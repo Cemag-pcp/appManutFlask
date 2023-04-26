@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="row"><h3>Abrir OS</h3></div>
+
+<div class="row">
+  <div class="col-md-4 offset-md-4">
+    {% with messages = get_flashed_messages()  %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-4 offset-md-4">
+    <div class="card card-body">
+      <form action="{{url_for('add_student')}}" method="POST">
+        <div class="form-group">
+          <label for="setor">Setor:</label>
+          <input type="text" class="form-control" name="setor" required>
+        </div>
+        <div class="form-group">
+          <label for="maquina">Máquina ou Local:</label>
+          <input type="text" class="form-control" name="maquina" required>
+        </div>
+        <div class="form-group">
+          <label for="problema">Descrição:</label>
+          <textarea id="problema" name="problema" rows="5" cols="39" required placeholder="Descreva o problema"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="risco">Risco de parada:</label>
+          <input type="text" class="form-control" name="risco" required>
+        </div>
+        <button class="btn btn-primary btn-block">
+          Save 
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

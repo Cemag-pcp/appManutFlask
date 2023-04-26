@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+<div class="col-md-4 offset-md-4">
+    <div class="card card-body">
+    <form action="/update/{{student.id}}" method="POST">
+        <div class="form-group">
+        <label for="setor">Setor:</label>
+        <input type="text" name="setor" value="{{student.setor}}" class="form-control" disabled>
+        </div>
+        <div class="form-group">
+        <label for="maquina">Máquina ou Local:</label>
+        <input type="text" name="maquina" value="{{student.maquina}}" class="form-control" disabled>
+        </div>
+        <div class="form-group">
+        <label for="risco">Risco</label>    
+        <input type="text" name="risco" value="{{student.risco}}" class="form-control" disabled>
+        </div>
+        <div class="form-group">
+            <label for="problema">Descrição:</label>
+            <textarea id="problema" name="problema" rows="5" cols="39" required disabled>{{student.problemaaparente}}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="datainicio">Data inicio</label>    
+            <input type="date" name="datainicio" class="form-control" >
+        </div>
+        <div class="form-group">
+            <label for="horainicio">Hora Inicio</label>    
+            <input type="time" name="horainicio" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="datafim">Data fim</label>    
+            <input type="date" name="datafim" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="horafim">Hora fim</label>    
+            <input type="time" name="horafim" class="form-control">
+        </div>
+        <div class="form-group">        
+        <label for="status">Status</label>
+        <select class="form-control form-control" id="statusLista" name="statusLista">
+            {% for opcao in opcoes %}
+            <option value="{{ opcao }}">{{ opcao }}</option>
+            {% endfor %}
+        </select>
+        </div>
+        <br>
+        <div class="form-group">
+        <button type="submit" class="btn btn-primary btn-block">
+            Update
+        </button>
+        </div>
+    </form>
+    </div>
+</div>
+</div>
+
+{% endblock %}
