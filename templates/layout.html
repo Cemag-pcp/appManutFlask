@@ -37,17 +37,17 @@
    
 <script>
 
-const btnDelete= document.querySelectorAll('.btn-delete');
-if(btnDelete) {
-  const btnArray = Array.from(btnDelete);
-  btnArray.forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      if(!confirm('Tem certeza que quer deletar?')){
-        e.preventDefault();
-      }
-    });
-  })
-}
+// const btnDelete= document.querySelectorAll('.btn-delete');
+// if(btnDelete) {
+//   const btnArray = Array.from(btnDelete);
+//   btnArray.forEach((btn) => {
+//     btn.addEventListener('click', (e) => {
+//       if(!confirm('Tem certeza que quer deletar?')){
+//         e.preventDefault();
+//       }
+//     });
+//   })
+// }
   
 $(document).ready(function() {
     $('#table1').DataTable({     

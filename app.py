@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
 import datetime
+import pandas as pd
+import numpy as np
 
 app = Flask(__name__)
 app.secret_key = "manutencaoprojeto"
@@ -17,9 +19,24 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_
 @app.route('/')
 def Index():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    s = "SELECT * FROM students"
+    s = "SELECT * FROM tb_ordens"
     cur.execute(s) # Execute the SQL
-    list_users = cur.fetchall()
+    # list_users = cur.fetchall()
+
+    df = pd.read_sql_query(s, conn)
+    df = df.sort_values(by='n_ordem')
+    df.reset_index(drop=True, inplace=True)
+    df.replace(np.nan, '', inplace=True)
+
+    # Loop para percorrer todas as linhas da coluna
+    for i in range(len(df['dataabertura'])):
+        if df['dataabertura'][i] == '':
+            df['dataabertura'][i] = df['dataabertura'][i-1]
+
+    df = df.drop_duplicates(subset=['id_ordem'], keep='last')
+    df = df.sort_values(by='id_ordem')
+    list_users = df.values.tolist()
+
     return render_template('index.html', list_users = list_users)
  
 @app.route('/add_student', methods=['POST'])
@@ -31,78 +48,116 @@ def add_student():
         risco = request.form['risco']
         problema = request.form['problema']
         dataAbertura = datetime.datetime.now()
-
-        cur.execute("INSERT INTO students (setor, maquina, risco, problemaaparente, dataabertura) VALUES (%s,%s,%s,%s,%s)", (setor, maquina, risco, problema, dataAbertura))
-        conn.commit()
-
+        n_ordem = 0
+        status = 'Em espera'
+        
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT MAX(id) FROM students")
+        cur.execute("SELECT MAX(id) FROM tb_ordens")
         maior_valor = cur.fetchone()[0]
         maior_valor = maior_valor+1
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT MAX(id_ordem) FROM tb_ordens")
+        ultima_os = cur.fetchone()[0]
+        ultima_os = ultima_os+1
+
+        try:
+            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura))
+            conn.commit()
+        except:
+            id = 0
+            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco, status, problemaaparente, id_ordem,n_ordem ,dataabertura) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (id, setor, maquina, risco, status, problema,ultima_os, n_ordem, dataAbertura))
+            conn.commit()
+
+        cur.close()
 
         flash('OS de número {} aberta com sucesso!'.format(maior_valor))
         return redirect(url_for('open_os'))
  
-@app.route('/edit/<id>', methods = ['POST', 'GET'])
-def get_employee(id):
+@app.route('/edit/<id_ordem>', methods = ['POST', 'GET'])
+def get_employee(id_ordem):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM students WHERE id = {}'.format(int(id)))
-    data = cur.fetchall()
+    s = ('SELECT * FROM tb_ordens WHERE id_ordem = {}'.format(int(id_ordem)))
+    cur.execute(s)
+    data1 = pd.read_sql_query(s, conn)
+
+    data1 = data1.sort_values(by='n_ordem')
+    data1.reset_index(drop=True, inplace=True)
+    data1.replace(np.nan, '', inplace=True)
+
+    # Loop para percorrer todas as linhas da coluna
+    for i in range(len(data1['dataabertura'])):
+        if data1['dataabertura'][i] == '':
+            data1['dataabertura'][i] = data1['dataabertura'][i-1]
+
+    data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
+    data1 = data1.sort_values(by='id_ordem')
+    data1 = data1.values.tolist()
+    opcaoAtual = data1[0][4]
+
     cur.close()
-    print(data[0])
     
     lista_opcoes = ['Em execução','Finalizada','Aguardando material']
-    opcaoAtual = data[0][4]    
+    
     opcoes = []
     opcoes.append(opcaoAtual)
 
     for opcao in lista_opcoes:
         opcoes.append(opcao)
-
+    
     opcoes = list(set(opcoes))
     opcoes.remove(opcaoAtual)  # Remove o elemento 'c' da lista
     opcoes.insert(0, opcaoAtual)
 
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM tb_ordens WHERE id_ordem = {}'.format(int(id)))
-    data = cur.fetchall()
-    cur.close()
+
     
-    return render_template('edit.html', student = data[0], opcoes=opcoes)
+    return render_template('edit.html', ordem=data1[0], opcoes=opcoes)
  
-@app.route('/update/<id>', methods=['POST'])
-def update_student(id):
+@app.route('/update/<id_ordem>', methods=['POST'])
+def update_student(id_ordem):
+
     if request.method == 'POST':
+            
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(""" SELECT MAX(id) FROM tb_ordens
+            """)
         
+        ultimo_id = cur.fetchone()[0]
+        try:
+            ultimo_id = ultimo_id+1
+        except:
+            ultimo_id = 0
+            
         setor = request.form['setor']
         maquina = request.form['maquina']
         risco = request.form['risco']
         status = request.form['statusLista']
         problema = request.form['problema']
-     
+        datainicio = request.form['datainicio']
+        horainicio = request.form['horainicio']
+        datafim = request.form['datafim']
+        horafim = request.form['horafim']
+        id_ordem = id_ordem
+        n_ordem = request.form['n_ordem']
+
+        print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
-            UPDATE students
-            SET setor = %s,
-                maquina = %s,
-                risco = %s,
-                status = %s,
-                problemaaparente = %s
-            WHERE id = %s
-        """, (setor, maquina, risco, status, problema, id))
-        flash('OS de número {} atualizada com sucesso!'.format(int(id)))
+            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem))
+        #flash('OS de número {} atualizada com sucesso!'.format(int(id)))
         conn.commit()
         return redirect(url_for('Index'))
  
-@app.route('/delete/<string:id>', methods = ['POST','GET'])
-def delete_student(id):
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+# @app.route('/delete/<string:id>', methods = ['POST','GET'])
+# def delete_student(id):
+#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
    
-    cur.execute('DELETE FROM students WHERE id = {0}'.format(id))
-    conn.commit()
-    flash('Os removida com sucesso!')
-    return redirect(url_for('Index'))
+#     cur.execute('DELETE FROM students WHERE id = {0}'.format(id))
+#     conn.commit()
+#     flash('Os removida com sucesso!')
+#     return redirect(url_for('Index'))
  
 @app.route('/openOs')
 def open_os():
