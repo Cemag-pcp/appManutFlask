@@ -7,11 +7,11 @@
         <form action="/update/{{ordem[10]}}" method="POST">
             <div class="form-group">
                 <label for="setor">Setor:</label>
-                <input type="text" name="setor" value="{{ordem[1]}}" class="form-control">
+                <input type="text" name="setor" value="{{ordem[1]}}" class="form-control" readonly="readonly">
             </div>
             <div class="form-group">
                 <label for="maquina">Máquina ou Local:</label>
-                <input type="text" name="maquina" value="{{ordem[2]}}" class="form-control">
+                <input type="text" name="maquina" value="{{ordem[2]}}" class="form-control" readonly="readonly">
             </div>
             <div class="form-group">
                 <label for="datainicio">Data inicio</label>    
@@ -22,18 +22,22 @@
                 <input type="time" name="horainicio" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="problema">Descrição:</label>
-                <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required>{{ordem[5]}}</textarea>
+                <label for="problema">Descrição do usuário:</label>
+                <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
+            </div>
+            <div class="form-group">
+                <label for="descmanutencao">Observação da manutenção:</label>
+                <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41" required></textarea>
             </div>
     </div>
     <div class = 'col-md-4 mx-auto'>
             <div class="form-group">
                 <label for="risco">Risco</label>    
-                <input type="text" name="risco" value="{{ordem[3]}}" class="form-control">
+                <input type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
             </div>
             <div class="form-group">
                 <label for="n_ordem">Número da execução:</label>
-                <input type="text" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control">
+                <input type="text" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
             </div>
             <div class="form-group">
                 <label for="datafim">Data fim</label>    
@@ -49,6 +53,14 @@
                     {% for opcao in opcoes %}
                     <option value="{{ opcao }}">{{ opcao }}</option>
                     {% endfor %}
+                </select>
+            </div>
+            <div class="form-group"> 
+                <label for="operador">Operadores</label>
+                <select class="form-control form-control" id="operador" name="operador" multiple required>
+                    <option value="123 - Ryan">123 - Ryan</option>
+                    <option value="456 - Davi">456 - Davi</option>
+                    <option value="789 - Outro">789 - Outro</option>
                 </select>
             </div>
             <br>

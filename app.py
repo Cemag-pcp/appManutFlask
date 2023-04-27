@@ -5,6 +5,10 @@ import psycopg2.extras
 import datetime
 import pandas as pd
 import numpy as np
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from wtforms.validators import DataRequired
+import json
 
 app = Flask(__name__)
 app.secret_key = "manutencaoprojeto"
@@ -25,6 +29,7 @@ def Index():
 
     df = pd.read_sql_query(s, conn)
     df = df.sort_values(by='n_ordem')
+    
     df.reset_index(drop=True, inplace=True)
     df.replace(np.nan, '', inplace=True)
 
@@ -38,7 +43,7 @@ def Index():
     list_users = df.values.tolist()
 
     return render_template('index.html', list_users = list_users)
- 
+
 @app.route('/add_student', methods=['POST'])
 def add_student():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -140,28 +145,45 @@ def update_student(id_ordem):
         horafim = request.form['horafim']
         id_ordem = id_ordem
         n_ordem = request.form['n_ordem']
+        descmanutencao = request.form['descmanutencao']
+        operador = request.form.getlist('operador')
+        operador = json.dumps(operador)
+        operador
+        print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
 
-        print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
-            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem))
+            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador]))
         #flash('OS de número {} atualizada com sucesso!'.format(int(id)))
         conn.commit()
+
         return redirect(url_for('Index'))
- 
-# @app.route('/delete/<string:id>', methods = ['POST','GET'])
-# def delete_student(id):
-#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-   
-#     cur.execute('DELETE FROM students WHERE id = {0}'.format(id))
-#     conn.commit()
-#     flash('Os removida com sucesso!')
-#     return redirect(url_for('Index'))
- 
+
 @app.route('/openOs')
 def open_os():
     return render_template("openOs.html")
+
+@app.route('/edit_material/<id_ordem>', methods = ['POST', 'GET'])
+def get_material(id_ordem):
+    # Verifica se a requisição é um POST
+    if request.method == 'POST':
+        # Obtém os dados do formulário
+        id_ordem = id_ordem
+        codigo = request.form['codigo']
+        quantidade = request.form['quantidade']
+    
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("INSERT INTO tb_carrinho (id_ordem, codigo, quantidade) VALUES (%s,%s,%s)", (id_ordem, codigo, quantidade))
+        conn.commit()
+
+    # Obtém os dados da tabela
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    s = ('SELECT * FROM tb_carrinho WHERE id_ordem = {}'.format(int(id_ordem)))
+    cur.execute(s)
+    data = cur.fetchall()
+    
+    return render_template('material.html', datas=data, id_ordem=id_ordem)
 
 if __name__ == "__main__":
     app.run(debug=True)

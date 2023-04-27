@@ -24,10 +24,23 @@
   <div class="col-md-4 offset-md-4">
     <div class="card card-body">
       <form action="{{url_for('add_student')}}" method="POST">
-        <div class="form-group">
-          <label for="setor">Setor:</label>
-          <input type="text" class="form-control" name="setor" required>
-        </div>
+        <div class="form-group">        
+          <label for="setor">Setor</label>
+          <select class="form-control form-control" id="setor" name="setor" required>
+              <option value="" selected disabled hidden></option>  
+              <option>Administrativo</option>
+              <option>Estamparia</option>
+              <option>Solda</option>
+              <option>Montagem</option>
+              <option>Pintura</option>
+              <option>Carpintaria</option>
+              <option>Almoxarifado</option>
+              <option>Usinagem</option>
+              <option>Serra</option>
+              <option>Corte</option>
+              <option>Serralheria</option>
+            </select>
+      </div>
         <div class="form-group">
           <label for="maquina">Máquina ou Local:</label>
           <input type="text" class="form-control" name="maquina" required>
@@ -36,10 +49,15 @@
           <label for="problema">Descrição:</label>
           <textarea id="problema" name="problema" rows="5" cols="39" required placeholder="Descreva o problema"></textarea>
         </div>
-        <div class="form-group">
-          <label for="risco">Risco de parada:</label>
-          <input type="text" class="form-control" name="risco" required>
-        </div>
+        <div class="form-group">        
+          <label for="risco">Risco</label>
+          <select class="form-control form-control" id="risco" name="risco" required>
+              <option value="" selected disabled hidden></option>  
+              <option>Alto</option>
+              <option>Médio</option>
+              <option>Baixo</option>
+          </select>
+      </div>
         <button class="btn btn-primary btn-block">
           Save 
         </button>
