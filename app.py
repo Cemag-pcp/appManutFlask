@@ -9,6 +9,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms.validators import DataRequired
 import json
+import plotly.graph_objs as go
+import plotly.offline as opy
 
 app = Flask(__name__)
 app.secret_key = "manutencaoprojeto"
@@ -23,9 +25,17 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_
 @app.route('/')
 def Index():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    s = "SELECT * FROM tb_ordens"
-    cur.execute(s) # Execute the SQL
-    # list_users = cur.fetchall()
+    #s = "SELECT * FROM tb_ordens"
+    s = (""" 
+        SELECT DISTINCT t1.total, t2.* 
+        FROM (
+            SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+            FROM tb_carrinho
+            JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+            GROUP BY tb_carrinho.id_ordem
+        ) t1
+        RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem;
+    """)
 
     df = pd.read_sql_query(s, conn)
     df = df.sort_values(by='n_ordem')
@@ -40,6 +50,14 @@ def Index():
 
     df = df.drop_duplicates(subset=['id_ordem'], keep='last')
     df = df.sort_values(by='id_ordem')
+    df.reset_index(drop=True, inplace=True)
+
+    for i in range(len(df)):
+        if df['total'][i] == '':
+            df['total'][i] = 0
+
+    df['total'] = df['total'].apply(lambda x: round(x, 2))
+
     list_users = df.values.tolist()
 
     return render_template('index.html', list_users = list_users)
@@ -179,11 +197,67 @@ def get_material(id_ordem):
 
     # Obtém os dados da tabela
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    s = ('SELECT * FROM tb_carrinho WHERE id_ordem = {}'.format(int(id_ordem)))
+    s = ("""
+        SELECT tb_carrinho.id_ordem, tb_carrinho.codigo, tb_carrinho.quantidade, tb_material.descricao, tb_material.valor * tb_carrinho.quantidade AS total
+        FROM tb_carrinho
+        JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+        WHERE id_ordem = {}
+    """).format(int(id_ordem))
+
     cur.execute(s)
     data = cur.fetchall()
+
+    s = ("""
+        SELECT SUM(valortotal.total) AS valor_total FROM
+        (
+        SELECT tb_carrinho.id_ordem, tb_carrinho.codigo, tb_carrinho.quantidade, tb_material.descricao, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+        FROM tb_carrinho
+        JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+        WHERE tb_carrinho.id_ordem = {}
+        GROUP BY tb_carrinho.id_ordem, tb_carrinho.codigo, tb_carrinho.quantidade, tb_material.descricao
+        ) AS valortotal; 
+    """).format(int(id_ordem))
     
-    return render_template('material.html', datas=data, id_ordem=id_ordem)
+    cur.execute(s)
+    valorTotal = cur.fetchall()
+
+
+    cur.close()
+
+    return render_template('material.html', datas=data, id_ordem=id_ordem, valorTotal=valorTotal[0][0])
+
+@app.route('/grafico')
+def grafico():
+    
+    plot_list = []
+
+    ##### Gráfico 1 #####
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    s = (""" 
+        SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
+        FROM tb_ordens
+        WHERE dataabertura NOTNULL
+        GROUP BY dataabertura
+        """)
+
+    cur.execute(s)
+
+    grafico1 = pd.read_sql_query(s,conn)
+
+    # Criação do gráfico
+    trace = go.Bar(x=grafico1['dataabertura'], y=grafico1['qt_os_abertas'])
+    data = [trace]
+    layout = go.Layout(title='Gráfico de Barras')
+    fig = go.Figure(data=data, layout=layout)
+
+    # Conversão do gráfico em HTML
+    plot_div = opy.plot(fig, auto_open=False, output_type='div')
+
+    plot_list.append(plot_div)
+
+    # Renderização do template com o gráfico
+    return render_template('grafico.html', plot_list=plot_list)
 
 if __name__ == "__main__":
     app.run(debug=True)

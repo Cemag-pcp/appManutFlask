@@ -14,7 +14,7 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-
+    
     <div class="container pt-4">
         <table id="table1" class="table table-striped" style="width: 100%";>
             <thead>
@@ -26,27 +26,29 @@
                     <th>Status</th>
                     <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
                     <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
                     <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
                 </tr>
             </thead>
             <tbody>
                 {% for row in list_users %}
                 <tr>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[10]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[1]}}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[2]}}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[4]}}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[5]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[12]}}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[6]}}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[13]}}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[0]}}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 
-                        <a href="/edit/{{row[10]}}" class="btn btn-secondary btn-sm">
+                        <a href="/edit/{{row[11]}}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-wrench"></i>
                         </a>
 
-                        <a href="/edit_material/{{row[10]}}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-shopping-cart"></i>
+                        <a href="/edit_material/{{row[11]}}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-box"></i>
                         </a>
 
                     </td>
@@ -62,6 +64,7 @@
                     <th>Status</th>
                     <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
                     <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
                     <th>Ação</th>
                 </tr>
             </tfoot>

@@ -25,9 +25,13 @@
                 <label for="problema">Descrição do usuário:</label>
                 <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
             </div>
-            <div class="form-group">
-                <label for="descmanutencao">Observação da manutenção:</label>
-                <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41" required></textarea>
+            <div class="form-group" style="width: 355px;"> 
+                <label for="operador">Operadores</label>
+                <select class="form-control form-control" id="operador" name="operador" multiple required>
+                    <option value="123 - Ryan">123 - Ryan</option>
+                    <option value="456 - Davi">456 - Davi</option>
+                    <option value="789 - Outro">789 - Outro</option>
+                </select>
             </div>
     </div>
     <div class = 'col-md-4 mx-auto'>
@@ -47,20 +51,16 @@
                 <label for="horafim">Hora fim</label>    
                 <input type="time" name="horafim" class="form-control" required>
             </div>
+            <div class="form-group">
+                <label for="descmanutencao">Observação da manutenção:</label>
+                <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41" required>{{ordem[13]}}</textarea>
+            </div>
             <div class="form-group">        
                 <label for="statusLista">Status</label>
                 <select class="form-control form-control" id="statusLista" name="statusLista">
                     {% for opcao in opcoes %}
                     <option value="{{ opcao }}">{{ opcao }}</option>
                     {% endfor %}
-                </select>
-            </div>
-            <div class="form-group"> 
-                <label for="operador">Operadores</label>
-                <select class="form-control form-control" id="operador" name="operador" multiple required>
-                    <option value="123 - Ryan">123 - Ryan</option>
-                    <option value="456 - Davi">456 - Davi</option>
-                    <option value="789 - Outro">789 - Outro</option>
                 </select>
             </div>
             <br>

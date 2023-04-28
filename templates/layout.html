@@ -16,6 +16,7 @@
 <!-- Include plugin -->
 <script src="https://cdn.rawgit.com/wenzhixin/multiple-select/e14b36de/multiple-select.js"></script>
 <script src="/static/multiselect-dropdown.js" ></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 </head>
 <body>
@@ -61,11 +62,10 @@
 //        } 
 //     );
 // } );
-  
 
 $(document).ready(function () {
     // Setup - add a text input to each footer cell
-    $('#table1 tfoot th').each(function () {
+    $('#table1 tfoot th:eq(1), #table1 tfoot th:eq(2), #table1 tfoot th:eq(3), #table1 tfoot th:eq(4), #table1 tfoot th:eq(5), #table1 tfoot th:eq(6), #table1 tfoot th:eq(7)').each(function () {
         var title = $(this).text();
         $(this).html('<div class="form-group"> <input class="form-control" type="text" placeholder= "' + title + '" /> </div>');
     });
