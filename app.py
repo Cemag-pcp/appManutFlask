@@ -15,7 +15,8 @@ import plotly.offline as opy
 app = Flask(__name__)
 app.secret_key = "manutencaoprojeto"
  
-DB_HOST = "localhost"
+# DB_HOST = "localhost"
+DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
@@ -77,12 +78,20 @@ def add_student():
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("SELECT MAX(id) FROM tb_ordens")
         maior_valor = cur.fetchone()[0]
-        maior_valor = maior_valor+1
+
+        try:
+            maior_valor = maior_valor+1
+        except:
+            maior_valor = 0
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("SELECT MAX(id_ordem) FROM tb_ordens")
         ultima_os = cur.fetchone()[0]
-        ultima_os = ultima_os+1
+
+        try:
+            ultima_os = ultima_os+1
+        except:
+            ultima_os = 0
 
         try:
             cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura))
@@ -94,7 +103,7 @@ def add_student():
 
         cur.close()
 
-        flash('OS de número {} aberta com sucesso!'.format(maior_valor))
+        flash('OS de número {} aberta com sucesso!'.format(ultima_os))
         return redirect(url_for('open_os'))
  
 @app.route('/edit/<id_ordem>', methods = ['POST', 'GET'])
@@ -133,8 +142,6 @@ def get_employee(id_ordem):
     opcoes.remove(opcaoAtual)  # Remove o elemento 'c' da lista
     opcoes.insert(0, opcaoAtual)
 
-
-    
     return render_template('edit.html', ordem=data1[0], opcoes=opcoes)
  
 @app.route('/update/<id_ordem>', methods=['POST'])
@@ -143,15 +150,19 @@ def update_student(id_ordem):
     if request.method == 'POST':
             
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute(""" SELECT MAX(id) FROM tb_ordens
-            """)
+        cur.execute(""" 
+            SELECT MAX(id) FROM tb_ordens
+        """)
         
         ultimo_id = cur.fetchone()[0]
+        
         try:
             ultimo_id = ultimo_id+1
         except:
             ultimo_id = 0
-            
+        
+        print(ultimo_id)
+
         setor = request.form['setor']
         maquina = request.form['maquina']
         risco = request.form['risco']
@@ -166,14 +177,14 @@ def update_student(id_ordem):
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
         operador = json.dumps(operador)
-        operador
+
         print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
             INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador]))
-        #flash('OS de número {} atualizada com sucesso!'.format(int(id)))
+        flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
         return redirect(url_for('Index'))
@@ -186,13 +197,26 @@ def open_os():
 def get_material(id_ordem):
     # Verifica se a requisição é um POST
     if request.method == 'POST':
+        
+        # Obtendo o ultimo id
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = ("""
+            SELECT MAX(id) FROM tb_carrinho
+        """)
+        cur.execute(s)
+        try:
+            max_id = cur.fetchall()[0][0] + 1
+        except:
+            max_id = 0
+
         # Obtém os dados do formulário
         id_ordem = id_ordem
         codigo = request.form['codigo']
         quantidade = request.form['quantidade']
     
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("INSERT INTO tb_carrinho (id_ordem, codigo, quantidade) VALUES (%s,%s,%s)", (id_ordem, codigo, quantidade))
+        cur.execute("INSERT INTO tb_carrinho (id, id_ordem, codigo, quantidade) VALUES (%s,%s,%s,%s)", (max_id, id_ordem, codigo, quantidade))
         conn.commit()
 
     # Obtém os dados da tabela
@@ -221,8 +245,7 @@ def get_material(id_ordem):
     cur.execute(s)
     valorTotal = cur.fetchall()
 
-
-    cur.close()
+    #cur.close()
 
     return render_template('material.html', datas=data, id_ordem=id_ordem, valorTotal=valorTotal[0][0])
 
@@ -258,6 +281,49 @@ def grafico():
 
     # Renderização do template com o gráfico
     return render_template('grafico.html', plot_list=plot_list)
+
+@app.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
+def timeline_os(id_ordem):
+
+    # Obtém os dados da tabela
+    s = ("""
+        SELECT n_ordem, status, datainicio, datafim, operador,
+            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+        FROM tb_ordens
+        WHERE id_ordem = {}
+    """).format(int(id_ordem))
+
+    df_timeline = pd.read_sql_query(s, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    for i in range(len(df_timeline)):
+        if df_timeline['fim'][i] == 'NaT':
+            df_timeline['fim'][i] = 0
+            df_timeline['inicio'][i] = 0
+        else:
+            pass
+
+    df_timeline = df_timeline.replace(np.nan,'-')
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+        for i in range(len(df_timeline)):
+            df_timeline['operador'][i] = df_timeline['operador'][i].replace("{","").replace("[","").replace("\\","").replace('"', '').replace("]}","")
+    except:
+        df_timeline['diferenca'] = '00:00:00'
+    
+    df_timeline = df_timeline.values.tolist()
+
+
+    return render_template('timeline.html', id_ordem=id_ordem, df_timeline=df_timeline)
 
 if __name__ == "__main__":
     app.run(debug=True)

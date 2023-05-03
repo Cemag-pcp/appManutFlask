@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="row"><h3>Visão das ordens de serviço</h3></div>
 
     {% with messages = get_flashed_messages()  %}
     {% if messages %}
@@ -16,59 +15,65 @@
     {% endwith %}
     
     <div class="container pt-4">
-        <table id="table1" class="table table-striped" style="width: 100%";>
-            <thead>
-                <tr>
-                    <th>OS</th>
-                    <th>Setor</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                    <th>Risco</th>
-                    <th>Status</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in list_users %}
-                <tr>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[2]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[4]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[5]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[6]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[13]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[0]}}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        <div class="row justify-content-md-center">
+            <div class="row"><h3>Visão das ordens de serviço</h3></div>
+                <table id="table1" class="table table-striped" style="width: 100%";>
+                    <thead>
+                        <tr>
+                            <th>OS</th>
+                            <th>Setor</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                            <th>Risco</th>
+                            <th>Status</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in list_users %}
+                        <tr>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[2]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[4]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[5]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[6]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[13]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">R$ {{row[0]}}</td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 
-                        <a href="/edit/{{row[11]}}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-wrench"></i>
-                        </a>
+                                <a href="/edit/{{row[11]}}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-wrench"></i>
+                                </a>
+                                <a href="/edit_material/{{row[11]}}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-box"></i>
+                                </a>
+                                <a href="/timeline/{{row[11]}}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-clock"></i>
+                                </a>
 
-                        <a href="/edit_material/{{row[11]}}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-box"></i>
-                        </a>
-
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th class="sorting sorting_asc">OS</th>
-                    <th>Setor</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                    <th>Risco</th>
-                    <th>Status</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
-                    <th>Ação</th>
-                </tr>
-            </tfoot>
-        </table>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="sorting sorting_asc"></th>
+                            <th>Setor</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                            <th>Risco</th>
+                            <th>Status</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
     </div>
 
 </div>
