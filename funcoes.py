@@ -8,8 +8,8 @@ import pandas as pd
 
 def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade):
 
-    # grupo = 'CARPINTARIA'
-    # codigo_maquina = 'auqlauqw'
+    # grupo = ''
+    # codigo_maquina = ''
     # maquina = 'qauqql'
     # classificacao = 'A'
     # ultima_manutencao = '2023/03/07'
