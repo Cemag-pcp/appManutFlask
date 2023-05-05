@@ -8,8 +8,10 @@ import numpy as np
 import json
 import plotly.graph_objs as go
 import plotly.offline as opy
-from funcoes import gerador_de_semanas_informar_manutencao
+from funcoes import gerador_de_semanas_informar_manutencao, login_required
 import warnings
+from flask import session
+from functools import wraps
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -22,8 +24,9 @@ DB_USER = "postgres"
 DB_PASS = "15512332"
  
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
- 
+
 @routes_bp.route('/')
+@login_required
 def Index():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     #s = "SELECT * FROM tb_ordens"
@@ -64,6 +67,7 @@ def Index():
     return render_template('user/index.html', list_users = list_users)
 
 @routes_bp.route('/add_student', methods=['POST'])
+@login_required
 def add_student():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
@@ -107,6 +111,7 @@ def add_student():
         return redirect(url_for('open_os'))
  
 @routes_bp.route('/edit/<id_ordem>', methods = ['POST', 'GET'])
+@login_required
 def get_employee(id_ordem):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -145,6 +150,7 @@ def get_employee(id_ordem):
     return render_template('user/edit.html', ordem=data1[0], opcoes=opcoes)
  
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
+@login_required
 def update_student(id_ordem):
 
     if request.method == 'POST':
@@ -190,10 +196,12 @@ def update_student(id_ordem):
         return redirect(url_for('Index'))
 
 @routes_bp.route('/openOs')
+@login_required
 def open_os():
     return render_template("user/openOs.html")
 
 @routes_bp.route('/edit_material/<id_ordem>', methods = ['POST', 'GET'])
+@login_required
 def get_material(id_ordem):
     # Verifica se a requisição é um POST
     if request.method == 'POST':
@@ -250,6 +258,7 @@ def get_material(id_ordem):
     return render_template('user/material.html', datas=data, id_ordem=id_ordem, valorTotal=valorTotal[0][0])
 
 @routes_bp.route('/grafico')
+@login_required
 def grafico():
     
     # lista com os gráficos a serem plotados
@@ -303,6 +312,7 @@ def grafico():
     return render_template('user/grafico.html', plot_list=plot_list)
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
+@login_required
 def timeline_os(id_ordem):
 
     # Obtém os dados da tabela
@@ -346,8 +356,9 @@ def timeline_os(id_ordem):
     return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_timeline)
 
 @routes_bp.route('/52semanas', methods=['POST','GET'])
+@login_required
 def plan_52semanas():
-
+        
     if request.method == 'POST':
     
         # Obtendo o ultimo id
@@ -378,7 +389,7 @@ def plan_52semanas():
 
         if  len(maquina_cadastrada[maquina_cadastrada['codigo'] == codigo]) > 0:
             flash("Máquina ja cadastrada", category='danger')
-         
+        
             return redirect('/52semanas')
         
         else:

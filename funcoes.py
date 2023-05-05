@@ -5,6 +5,8 @@ import datetime
 import numpy as np
 from pandas.tseries.offsets import BDay
 import pandas as pd
+from flask import redirect, url_for, session
+from functools import wraps
 
 def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade):
 
@@ -176,3 +178,11 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
     df_vazio = df_vazio.replace(np.nan, '')
     
     return df_vazio
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'loggedin' not in session:
+            return redirect(url_for('login.login'))
+        return func(*args, **kwargs)
+    return wrapper
