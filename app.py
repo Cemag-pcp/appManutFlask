@@ -11,6 +11,10 @@ from wtforms.validators import DataRequired
 import json
 import plotly.graph_objs as go
 import plotly.offline as opy
+from funcoes import gerador_de_semanas_informar_manutencao
+import warnings
+
+warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 app.secret_key = "manutencaoprojeto"
@@ -252,10 +256,10 @@ def get_material(id_ordem):
 @app.route('/grafico')
 def grafico():
     
-    plot_list = []
+    # lista com os gráficos a serem plotados
+    plot_list = [] 
 
-    ##### Gráfico 1 #####
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    ##### GRÁFICO 1 #####
 
     s = (""" 
         SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
@@ -264,15 +268,32 @@ def grafico():
         GROUP BY dataabertura
         """)
 
-    cur.execute(s)
+    grafico1 = pd.read_sql_query(s,conn)
+
+    # Criação do gráfico
+    trace = go.Bar(x=grafico1['dataabertura'], y=grafico1['qt_os_abertas'])
+    data = [trace]
+    #layout = go.Layout(title='Gráfico de Barras')
+    fig = go.Figure(data=data)#, layout=layout)
+
+    # Conversão do gráfico em HTML
+    plot_div = opy.plot(fig, auto_open=False, output_type='div')
+
+    plot_list.append(plot_div)
+
+    ##### GRÁFICO 2 #####
+
+    s = (""" 
+        SELECT * FROM tb_ordens 
+        """)
 
     grafico1 = pd.read_sql_query(s,conn)
 
     # Criação do gráfico
     trace = go.Bar(x=grafico1['dataabertura'], y=grafico1['qt_os_abertas'])
     data = [trace]
-    layout = go.Layout(title='Gráfico de Barras')
-    fig = go.Figure(data=data, layout=layout)
+    #layout = go.Layout(title='Gráfico de Barras')
+    fig = go.Figure(data=data)#, layout=layout)
 
     # Conversão do gráfico em HTML
     plot_div = opy.plot(fig, auto_open=False, output_type='div')
@@ -318,12 +339,74 @@ def timeline_os(id_ordem):
         for i in range(len(df_timeline)):
             df_timeline['operador'][i] = df_timeline['operador'][i].replace("{","").replace("[","").replace("\\","").replace('"', '').replace("]}","")
     except:
-        df_timeline['diferenca'] = '00:00:00'
+        df_timeline['diferenca'] = 0
     
     df_timeline = df_timeline.values.tolist()
 
 
     return render_template('timeline.html', id_ordem=id_ordem, df_timeline=df_timeline)
+
+@app.route('/52semanas', methods=['POST','GET'])
+def plan_52semanas():
+
+    if request.method == 'POST':
+    
+        # Obtendo o ultimo id
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = ("""
+            SELECT MAX(id) FROM tb_maquinas
+        """)
+        cur.execute(s)
+        try:
+            max_id = cur.fetchall()[0][0] + 1
+        except:
+            max_id = 0
+
+        # Obtém os dados do formulário
+        codigo = request.form['codigo']
+        descricao = request.form['descricao']
+        setor = request.form['setor']
+        criticidade = request.form['criticidade']
+        manut_inicial = request.form['manut_inicial']
+        periodicidade = request.form['periodicidade']
+        
+        s = ("""
+            select codigo from tb_maquinas
+        """.format(codigo))
+
+        maquina_cadastrada = pd.read_sql_query(s,conn)
+
+        if  len(maquina_cadastrada[maquina_cadastrada['codigo'] == codigo]) > 0:
+            flash("Máquina ja cadastrada", category='danger')
+         
+            return redirect('/52semanas')
+        
+        else:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute("INSERT INTO tb_maquinas (id, codigo, descricao, setor, criticidade, manut_inicial, periodicidade) VALUES (%s,%s,%s,%s,%s,%s,%s)", (max_id, codigo, descricao, setor, criticidade, manut_inicial, periodicidade))
+            conn.commit()
+
+            flash("Máquina cadastrada com sucesso", category='sucess')
+            return redirect('/52semanas')
+
+    s = (""" SELECT * FROM tb_maquinas """)
+
+    df_maquinas = pd.read_sql_query(s, conn)
+    
+    df_final = pd.DataFrame()
+
+    for i in range(len(df_maquinas)):    
+        
+        df_planejamento = gerador_de_semanas_informar_manutencao(df_maquinas['setor'][i], df_maquinas['codigo'][i], df_maquinas['descricao'][i], df_maquinas['criticidade'][i], df_maquinas['manut_inicial'][i], df_maquinas['periodicidade'][i])
+        df_final = pd.concat([df_final, df_planejamento], axis=0)
+
+    df_final = df_final.replace('','-')
+    colunas = df_final.columns.tolist()
+    df_final = df_final.values.tolist()
+
+    return render_template('52semanas.html', data=df_final, colunas=colunas)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

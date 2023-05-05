@@ -3,6 +3,58 @@
 
 <div class="row"><h3>Gráficos</h3></div>
 
-<div class="chart-container" style="width: 500px; height: 300px;">{{ plot_list[0]|safe }}</div>
+<div class='row'>
+    <div class="col-sm-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Em andamento</h5>
+                <p class="card-text">5</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Abertas</h5>
+                <p class="card-text">10</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Finalizadas</h5>
+                <p class="card-text">8</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="card mx-auto">
+            <div class="card-body text-center">
+                <h5 class="card-title">Aguardando material</h5>
+                <p class="card-text">15</p>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div class='row'>
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="card-title">MTTR(Tempo médio de reparo)</h3>
+                {{ plot_list[0]|safe }}
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="card-title">MTBF(Tempo médio entre falhas)</h3>
+                {{ plot_list[1]|safe }}
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
