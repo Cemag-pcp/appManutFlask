@@ -17,9 +17,9 @@ DB_PASS = "15512332"
  
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
-@app.route('/teste')
-def index():
-    return 'Página Inicial'
+# @app.route('/teste')
+# def index():
+#     return 'Página Inicial'
 
 if __name__ == '__main__':
     app.run()

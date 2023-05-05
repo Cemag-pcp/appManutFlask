@@ -25,9 +25,10 @@ DB_PASS = "15512332"
  
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
-@routes_bp.route('/')
+@routes_bp.route('/index')
 @login_required
 def Index():
+    
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     #s = "SELECT * FROM tb_ordens"
     s = (""" 
@@ -108,7 +109,7 @@ def add_student():
         cur.close()
 
         flash('OS de número {} aberta com sucesso!'.format(ultima_os))
-        return redirect(url_for('open_os'))
+        return redirect(url_for('routes.open_os'))
  
 @routes_bp.route('/edit/<id_ordem>', methods = ['POST', 'GET'])
 @login_required
@@ -193,7 +194,7 @@ def update_student(id_ordem):
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
-        return redirect(url_for('Index'))
+        return redirect(url_for('routes.Index'))
 
 @routes_bp.route('/openOs')
 @login_required
