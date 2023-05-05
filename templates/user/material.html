@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "user/layout.html" %}
 {% block body %}
 <div class = "w3-container">
 
@@ -12,7 +12,7 @@
   <div class="row justify-content-md-center">
     <div class="col-md-4">
         <div class="card card-body">
-          <form action="{{ url_for('get_material', id_ordem=id_ordem) }}" method="POST">
+          <form action="{{ url_for('routes.get_material', id_ordem=id_ordem) }}" method="POST">
               <table>
                   <thead>
                       <tr>

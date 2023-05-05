@@ -1,0 +1,36 @@
+{% extends 'login/base.html' %} 
+
+{% block body %}
+
+<div class="container">
+    <div class="logreg-box" style="color:white">
+        <div class="form-box login">
+            <div class="form-content">
+            <form method= "POST" action="">
+                <h2 style="text-align: left;"><strong>Crie uma conta</strong></h2>
+                <div class="input-box center">
+                    <span class="icon"><ion-icon name="mail" style="color: white;"></ion-icon></span>
+                    <input type="email" required>
+                    <label class="opacity-100">E-mail</label>
+                </div>
+
+                <div class="input-box center">
+                    <span class="icon"><ion-icon name="lock-closed" style="color: white;"></ion-icon></span>
+                    <input type="password" required>
+                    <label class="opacity-100">Senha</label>
+                </div>
+
+                <div class="input-box center">
+                    <span class="icon"><ion-icon name="lock-closed" style="color: white;"></ion-icon></span>
+                    <input type="password" required>
+                    <label class="opacity-100" style="left: 17%;">Confime sua Senha</label>
+                </div>
+
+                <button type="submit" class="btn btn-secondary opacity-100" style="text-align: center;">Criar conta</button>
+                
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

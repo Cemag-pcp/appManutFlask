@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid container">
+      <div class="image-container">
+        <a class="navbar-brand " href="{{ url_for('login.login') }}"><strong></strong>
+          <img src="static\img\logo-cemagL.png" alt="logo cemag">
+        </a>
+      </div>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{ url_for('login.home')}}">Página inicial</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('login.contato') }}">Contatos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('login.login') }}">Login</a>
+          </li>
+          <!-- <li class="nav-item dropdown disabled">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Login
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Login</a></li>
+              <li><a class="dropdown-item" href="#">Another action</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+          </li> -->
+          <!-- <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('login.login') }}">Criar Conta</a>
+          </li> -->
+        </ul>
+        <form class="d-flex" role="search">
+          <input class="form-control me-2" type="search" placeholder="Pesquisar..." aria-label="Search">
+          <button class="btn btn-outline-dark" type="submit">Pesquisar</button>
+        </form>
+      </div>
+    </div>
+  </nav>

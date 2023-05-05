@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "user/layout.html" %}
 {% block body %}
 
     {% with messages = get_flashed_messages()  %}
@@ -44,7 +44,6 @@
                                 <td>{{row[13]}}</td>
                                 <td>R$ {{row[0]}}</td>
                                 <td>
-
                                     <a href="/edit/{{row[11]}}" class="btn btn-secondary btn-sm">
                                         <i class="fas fa-wrench"></i>
                                     </a>
