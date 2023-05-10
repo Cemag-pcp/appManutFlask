@@ -25,6 +25,12 @@ DB_PASS = "15512332"
  
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
+@routes_bp.route('/')
+@login_required
+def inicio():
+    
+    return render_template("login/login.html")
+
 @routes_bp.route('/index')
 @login_required
 def Index():
@@ -197,7 +203,6 @@ def update_student(id_ordem):
         return redirect(url_for('routes.Index'))
 
 @routes_bp.route('/openOs')
-@login_required
 def open_os():
     return render_template("user/openOs.html")
 
