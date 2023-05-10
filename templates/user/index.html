@@ -17,8 +17,8 @@
     <div id = "tabela" class="container-fluid">
         <div class="row justify-content-md-center">
             <div class = "board" style="overflow-x: auto;">
+                <div id = "titulo" class="row"><h3 class="visao">Visão das ordens de serviço</h3></div>
                 <table id="table1" class="table table-striped">
-                    <div id = "titulo" class="row"><h3 class="visao">Visão das ordens de serviço</h3></div>
                     <thead>
                         <tr>
                             <th>OS</th>
@@ -65,7 +65,7 @@
                         {% endfor %}
                     </tbody>
                     <tfoot>
-                        <tr id = 'buscar'>
+                        <tr>
                             <th class="sorting sorting_asc"></th>
                             <th>Setor</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
