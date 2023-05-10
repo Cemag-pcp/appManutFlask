@@ -14,69 +14,74 @@
     {% endif %}
     {% endwith %}
     
-    <div class="container pt-4">
+    <div id = "tabela" class="container-fluid">
         <div class="row justify-content-md-center">
-            <div class="row"><h3>Visão das ordens de serviço</h3></div>
-                <div style="overflow-x: auto;">
-                    <table id="table1" class="table table-striped" style="width: 100%";>
-                        <thead>
-                            <tr>
-                                <th>OS</th>
-                                <th>Setor</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                                <th>Risco</th>
-                                <th>Status</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in list_users %}
-                            <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                <td>{{row[11]}}</td>
-                                <td>{{row[2]}}</td>
-                                <td>{{row[3]}}</td>
-                                <td>{{row[4]}}</td>
-                                <td>{{row[5]}}</td>
-                                <td>{{row[6]}}</td>
-                                <td>{{row[13]}}</td>
-                                <td>R$ {{row[0]}}</td>
-                                <td>
-
-                                    <a href="/edit/{{row[11]}}" class="btn btn-secondary btn-sm">
-                                        <i class="fas fa-wrench"></i>
-                                    </a>
-                                    <a href="/edit_material/{{row[11]}}" class="btn btn-secondary btn-sm">
-                                        <i class="fas fa-box"></i>
-                                    </a>
-                                    <a href="/timeline/{{row[11]}}" class="btn btn-secondary btn-sm">
-                                        <i class="fas fa-clock"></i>
-                                    </a>
-
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th class="sorting sorting_asc"></th>
-                                <th>Setor</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                                <th>Risco</th>
-                                <th>Status</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                                <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
-                                <th></th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+            <div class = "board" style="overflow-x: auto;">
+                <table id="table1" class="table table-striped">
+                    <div id = "titulo" class="row"><h3 class="visao">Visão das ordens de serviço</h3></div>
+                    <thead>
+                        <tr>
+                            <th>OS</th>
+                            <th>Setor</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                            <th>Risco</th>
+                            <th>Status</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in list_users %}
+                        <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <td>{{row[11]}}</td>
+                            <td>{{row[2]}}</td>
+                            <td>{{row[3]}}</td>
+                            <td>{{row[4]}}</td>
+                            <td>{{row[5]}}</td>
+                            <td>{{row[6]}}</td>
+                            <td>{{row[13]}}</td>
+                            <td>R$ {{row[0]}}</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                      ...
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <a class = 'dropdown-item'href="/edit/{{row[11]}}" class="btn">
+                                            <i class="fas fa-wrench"></i> Editar
+                                        </a>    
+                                        <a class = "dropdown-item"href="/edit_material/{{row[11]}}" class="btn">
+                                            <i class="fas fa-box"></i> Material
+                                        </a>
+                                        <a class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn">
+                                            <i class="fas fa-clock"></i> Timeline
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr id = 'buscar'>
+                            <th class="sorting sorting_asc"></th>
+                            <th>Setor</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                            <th>Risco</th>
+                            <th>Status</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
             </div>
         </div>
     </div>
 
-</div>
+    </div>
 {% endblock %}
