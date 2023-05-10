@@ -27,13 +27,13 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_
 
 @routes_bp.route('/')
 @login_required
-def inicio():
+def inicio(): # Redirecionar para a página de login
     
     return render_template("login/login.html")
 
 @routes_bp.route('/index')
 @login_required
-def Index():
+def Index(): # Página inicial (Página com a lista de ordens de serviço)
     
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     #s = "SELECT * FROM tb_ordens"
@@ -73,9 +73,9 @@ def Index():
 
     return render_template('user/index.html', list_users = list_users)
 
-@routes_bp.route('/add_student', methods=['POST'])
+@routes_bp.route('/add_student', methods=['POST']) 
 @login_required
-def add_student():
+def add_student(): # Criar ordem de serviço
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         setor = request.form['setor']
@@ -119,7 +119,7 @@ def add_student():
  
 @routes_bp.route('/edit/<id_ordem>', methods = ['POST', 'GET'])
 @login_required
-def get_employee(id_ordem):
+def get_employee(id_ordem): # Página para edição da ordem de serviço (Informar o andamento da ordem)
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     s = ('SELECT * FROM tb_ordens WHERE id_ordem = {}'.format(int(id_ordem)))
@@ -158,7 +158,7 @@ def get_employee(id_ordem):
  
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
-def update_student(id_ordem):
+def update_student(id_ordem): # Inserir as edições no banco de dados
 
     if request.method == 'POST':
             
@@ -203,12 +203,12 @@ def update_student(id_ordem):
         return redirect(url_for('routes.Index'))
 
 @routes_bp.route('/openOs')
-def open_os():
+def open_os(): # Página de abrir OS
     return render_template("user/openOs.html")
 
 @routes_bp.route('/edit_material/<id_ordem>', methods = ['POST', 'GET'])
 @login_required
-def get_material(id_ordem):
+def get_material(id_ordem): # Informar material que foi utilizado na ordem de serviço
     # Verifica se a requisição é um POST
     if request.method == 'POST':
         
@@ -265,7 +265,7 @@ def get_material(id_ordem):
 
 @routes_bp.route('/grafico')
 @login_required
-def grafico():
+def grafico(): # Dashboard
     
     # lista com os gráficos a serem plotados
     plot_list = [] 
@@ -319,7 +319,7 @@ def grafico():
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
-def timeline_os(id_ordem):
+def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
 
     # Obtém os dados da tabela
     s = ("""
@@ -363,7 +363,7 @@ def timeline_os(id_ordem):
 
 @routes_bp.route('/52semanas', methods=['POST','GET'])
 @login_required
-def plan_52semanas():
+def plan_52semanas(): # Tabela com as 52 semanas
         
     if request.method == 'POST':
     

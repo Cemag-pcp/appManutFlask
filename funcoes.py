@@ -8,7 +8,7 @@ import pandas as pd
 from flask import redirect, url_for, session
 from functools import wraps
 
-def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade):
+def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade): # Função para gerar as 52 semanas
 
     # grupo = 'CARPINTARIA'
     # codigo_maquina = 'auqlauqw'
@@ -179,7 +179,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
     
     return df_vazio
 
-def login_required(func):
+def login_required(func): # Lógica do parâmetro de login_required, onde escolhe quais páginas onde apenas o usuário logado pode acessar
     @wraps(func)
     def wrapper(*args, **kwargs):
         if 'loggedin' not in session:

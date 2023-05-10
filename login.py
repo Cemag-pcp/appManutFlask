@@ -20,12 +20,12 @@ DB_PASS = "15512332"
 
 @login_bp.route('/home')
 @login_required
-def home():
+def home():  # Página de login
     
     return render_template('login/home.html')
 
 @login_bp.route('/login', methods=['POST','GET'])
-def login():
+def login(): # Lógica de login
     
     if 'loggedin' in session:
     # Usuário já está logado, redirecione para a página inicial
@@ -59,25 +59,20 @@ def login():
         return render_template('login/login.html', msg = msg)
 
 @login_bp.route('/logout')
-def logout():
+def logout(): # Botão de logout
 	session.pop('loggedin', None)
 	session.pop('id', None)
 	session.pop('username', None)
 	return redirect(url_for('login.login'))
 
-# @app.route('/signup')
-# def signup():
-#     form_criarconta = FormCriarConta()
-#     return render_template('signup.html', form_criarconta = form_criarconta)
-
 @login_bp.route('/contato')
 @login_required
-def contato():
+def contato(): # Página de contatos (Excluir)
     return render_template('login/contato.html')
 
 @login_bp.route('/usuarios')
 @login_required
-def usuarios():
+def usuarios(): # Página de usuários (Excluir)
     return render_template('login/usuarios.html', lista_usuarios = lista_usuarios)
 
 if __name__ == '__main__':
