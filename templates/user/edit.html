@@ -1,7 +1,7 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-<div class = 'card card-body'>
+<div id = 'edicao' class = 'card card-body'>
 <div class="row">
     <div class = 'col-md-4 mx-auto'>
         <form action="/update/{{ordem[10]}}" method="POST">
@@ -65,7 +65,7 @@
             </div>
             <br>
             <div class="form-group">
-            <button type="submit" class="btn btn-primary btn-block">
+            <button id = 'salvar_edicao' type="submit" class="btn btn-primary btn-block">
                 Salvar
             </button>
             </div>

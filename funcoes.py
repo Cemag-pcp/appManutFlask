@@ -1,4 +1,3 @@
-
 from datetime import datetime, date
 from datetime import timedelta
 import datetime
@@ -7,6 +6,12 @@ from pandas.tseries.offsets import BDay
 import pandas as pd
 from flask import redirect, url_for, session
 from functools import wraps
+import psycopg2
+
+DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
+DB_NAME = "postgres"
+DB_USER = "postgres"
+DB_PASS = "15512332"
 
 def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade): # Função para gerar as 52 semanas
 
@@ -186,3 +191,116 @@ def login_required(func): # Lógica do parâmetro de login_required, onde escolh
             return redirect(url_for('login.login'))
         return func(*args, **kwargs)
     return wrapper
+
+# def trigger_ordem_planejada():
+
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+#     s = (""" SELECT * FROM tb_maquinas """)
+#     df_maquinas = pd.read_sql_query(s, conn)
+    
+#     df_final = pd.DataFrame()
+
+#     for i in range(len(df_maquinas)):    
+        
+#         df_planejamento = gerador_de_semanas_informar_manutencao(df_maquinas['setor'][i], df_maquinas['codigo'][i], df_maquinas['descricao'][i], df_maquinas['criticidade'][i], df_maquinas['manut_inicial'][i], df_maquinas['periodicidade'][i])
+#         df_final = pd.concat([df_final, df_planejamento], axis=0)
+
+#     df_final = df_final.replace('','-')
+
+#     data = date.today().strftime(format="%d/%m/%Y")
+#     data = pd.to_datetime(data, format="%d/%m/%Y") #+ timedelta(3) # rodar na sexta porém com data segunda-feira
+    
+#     lista_indices = []
+
+#     for i in range(1,7):
+#         indices = []
+#         for coluna in table.columns:
+#             data_str = data.strftime(format='%d-%m-%Y')
+#             idx = table.index[table[coluna] == data_str].tolist()
+#             if len(idx) > 0:
+#                  semana = coluna
+#             indices.extend([(i) for i in idx])
+#             #colunas.extend([(i,coluna) for i in idx])
+
+#         lista_indices.append(indices)
+#         #lista_colunas.append(colunas)
+#         #semana = lista_colunas[1][1][1]
+
+#         data = data + timedelta(1)
+    
+#     maquinas_merge = pd.DataFrame()
+    
+#     for j in range(6):
+
+#         if len(table.iloc[lista_indices[j]]) > 0:
+
+#             # DataFrame com informações das máquinas
+
+#             table_maquinas = table.iloc[lista_indices[j]].reset_index(drop=True).sort_values(by='Classificação')
+
+#             maquinas = pd.DataFrame(table_maquinas['Código da máquina'].copy())
+
+#             media_tempos = table3[['Código da máquina','Criticidade','tempo de manutencao']]
+#             media_tempos = pd.DataFrame(media_tempos.groupby(['Código da máquina','Criticidade']).mean()).reset_index()
+#             media_tempos['Data real'] = semana
+#             i = i-1
+            
+#             maquinas = maquinas.merge(media_tempos)
+
+#             maquinas_merge = maquinas_merge.append(maquinas).reset_index(drop=True)
+
+#         else:
+#             pass
+
+#     # Criando as listas de equipamentos e tempos
+
+#     equipamentos = maquinas_merge['Código da máquina'].values.tolist()
+#     tempos = maquinas_merge['tempo de manutencao'].values.tolist()
+    
+#     df_planejamento = pd.DataFrame(data=equipamentos, columns=['Código da máquina'])
+#     df_planejamento['Dia'] = ''
+
+#     data = date.today().strftime(format="%d/%m/%Y")
+#     data = pd.to_datetime(data, format="%d/%m/%Y")# + timedelta(3) # data de hoje (segunda-feira)
+    
+#     # Criando a variável de tempo máximo
+#     tempo_maximo = 180
+
+#     # Criando o laço de repetição
+#     for i in range(len(equipamentos)):
+#         # Verificando se o tempo do equipamento cabe no dia atual
+#         if tempos[i] <= tempo_maximo:
+
+#             tempo_maximo = tempo_maximo - tempos[i]
+
+#         else:
+#             # Incrementando o dia atual
+#             data = data + 1 * BDay()
+#             tempo_maximo = 180 - tempos[i]
+
+#         df_planejamento['Dia'][i] = data
+    
+#     df_planejamento = df_planejamento[['Dia','Código da máquina']]
+#     df_planejamento = df_planejamento.merge(maquinas_merge, how='inner')
+    
+#     df_planejamento['Dia'] = pd.to_datetime(df_planejamento['Dia'])
+#     df_planejamento['Dia'] = df_planejamento['Dia'].dt.strftime("%d/%m/%Y")
+
+#     df_planejamento['Data real'] = semana
+#     df_planejamento['Data real'] = semana
+
+#     table = table[['Código da máquina', 'Descrição da máquina', 'Setor']]
+#     df_planejamento = df_planejamento.merge(table)
+
+#     df_planejamento = df_planejamento[['Data real','Dia','Código da máquina', 'Descrição da máquina', 'Setor', 'Criticidade', 'tempo de manutencao']]
+
+
+
+
+
+
+
+
+
+
