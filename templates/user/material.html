@@ -1,9 +1,9 @@
 {% extends "user/layout.html" %}
 {% block body %}
-
+<a id='botao_voltar' href="/index"><i id='icone_botao' class="fa-sharp fa-solid fa-left-to-line"></i>Voltar</a>
 <div class = "w3-container">
   <div class="row justify-content-md-center">
-    <div class="col-md-4">
+    <div class="col-md-4" style="margin-top: 15px;">
         <div id = 'form_inserir_material' class="card card-body">
           <form action="{{ url_for('routes.get_material', id_ordem=id_ordem) }}" method="POST">
               <table>

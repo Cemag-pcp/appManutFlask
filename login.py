@@ -29,7 +29,7 @@ def login(): # Lógica de login
     
     if 'loggedin' in session:
     # Usuário já está logado, redirecione para a página inicial
-        return redirect(url_for('login.home'))
+        return redirect(url_for('routes.Index'))
     
     else:
 
@@ -52,7 +52,7 @@ def login(): # Lógica de login
                 session['id'] = account['id']
                 session['username'] = account['email']
                 msg = 'Logged in successfully !'
-                return render_template('login/home.html', msg = msg)
+                return render_template('user/index.html', msg = msg)
             else:           
                 msg = 'Incorrect username / password !'
 
