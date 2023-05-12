@@ -227,7 +227,7 @@ body {
 #titulo .visao{
   top:5%;
   left: 50%;
-  transform: translate(140%,-13%);
+  transform: translate(120%,-13%);
   padding: 10px;
 }
 
@@ -512,4 +512,27 @@ body {
   width: 70%;
   height: auto;
   border-radius: 20px;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.alert{
+  margin: 0;
+  z-index: 3;
+  width: 50%;
+  left: 5%;
+  top:5%;
+  transform: translate(55%,-50%);
+  animation: fadeOut 5s forwards;
+  opacity: 0;
+  position: absolute;
 }
