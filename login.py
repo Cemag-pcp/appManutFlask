@@ -52,7 +52,7 @@ def login(): # Lógica de login
                 session['id'] = account['id']
                 session['username'] = account['email']
                 msg = 'Logged in successfully !'
-                return render_template('user/index.html', msg = msg)
+                return redirect(url_for('routes.Index'))
             else:           
                 msg = 'Incorrect username / password !'
 

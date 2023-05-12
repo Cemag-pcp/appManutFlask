@@ -20,7 +20,7 @@
     <!-- Include the default stylesheet -->
     <!-- Include plugin -->
     <script src="https://cdn.rawgit.com/wenzhixin/multiple-select/e14b36de/multiple-select.js"></script>
-    <script src="/static/multiselect-dropdown.js" ></script>
+    <script src="/static/js/multiselect-dropdown.js" ></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
@@ -35,11 +35,11 @@
       <!-- <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav"> -->
       <ul class="item">
-        <li><i class="fa-sharp fa-solid fa-gear"></i><a href="/index">Ordem de serviço</a></li>
-        <li><i class="fa-solid fa-folder-open"></i><a href="/openOs">Abertura de Os</a></li>  
-        <li><i class="fa-solid fa-chart-line"></i><a href="/grafico">Gráficos</a></li>
-        <li><i class="fa-sharp fa-solid fa-calendar-week"></i><a href="/52semanas">52 Semanas</a></li>
-        <li><i class="fa-sharp fa-solid fa-arrow-right-from-bracket"></i><a href="/logout">Logout</a></li>
+        <li onclick="location.href='/index'"><i class="fa-sharp fa-solid fa-gear"></i><a href="/index">Ordem de serviço</a></li>
+        <li onclick="location.href='/openOs'"><i class="fa-solid fa-folder-open"></i><a href="/openOs">Abertura de Os</a></li>  
+        <li onclick="location.href='/grafico'"><i class="fa-solid fa-chart-line"></i><a href="/grafico">Gráficos</a></li>
+        <li onclick="location.href='/52semanas'"><i class="fa-sharp fa-solid fa-calendar-week"></i><a href="/52semanas">52 Semanas</a></li>
+        <li id="logout_navbar" onclick="location.href='/logout'"><i class="fa-sharp fa-solid fa-arrow-right-from-bracket"></i><a href="/logout">Logout</a></li>
         <!-- <a class="nav-item nav-link disabled" href="#">PAGINA3</a>
         <a class="nav-item nav-link disabled" href="#">Disabled</a> -->
       </ul>

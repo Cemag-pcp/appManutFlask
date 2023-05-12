@@ -13,6 +13,10 @@ body {
   position: relative;
 }
 
+#logout_navbar{
+  top: 5%;
+  transform: translate(0%,45vh);
+}
 
 /* #abertura_titulo{
   position:fixed;
@@ -65,19 +69,30 @@ body {
 #botao_voltar{
   width: 70%;
   height: 30px;
-  margin-left: 100px;
+  top: 5%;
+  left: 5%;
+  transform: translate(-50%, -50%);
+  margin-left: 80px;
   padding: 1%;
-  border-color: rgb(0, 0, 0, 0.1);
   text-decoration: none;
   border-radius: 20px;
   box-shadow: inset;
-  background-color: #c9cacab4;
+  background-color: #adadad4b;
   font-family: 'Poppins', sans-serif;
   outline: none;
   cursor: pointer;
   font-size: 1em;
   color: black;
   font-weight: 700;
+}
+
+#botao_voltar i{
+  color: rgb(0, 0, 0);
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
@@ -394,7 +409,7 @@ body {
   padding: 20px;
   top: 30%;
   left: 50%;
-  transform: translate(50%,-40%);
+  transform: translate(16.5%,-40%);
   background-color: rgba(255, 255, 255,0.5);
   width: 50%;
   height: auto;
@@ -403,14 +418,13 @@ body {
 
 .sem{
   left: 5%;
-  transform: translate(200%);
+  transform: translate(40%);
   margin: 10px;
 }
 
 #filtro_semanas button{
-  margin-top: 5px;
-  width: 100%;
-  height: 40px; 
+  margin-top: 25px;
+  width: 100%; 
   outline: none;
   background-color: #fff;
   border-color: rgb(252, 90, 10,0.5);
@@ -421,36 +435,81 @@ body {
   font-weight: 500;
 }
 
-#table2{
-  width: 50%;
-  height: 50%;
-  margin-top: 50px;
-  top: 2%;
-  left: 20%;
-  transform: translate(1%, -15%);
-  margin-bottom: 10px;
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255,0.5);
-  padding: 30px;
+#filtro_semanas input{
+  width: 86%;
+  margin: 5px;
 }
-
-#table2_filter{
-  padding: 20px;
-  width: 30%;
-  height: 20%;
-  top: 5%;
-  left: 20%;
-  transform: translate(20%, -40%);
-}
-
-#table2_length{
-  width: 30%;
-  height: 20%;
-  top: 10%;
-  left: 20%;
-  transform: translate(30%, -100%);
-}
+  
 
 #table2_info{
   margin-left: 80px;
+}
+
+#tabela2 .board2{
+  width: 85%;
+  height: 90vh;
+  top: 2%;
+  left: 20%;
+  transform: translate(0%, -5%);
+  margin-bottom: 10px;
+  align-items: center;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255,0.5);
+  padding: 40px;
+  margin: 0;
+}
+
+#titulo_grafico{
+  top:5%;
+  left: 5%;
+  transform: translate(43%,-90%);
+  padding: 10px;
+}
+
+#andamento{
+  left: 50%;
+  transform: translate(-50%);
+  background-color: rgba(255, 255, 255,0.5);
+  width: 70%;
+  height: auto;
+  border-radius: 20px;
+}
+
+#abertas{
+  background-color: rgba(255, 255, 255,0.5);
+  width: 70%;
+  height: auto;
+  border-radius: 20px;
+}
+
+#finalizadas{
+  background-color: rgba(255, 255, 255,0.5);
+  width: 70%;
+  height: auto;
+  border-radius: 20px;
+}
+
+#aguardando_material{
+  left: 5%;
+  transform: translate(-50%);
+  background-color: rgba(255, 255, 255,0.5);
+  width: 70%;
+  height: auto;
+  border-radius: 20px;
+}
+
+#mttr{
+  left: 50%;
+  transform: translate(22%);
+  background-color: rgba(255, 255, 255,0.5);
+  width: 70%;
+  height: auto;
+  border-radius: 20px;
+}
+
+#mtbf{
+  background-color: rgba(255, 255, 255,0.5);
+  width: 70%;
+  height: auto;
+  border-radius: 20px;
 }
