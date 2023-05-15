@@ -1,44 +1,62 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-<div id='titulo_grafico'><h3>Gráficos</h3></div>
+<!-- <div id='titulo_grafico'><h3>Gráficos</h3></div> -->
 
-<div class='row'>
+<div class='row' >
     <div class="col-sm-3">
         <div id = 'andamento' class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title">Em andamento</h5>
-                <p class="card-text">5</p>
+            <div id = "infos_graficos">
+                <div class="info-row">
+                    <p class="card-text">5</p>
+                    <h5 class="card-title">Em andamento</h5> 
+                </div>
+                <i class="fa-solid fa-bars-progress"></i>             
             </div>
         </div>
     </div>
     <div class="col-sm-3">
         <div id = 'abertas' class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title">Abertas</h5>
-                <p class="card-text">10</p>
+            <div id = "infos_graficos">
+                <div class="info-row">
+                    <p class="card-text">10</p>
+                    <h5 class="card-title"></i>Abertas</h5>                 
+                </div>
+                <i class="fa-solid fa-lock-open"></i>
             </div>
         </div>
     </div>
     <div class="col-sm-3">
         <div id = 'finalizadas' class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title">Finalizadas</h5>
-                <p class="card-text">8</p>
+            <div id = "infos_graficos">
+                <div class="info-row">
+                    <p class="card-text">8</p>
+                    <h5 class="card-title"></i>Finalizadas</h5>                  
+                </div>
+                <i class="fa-sharp fa-solid fa-square-check"></i>
             </div>
         </div>
     </div>
-    <div class="col-sm-3">
-        <div id = 'aguardando_material' class="card mx-auto">
-            <div class="card-body text-center">
-                <h5 class="card-title">Aguardando material</h5>
-                <p class="card-text">15</p>
+    <div id = 'aguard' class="col-sm-3">
+        <div id = 'aguardando_material' class="card">
+            <div id = "infos_graficos" class="w">
+                <div class="info-row">
+                    <p class="card-text">15</p>
+                    <h5 class="card-title">Aguardando material</h5>                    
+                </div>
+                <i class="fa-solid fa-spinner"></i>             
             </div>
         </div>
     </div>
 </div>
 <br>
 
+<div>
+    <canvas id="grafico1"></canvas>
+    <canvas id="grafico2"></canvas>
+    <canvas id="grafico3"></canvas>
+</div>
+<!-- 
 <div class='row'>
     <div class="col-sm-6">
         <div id ='mttr'>
@@ -56,6 +74,6 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 {% endblock %}

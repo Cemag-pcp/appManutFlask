@@ -24,6 +24,7 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 <body>
@@ -51,7 +52,8 @@
     </div>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <script src="/static/menu.js" ></script>
+    <script src="/static/js/menu.js" ></script>
+    <script src="/static/js/graf.js" ></script>
     <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
@@ -117,25 +119,25 @@
 
 
 
-// Obtém o elemento do botão "Abrir Menu"
-var menuButton = document.getElementById("menu-button");
+// // Obtém o elemento do botão "Abrir Menu"
+// var menuButton = document.getElementById("menu-button");
 
-// Obtém o elemento do menu
-var menu = document.getElementById("menu");
+// // Obtém o elemento do menu
+// var menu = document.getElementById("menu");
 
-// Adiciona um ouvinte de evento de clique ao botão "Abrir Menu"
-menuButton.addEventListener("click", function() {
-  // Verifica se o menu está ativo
-  if (menu.classList.contains("active")) {
-    // Remove a classe 'active' do menu e do botão para fechar o menu
-    menu.classList.remove("active");
-    menuButton.classList.remove("active");
-  } else {
-    // Adiciona a classe 'active' ao menu e ao botão para abrir o menu
-    menu.classList.add("active");
-    menuButton.classList.add("active");
-  }
-});
+// // Adiciona um ouvinte de evento de clique ao botão "Abrir Menu"
+// menuButton.addEventListener("click", function() {
+//   // Verifica se o menu está ativo
+//   if (menu.classList.contains("active")) {
+//     // Remove a classe 'active' do menu e do botão para fechar o menu
+//     menu.classList.remove("active");
+//     menuButton.classList.remove("active");
+//   } else {
+//     // Adiciona a classe 'active' ao menu e ao botão para abrir o menu
+//     menu.classList.add("active");
+//     menuButton.classList.add("active");
+//   }
+// });
 
 
   </script>
