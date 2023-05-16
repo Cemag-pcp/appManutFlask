@@ -41,14 +41,49 @@
                 <tr>
                     <td><input type="text" class="form-control" name="codigo" required></td>
                     <td><input type="text" class="form-control" name="descricao" required></td>
-                    <td><input type="text" class="form-control" name="setor" required></td>
-                    <td><input type="text" class="form-control" name="criticidade" required></td>
+                    <td>
+                      <div class="form-group" style="margin-right: 3px; margin-top: 15px; padding: 3px; width: 180px;">                
+                        <select class="form-control form-control" id="setor" name="setor" required>
+                          <option value="" selected disabled hidden></option>  
+                          <option>Administrativo</option>
+                          <option>Estamparia</option>
+                          <option>Solda</option>
+                          <option>Montagem</option>
+                          <option>Pintura</option>
+                          <option>Carpintaria</option>
+                          <option>Almoxarifado</option>
+                          <option>Usinagem</option>
+                          <option>Serra</option>
+                          <option>Corte</option>
+                          <option>Serralheria</option>
+                        </select>
+                      </div>
+                    </td>
+                      <td>
+                        <div class="form-group" style="margin-right: 3px; margin-top: 15px; padding: 3px; width: 100px;">                
+                          <select class="form-control form-control" id="criticidade" name="criticidade" required>
+                            <option value="" selected disabled hidden></option>  
+                            <option>A</option>
+                            <option>B</option>
+                            <option>C</option>
+                          </select>
+                        </div>
+                      </td>
                     <td><input type="date" class="form-control" name="manut_inicial" required></td>
-                    <td><input type="text" class="form-control" name="periodicidade" required></td>
+                    <td>
+                      <div class="form-group" style="margin-right: 3px; margin-top: 15px; padding: 3px; width: 150px;">                
+                        <select class="form-control form-control" id="periodicidade" name="periodicidade" required>
+                          <option value="" selected disabled hidden></option>  
+                          <option>Semanal</option>
+                          <option>Quinzenal</option>
+                          <option>Bimestral</option>
+                        </select>
+                      </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
-        <button class="btn btn-primary btn-block">
+        <button id = 'botao_52semanas' class="btn btn-primary btn-block">
             Inserir 
         </button>
     </form>
