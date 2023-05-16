@@ -196,9 +196,14 @@ def login_required(func): # Lógica do parâmetro de login_required, onde escolh
 
 #     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
-#     s = (""" SELECT * FROM tb_maquinas """)
+#     s = (""" SELECT * FROM tb_ordens """)
 #     df_maquinas = pd.read_sql_query(s, conn)
     
+#     df_maquinas = df_maquinas.dropna(subset=['operador'])
+#     df_maquinas['operador'] = df_maquinas['operador'].str.replace('[', '').str.replace(']', '').str.replace('\"', '').str.replace('\\', '').str.replace('{','').str.replace('}','').str.replace('\s+', '', regex=True)
+    
+#     df_maquinas['Contagem'] = df_maquinas['operador'].str.count(',') + 1
+
 #     df_final = pd.DataFrame()
 
 #     for i in range(len(df_maquinas)):    
@@ -215,9 +220,9 @@ def login_required(func): # Lógica do parâmetro de login_required, onde escolh
 
 #     for i in range(1,7):
 #         indices = []
-#         for coluna in table.columns:
+#         for coluna in df_maquinas.columns:
 #             data_str = data.strftime(format='%d-%m-%Y')
-#             idx = table.index[table[coluna] == data_str].tolist()
+#             idx = df_maquinas.index[df_maquinas[coluna] == data_str].tolist()
 #             if len(idx) > 0:
 #                  semana = coluna
 #             indices.extend([(i) for i in idx])
@@ -233,11 +238,11 @@ def login_required(func): # Lógica do parâmetro de login_required, onde escolh
     
 #     for j in range(6):
 
-#         if len(table.iloc[lista_indices[j]]) > 0:
+#         if len(df_maquinas.iloc[lista_indices[j]]) > 0:
 
 #             # DataFrame com informações das máquinas
 
-#             table_maquinas = table.iloc[lista_indices[j]].reset_index(drop=True).sort_values(by='Classificação')
+#             table_maquinas = df_maquinas.iloc[lista_indices[j]].reset_index(drop=True).sort_values(by='Classificação')
 
 #             maquinas = pd.DataFrame(table_maquinas['Código da máquina'].copy())
 
@@ -294,13 +299,3 @@ def login_required(func): # Lógica do parâmetro de login_required, onde escolh
 #     df_planejamento = df_planejamento.merge(table)
 
 #     df_planejamento = df_planejamento[['Data real','Dia','Código da máquina', 'Descrição da máquina', 'Setor', 'Criticidade', 'tempo de manutencao']]
-
-
-
-
-
-
-
-
-
-

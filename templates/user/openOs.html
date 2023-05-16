@@ -22,11 +22,11 @@
 <div class="row">
   <div class="col-md-4 offset-md-4">
     <div id ="formulario_abertura" class="card card-body">
-      <form action="{{url_for('routes.add_student')}}" method="POST">
+      <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data">
         <div class="form-group"> 
           <div id = 'abertura_titulo' class="row"><h3>Abrir OS</h3></div>       
-          <label for="setor">Setor</label>
-          <select class="form-control form-control" id="setor" name="setor" required>
+            <label for="setor">Setor</label>
+            <select class="form-control form-control" id="setor" name="setor" required>
               <option value="" selected disabled hidden></option>  
               <option>Administrativo</option>
               <option>Estamparia</option>
@@ -40,7 +40,7 @@
               <option>Corte</option>
               <option>Serralheria</option>
             </select>
-      </div>
+          </div>
         <div class="form-group">
           <label for="maquina">Máquina ou Local:</label>
           <input type="text" class="form-control" name="maquina" required>
@@ -57,7 +57,11 @@
               <option>Médio</option>
               <option>Baixo</option>
           </select>
-      </div>
+        </div>
+        <div class="form-group">        
+          <label for="imagem">Imagem:</label>
+          <input type="file" class="form-control-file" id="imagem" name="imagem">
+        </div>
         <button id = 'salvar' class="btn btn-block">
           Save 
         </button>

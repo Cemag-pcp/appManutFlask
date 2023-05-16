@@ -1,5 +1,5 @@
 #app.py
-from flask import Flask, render_template, request, redirect, url_for, flash,Blueprint
+from flask import Flask, render_template, request, redirect, url_for, flash,Blueprint, Response
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
 import datetime
@@ -12,6 +12,7 @@ from funcoes import gerador_de_semanas_informar_manutencao, login_required
 import warnings
 from flask import session
 from functools import wraps
+import base64
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -35,7 +36,8 @@ def inicio(): # Redirecionar para a página de login
 @login_required
 def Index(): # Página inicial (Página com a lista de ordens de serviço)
     
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
     #s = "SELECT * FROM tb_ordens"
     s = (""" 
         SELECT DISTINCT t1.total, t2.* 
@@ -76,8 +78,13 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 @routes_bp.route('/add_student', methods=['POST']) 
 @login_required
 def add_student(): # Criar ordem de serviço
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
     if request.method == 'POST':
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
         setor = request.form['setor']
         maquina = request.form['maquina']
         risco = request.form['risco']
@@ -105,11 +112,31 @@ def add_student(): # Criar ordem de serviço
             ultima_os = 0
 
         try:
+
             cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura))
-            conn.commit()
+
+            if 'imagem' in request.files:
+                imagem = request.files['imagem']
+                # Ler os dados da imagem
+                imagem_data = imagem.read()
+
+                cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data))
+                conn.commit()
+
         except:
             id = 0
             cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco, status, problemaaparente, id_ordem,n_ordem ,dataabertura) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (id, setor, maquina, risco, status, problema,ultima_os, n_ordem, dataAbertura))
+            
+            if 'imagem' in request.files:
+                imagem = request.files['imagem']
+                # Ler os dados da imagem
+                imagem_data = imagem.read()
+
+                cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data))
+                conn.commit()
+                
             conn.commit()
 
         cur.close()
@@ -422,3 +449,17 @@ def plan_52semanas(): # Tabela com as 52 semanas
     df_final = df_final.values.tolist()
 
     return render_template('user/52semanas.html', data=df_final, colunas=colunas)
+
+@routes_bp.route('/visualizar_imagem/<id_ordem>', methods=['GET'])
+@login_required
+def visualizar_imagem(id_ordem):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute("SELECT imagem FROM tb_imagens WHERE id_ordem = %s", (id_ordem,))
+    imagem_data = cur.fetchone()[0]
+
+    imagem_base64 = base64.b64encode(imagem_data).decode('utf-8')
+
+    return render_template('user/imagem.html', imagem_data=imagem_base64, id_ordem=id_ordem)
