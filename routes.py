@@ -330,19 +330,11 @@ def grafico(): # Dashboard
 
     grafico1 = pd.read_sql_query(s,conn)
 
+    grafico1_list = grafico1.values.tolist()
+
     # Criação do gráfico
-    trace = go.Bar(x=grafico1['dataabertura'], y=grafico1['count'])
-    data = [trace]
-    #layout = go.Layout(title='Gráfico de Barras')
-    fig = go.Figure(data=data)#, layout=layout)
-
-    # Conversão do gráfico em HTML
-    plot_div = opy.plot(fig, auto_open=False, output_type='div')
-
-    plot_list.append(plot_div)
-
     # Renderização do template com o gráfico
-    return render_template('user/grafico.html', plot_list=plot_list)
+    return render_template('user/grafico.html', grafico1_list=grafico1_list,plot_list=plot_list)
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
