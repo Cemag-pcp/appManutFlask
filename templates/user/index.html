@@ -1,110 +1,153 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-    {% with messages = get_flashed_messages()  %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-success" role="sucess">
-        <strong>Sucesso!</strong> {{ message }}
-        <button type="button" class="close" data-dismiss="sucess" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-    
-    <div id = "tabela" class="container-fluid">
-        <div class="row justify-content-md-center">
-            <div class = "board" style="overflow-x: auto;">
-                <div id = "titulo" class="row"><h3 class="visao">Visão das ordens de serviço</h3></div>
-                <table id="table1" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>OS</th>
-                            <th>Setor</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                            <th>Risco</th>
-                            <th>Status</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Imagem</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in list_users %}
-                        <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <td>{{row[11]}}</td>
-                            <td>{{row[2]}}</td>
-                            <td>{{row[3]}}</td>
-                            <td>{{row[4]}}</td>
-                            <td>{{row[5]}}</td>
-                            <td>{{row[6]}}</td>
-                            <td>{{row[13]}}</td>
-                            <td>R$ {{row[0]}}</td>
-                            <td>
-                                <!-- Icon that triggers the popup -->
-                                <i class="icon fa-sharp fa-solid fa-image" onclick="showPopup('static/img/img-solda2.jpg')"></i>
-                                
-                                <!-- Popup container -->
-                                <div id="popup" class="popup" onclick="closePopup()">
-                                  <div class="popup-content">
-                                    <!-- Popup image -->
-                                    <img id="popup-img" class="popup-img">
-                                  </div>
+{% with messages = get_flashed_messages()  %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success" role="sucess">
+    <strong>Sucesso!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="sucess" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div id = "tabela" class="container-fluid">
+    <div class="row justify-content-md-center">
+        <div class = "board" style="overflow-x: auto;">
+            <div id = "titulo" class="row"><h3 class="visao">Visão das ordens de serviço</h3></div>
+            <table id="table1" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>OS</th>
+                        <th>Setor</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                        <th>Risco</th>
+                        <th>Status</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in list_users %}
+                    <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <td>{{row[11]}}</td>
+                        <td>{{row[2]}}</td>
+                        <td>{{row[3]}}</td>
+                        <td>{{row[4]}}</td>
+                        {% if row[5].strip() == 'Finalizada' %}
+                        <td style="color: green; font-weight: bold;">{{ row[5] }}</td>
+                        {% elif row[5].strip() == 'Em espera' %}
+                        <td style="color: rgb(174, 174, 112); font-weight: bold;">{{ row[5] }}</td>
+                        {% elif row[5].strip() == 'Em execução' %}
+                        <td style="color: blue; font-weight: bold;">{{ row[5] }}</td>
+                        {% else %}
+                        <td style="color: black; font-weight: bold;">{{ row[5] }}</td>
+                        {% endif %}
+                        <td>{{row[6]}}</td>
+                        <td>{{row[13]}}</td>
+                        <td>R$ {{row[0]}}</td>                    
+                        <td>
+                            <div class="dropdown">
+                                <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                    <a id="dropdown_os" class="dropdown-item" href="/edit/{{row[11]}}">
+                                        <i class="fas fa-wrench"></i>
+                                    </a>    
+                                    <a  id = 'dropdown_os' class = "dropdown-item" href="/edit_material/{{row[11]}}" class="btn">
+                                        <i class="fas fa-box"></i> 
+                                    </a>
+                                    <a id = 'dropdown_os' class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn">
+                                        <i class="fas fa-clock"></i> 
+                                    </a>
+                                    <!-- <a>
+                                        <button type="button" class="btn btn-primary" onclick="showImageModal('{{ row[11] }}')">Exibir Imagem</button>
+                                    </a>  -->
+                                    <a id="dropdown_os" class="dropdown-item" onclick="showImageModal('{{ row[11] }}')">
+                                        <i class="fas fa-image"></i> 
+                                    </a>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="dropdown">
-                                    <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <a id = 'dropdown_os' class = 'dropdown-item'href="/edit/{{row[11]}}" class="btn">
-                                            <i class="fas fa-wrench"></i> Editar
-                                        </a>    
-                                        <a  id = 'dropdown_os' class = "dropdown-item" href="/edit_material/{{row[11]}}" class="btn">
-                                            <i class="fas fa-box"></i> Material
-                                        </a>
-                                        <a id = 'dropdown_os' class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn">
-                                            <i class="fas fa-clock"></i> Timeline
-                                        </a>
-                                        <!-- <a class="dropdown-item" href="javascript:void(0)" onclick="openPopup('/visualizar_imagem/{{row[11]}}')">
-                                            <i class="fa-solid fa-image"></i> Imagem
-                                        </a> -->
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th class="sorting sorting_asc"></th>
-                            <th>Setor</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                            <th>Risco</th>
-                            <th>Status</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class="sorting sorting_asc"></th>
+                        <th>Setor</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                        <th>Risco</th>
+                        <th>Status</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
         </div>
     </div>
+</div>
 
+<!-- Modal Imagem -->
+<div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imagemModalLabel">Foto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Aqui é onde a imagem será exibida -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+  
 <script>
+
+    function showImageModal(id_ordem) {
+        $.ajax({
+        url: '/visualizar_imagem/' + id_ordem,
+        type: 'GET',
+        success: function(response) {
+            var imagemData = response.imagem_data;
+            var modalBody = '<img src="data:image/png;base64,' + imagemData + '" alt="Imagem" />';
+    
+            // Preencha o conteúdo do modal com a imagem
+            $('#imagemModal .modal-body').html(modalBody);
+    
+            // Exiba o modal
+            $('#imagemModal').modal('show');
+        },
+        error: function(error) {
+            console.log(error);
+        }
+        });
+    }
+  
+</script>
+
+<!-- <script>
 
     function openPopup(url) {
         window.open(url, 'popupWindow', 'width=800,height=600');
     }
     
-</script>
+</script> -->
 
 {% endblock %}

@@ -1,5 +1,5 @@
 #app.py
-from flask import Flask, render_template, request, redirect, url_for, flash,Blueprint, Response
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash,Blueprint, Response
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
 import datetime
@@ -318,7 +318,6 @@ def grafico(): # Dashboard
     
     return render_template('user/grafico.html', **context)
 
-
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
 def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
@@ -428,7 +427,6 @@ def plan_52semanas(): # Tabela com as 52 semanas
 @routes_bp.route('/visualizar_imagem/<id_ordem>', methods=['GET'])
 @login_required
 def visualizar_imagem(id_ordem):
-    
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -437,4 +435,4 @@ def visualizar_imagem(id_ordem):
 
     imagem_base64 = base64.b64encode(imagem_data).decode('utf-8')
 
-    return render_template('user/imagem.html', imagem_data=imagem_base64, id_ordem=id_ordem)
+    return jsonify(imagem_data=imagem_base64, id_ordem=id_ordem)

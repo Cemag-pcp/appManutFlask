@@ -7,6 +7,7 @@ import pandas as pd
 from flask import redirect, url_for, session
 from functools import wraps
 import psycopg2
+import psycopg2.extras
 
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
@@ -15,18 +16,11 @@ DB_PASS = "15512332"
 
 def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade): # Função para gerar as 52 semanas
 
-    # grupo = 'CARPINTARIA'
-    # codigo_maquina = 'auqlauqw'
-    # maquina = 'qauqql'
-    # classificacao = 'A'
-    # ultima_manutencao = '2023/03/07'
-    # periodicidade = 'Quinzenal'
-
     lista_campos = []
 
-    lista_campos.append([grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade])
+    lista_campos.append([codigo_maquina,grupo,maquina,classificacao,ultima_manutencao,periodicidade])
 
-    df_maquinas = pd.DataFrame(data = lista_campos, columns=['Grupo','Código da máquina','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
+    df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
     
     # Converte a coluna de data para o tipo datetime
     df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
@@ -151,7 +145,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
     
     df_vazio = pd.DataFrame()
     
-    list_52 = ['Grupo', 'Código da máquina', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção']
+    list_52 = ['Código da máquina','Grupo', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção']
     
     for li in range(1,53):
         list_52.append(li)
@@ -299,3 +293,26 @@ def login_required(func): # Lógica do parâmetro de login_required, onde escolh
 #     df_planejamento = df_planejamento.merge(table)
 
 #     df_planejamento = df_planejamento[['Data real','Dia','Código da máquina', 'Descrição da máquina', 'Setor', 'Criticidade', 'tempo de manutencao']]
+
+# def carregar_sql():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+    df = pd.read_csv('carga_inicial.csv', sep=';')
+
+    df.reset_index(inplace=True)
+    #df = df.rename(columns={'index':'id'})
+    # df.drop(columns={'Unnamed: 4'}, inplace=True)
+
+    # df = df.iloc[[0,1],:]
+
+    # Inserir os dados do dataframe na tabela
+    for index, row in df.iterrows():
+        cur.execute('INSERT INTO tb_maquinas (setor, codigo, descricao, criticidade, periodicidade, manut_inicial) VALUES (%s, %s, %s, %s, %s, %s)', (row['setor'], row['codigo'], row['descricao'], row['criticidade'], row['periodicidade'], row['manut_inicial']))
+
+    # Salvar as alterações no banco de dados
+    conn.commit()
+
+    # Fechar a conexão com o banco de dados
+    conn.close()

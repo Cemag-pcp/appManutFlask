@@ -1,4 +1,5 @@
 // JavaScript to handle the popup
+
   function showPopup(imageSrc) {
     var popup = document.getElementById('popup');
     var popupImg = document.getElementById('popup-img');
