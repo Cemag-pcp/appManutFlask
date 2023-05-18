@@ -61,30 +61,28 @@
         </div>
     </div>
 </div>
+
 <script>
     var eixo_y = {{ grafico1_os | safe }};
     var eixo_x = {{ grafico1_data | safe }};
     var ctx = document.getElementById('grafico2').getContext('2d');
 
-    var grafico2 = new Chart(ctx, {
+    var grafico = new Chart(ctx, {
         type: 'line',
         data: {
             labels: eixo_x,
-            datasets: [
-                  {
-                    label: "Data Points",
-                    backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850","#c45850","#c45850"],
-                    data: eixo_y,
-                    fill: true,
-                    borderColor: "rgb(75, 192, 192)",
-                    lineTension: 0.1
-                  }
-              ]
-            },
-            options: {
-                resposive: false,
-            }
-            });
-
+            datasets: [{
+                label: 'Quantidade de OS Abertas',
+                data: eixo_y,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
 </script>
+
 {% endblock %}
