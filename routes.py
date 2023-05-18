@@ -294,9 +294,6 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 @login_required
 def grafico(): # Dashboard
     
-    # lista com os gráficos a serem plotados
-    plot_list = [] 
-
     ##### GRÁFICO 1 #####
 
     s = (""" 
@@ -312,33 +309,15 @@ def grafico(): # Dashboard
     grafico1_data = grafico1['dataabertura'].tolist()
     grafico1_os = grafico1['qt_os_abertas'].tolist()
     
-    context = {'grafico1_data':grafico1_data,'grafico1_os':grafico1_os}
+    # context = {'grafico1_data':grafico1_data,'grafico1_os':grafico1_os}
 
-    # # Criação do gráfico
-    # trace = go.Bar(x=grafico1['dataabertura'], y=grafico1['qt_os_abertas'])
-    # data = [trace]
-    # #layout = go.Layout(title='Gráfico de Barras')
-    # fig = go.Figure(data=data)#, layout=layout)
+    # grafico1_data = ['2022-01-01', '2022-01-02', '2022-01-03']
+    # grafico1_os = [10, 5, 8]
 
-    # # Conversão do gráfico em HTML
-    # plot_div = opy.plot(fig, auto_open=False, output_type='div')
+    context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
+    
+    return render_template('user/grafico.html', **context)
 
-    # plot_list.append(plot_div)
-
-    # ##### GRÁFICO 2 #####
-
-    # s = (""" 
-    #     SELECT dataabertura, count(status)
-    #     FROM tb_ordens
-    #     WHERE dataabertura IS NOT NULL AND status = 'Em espera'
-    #     GROUP BY dataabertura;
-    #     """)
-
-    # grafico1 = pd.read_sql_query(s,conn)
-
-    # Criação do gráfico
-    # Renderização do template com o gráfico
-    return render_template('user/grafico.html', context=context)
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
