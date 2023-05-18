@@ -23,7 +23,7 @@ DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
- 
+
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
 @routes_bp.route('/')
@@ -307,34 +307,38 @@ def grafico(): # Dashboard
         """)
 
     grafico1 = pd.read_sql_query(s,conn)
+    grafico1['dataabertura'] = grafico1['dataabertura'].astype(str)
 
-    # Criação do gráfico
-    trace = go.Bar(x=grafico1['dataabertura'], y=grafico1['qt_os_abertas'])
-    data = [trace]
-    #layout = go.Layout(title='Gráfico de Barras')
-    fig = go.Figure(data=data)#, layout=layout)
+    grafico1_data = grafico1['dataabertura'].tolist()
+    grafico1_os = grafico1['qt_os_abertas'].tolist()
+    
+    context = {'grafico1_data':grafico1_data,'grafico1_os':grafico1_os}
 
-    # Conversão do gráfico em HTML
-    plot_div = opy.plot(fig, auto_open=False, output_type='div')
+    # # Criação do gráfico
+    # trace = go.Bar(x=grafico1['dataabertura'], y=grafico1['qt_os_abertas'])
+    # data = [trace]
+    # #layout = go.Layout(title='Gráfico de Barras')
+    # fig = go.Figure(data=data)#, layout=layout)
 
-    plot_list.append(plot_div)
+    # # Conversão do gráfico em HTML
+    # plot_div = opy.plot(fig, auto_open=False, output_type='div')
 
-    ##### GRÁFICO 2 #####
+    # plot_list.append(plot_div)
 
-    s = (""" 
-        SELECT dataabertura, count(status)
-        FROM tb_ordens
-        WHERE dataabertura IS NOT NULL AND status = 'Em espera'
-        GROUP BY dataabertura;
-        """)
+    # ##### GRÁFICO 2 #####
 
-    grafico1 = pd.read_sql_query(s,conn)
+    # s = (""" 
+    #     SELECT dataabertura, count(status)
+    #     FROM tb_ordens
+    #     WHERE dataabertura IS NOT NULL AND status = 'Em espera'
+    #     GROUP BY dataabertura;
+    #     """)
 
-    grafico1_list = grafico1.values.tolist()
+    # grafico1 = pd.read_sql_query(s,conn)
 
     # Criação do gráfico
     # Renderização do template com o gráfico
-    return render_template('user/grafico.html', grafico1_list=grafico1_list,plot_list=plot_list)
+    return render_template('user/grafico.html', context=context)
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
