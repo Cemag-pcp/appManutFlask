@@ -290,20 +290,40 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 
     return render_template('user/material.html', datas=data, id_ordem=id_ordem, valorTotal=valorTotal[0][0])
 
-@routes_bp.route('/grafico')
+@routes_bp.route('/grafico', methods=['POST', 'GET'])
 @login_required
 def grafico(): # Dashboard
     
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'POST':
+        setor = request.form['filtro_setor']
+        # outra_variavel = request.form['outra_variavel']
+    else:
+        setor = None
+        # outra_variavel = None
+
     ##### GRÁFICO 1 #####
 
-    s = (""" 
+    query = """
         SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
         FROM tb_ordens
-        WHERE dataabertura NOTNULL
-        GROUP BY dataabertura
-        """)
+        WHERE dataabertura IS NOT NULL
+        """
 
-    grafico1 = pd.read_sql_query(s,conn)
+    params = {}
+
+    if setor:
+        query += " AND setor = %(setor)s"
+        params['setor'] = setor
+
+    # if outra_variavel:
+    #     query += " AND outra_variavel = %(outra_variavel)s"
+    #     params['outra_variavel'] = outra_variavel
+
+    query += " GROUP BY dataabertura"
+
+    grafico1 = pd.read_sql_query(query, conn, params=params)
     grafico1['dataabertura'] = grafico1['dataabertura'].astype(str)
 
     grafico1_data = grafico1['dataabertura'].tolist()
@@ -322,8 +342,33 @@ def grafico(): # Dashboard
     # grafico1_os = [10, 5, 8]
 
     context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
-    
-    return render_template('user/grafico.html', **context)
+
+    ##### Card de finalizadas #####
+
+    s = """ SELECT status, COUNT(id_ordem) as qt_os_abertas
+            FROM tb_ordens
+            GROUP BY status """
+
+    cur.execute(s)
+
+    s = """ SELECT * FROM tb_ordens """
+
+    cur.execute(s)
+
+    df_status = pd.read_sql_query(s,conn)
+
+    df_status = df_status.drop_duplicates(subset='id_ordem', keep='last')
+
+    df_status['status'] = df_status['status'].str.strip()
+
+    qt_finalizada = df_status[df_status['status'] == 'Finalizada'].values.tolist()[0][1]
+    qt_execucao = df_status[df_status['status'] == 'Em execução'].values.tolist()[0][1]
+    qt_espera = df_status[df_status['status'] == 'Em espera'].values.tolist()[0][1]
+    qt_aguardando = df_status[df_status['status'] == 'Aguardando material'].values.tolist()[0][1]
+
+    lista_qt = [qt_finalizada,qt_execucao,qt_espera,qt_aguardando]
+
+    return render_template('user/grafico.html', **context, setor=setor, lista_qt=lista_qt)
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required

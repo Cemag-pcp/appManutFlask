@@ -1,7 +1,13 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-<!-- <div id='titulo_grafico'><h3>Gráficos</h3></div> -->
+<form action="{{ url_for('routes.grafico') }}" method="POST">
+    <label for="filtro1">Filtro 1:</label>
+    <input type="text" id="filtro_setor" name="filtro_setor" value="{{ setor }}">
+
+    <button type="submit">Filtrar</button>
+</form>
+
 <div id = 'pagina_graficos'>
     <div class='row' style="width:1800px">
         <div class="col-sm-3 col-md-3">
@@ -10,7 +16,7 @@
                     <div class="info-row">
                         <h5 class="card-title">Em andamento</h5> 
                         <i class="fa-solid fa-bars-progress"></i> 
-                        <p class="card-text">5</p> 
+                        <p class="card-text">{{lista_qt[1]}}</p> 
                     </div>           
                 </div>
             </div>
@@ -19,9 +25,9 @@
             <div id = 'abertas'>
                 <div id = "infos_graficos">
                     <div class="info-row">
-                        <h5 class="card-title"></i>Abertas</h5>   
+                        <h5 class="card-title"></i>Em Espera</h5>   
                         <i class="fa-solid fa-lock-open"></i>  
-                        <p class="card-text">10</p>            
+                        <p class="card-text">{{lista_qt[2]}}</p>            
                     </div>
                 </div>
             </div>
@@ -32,7 +38,7 @@
                     <div class="info-row">
                         <h5 class="card-title"></i>Finalizadas</h5>    
                         <i class="fa-sharp fa-solid fa-square-check"></i> 
-                        <p class="card-text">8</p>             
+                        <p class="card-text">{{lista_qt[0]}}</p>             
                     </div>
                 </div>
             </div>
@@ -43,7 +49,7 @@
                     <div class="info-row">
                         <h5 class="card-title">Aguardando material</h5> 
                         <i class="fa-solid fa-spinner"></i>   
-                        <p class="card-text">15</p>                 
+                        <p class="card-text">{{lista_qt[3]}}</p>                 
                     </div>            
                 </div>
             </div>
