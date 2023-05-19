@@ -309,6 +309,13 @@ def grafico(): # Dashboard
     grafico1_data = grafico1['dataabertura'].tolist()
     grafico1_os = grafico1['qt_os_abertas'].tolist()
     
+    sorted_tuples = sorted(zip(grafico1_data, grafico1_os), key=lambda x: x[0])
+
+    # Desempacotar as tuplas classificadas em duas listas separadas
+    grafico1_data, grafico1_os = zip(*sorted_tuples)
+
+    grafico1_data = list(grafico1_data)
+    grafico1_os = list(grafico1_os)
     # context = {'grafico1_data':grafico1_data,'grafico1_os':grafico1_os}
 
     # grafico1_data = ['2022-01-01', '2022-01-02', '2022-01-03']
