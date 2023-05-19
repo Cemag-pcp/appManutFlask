@@ -20,8 +20,8 @@ h2{
     justify-content: center;
     position: relative;
     background-color: rgba(255, 255, 255, 0.1);;
-    width: 50%;
-    height: 70%;
+    width: 600px;
+    height: 700px;
     border-radius: 20px;
     border: 2px solid rgb(252, 90, 10, .5);
     backdrop-filter: blur(20px);

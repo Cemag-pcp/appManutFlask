@@ -29,22 +29,22 @@
 </head>
 <body>
   <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
-    <section id="menu" class="menu-hidden">
+    <div id="menu">
       <div class="logo">
-        <img src="static\img\logo-cemagL.png" alt="logo cemag">
+        <img src="static\img\SELO 50 ANOS ISOLADO_Prancheta 1.png" alt="logo cemag">
       </div>
       <!-- <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav"> -->
       <ul class="item">
-        <li onclick="location.href='/index'"><i class="fa-sharp fa-solid fa-gear"></i><a href="/index">Ordem de serviço</a></li>
-        <li onclick="location.href='/openOs'"><i class="fa-solid fa-folder-open"></i><a href="/openOs">Abertura de Os</a></li>  
-        <li onclick="location.href='/grafico'"><i class="fa-solid fa-chart-line"></i><a href="/grafico">Gráficos</a></li>
-        <li onclick="location.href='/52semanas'"><i class="fa-sharp fa-solid fa-calendar-week"></i><a href="/52semanas">52 Semanas</a></li>
-        <li id="logout_navbar" onclick="location.href='/logout'"><i class="fa-sharp fa-solid fa-arrow-right-from-bracket"></i><a href="/logout">Logout</a></li>
+        <li onclick="location.href='/index'"><i class="fa-sharp fa-solid fa-gear"></i><a href="/index"></a></li>
+        <li onclick="location.href='/openOs'"><i class="fa-solid fa-folder-open"></i><a href="/openOs"></a></li>  
+        <li onclick="location.href='/grafico'"><i class="fa-solid fa-chart-line"></i><a href="/grafico"></a></li>
+        <li onclick="location.href='/52semanas'"><i class="fa-sharp fa-solid fa-calendar-week"></i><a href="/52semanas"></a></li>
+        <li id="logout_navbar" onclick="location.href='/logout'"><i class="fa-sharp fa-solid fa-arrow-right-from-bracket"></i><a href="/logout"></a></li>
         <!-- <a class="nav-item nav-link disabled" href="#">PAGINA3</a>
         <a class="nav-item nav-link disabled" href="#">Disabled</a> -->
       </ul>
-    </section>
+    </div>
     
     <div id = "tabela_info">
       {% block body %}
