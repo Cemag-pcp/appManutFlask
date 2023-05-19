@@ -39,15 +39,19 @@
                         <td>{{row[2]}}</td>
                         <td>{{row[3]}}</td>
                         <td>{{row[4]}}</td>
+                        
+
                         {% if row[5].strip() == 'Finalizada' %}
                         <td style="color: green; font-weight: bold;">{{ row[5] }}</td>
                         {% elif row[5].strip() == 'Em espera' %}
-                        <td style="color: rgb(174, 174, 112); font-weight: bold;">{{ row[5] }}</td>
+                        <td style="color: rgb(187, 187, 71); font-weight: bold;">{{ row[5] }}</td>
                         {% elif row[5].strip() == 'Em execução' %}
                         <td style="color: blue; font-weight: bold;">{{ row[5] }}</td>
                         {% else %}
                         <td style="color: black; font-weight: bold;">{{ row[5] }}</td>
                         {% endif %}
+                        
+                        
                         <td>{{row[6]}}</td>
                         <td>{{row[13]}}</td>
                         <td>R$ {{row[0]}}</td>                    
@@ -141,13 +145,5 @@
     }
   
 </script>
-
-<!-- <script>
-
-    function openPopup(url) {
-        window.open(url, 'popupWindow', 'width=800,height=600');
-    }
-    
-</script> -->
 
 {% endblock %}
