@@ -13,6 +13,7 @@ import warnings
 from flask import session
 from functools import wraps
 import base64
+from datetime import datetime
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -89,7 +90,7 @@ def add_student(): # Criar ordem de serviço
         maquina = request.form['maquina']
         risco = request.form['risco']
         problema = request.form['problema']
-        dataAbertura = datetime.datetime.now()
+        dataAbertura = datetime.now()
         n_ordem = 0
         status = 'Em espera'
 
@@ -214,24 +215,39 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         except:
             ultimo_id = 0
         
-        print(ultimo_id)
-
         setor = request.form['setor']
         maquina = request.form['maquina']
         risco = request.form['risco']
         status = request.form['statusLista']
         problema = request.form['problema']
-        datainicio = request.form['datainicio']
-        horainicio = request.form['horainicio']
-        datafim = request.form['datafim']
-        horafim = request.form['horafim']
+        # datainicio = request.form['datainicio']
+        # horainicio = request.form['horainicio']
+        # datafim = request.form['datafim']
+        # horafim = request.form['horafim']
         id_ordem = id_ordem
         n_ordem = request.form['n_ordem']
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
         operador = json.dumps(operador)
         tipo_manutencao = request.form['tipo_manutencao']
-        print(tipo_manutencao)
+        datetimes = request.form['datetimes']
+        # print(datetimes)
+
+        # Divida a string em duas partes: data/hora inicial e data/hora final
+        data_hora_inicial_str, data_hora_final_str = datetimes.split(" - ")
+
+        # Faça o parsing das strings de data e hora
+        data_inicial = datetime.strptime(data_hora_inicial_str, "%d/%m/%y %I:%M %p")
+        data_final = datetime.strptime(data_hora_final_str, "%d/%m/%y %I:%M %p")
+
+        # Formate as datas e horas no formato desejado
+        datainicio = data_inicial.strftime("%Y-%m-%d")
+        horainicio = data_inicial.strftime("%H:%M:%S")
+        datafim = data_final.strftime("%Y-%m-%d")
+        horafim = data_final.strftime("%H:%M:%S")
+
+        # print(datainicio, horainicio, datafim, horafim)
+
         #print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -443,8 +459,9 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
     except:
         df_timeline['diferenca'] = 0
     
-    df_timeline = df_timeline.values.tolist()
+    df_timeline = df_timeline.sort_values(by='n_ordem', ascending=True)
 
+    df_timeline = df_timeline.values.tolist()
 
     return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_timeline)
 

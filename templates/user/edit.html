@@ -15,14 +15,6 @@
                 <input type="text" name="maquina" value="{{ordem[2]}}" class="form-control" readonly="readonly">
             </div>
             <div class="form-group">
-                <label for="datainicio">Data inicio</label>    
-                <input type="date" name="datainicio" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="horainicio">Hora Inicio</label>    
-                <input type="time" name="horainicio" class="form-control" required>
-            </div>
-            <div class="form-group">
                 <label for="problema">Descrição do usuário:</label>
                 <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
             </div>
@@ -34,21 +26,29 @@
                     <option value="789 - Outro">789 - Outro</option>
                 </select>
             </div>
+            {% if tipo_manutencao == '' %}
             <div class="form-group" style="width: 355px;"> 
                 <label for="operador">Tipo de manutenção</label>
-                <select class="form-control form-control" id="tipo_manutencao" name="tipo_manutencao" required>
-                    {% if tipo_manutencao == '' %}
-                        <option value="" selected disabled hidden></option>  
-                        <option value="Hidráulica">Hidráulica</option>
-                        <option value="Elétrica">Elétrica</option>
-                        <option value="Projeto">Projeto</option>
-                        <option value="Predial">Predial</option>
-                        <option value="Preditiva">Preditiva</option>
-                    {% else %}
-                        <option value="{{ tipo_manutencao }}" disabled>{{ tipo_manutencao }}</option>
-                    {% endif %}
-                </select>
+                <select class="form-control form-control" name="tipo_manutencao">
+                    <option value="" selected disabled hidden></option>  
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Elétrica">Elétrica</option>
+                    <option value="Projeto">Projeto</option>
+                    <option value="Predial">Predial</option>
+                    <option value="Preditiva">Preditiva</option>   
+                </select>               
             </div>
+            {% else %}
+            <div class="form-group">
+                <label for="operador">Tipo de manutenção</label>
+                <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control" readonly="readonly">
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="statusLista">Data e hora</label>
+                <input type="text" name="datetimes" />
+            </div>
+ 
     </div>
     <div class = 'col-md-4 mx-auto'>
             <div class="form-group">
@@ -58,14 +58,6 @@
             <div class="form-group">
                 <label for="n_ordem">Número da execução:</label>
                 <input type="text" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
-            </div>
-            <div class="form-group">
-                <label for="datafim">Data fim</label>    
-                <input type="date" name="datafim" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="horafim">Hora fim</label>    
-                <input type="time" name="horafim" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="descmanutencao">Observação da manutenção:</label>
@@ -89,4 +81,28 @@
     </div>
 </div>
 </div>
+
+<script>
+$(function() {
+    $('input[name="datetimes"]').daterangepicker({
+      timePicker: true,
+      startDate: moment().startOf('hour'),
+      endDate: moment().startOf('hour').add(32, 'hour'),
+      locale: {
+        format: 'DD/MM/YY hh:mm A'
+      }
+    });
+  
+    $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
+      var startDate = picker.startDate;
+      var endDate = picker.endDate;
+  
+      if (endDate.isBefore(startDate)) {
+        alert("A data final não pode ser menor que a data inicial");
+        picker.setEndDate(startDate);
+      }
+    });
+  });
+</script>  
+
 {% endblock %}
