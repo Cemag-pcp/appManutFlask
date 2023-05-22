@@ -8,6 +8,7 @@
 }
 
 body {
+  margin: 0;
   width: 100%;
   background: #E5E7EB;
   position: relative;
@@ -45,7 +46,7 @@ body {
   justify-content: center;
   top: 70%;
   left: 50%;
-  transform: translate(-50%, -10%);
+  transform: translate(-50%, 0%);
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   padding-top: 5%;  
@@ -68,12 +69,13 @@ body {
 }
 
 #botao_voltar{
-  width: 70%;
-  height: 30px;
+  position: relative;
+  width: 130px;
+  height: 60px;
   top: 5%;
   left: 5%;
-  transform: translate(-50%, -50%);
-  margin-left: 80px;
+  transform: translate(0%, 130%);
+  margin-top: 50px;
   padding: 1%;
   text-decoration: none;
   border-radius: 20px;
@@ -135,15 +137,15 @@ body {
 }
 
 #menu-button{
-  z-index: 2;
-  position: relative;
+  z-index: 4;
+  position: fixed;
   background-color: #e5e7eb00;
   place-items: center;
-  top: 50%;
+  top: 5%;
+  left: 5%;
+  transform: translate(0%,50%);
   padding: 0.5em;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, rgba(0,0,0,0.2));
-  margin-top: 90px;
-  margin-left: 100px;
   font-size: 24px; /* Ajuste o tamanho desejado */
   border: none; /* Remove a borda */
   cursor: pointer;
@@ -210,7 +212,7 @@ body {
   height: 90vh;
   top: 2%;
   left: 20%;
-  transform: translate(-20%, -13%);
+  transform: translate(-20%, 5%);
   margin-bottom: 10px;
   align-items: center;
   border-radius: 20px;
@@ -232,6 +234,152 @@ body {
   left: 50%;
   transform: translate(120%,-13%);
   padding: 10px;
+}
+
+#status_os_finalizadas{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(51, 211, 145, 0.8); 
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  width: 120px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 4px; 
+  margin-top: 15px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+#status_os_espera{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(253, 188, 100, 0.8); 
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  width: 120px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 5px; 
+  margin-top: 15px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+#status_os_execução{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(22, 93, 226, 0.6);
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08); 
+  width: 140px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 5px; 
+  margin-top: 15px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+#status_os_aguardando{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(112, 114, 117, 0.6); 
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  width: 200px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 5px; 
+  margin-top: 15px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+#status_os_finalizadas_timeline{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(51, 211, 145, 0.8); 
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  width: 120px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 4px; 
+  margin-top: 5px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+#status_os_espera_timeline{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(253, 188, 100, 0.8); 
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  width: 120px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 5px; 
+  margin-top: 5px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+#status_os_execução_timeline{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(22, 93, 226, 0.6);
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08); 
+  width: 140px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 5px;
+  margin-top: 5px;  
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+#status_os_aguardando_timeline{
+  color: rgb(255, 255, 255); 
+  background-color: rgba(112, 114, 117, 0.6); 
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  width: 200px;
+  border-radius: 20px; 
+  text-align: center; 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 5px; 
+  margin-top: 5px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+.dropdown-menu {
+  min-width: unset; /* Remove minimum width */
+  padding: 0.5rem 0; /* Adjust padding as needed */
+  font-size: 0.9rem; /* Adjust font size as needed */
+}
+
+.dropdown-item {
+  padding: 0.25rem 1rem; /* Adjust padding as needed */
+}
+
+.modal-body img{
+  margin: 0;
+  width: 450px;
+  height: auto;
+  display: flex;
+  justify-content: center;
 }
 
 /* #titulo .visao{
@@ -303,7 +451,7 @@ body {
 #formulario_abertura{
   top: 50%;
   left: 50%;
-  transform: translate(-50%,0%);
+  transform: translate(-50%,20%);
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   width: 450px;
@@ -333,10 +481,10 @@ body {
 #form_inserir_material {
   top: 30%;
   left: 50%;
-  transform: translate(-55%,20%);
+  transform: translate(-200%,200%);
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-  width: 70%;
+  width: 400px;
   height: auto;
   border-radius: 20px;
 }
@@ -368,7 +516,7 @@ body {
 #table_materiais_utilizados{
   top: 50%;
   left: 5%;
-  transform: translate(-15%,10%);
+  transform: translate(40%,-10%);
   align-items: center;
   border-radius: 20px;
   background-color: rgba(255, 255, 255,0.5);
@@ -386,6 +534,27 @@ body {
   text-decoration: none;
   color: rgb(134, 141, 151);
   font-weight: 300px;
+}
+
+.loading{
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  z-index: 9999;
+  left: 5%;
+  top: 5%;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 30px;
+  color: white;
+  transform: translate(-5%,-5%);
+  width: 100%;
+  height: 100.9vh;
+}
+
+.centralize{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #linha_tempo{
@@ -411,7 +580,7 @@ body {
   padding: 20px;
   top: 30%;
   left: 50%;
-  transform: translate(50%,-40%);
+  transform: translate(55%,13%);
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   width: 850px;
@@ -423,6 +592,7 @@ body {
   left: 5%;
   transform: translate(40%);
   margin: 10px;
+  margin-bottom: 15px;
 }
 
 #botao_52semanas{
@@ -438,6 +608,12 @@ body {
   font-weight: 500;
 }
 
+#semanas_primeira_tabela{
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+}
+
 #filtro_semanas input{
   width: 86%;
   margin: 5px;
@@ -450,10 +626,10 @@ body {
 
 #tabela2 .board2{
   width: 1600px;
-  height: 90vh;
+  height: 80vh;
   top: 2%;
   left: 20%;
-  transform: translate(0%, -5%);
+  transform: translate(0%, 15%);
   margin-bottom: 10px;
   align-items: center;
   border-radius: 20px;

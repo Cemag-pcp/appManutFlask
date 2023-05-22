@@ -1,7 +1,6 @@
 {% extends "user/layout.html" %}
 {% block body %}
   <br>
-  <a id='botao_voltar' href="/index"><i class="fa-solid fa-arrow-left"></i>Voltar</a>
     <div id = 'linha_tempo'class="card card-body">
       <div class="row justify-content-md-center">
         <div class="row"><h3>Linha do tempo das manutenções por Ordem</h3></div>
@@ -20,7 +19,17 @@
             {% for data in df_timeline %}
             <tr>
                 <td>{{data[0]}}</td>
-                <td>{{data[1]}}</td>
+                
+                {% if data[1].strip() == 'Finalizada' %}
+                <td id="status_os_finalizadas_timeline">{{ data[1] }}</td>
+                {% elif data[1].strip() == 'Em espera' %}
+                <td id="status_os_espera_timeline">{{ data[1] }}</td>
+                {% elif data[1].strip() == 'Em execução' %}
+                <td id="status_os_execução_timeline">{{ data[1] }}</td>
+                {% else %}
+                <td id="status_os_aguardando_timeline">{{ data[1] }}</td>
+                {% endif %}
+
                 <td>{{data[2]}}</td>
                 <td>{{data[3]}}</td>
                 <td>{{data[4]}}</td>
@@ -31,7 +40,5 @@
           </table>
       </div>
     </div>
-  </div>
-</div>
  
 {% endblock %}

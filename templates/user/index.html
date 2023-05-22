@@ -13,7 +13,6 @@
 {% endfor %}
 {% endif %}
 {% endwith %}
-
 <div id = "tabela" class="container-fluid">
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
@@ -42,13 +41,13 @@
                         
 
                         {% if row[5].strip() == 'Finalizada' %}
-                        <td style="color: green; font-weight: bold;">{{ row[5] }}</td>
+                        <td id="status_os_finalizadas">{{ row[5] }}</td>
                         {% elif row[5].strip() == 'Em espera' %}
-                        <td style="color: rgb(187, 187, 71); font-weight: bold;">{{ row[5] }}</td>
+                        <td id="status_os_espera">{{ row[5] }}</td>
                         {% elif row[5].strip() == 'Em execução' %}
-                        <td style="color: blue; font-weight: bold;">{{ row[5] }}</td>
+                        <td id="status_os_execução">{{ row[5] }}</td>
                         {% else %}
-                        <td style="color: black; font-weight: bold;">{{ row[5] }}</td>
+                        <td id="status_os_aguardando">{{ row[5] }}</td>
                         {% endif %}
                         
                         
@@ -61,19 +60,19 @@
                                     <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                    <a id="dropdown_os" class="dropdown-item" href="/edit/{{row[11]}}">
-                                        <i class="fas fa-wrench"></i>
+                                    <a id="dropdown_os" class="dropdown-item" href="/edit/{{row[11]}}"> 
+                                        <i class="fas fa-wrench"></i> 
                                     </a>    
-                                    <a  id = 'dropdown_os' class = "dropdown-item" href="/edit_material/{{row[11]}}" class="btn">
+                                    <a  id = 'dropdown_os' class = "dropdown-item" href="/edit_material/{{row[11]}}" class="btn"> 
                                         <i class="fas fa-box"></i> 
                                     </a>
-                                    <a id = 'dropdown_os' class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn">
+                                    <a id = 'dropdown_os' class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn"> 
                                         <i class="fas fa-clock"></i> 
                                     </a>
                                     <!-- <a>
                                         <button type="button" class="btn btn-primary" onclick="showImageModal('{{ row[11] }}')">Exibir Imagem</button>
                                     </a>  -->
-                                    <a id="dropdown_os" class="dropdown-item" onclick="showImageModal('{{ row[11] }}')">
+                                    <a id="dropdown_os" class="dropdown-item" style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                         <i class="fas fa-image"></i> 
                                     </a>
                                 </div>
@@ -125,20 +124,24 @@
 <script>
 
     function showImageModal(id_ordem) {
+        showLoading()
         $.ajax({
         url: '/visualizar_imagem/' + id_ordem,
         type: 'GET',
         success: function(response) {
+            hideLoading();
             var imagemData = response.imagem_data;
             var modalBody = '<img src="data:image/png;base64,' + imagemData + '" alt="Imagem" />';
-    
+            
             // Preencha o conteúdo do modal com a imagem
             $('#imagemModal .modal-body').html(modalBody);
-    
+            
             // Exiba o modal
             $('#imagemModal').modal('show');
         },
         error: function(error) {
+            hideLoading();
+            alert('Essa Ordem de Serviço não contém imagem')
             console.log(error);
         }
         });
