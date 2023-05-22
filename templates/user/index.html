@@ -13,7 +13,6 @@
 {% endfor %}
 {% endif %}
 {% endwith %}
-
 <div id = "tabela" class="container-fluid">
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
@@ -125,20 +124,24 @@
 <script>
 
     function showImageModal(id_ordem) {
+        showLoading()
         $.ajax({
         url: '/visualizar_imagem/' + id_ordem,
         type: 'GET',
         success: function(response) {
+            hideLoading();
             var imagemData = response.imagem_data;
             var modalBody = '<img src="data:image/png;base64,' + imagemData + '" alt="Imagem" />';
-    
+            
             // Preencha o conteúdo do modal com a imagem
             $('#imagemModal .modal-body').html(modalBody);
-    
+            
             // Exiba o modal
             $('#imagemModal').modal('show');
         },
         error: function(error) {
+            hideLoading();
+            alert('Essa Ordem de Serviço não contém imagem')
             console.log(error);
         }
         });
