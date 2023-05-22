@@ -34,6 +34,21 @@
                     <option value="789 - Outro">789 - Outro</option>
                 </select>
             </div>
+            <div class="form-group" style="width: 355px;"> 
+                <label for="operador">Tipo de manutenção</label>
+                <select class="form-control form-control" id="tipo_manutencao" name="tipo_manutencao" required>
+                    {% if tipo_manutencao == '' %}
+                        <option value="" selected disabled hidden></option>  
+                        <option value="Hidráulica">Hidráulica</option>
+                        <option value="Elétrica">Elétrica</option>
+                        <option value="Projeto">Projeto</option>
+                        <option value="Predial">Predial</option>
+                        <option value="Preditiva">Preditiva</option>
+                    {% else %}
+                        <option value="{{ tipo_manutencao }}" disabled>{{ tipo_manutencao }}</option>
+                    {% endif %}
+                </select>
+            </div>
     </div>
     <div class = 'col-md-4 mx-auto'>
             <div class="form-group">

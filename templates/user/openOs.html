@@ -20,6 +20,7 @@
   <div class="col-md-4 offset-md-4">
     <div id ="formulario_abertura" class="card card-body">
       <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data">
+
         <div class="form-group"> 
           <div id = 'abertura_titulo' class="row"><h3>Abrir OS</h3></div>       
             <label for="setor">Setor</label>
@@ -37,15 +38,28 @@
               <option>Corte</option>
               <option>Serralheria</option>
             </select>
-          </div>
-        <div class="form-group">
-          <label for="maquina">Máquina ou Local:</label>
-          <input type="text" class="form-control" name="maquina" required>
         </div>
+
+        <div class="form-group" id="maquina-select">
+          <label for="maquina">Máquina ou local</label>
+          <select class="select2" name="maquina" >
+            {% for maquina in lista_maquinas %}
+            <option value="" selected disabled hidden></option>  
+            <option value="{{maquina[0]}}">{{maquina[0]}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group" id="maquina-input">
+          <label for="maquina">Descreva o local ou a máquina</label>
+          <input class="select2" name="maquina" >
+        </div>
+         
         <div class="form-group">
           <label for="problema">Descrição:</label>
           <textarea id="problema" name="problema" rows="5" cols="39" required placeholder=" Descreva o problema..."></textarea>
         </div>
+
         <div class="form-group">        
           <label for="risco">Risco</label>
           <select class="form-control form-control" id="risco" name="risco" required>
@@ -55,16 +69,46 @@
               <option>Baixo</option>
           </select>
         </div>
+
         <div class="form-group">        
           <label for="imagem">Imagem:</label>
           <input type="file" class="form-control-file" id="imagem" name="imagem">
         </div>
+
         <button id = 'salvar' class="btn btn-block">
           Save 
         </button>
+        
       </form>
     </div>
   </div>
 </div>
+
+<!-- Script para desabilitar os campos de acordo com o setor-->
+<script>
+  document.getElementById('setor').addEventListener('change', function() {
+    var setorValue = this.value;
+    var maquinaSelect = document.getElementById('maquina-select');
+    var maquinaInput = document.getElementById('maquina-input');
+    
+    if (setorValue === 'Administrativo') {
+      maquinaSelect.style.display = 'none';
+      maquinaInput.style.display = 'block';
+
+    } else {
+      maquinaSelect.style.display = 'block';
+      maquinaInput.style.display = 'none';
+    }
+  });
+</script>
+
+
+<!-- Script para gerar o dropdown com filtro por nome -->
+<script>
+  $(document).ready(function() {
+    $('.select2').select2();
+  });
+</script>
+
 
 {% endblock %}

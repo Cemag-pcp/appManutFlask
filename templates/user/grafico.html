@@ -1,10 +1,23 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-<form action="{{ url_for('routes.grafico') }}" method="POST">
-    <label for="filtro1">Filtro 1:</label>
-    <input type="text" id="filtro_setor" name="filtro_setor" value="{{ setor }}">
 
+<form action="{{ url_for('routes.grafico') }}" method="POST">
+    <label for="filtro1">Setor:</label>
+    <select id="filtro_setor" name="filtro_setor" value="{{ setor }}">
+        <option value="" selected disabled hidden>{{ setor }}</option>  
+        <option>Administrativo</option>
+        <option>Estamparia</option>
+        <option>Solda</option>
+        <option>Montagem</option>
+        <option>Pintura</option>
+        <option>Carpintaria</option>
+        <option>Almoxarifado</option>
+        <option>Usinagem</option>
+        <option>Serra</option>
+        <option>Corte</option>
+        <option>Serralheria</option>
+    </select>
     <button type="submit">Filtrar</button>
 </form>
 

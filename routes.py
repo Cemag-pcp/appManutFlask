@@ -92,6 +92,9 @@ def add_student(): # Criar ordem de serviço
         dataAbertura = datetime.datetime.now()
         n_ordem = 0
         status = 'Em espera'
+
+        maquina = maquina.split(" - ")
+        maquina = maquina[0]
         
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("SELECT MAX(id) FROM tb_ordens")
@@ -148,6 +151,8 @@ def add_student(): # Criar ordem de serviço
 @login_required
 def get_employee(id_ordem): # Página para edição da ordem de serviço (Informar o andamento da ordem)
 
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     s = ('SELECT * FROM tb_ordens WHERE id_ordem = {}'.format(int(id_ordem)))
     cur.execute(s)
@@ -164,6 +169,7 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
 
     data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
     data1 = data1.sort_values(by='id_ordem')
+    tipo_manutencao = data1['tipo_manutencao'].values.tolist()[0]
     data1 = data1.values.tolist()
     opcaoAtual = data1[0][4]
 
@@ -181,11 +187,18 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     opcoes.remove(opcaoAtual)  # Remove o elemento 'c' da lista
     opcoes.insert(0, opcaoAtual)
 
-    return render_template('user/edit.html', ordem=data1[0], opcoes=opcoes)
+    return render_template('user/edit.html', ordem=data1[0], opcoes=opcoes, tipo_manutencao=tipo_manutencao)
  
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
 def update_student(id_ordem): # Inserir as edições no banco de dados
+
+    # # Execute a instrução SQL para alterar o tipo da coluna
+    # alter_query = "ALTER TABLE tb_ordens ALTER COLUMN tipo_manutencao TYPE TEXT;"
+    # cur.execute(alter_query)
+    # conn.commit()
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     if request.method == 'POST':
             
@@ -217,13 +230,14 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
         operador = json.dumps(operador)
-
-        print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
+        tipo_manutencao = request.form['tipo_manutencao']
+        print(tipo_manutencao)
+        #print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
-            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador]))
+            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, tipo_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador],tipo_manutencao))
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
@@ -231,7 +245,20 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
 
 @routes_bp.route('/openOs')
 def open_os(): # Página de abrir OS
-    return render_template("user/openOs.html")
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """
+        SELECT * FROM tb_maquinas
+    """
+
+    lista_maquinas = pd.read_sql_query(query, conn)
+
+    lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
+    lista_maquinas = lista_maquinas[['codigo_desc']].values.tolist()
+
+    return render_template("user/openOs.html", lista_maquinas=lista_maquinas)
 
 @routes_bp.route('/edit_material/<id_ordem>', methods = ['POST', 'GET'])
 @login_required
@@ -294,16 +321,16 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 @login_required
 def grafico(): # Dashboard
     
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if request.method == 'POST':
         setor = request.form['filtro_setor']
         # outra_variavel = request.form['outra_variavel']
     else:
-        setor = None
-        # outra_variavel = None
-
-    ##### GRÁFICO 1 #####
+        setor = ''
+        # outra_variavel = None   
 
     query = """
         SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
@@ -317,13 +344,20 @@ def grafico(): # Dashboard
         query += " AND setor = %(setor)s"
         params['setor'] = setor
 
-    # if outra_variavel:
-    #     query += " AND outra_variavel = %(outra_variavel)s"
-    #     params['outra_variavel'] = outra_variavel
-
-    query += " GROUP BY dataabertura"
+    query += "GROUP BY dataabertura"
 
     grafico1 = pd.read_sql_query(query, conn, params=params)
+
+    if len(grafico1) == 0:
+        query = """
+        SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
+        FROM tb_ordens
+        WHERE dataabertura IS NOT NULL
+        GROUP BY dataabertura
+        """
+
+        grafico1 = pd.read_sql_query(query, conn, params=params)
+
     grafico1['dataabertura'] = grafico1['dataabertura'].astype(str)
 
     grafico1_data = grafico1['dataabertura'].tolist()
@@ -343,7 +377,7 @@ def grafico(): # Dashboard
 
     context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
 
-    ##### Card de finalizadas #####
+    ##### CARDS #####
 
     s = """ SELECT status, COUNT(id_ordem) as qt_os_abertas
             FROM tb_ordens
@@ -361,10 +395,10 @@ def grafico(): # Dashboard
 
     df_status['status'] = df_status['status'].str.strip()
 
-    qt_finalizada = df_status[df_status['status'] == 'Finalizada'].values.tolist()[0][1]
-    qt_execucao = df_status[df_status['status'] == 'Em execução'].values.tolist()[0][1]
-    qt_espera = df_status[df_status['status'] == 'Em espera'].values.tolist()[0][1]
-    qt_aguardando = df_status[df_status['status'] == 'Aguardando material'].values.tolist()[0][1]
+    qt_finalizada = df_status[df_status['status'] == 'Finalizada'].shape[0]
+    qt_execucao = df_status[df_status['status'] == 'Em execução'].shape[0]
+    qt_espera = df_status[df_status['status'] == 'Em espera'].shape[0]
+    qt_aguardando = df_status[df_status['status'] == 'Aguardando material'].shape[0]
 
     lista_qt = [qt_finalizada,qt_execucao,qt_espera,qt_aguardando]
 
@@ -417,7 +451,9 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
 @routes_bp.route('/52semanas', methods=['POST','GET'])
 @login_required
 def plan_52semanas(): # Tabela com as 52 semanas
-        
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
     if request.method == 'POST':
     
         # Obtendo o ultimo id
