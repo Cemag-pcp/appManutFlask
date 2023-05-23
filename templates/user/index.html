@@ -34,10 +34,10 @@
                 <tbody>
                     {% for row in list_users %}
                     <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        <td>{{row[11]}}</td>
-                        <td>{{row[2]}}</td>
-                        <td>{{row[3]}}</td>
-                        <td>{{row[4]}}</td>
+                        <td style="padding-bottom: 0px;">{{row[11]}}</td>
+                        <td style="padding-bottom: 0px;">{{row[2]}}</td>
+                        <td style="padding-bottom: 0px;">{{row[3]}}</td>
+                        <td style="padding-bottom: 0px;">{{row[4]}}</td>
                         
 
                         {% if row[5].strip() == 'Finalizada' %}
@@ -51,10 +51,10 @@
                         {% endif %}
                         
                         
-                        <td>{{row[6]}}</td>
-                        <td>{{row[13]}}</td>
-                        <td>R$ {{row[0]}}</td>                    
-                        <td>
+                        <td style="padding-bottom: 0px;">{{row[6]}}</td>
+                        <td style="padding-bottom: 0px;">{{row[13]}}</td>
+                        <td style="padding-bottom: 0px;">R$ {{row[0]}}</td>                    
+                        <td style="padding-bottom: 0px;">
                             <div class="dropdown">
                                 <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
@@ -85,12 +85,12 @@
                     <tr>
                         <th class="sorting sorting_asc"></th>
                         <th>Setor</th>
-                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                        <th>Risco</th>
+                        <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                        <th style="min-width: 150px">Risco</th>
                         <th>Status</th>
                         <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                        <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                        <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                        <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
                         <th></th>
                     </tr>
                 </tfoot>

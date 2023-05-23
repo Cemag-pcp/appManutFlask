@@ -1,26 +1,6 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-
-<form action="{{ url_for('routes.grafico') }}" method="POST">
-    <label for="filtro1">Setor:</label>
-    <select id="filtro_setor" name="filtro_setor" value="{{ setor }}">
-        <option value="" selected disabled hidden>{{ setor }}</option>  
-        <option>Administrativo</option>
-        <option>Estamparia</option>
-        <option>Solda</option>
-        <option>Montagem</option>
-        <option>Pintura</option>
-        <option>Carpintaria</option>
-        <option>Almoxarifado</option>
-        <option>Usinagem</option>
-        <option>Serra</option>
-        <option>Corte</option>
-        <option>Serralheria</option>
-    </select>
-    <button type="submit">Filtrar</button>
-</form>
-
 <div id = 'pagina_graficos'>
     <div class='row' style="width:1800px">
         <div class="col-sm-3 col-md-3">
@@ -69,7 +49,24 @@
         </div>
     </div>
         <br>
-
+        <form id = 'filtro_grafico'action="{{ url_for('routes.grafico') }}" method="POST">
+            <label style ='margin-right: 10px; margin-top: 6px; font-weight: bold;' for="filtro1">Setor :</label>
+            <select style ='margin-right: 20px;' id="filtro_setor" class="form-control" name="filtro_setor" value="{{ setor }}">
+                <option value="" selected disabled hidden>{{ setor }}</option>  
+                <option>Administrativo</option>
+                <option>Estamparia</option>
+                <option>Solda</option>
+                <option>Montagem</option>
+                <option>Pintura</option>
+                <option>Carpintaria</option>
+                <option>Almoxarifado</option>
+                <option>Usinagem</option>
+                <option>Serra</option>
+                <option>Corte</option>
+                <option>Serralheria</option>
+            </select>
+            <button id = 'botao_filtrar_grafico' type="submit">Filtrar</button>
+        </form>        
     <div>
         <canvas id="grafico2"></canvas>
         <canvas id="grafico3"></canvas>

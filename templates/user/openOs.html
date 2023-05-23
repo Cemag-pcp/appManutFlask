@@ -42,7 +42,7 @@
 
         <div class="form-group" id="maquina-select">
           <label for="maquina">Máquina ou local</label>
-          <select class="select2" name="maquina" >
+          <select style = 'width: 410px;' class="select2" name="maquina" >
             {% for maquina in lista_maquinas %}
             <option value="" selected disabled hidden></option>  
             <option value="{{maquina[0]}}">{{maquina[0]}}</option>

@@ -4,7 +4,7 @@
 <div style="display: flex; justify-content: space-between;align-items: center;"><a id='botao_voltar' href="/index" style="top: 5%;left:5%;transform: translate(0%,150%);"><i class="fa-solid fa-arrow-left"></i>Voltar</a></div>
 <div id = 'edicao' class = 'card card-body'>
 <div class="row">
-    <div class = 'col-md-4 mx-auto'>
+    <div class = 'col offset'>
         <form action="/update/{{ordem[10]}}" method="POST">
             <div class="form-group">
                 <label for="setor">Setor:</label>
@@ -18,7 +18,7 @@
                 <label for="problema">Descrição do usuário:</label>
                 <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
             </div>
-            <div class="form-group" style="width: 355px;"> 
+            <div class="form-group" style="width: 530px;"> 
                 <label for="operador">Operadores</label>
                 <select class="form-control form-control" id="operador" name="operador" multiple required>
                     <option value="123 - Ryan">123 - Ryan</option>
@@ -47,11 +47,11 @@
             
             <div class="form-group">
                 <label for="statusLista">Data e hora</label>
-                <input type="text" name="datetimes" />
+                <input id="data_edit" type="text" name="datetimes" />
             </div>
  
     </div>
-    <div class = 'col-md-4 mx-auto'>
+    <div class = 'col-md-12 offset'>
             <div class="form-group">
                 <label for="risco">Risco</label>    
                 <input type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
