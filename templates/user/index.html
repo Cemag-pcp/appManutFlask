@@ -53,7 +53,7 @@
                         
                         <td>{{row[6]}}</td>
                         <td>{{row[13]}}</td>
-                        <td>R$ {{row[0]}}</td>                    
+                        <td class="coluna-valores">R${{row[0]}}</td>                    
                         <td>
                             <div class="dropdown">
                                 <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -148,5 +148,37 @@
     }
   
 </script>
+
+<script>
+    // Obtém todas as células da coluna que contém os valores float (índice da coluna, começando em 0)
+    var colunaValores = document.querySelectorAll('#table1 td.coluna-valores');
+
+    // Percorre todas as células da coluna
+    for (var i = 0; i < colunaValores.length; i++) {
+    var valorCelula = colunaValores[i].textContent;
+
+    // Remove caracteres não numéricos (exceto ponto decimal) da string
+    var valorNumerico = valorCelula.replace(/[^\d.-]/g, '');
+
+    // Converte o valor para float
+    var valorFloat = parseFloat(valorNumerico);
+
+    // Verifica se o valor é um número válido
+    if (!isNaN(valorFloat)) {
+        // Formata o valor como moeda
+        var formatoMoeda = valorFloat.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+        });
+
+        // Atualiza o valor da célula com a moeda formatada
+        colunaValores[i].textContent = formatoMoeda;
+    }
+    }
+</script>
+  
+
 
 {% endblock %}

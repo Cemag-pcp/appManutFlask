@@ -27,6 +27,73 @@ DB_PASS = "15512332"
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
+def tempo_os():
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    # Obtém os dados da tabela
+    s = ("""
+        SELECT datafim,
+            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+        FROM tb_ordens
+    """)
+
+    df_timeline = pd.read_sql_query(s, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    df_timeline = df_timeline[['datafim','diferenca']]
+    df_agrupado = df_timeline.groupby('datafim')['diferenca'].sum().reset_index()
+
+    # df_timeline = df_timeline.values.tolist()
+
+    return df_agrupado
+
+def tempo_os2(query):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    # Obtém os dados da tabela
+    s = (query)
+
+    df_timeline = pd.read_sql_query(s, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    df_timeline = df_timeline[['datafim','diferenca']]
+    df_agrupado = df_timeline.groupby('datafim')['diferenca'].sum().reset_index()
+
+    # df_timeline = df_timeline.values.tolist()
+
+    return df_agrupado
+
 @routes_bp.route('/')
 @login_required
 def inicio(): # Redirecionar para a página de login
@@ -333,6 +400,117 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 
     return render_template('user/material.html', datas=data, id_ordem=id_ordem, valorTotal=valorTotal[0][0])
 
+# @routes_bp.route('/grafico', methods=['POST', 'GET'])
+# @login_required
+# def grafico(): # Dashboard
+    
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+#     if request.method == 'POST':
+#         setor = request.form['filtro_setor']
+#         maquina = request.form['filtro_maquinas']
+#         maquina = maquina.split(' - ')[0]
+#         # outra_variavel = request.form['outra_variavel']
+#     else:
+#         setor = ''
+#         maquina = ''
+#         # outra_variavel = None   
+
+#     print(maquina)
+
+#     query = """
+#         SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
+#         FROM tb_ordens
+#         WHERE dataabertura IS NOT NULL
+#         """
+
+#     params = {}
+
+#     if setor:
+#         query += " AND setor = %(setor)s "
+#         params['setor'] = setor
+
+#     if maquina:
+#         query += "AND maquina = %(maquina)s "
+#         params['maquina'] = maquina
+    
+#     query += " GROUP BY dataabertura"
+
+#     grafico1 = pd.read_sql_query(query, conn, params=params)
+
+#     if len(grafico1) == 0:
+#         query = """
+#         SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
+#         FROM tb_ordens
+#         WHERE dataabertura IS NOT NULL
+#         GROUP BY dataabertura
+#         """
+
+#         grafico1 = pd.read_sql_query(query, conn, params=params)
+
+#     grafico1['dataabertura'] = grafico1['dataabertura'].astype(str)
+
+#     grafico1_data = grafico1['dataabertura'].tolist()
+#     grafico1_os = grafico1['qt_os_abertas'].tolist()
+    
+#     sorted_tuples = sorted(zip(grafico1_data, grafico1_os), key=lambda x: x[0])
+
+#     # Desempacotar as tuplas classificadas em duas listas separadas
+#     grafico1_data, grafico1_os = zip(*sorted_tuples)
+
+#     grafico1_data = list(grafico1_data)
+#     grafico1_os = list(grafico1_os)
+
+#     context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
+
+#     ##### CARDS #####
+
+#     query = """
+#         SELECT * FROM tb_ordens 
+#         """
+
+#     params = {}
+
+#     if setor:
+#         query += " WHERE setor = %(setor)s"
+#         params['setor'] = setor
+
+#     if maquina:
+#         query += " WHERE maquina = %(maquina)s"
+#         params['maquina'] = maquina
+
+#     df_status = pd.read_sql_query(query, conn, params=params)
+
+#     if len(df_status) == 0:
+#         query = """
+#             SELECT * FROM tb_ordens 
+#             """
+
+#         df_status = pd.read_sql_query(query, conn, params=params)
+
+#     df_status = df_status.drop_duplicates(subset='id_ordem', keep='last')
+
+#     df_status['status'] = df_status['status'].str.strip()
+
+#     qt_finalizada = df_status[df_status['status'] == 'Finalizada'].shape[0]
+#     qt_execucao = df_status[df_status['status'] == 'Em execução'].shape[0]
+#     qt_espera = df_status[df_status['status'] == 'Em espera'].shape[0]
+#     qt_aguardando = df_status[df_status['status'] == 'Aguardando material'].shape[0]
+
+#     lista_qt = [qt_finalizada,qt_execucao,qt_espera,qt_aguardando]
+
+#     query = """
+#         SELECT CONCAT(codigo, ' - ', descricao) AS codigo_descricao
+#         FROM tb_maquinas; 
+#     """
+
+#     cur.execute(query)
+#     maquinas = cur.fetchall()
+
+#     return render_template('user/grafico.html', **context, setor=setor, lista_qt=lista_qt, maquinas=maquinas)
+
 @routes_bp.route('/grafico', methods=['POST', 'GET'])
 @login_required
 def grafico(): # Dashboard
@@ -341,43 +519,31 @@ def grafico(): # Dashboard
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    if request.method == 'POST':
-        setor = request.form['filtro_setor']
-        # outra_variavel = request.form['outra_variavel']
-    else:
-        setor = ''
-        # outra_variavel = None   
+    cur.execute("SELECT DISTINCT setor FROM tb_ordens")
+    setores = cur.fetchall()
 
-    query = """
-        SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
-        FROM tb_ordens
-        WHERE dataabertura IS NOT NULL
-        """
+    cur.execute("SELECT DISTINCT codigo FROM tb_maquinas")
+    maquinas = cur.fetchall()
 
-    params = {}
+    query = "SELECT * FROM tb_ordens"
 
-    if setor:
-        query += " AND setor = %(setor)s"
-        params['setor'] = setor
+    df_cards = pd.read_sql_query(query, conn)
+    df_cards = df_cards.drop_duplicates(subset='id_ordem', keep='last')
+    df_cards['status'] = df_cards['status'].apply(lambda x: x.split("  ")[0])
 
-    query += "GROUP BY dataabertura"
+    espera = df_cards[df_cards['status'] == 'Em espera'].shape[0]
+    material = df_cards[df_cards['status'] == 'Aguardando material'].shape[0]
+    finalizado = df_cards[df_cards['status'] == 'Finalizado'].shape[0]
+    execucao = df_cards[df_cards['status'] == 'Em execução'].shape[0]
 
-    grafico1 = pd.read_sql_query(query, conn, params=params)
+    lista_qt = [espera,material,finalizado,execucao]
 
-    if len(grafico1) == 0:
-        query = """
-        SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
-        FROM tb_ordens
-        WHERE dataabertura IS NOT NULL
-        GROUP BY dataabertura
-        """
+    df_tempos = tempo_os()
 
-        grafico1 = pd.read_sql_query(query, conn, params=params)
+    df_tempos['datafim'] = df_tempos['datafim'].astype(str)
 
-    grafico1['dataabertura'] = grafico1['dataabertura'].astype(str)
-
-    grafico1_data = grafico1['dataabertura'].tolist()
-    grafico1_os = grafico1['qt_os_abertas'].tolist()
+    grafico1_data = df_tempos['datafim'].tolist()
+    grafico1_os = df_tempos['diferenca'].tolist()
     
     sorted_tuples = sorted(zip(grafico1_data, grafico1_os), key=lambda x: x[0])
 
@@ -386,39 +552,83 @@ def grafico(): # Dashboard
 
     grafico1_data = list(grafico1_data)
     grafico1_os = list(grafico1_os)
-    # context = {'grafico1_data':grafico1_data,'grafico1_os':grafico1_os}
-
-    # grafico1_data = ['2022-01-01', '2022-01-02', '2022-01-03']
-    # grafico1_os = [10, 5, 8]
 
     context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
 
-    ##### CARDS #####
+    if request.method == 'POST':
+        setor_selecionado = request.form.get('setor')
+        maquina_selecionado = request.form.get('maquina')
 
-    s = """ SELECT status, COUNT(id_ordem) as qt_os_abertas
-            FROM tb_ordens
-            GROUP BY status """
+        # Monta a query base
+        query = "SELECT * FROM tb_ordens WHERE 1=1"
 
-    cur.execute(s)
+        # Adiciona as condições de filtro se os campos não estiverem vazios
+        if setor_selecionado:
+            query += f" AND setor = '{setor_selecionado}'"
+        if maquina_selecionado:
+            query += f" AND maquina = '{maquina_selecionado}'"
 
-    s = """ SELECT * FROM tb_ordens """
+        # Executa a query
+        cur.execute(query)
+        itens_filtrados = cur.fetchall()
+    
+        # Criando cards
 
-    cur.execute(s)
+        df_cards = pd.read_sql_query(query, conn)
+        df_cards = df_cards.drop_duplicates(subset='id_ordem', keep='last')
+        df_cards['status'] = df_cards['status'].apply(lambda x: x.split("  ")[0])
 
-    df_status = pd.read_sql_query(s,conn)
+        espera = df_cards[df_cards['status'] == 'Em espera'].shape[0]
+        material = df_cards[df_cards['status'] == 'Aguardando material'].shape[0]
+        finalizado = df_cards[df_cards['status'] == 'Finalizado'].shape[0]
+        execucao = df_cards[df_cards['status'] == 'Em execução'].shape[0]
 
-    df_status = df_status.drop_duplicates(subset='id_ordem', keep='last')
+        lista_qt = [espera,material,finalizado,execucao]
 
-    df_status['status'] = df_status['status'].str.strip()
+        query = ("""
+        SELECT datafim,
+        TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+        TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+        FROM tb_ordens
+        WHERE 1=1
+        """)
 
-    qt_finalizada = df_status[df_status['status'] == 'Finalizada'].shape[0]
-    qt_execucao = df_status[df_status['status'] == 'Em execução'].shape[0]
-    qt_espera = df_status[df_status['status'] == 'Em espera'].shape[0]
-    qt_aguardando = df_status[df_status['status'] == 'Aguardando material'].shape[0]
+        if setor_selecionado:
+            query += f" AND setor = '{setor_selecionado}'"
+        if maquina_selecionado:
+            query += f" AND maquina = '{maquina_selecionado}'"
 
-    lista_qt = [qt_finalizada,qt_execucao,qt_espera,qt_aguardando]
+        df_tempos = tempo_os2(query)
 
-    return render_template('user/grafico.html', **context, setor=setor, lista_qt=lista_qt)
+        if len(df_tempos) == 0:
+            df_tempos = tempo_os()
+
+        df_tempos['datafim'] = df_tempos['datafim'].astype(str)
+
+        grafico1_data = df_tempos['datafim'].tolist()
+        grafico1_os = df_tempos['diferenca'].tolist()
+        
+        sorted_tuples = sorted(zip(grafico1_data, grafico1_os), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        
+        grafico1_data = list(grafico1_data)
+        grafico1_os = list(grafico1_os)
+
+        context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
+
+        return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens_filtrados=itens_filtrados,
+                               setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context)
+    
+    # Se o método for GET, exibe todos os itens
+    cur.execute("SELECT * FROM tb_ordens")
+    itens = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens, **context)
+
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
