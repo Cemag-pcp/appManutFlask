@@ -14,6 +14,7 @@ from flask import session
 from functools import wraps
 import base64
 from datetime import datetime
+from pandas.tseries.offsets import BMonthEnd
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -26,6 +27,25 @@ DB_USER = "postgres"
 DB_PASS = "15512332"
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+def dias_uteis():
+    
+    # Obter a data atual
+    data_atual = pd.Timestamp.now()
+    
+    # Obter o primeiro dia do mês atual
+    primeiro_dia_mes = data_atual - pd.offsets.MonthBegin()
+
+    # Obter o último dia útil do mês atual
+    ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+
+    # Obter a sequência de datas úteis no mês atual
+    datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
+
+    # Contar o número de dias úteis
+    qtd_dias_uteis = len(datas_uteis)
+
+    return qtd_dias_uteis
 
 def tempo_os():
     
@@ -62,6 +82,76 @@ def tempo_os():
     # df_timeline = df_timeline.values.tolist()
 
     return df_agrupado
+
+def calculo_indicadores():
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    # Obtém os dados da tabela
+    s = ("""
+        SELECT datafim, maquina, n_ordem,
+            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+        FROM tb_ordens
+    """)
+
+    data_hoje = datetime.today()
+    mes_hoje = datetime.today().month
+    
+    df_timeline = pd.read_sql_query(s, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
+
+    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    # df_timeline = df_timeline[['datafim','diferenca']]
+    
+    df_timeline['maquina'] = df_timeline['maquina'].str.strip()
+    df_agrupado_tempo = df_timeline.groupby(['maquina'])['diferenca'].sum().reset_index()
+
+    df_agrupado_qtd = df_timeline[['maquina']]
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_agrupado_qtd['maquina'].value_counts()
+    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['maquina'].map(contagem)
+    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+
+    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='maquina')
+
+    s = ("""
+    SELECT codigo FROM tb_maquinas
+    """)
+
+    df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
+    df_maquinas = df_maquinas.rename(columns={'codigo':'maquina'})
+
+    df_combinado = df_combinado.merge(df_maquinas, on='maquina')
+    df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+
+    qtd_dias_uteis = dias_uteis()
+
+    df_combinado['carga_trabalhada'] = qtd_dias_uteis * 7
+    
+    df_combinado['MTBF'] = df_combinado['carga_trabalhada'] - df_combinado['diferenca'] / df_combinado['qtd_manutencao']
+    df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
+
+    return df_combinado
 
 def tempo_os2(query):
     
@@ -538,22 +628,22 @@ def grafico(): # Dashboard
 
     lista_qt = [espera,material,finalizado,execucao]
 
-    df_tempos = tempo_os()
+    df_tempos = calculo_indicadores()
 
-    df_tempos['datafim'] = df_tempos['datafim'].astype(str)
+    # df_tempos['datafim'] = df_tempos['datafim'].astype(str)
 
-    grafico1_data = df_tempos['datafim'].tolist()
-    grafico1_os = df_tempos['diferenca'].tolist()
+    grafico1_maquina = df_tempos['maquina'].tolist() # eixo x
+    grafico1_mtbf = df_tempos['MTBF'].tolist() # eixo y
     
-    sorted_tuples = sorted(zip(grafico1_data, grafico1_os), key=lambda x: x[0])
+    sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
 
     # Desempacotar as tuplas classificadas em duas listas separadas
-    grafico1_data, grafico1_os = zip(*sorted_tuples)
+    grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
 
-    grafico1_data = list(grafico1_data)
-    grafico1_os = list(grafico1_os)
+    grafico1_maquina = list(grafico1_maquina)
+    grafico1_mtbf = list(grafico1_mtbf)
 
-    context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
+    context = {'grafico1_maquina': grafico1_maquina, 'grafico1_mtbf': grafico1_mtbf}
 
     if request.method == 'POST':
         setor_selecionado = request.form.get('setor')
@@ -628,7 +718,6 @@ def grafico(): # Dashboard
     conn.close()
 
     return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens, **context)
-
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required

@@ -83,8 +83,8 @@
 
 <script>
     
-    var eixo_y = {{ grafico1_os | safe }};
-    var eixo_x = {{ grafico1_data | safe }};
+    var eixo_y = {{ grafico1_maquina | safe }};
+    var eixo_x = {{ grafico1_mtbf | safe }};
     var ctx = document.getElementById('grafico2').getContext('2d');
 
     var grafico = new Chart(ctx, {
@@ -104,8 +104,8 @@
         }
     });
 
-    var eixo_y = {{ grafico1_os | safe }};
-    var eixo_x = {{ grafico1_data | safe }};
+    var eixo_y = {{ grafico1_mtbf | safe }};
+    var eixo_x = {{ grafico1_maquina | safe }};
     var ctx = document.getElementById('grafico3').getContext('2d');
 
     var grafico = new Chart(ctx, {
@@ -124,8 +124,8 @@
         }
     });
 
-    var eixo_y = {{ grafico1_os | safe }};
-    var eixo_x = {{ grafico1_data | safe }};
+    var eixo_y = {{ grafico1_maquina | safe }};
+    var eixo_x = {{ grafico1_mtbf | safe }};
     var ctx = document.getElementById('grafico4').getContext('2d');
 
     var grafico = new Chart(ctx, {
@@ -144,8 +144,8 @@
         }
     });
 
-    var eixo_y = {{ grafico1_os | safe }};
-    var eixo_x = {{ grafico1_data | safe }};
+    var eixo_y = {{ grafico1_maquina | safe }};
+    var eixo_x = {{ grafico1_mtbf | safe }};
     var ctx = document.getElementById('grafico5').getContext('2d');
 
     var grafico = new Chart(ctx, {
