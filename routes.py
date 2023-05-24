@@ -437,6 +437,11 @@ def open_os(): # Página de abrir OS
 @login_required
 def get_material(id_ordem): # Informar material que foi utilizado na ordem de serviço
     # Verifica se a requisição é um POST
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     if request.method == 'POST':
         
         # Obtendo o ultimo id
@@ -490,117 +495,6 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 
     return render_template('user/material.html', datas=data, id_ordem=id_ordem, valorTotal=valorTotal[0][0])
 
-# @routes_bp.route('/grafico', methods=['POST', 'GET'])
-# @login_required
-# def grafico(): # Dashboard
-    
-#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-
-#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-#     if request.method == 'POST':
-#         setor = request.form['filtro_setor']
-#         maquina = request.form['filtro_maquinas']
-#         maquina = maquina.split(' - ')[0]
-#         # outra_variavel = request.form['outra_variavel']
-#     else:
-#         setor = ''
-#         maquina = ''
-#         # outra_variavel = None   
-
-#     print(maquina)
-
-#     query = """
-#         SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
-#         FROM tb_ordens
-#         WHERE dataabertura IS NOT NULL
-#         """
-
-#     params = {}
-
-#     if setor:
-#         query += " AND setor = %(setor)s "
-#         params['setor'] = setor
-
-#     if maquina:
-#         query += "AND maquina = %(maquina)s "
-#         params['maquina'] = maquina
-    
-#     query += " GROUP BY dataabertura"
-
-#     grafico1 = pd.read_sql_query(query, conn, params=params)
-
-#     if len(grafico1) == 0:
-#         query = """
-#         SELECT dataabertura, COUNT(id_ordem) as qt_os_abertas
-#         FROM tb_ordens
-#         WHERE dataabertura IS NOT NULL
-#         GROUP BY dataabertura
-#         """
-
-#         grafico1 = pd.read_sql_query(query, conn, params=params)
-
-#     grafico1['dataabertura'] = grafico1['dataabertura'].astype(str)
-
-#     grafico1_data = grafico1['dataabertura'].tolist()
-#     grafico1_os = grafico1['qt_os_abertas'].tolist()
-    
-#     sorted_tuples = sorted(zip(grafico1_data, grafico1_os), key=lambda x: x[0])
-
-#     # Desempacotar as tuplas classificadas em duas listas separadas
-#     grafico1_data, grafico1_os = zip(*sorted_tuples)
-
-#     grafico1_data = list(grafico1_data)
-#     grafico1_os = list(grafico1_os)
-
-#     context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
-
-#     ##### CARDS #####
-
-#     query = """
-#         SELECT * FROM tb_ordens 
-#         """
-
-#     params = {}
-
-#     if setor:
-#         query += " WHERE setor = %(setor)s"
-#         params['setor'] = setor
-
-#     if maquina:
-#         query += " WHERE maquina = %(maquina)s"
-#         params['maquina'] = maquina
-
-#     df_status = pd.read_sql_query(query, conn, params=params)
-
-#     if len(df_status) == 0:
-#         query = """
-#             SELECT * FROM tb_ordens 
-#             """
-
-#         df_status = pd.read_sql_query(query, conn, params=params)
-
-#     df_status = df_status.drop_duplicates(subset='id_ordem', keep='last')
-
-#     df_status['status'] = df_status['status'].str.strip()
-
-#     qt_finalizada = df_status[df_status['status'] == 'Finalizada'].shape[0]
-#     qt_execucao = df_status[df_status['status'] == 'Em execução'].shape[0]
-#     qt_espera = df_status[df_status['status'] == 'Em espera'].shape[0]
-#     qt_aguardando = df_status[df_status['status'] == 'Aguardando material'].shape[0]
-
-#     lista_qt = [qt_finalizada,qt_execucao,qt_espera,qt_aguardando]
-
-#     query = """
-#         SELECT CONCAT(codigo, ' - ', descricao) AS codigo_descricao
-#         FROM tb_maquinas; 
-#     """
-
-#     cur.execute(query)
-#     maquinas = cur.fetchall()
-
-#     return render_template('user/grafico.html', **context, setor=setor, lista_qt=lista_qt, maquinas=maquinas)
-
 @routes_bp.route('/grafico', methods=['POST', 'GET'])
 @login_required
 def grafico(): # Dashboard
@@ -612,7 +506,7 @@ def grafico(): # Dashboard
     cur.execute("SELECT DISTINCT setor FROM tb_ordens")
     setores = cur.fetchall()
 
-    cur.execute("SELECT DISTINCT codigo FROM tb_maquinas")
+    cur.execute("SELECT DISTINCT CONCAT(codigo, ' - ', descricao) AS codigo_concatenado FROM tb_maquinas")
     maquinas = cur.fetchall()
 
     query = "SELECT * FROM tb_ordens"
@@ -633,7 +527,8 @@ def grafico(): # Dashboard
     # df_tempos['datafim'] = df_tempos['datafim'].astype(str)
 
     grafico1_maquina = df_tempos['maquina'].tolist() # eixo x
-    grafico1_mtbf = df_tempos['MTBF'].tolist() # eixo y
+    grafico1_mtbf = df_tempos['MTBF'].tolist() # eixo y gráfico 1
+    grafico2_mttr = df_tempos['MTTR'].tolist() # eixo y grafico 2
     
     sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
 
@@ -643,7 +538,8 @@ def grafico(): # Dashboard
     grafico1_maquina = list(grafico1_maquina)
     grafico1_mtbf = list(grafico1_mtbf)
 
-    context = {'grafico1_maquina': grafico1_maquina, 'grafico1_mtbf': grafico1_mtbf}
+    context = {'grafico1_maquina': grafico1_maquina, 'grafico1_mtbf': grafico1_mtbf,
+               'grafico2_maquina':grafico1_maquina, 'grafico2_mttr':grafico2_mttr}
 
     if request.method == 'POST':
         setor_selecionado = request.form.get('setor')
@@ -695,18 +591,6 @@ def grafico(): # Dashboard
 
         df_tempos['datafim'] = df_tempos['datafim'].astype(str)
 
-        grafico1_data = df_tempos['datafim'].tolist()
-        grafico1_os = df_tempos['diferenca'].tolist()
-        
-        sorted_tuples = sorted(zip(grafico1_data, grafico1_os), key=lambda x: x[0])
-
-        # Desempacotar as tuplas classificadas em duas listas separadas
-        
-        grafico1_data = list(grafico1_data)
-        grafico1_os = list(grafico1_os)
-
-        context = {'grafico1_data': grafico1_data, 'grafico1_os': grafico1_os}
-
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens_filtrados=itens_filtrados,
                                setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context)
     
@@ -722,6 +606,10 @@ def grafico(): # Dashboard
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
 def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Obtém os dados da tabela
     s = ("""
