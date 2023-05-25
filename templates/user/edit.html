@@ -31,17 +31,37 @@
                 <label for="operador">Tipo de manutenção</label>
                 <select class="form-control form-control" name="tipo_manutencao">
                     <option value="" selected disabled hidden></option>  
-                    <option value="Hidráulica">Hidráulica</option>
-                    <option value="Elétrica">Elétrica</option>
-                    <option value="Projeto">Projeto</option>
-                    <option value="Predial">Predial</option>
-                    <option value="Preditiva">Preditiva</option>   
+                    <option value="Corretiva">Corretiva</option>
+                    <option value="Preventiva">Preventiva</option>
+                    <option value="Preditiva">Preditiva</option>
+                    <option value="Apoio">Apoio</option>
+                    <option value="Projetos">Projetos</option>
+                    <option value="sesmt">SESMT</option>  
                 </select>               
             </div>
             {% else %}
+
             <div class="form-group">
                 <label for="operador">Tipo de manutenção</label>
                 <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control" readonly="readonly">
+            </div>
+            {% endif %}
+
+            {% if area_manutencao == '' %}
+            <div class="form-group" style="width: 355px;"> 
+                <label for="operador">Área de manutenção</label>
+                <select class="form-control form-control" name="area_manutencao">
+                    <option value="" selected disabled hidden></option>  
+                    <option value="Predial">Predial</option>
+                    <option value="Mecânica">Mecânica</option>
+                    <option value="Elétrica">Elétrica</option>
+                </select>               
+            </div>
+            {% else %}
+
+            <div class="form-group">
+                <label for="operador">Área de manutenção</label>
+                <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control" readonly="readonly">
             </div>
             {% endif %}
 

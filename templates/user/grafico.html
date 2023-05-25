@@ -4,19 +4,28 @@
 
 <form action="{{ url_for('routes.grafico') }}" method="POST">
     <label for="filtro_setor">Setor:</label>
-    <select id="setor" name="setor" value="{{ setor }}">
+    <select class="select2" id="filtro_setor" name="filtro_setor" value="{{ setor }}">
+        <option value="{{setor_selecionado}}" selected disabled hidden>{{setor_selecionado}}</option>
         {% for setor in setores %}
-        <option value="" selected disabled hidden></option>
         <option>{{ setor[0] }}</option>
         {% endfor %}
+        <option>Manutenção</option>
     </select>
     
-    <label for="filtro_maquinas">Setor:</label>
+    <label for="filtro_maquinas">Máquina:</label>
     <select class="select2"id="filtro_maquinas" name="filtro_maquinas">
+        <option value="{{maquina_selecionado}}" selected disabled hidden>{{maquina_selecionado}}</option>
         {% for maquina in maquinas %}
-        <option value="" selected disabled hidden></option>
         <option>{{maquina[0]}}</option>
         {% endfor %}
+    </select>
+
+    <label for="area_manutencao">Área de Manutenção:</label>
+    <select class="select2"id="area_manutencao" name="area_manutencao">
+        <option value="{{area_manutencao}}" selected disabled hidden>{{area_manutencao}}</option>
+        <option value="Predial" >Predial</option>
+        <option value="Mecânica" >Mecânica</option>
+        <option value="Elétrica" >Elétrica</option>
     </select>
 
     <button type="submit">Filtrar</button>
@@ -142,12 +151,12 @@
         }
     });
 
-    var eixo_y = {{ grafico1_maquina | safe }};
-    var eixo_x = {{ grafico1_mtbf | safe }};
+    var eixo_y = {{ pizza1_quantidade | safe }};
+    var eixo_x = {{ pizza1_area | safe }};
     var ctx = document.getElementById('grafico4').getContext('2d');
 
     var grafico = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'pie',
         data: {
             labels: eixo_x,
             datasets: [{

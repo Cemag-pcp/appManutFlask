@@ -83,22 +83,23 @@ def tempo_os():
 
     return df_agrupado
 
-def calculo_indicadores():
+def calculo_indicadores(query):
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     # Obtém os dados da tabela
-    s = ("""
-        SELECT datafim, maquina, n_ordem,
-            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-        FROM tb_ordens
-    """)
+    
+    # query = ("""
+    #     SELECT datafim, maquina, n_ordem,
+    #         TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+    #         TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+    #     FROM tb_ordens
+    #     WHERE 1=1 AND
+    # """)
 
-    data_hoje = datetime.today()
     mes_hoje = datetime.today().month
     
-    df_timeline = pd.read_sql_query(s, conn)
+    df_timeline = pd.read_sql_query(query, conn)
 
     df_timeline['inicio'] = df_timeline['inicio'].astype(str)
     df_timeline['fim'] = df_timeline['fim'].astype(str)
@@ -151,7 +152,62 @@ def calculo_indicadores():
     df_combinado['MTBF'] = df_combinado['carga_trabalhada'] - df_combinado['diferenca'] / df_combinado['qtd_manutencao']
     df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
 
-    return df_combinado
+    if len(df_combinado)> 0:
+
+        grafico1_maquina = df_combinado['maquina'].tolist() # eixo x
+        grafico1_mtbf = df_combinado['MTBF'].tolist() # eixo y gráfico 1
+        grafico2_mttr = df_combinado['MTTR'].tolist() # eixo y grafico 2
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico1_mtbf = list(grafico1_mtbf)
+
+        context = {'grafico1_maquina': grafico1_maquina, 'grafico1_mtbf': grafico1_mtbf,
+                'grafico2_maquina':grafico1_maquina, 'grafico2_mttr':grafico2_mttr}
+        
+    else:
+
+        grafico1_maquina = []
+        grafico1_mtbf = []
+        grafico2_mttr = []
+
+        context = {'grafico1_maquina': grafico1_maquina, 'grafico1_mtbf': grafico1_mtbf,
+            'grafico2_maquina':grafico1_maquina, 'grafico2_mttr':grafico2_mttr} 
+
+    return context
+
+def grafico_area(query):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    
+    # query = ("""
+    #     SELECT maquina, area_manutencao, datafim, id_ordem
+    #     FROM tb_ordens
+    # """)    
+
+    df_area = pd.read_sql_query(query,conn)
+
+    mes_atual = datetime.today().month
+
+    df_area['mes'] = pd.to_datetime(df_area['datafim']).dt.month
+    df_area = df_area[df_area['mes'] == mes_atual]
+    df_area = df_area.drop_duplicates(subset='id_ordem', keep='last')
+    df_area = df_area.dropna()
+    df_area = df_area[['area_manutencao']]
+
+    contagem = df_area.value_counts(subset='area_manutencao')
+    df_area['qtde_area'] = df_area['area_manutencao'].map(contagem)
+    
+    area = df_area['area_manutencao'].values.tolist()
+    quantidade_area = df_area['qtde_area'].values.tolist()
+
+    pizza_context = {'pizza1_area': area, 'pizza1_quantidade':quantidade_area}        
+
+    return pizza_context
 
 def tempo_os2(query):
     
@@ -327,7 +383,10 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
 
     data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
     data1 = data1.sort_values(by='id_ordem')
+    
     tipo_manutencao = data1['tipo_manutencao'].values.tolist()[0]
+    area_manutencao = data1['area_manutencao'].values.tolist()[0]
+
     data1 = data1.values.tolist()
     opcaoAtual = data1[0][4]
 
@@ -345,7 +404,7 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     opcoes.remove(opcaoAtual)  # Remove o elemento 'c' da lista
     opcoes.insert(0, opcaoAtual)
 
-    return render_template('user/edit.html', ordem=data1[0], opcoes=opcoes, tipo_manutencao=tipo_manutencao)
+    return render_template('user/edit.html', ordem=data1[0], opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao)
  
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
@@ -388,6 +447,7 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         operador = json.dumps(operador)
         tipo_manutencao = request.form['tipo_manutencao']
         datetimes = request.form['datetimes']
+        area_manutencao = request.form['area_manutencao']
         # print(datetimes)
 
         # Divida a string em duas partes: data/hora inicial e data/hora final
@@ -409,8 +469,8 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
-            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, tipo_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador],tipo_manutencao))
+            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, tipo_manutencao, area_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador],tipo_manutencao, area_manutencao))
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
@@ -522,28 +582,41 @@ def grafico(): # Dashboard
 
     lista_qt = [espera,material,finalizado,execucao]
 
-    df_tempos = calculo_indicadores()
+    query = ("""
+        SELECT datafim, maquina, n_ordem,
+            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+        FROM tb_ordens
+        WHERE 1=1
+    """)
 
-    # df_tempos['datafim'] = df_tempos['datafim'].astype(str)
+    context = calculo_indicadores(query)
 
-    grafico1_maquina = df_tempos['maquina'].tolist() # eixo x
-    grafico1_mtbf = df_tempos['MTBF'].tolist() # eixo y gráfico 1
-    grafico2_mttr = df_tempos['MTTR'].tolist() # eixo y grafico 2
-    
-    sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
+    query = ("""
+        SELECT maquina, area_manutencao, datafim, id_ordem
+        FROM tb_ordens
+        WHERE 1=1
+    """)  
 
-    # Desempacotar as tuplas classificadas em duas listas separadas
-    grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
-
-    grafico1_maquina = list(grafico1_maquina)
-    grafico1_mtbf = list(grafico1_mtbf)
-
-    context = {'grafico1_maquina': grafico1_maquina, 'grafico1_mtbf': grafico1_mtbf,
-               'grafico2_maquina':grafico1_maquina, 'grafico2_mttr':grafico2_mttr}
+    pizza_context = grafico_area(query)
 
     if request.method == 'POST':
-        setor_selecionado = request.form.get('setor')
-        maquina_selecionado = request.form.get('maquina')
+
+        setor_selecionado = request.form.get('filtro_setor')
+        maquina_selecionado = request.form.get('filtro_maquinas')
+        area_manutencao = request.form.get('area_manutencao')
+
+        if not setor_selecionado:
+            setor_selecionado = ''
+        if not maquina_selecionado:
+            maquina_selecionado = ''
+        if not area_manutencao:
+            area_manutencao = ''
+    
+        try:
+            maquina_selecionado = maquina_selecionado.split(" - ")[0]
+        except:
+            pass
 
         # Monta a query base
         query = "SELECT * FROM tb_ordens WHERE 1=1"
@@ -553,6 +626,8 @@ def grafico(): # Dashboard
             query += f" AND setor = '{setor_selecionado}'"
         if maquina_selecionado:
             query += f" AND maquina = '{maquina_selecionado}'"
+        if area_manutencao:
+            query += f" AND area_manutencao = '{area_manutencao}'"
 
         # Executa a query
         cur.execute(query)
@@ -573,8 +648,8 @@ def grafico(): # Dashboard
 
         query = ("""
         SELECT datafim,
-        TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-        TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
         FROM tb_ordens
         WHERE 1=1
         """)
@@ -583,6 +658,8 @@ def grafico(): # Dashboard
             query += f" AND setor = '{setor_selecionado}'"
         if maquina_selecionado:
             query += f" AND maquina = '{maquina_selecionado}'"
+        if area_manutencao:
+            query += f" AND area_manutencao = '{area_manutencao}'"
 
         df_tempos = tempo_os2(query)
 
@@ -591,8 +668,41 @@ def grafico(): # Dashboard
 
         df_tempos['datafim'] = df_tempos['datafim'].astype(str)
 
+        query = ("""
+        SELECT datafim, maquina, n_ordem,
+            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+        FROM tb_ordens
+        WHERE 1=1
+        """)
+
+        if setor_selecionado:
+            query += f" AND setor = '{setor_selecionado}'"
+        if maquina_selecionado:
+            query += f" AND maquina = '{maquina_selecionado}'"
+        if area_manutencao:
+            query += f" AND area_manutencao = '{area_manutencao}'"
+
+        context = calculo_indicadores(query)
+
+        query = ("""
+        SELECT maquina, area_manutencao, datafim, id_ordem
+        FROM tb_ordens
+        WHERE 1=1
+        """)    
+
+        if setor_selecionado:
+            query += f" AND setor = '{setor_selecionado}'"
+        if maquina_selecionado:
+            query += f" AND maquina = '{maquina_selecionado}'"
+        if area_manutencao:
+            query += f" AND area_manutencao = '{area_manutencao}'"
+
+        pizza_context = grafico_area(query)
+
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens_filtrados=itens_filtrados,
-                               setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context)
+                               setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context, **pizza_context,
+                               area_manutencao=area_manutencao)
     
     # Se o método for GET, exibe todos os itens
     cur.execute("SELECT * FROM tb_ordens")
@@ -601,7 +711,7 @@ def grafico(): # Dashboard
     cur.close()
     conn.close()
 
-    return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens, **context)
+    return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens, **context, **pizza_context,setor_selecionado='', maquina_selecionado='', area_manutencao='')
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
