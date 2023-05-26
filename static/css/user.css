@@ -53,6 +53,16 @@ body {
   border-radius: 20px;
 }
 
+.form-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-row .form-group {
+  width: calc(50% - 10px);
+  margin-left: 3px;
+}
+
 #data_edit{
   position: relative;
   width: 100%;
@@ -172,6 +182,13 @@ body {
   border: none; /* Remove a borda */
   cursor: pointer;
   outline: none;
+}
+@media (max-width: 768px) {
+  /* Ajuste para telas menores (menu oculto) */
+  #menu-button {
+    position: absolute;
+    margin-left: 70px;
+  }
 }
 
 #menu .item {
@@ -489,8 +506,7 @@ body {
   #formulario_abertura {
       width: 100%; /* Ocupar toda a largura disponível */
       max-width: 450px; /* Limitar a largura máxima */
-      margin-left: auto;
-      margin-right: auto;
+      margin-bottom: 21 0px;
   }
 }
 
@@ -676,7 +692,7 @@ body {
   justify-content: space-between;
   left: 5%;
   top: 5%;
-  transform: translate(50%,150%);
+  transform: translate(30%,60%);
   align-items: center;
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
@@ -780,12 +796,39 @@ body {
   position: absolute;
 }
 
-#filtro_grafico{
+#form_filtros_graficos {
+  padding-right: 10px;
   display: flex;
-  flex: 1;
+  flex-wrap: wrap;
+  justify-content: center;
   left: 5%;
   top: 5%;
-  transform: translate(10%,-100%);
+  transform: translate(30%,0%);
+  width: 1200px;
+  height: 100px;
+  align-items: center;
+  margin-top: 60px; /* Ajuste esse valor conforme necessário */
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255,0.5);
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+}
+
+#form_filtros_graficos button{
+  padding: 5px;
+  margin-left: 15px;
+  background-color: #adadad4b;
+  border: solid 2px;
+  border-radius: 10px;
+  border-color: rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  cursor: pointer;
+}
+
+#form_filtros_graficos label,
+#form_filtros_graficos select {
+  margin: 5px;
+  margin-left: 20px;
 }
 
 #botao_filtrar_grafico{
@@ -812,7 +855,7 @@ body {
 #grafico2{
   left: 5%;
   top:5%;
-  transform: translate(8.5%,60%);
+  transform: translate(8.5%,30%);
   padding: 60px;
   width: 800px;
   height: 600px;
@@ -824,7 +867,7 @@ body {
 #grafico3{
   left: 5%;
   top:5%;
-  transform: translate(8.5%,100%);
+  transform: translate(120%,-70%);
   padding: 60px;
   width: 800px;
   height: 600px;
@@ -836,7 +879,7 @@ body {
 #grafico4{
   left: 5%;
   top:5%;
-  transform: translate(240%,-130%);
+  transform: translate(50%,-50%);
   padding: 60px;
   width: 450px;
   height: 300px;
@@ -848,7 +891,7 @@ body {
 #grafico5{
   left: 5%;
   top:5%;
-  transform: translate(240%,-105%);
+  transform: translate(250%,-150%);
   padding: 60px;
   width: 450px;
   height: 300px;

@@ -18,6 +18,60 @@
                 <label for="problema">Descrição do usuário:</label>
                 <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
             </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="risco">Risco</label>    
+                    <input style="width: 250px;" type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
+                </div>
+                <div class="form-group">
+                    <label for="n_ordem">Número da execução:</label>
+                    <input style ="width: 245px;" type="text" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
+                </div>
+            </div>
+            <div class="form-row">
+                {% if tipo_manutencao == '' %}
+                <div class="form-group" style="width: 245px;"> 
+                    <label for="operador">Tipo de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control" name="tipo_manutencao">
+                        <option value="" selected disabled hidden></option>  
+                        <option value="Corretiva">Corretiva</option>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Preditiva">Preditiva</option>
+                        <option value="Apoio">Apoio</option>
+                        <option value="Projetos">Projetos</option>
+                        <option value="sesmt">SESMT</option>  
+                    </select>               
+                </div>
+                {% else %}
+
+                <div class="form-group">
+                    <label for="operador">Tipo de manutenção</label>
+                    <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control" readonly="readonly">
+                </div>
+                {% endif %}
+
+                {% if area_manutencao == '' %}
+                <div class="form-group" style="width: 250px;"> 
+                    <label for="operador">Área de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control" name="area_manutencao">
+                        <option value="" selected disabled hidden></option>  
+                        <option value="Predial">Predial</option>
+                        <option value="Mecânica">Mecânica</option>
+                        <option value="Elétrica">Elétrica</option>
+                    </select>               
+                </div>
+                {% else %}
+
+                <div class="form-group">
+                    <label for="operador">Área de manutenção</label>
+                    <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control" readonly="readonly">
+                </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="statusLista">Data e hora</label>
+                <input id="data_edit" type="text" name="datetimes" />
+            </div>
             <div class="form-group" style="width: 530px;"> 
                 <label for="operador">Operadores</label>
                 <select class="form-control form-control" id="operador" name="operador" multiple required>
@@ -26,60 +80,8 @@
                     <option value="789 - Outro">789 - Outro</option>
                 </select>
             </div>
-            {% if tipo_manutencao == '' %}
-            <div class="form-group" style="width: 355px;"> 
-                <label for="operador">Tipo de manutenção</label>
-                <select class="form-control form-control" name="tipo_manutencao">
-                    <option value="" selected disabled hidden></option>  
-                    <option value="Corretiva">Corretiva</option>
-                    <option value="Preventiva">Preventiva</option>
-                    <option value="Preditiva">Preditiva</option>
-                    <option value="Apoio">Apoio</option>
-                    <option value="Projetos">Projetos</option>
-                    <option value="sesmt">SESMT</option>  
-                </select>               
-            </div>
-            {% else %}
-
-            <div class="form-group">
-                <label for="operador">Tipo de manutenção</label>
-                <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control" readonly="readonly">
-            </div>
-            {% endif %}
-
-            {% if area_manutencao == '' %}
-            <div class="form-group" style="width: 355px;"> 
-                <label for="operador">Área de manutenção</label>
-                <select class="form-control form-control" name="area_manutencao">
-                    <option value="" selected disabled hidden></option>  
-                    <option value="Predial">Predial</option>
-                    <option value="Mecânica">Mecânica</option>
-                    <option value="Elétrica">Elétrica</option>
-                </select>               
-            </div>
-            {% else %}
-
-            <div class="form-group">
-                <label for="operador">Área de manutenção</label>
-                <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control" readonly="readonly">
-            </div>
-            {% endif %}
-
-            <div class="form-group">
-                <label for="statusLista">Data e hora</label>
-                <input id="data_edit" type="text" name="datetimes" />
-            </div>
- 
     </div>
     <div class = 'col-md-12 offset'>
-            <div class="form-group">
-                <label for="risco">Risco</label>    
-                <input type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
-            </div>
-            <div class="form-group">
-                <label for="n_ordem">Número da execução:</label>
-                <input type="text" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
-            </div>
             <div class="form-group">
                 <label for="descmanutencao">Observação da manutenção:</label>
                 <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41"></textarea>

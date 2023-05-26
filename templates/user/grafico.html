@@ -2,7 +2,7 @@
 {% block body %}
 
 
-<form action="{{ url_for('routes.grafico') }}" method="POST">
+<form id = 'form_filtros_graficos' action="{{ url_for('routes.grafico') }}" method="POST">
     <label for="filtro_setor">Setor:</label>
     <select class="select2" id="filtro_setor" name="filtro_setor" value="{{ setor }}">
         <option value="{{setor_selecionado}}" selected disabled hidden>{{setor_selecionado}}</option>
