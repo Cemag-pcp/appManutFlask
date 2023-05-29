@@ -42,7 +42,7 @@
         </div>
 
         <div class="form-group" id="maquina-select">
-          <label for="maquina">Máquina ou local</label>
+          <label for="maquina">Máquina:</label>
           <select style = 'width: 100%;' class="select2" name="maquina" >
             {% for maquina in lista_maquinas %}
             <option value="" selected disabled hidden></option>  
@@ -52,8 +52,19 @@
         </div>
 
         <div class="form-group" id="maquina-input">
-          <label for="maquina">Descreva o local ou a máquina</label>
-          <input class="select2" name="maquina" >
+          <label for="maquina">Área:</label>
+          <!-- <input class="select2" name="maquina" > -->
+          <select class="form-control form-control select2" id="maquina" name="setor" required>
+            <option value="" selected disabled hidden></option>  
+            <option>RH</option>
+            <option>Vendas</option>
+            <option>Contabilidade</option>
+            <option>PCP</option>
+            <option>Marketing</option>
+            <option>TI</option>
+            <option>Projetos</option>
+            <option>Compras</option>              
+          </select>
         </div>
          
         <div class="form-group">
@@ -93,12 +104,14 @@
     var maquinaSelect = document.getElementById('maquina-select');
     var maquinaInput = document.getElementById('maquina-input');
     
-    if (setorValue === 'Administrativo') {
+    if (setorValue === '') {
       maquinaSelect.style.display = 'none';
-      maquinaInput.style.display = 'block';
-
+      maquinaInput.style.display = 'none';
+    } else if (setorValue === 'Administrativo') {
+      maquinaSelect.style.display = 'none';
+      maquinaInput.style.display = '';
     } else {
-      maquinaSelect.style.display = 'block';
+      maquinaSelect.style.display = '';
       maquinaInput.style.display = 'none';
     }
   });

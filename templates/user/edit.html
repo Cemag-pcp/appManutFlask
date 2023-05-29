@@ -75,9 +75,9 @@
             <div class="form-group" style="width: 530px;"> 
                 <label for="operador">Operadores</label>
                 <select class="form-control form-control" id="operador" name="operador" multiple required>
-                    <option value="123 - Ryan">123 - Ryan</option>
-                    <option value="456 - Davi">456 - Davi</option>
-                    <option value="789 - Outro">789 - Outro</option>
+                    {% for funcionario in tb_funcionarios %}
+                    <option value={{funcionario[0]}}>{{funcionario[0]}}</option>
+                    {% endfor %}
                 </select>
             </div>
     </div>

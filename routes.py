@@ -404,7 +404,13 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     opcoes.remove(opcaoAtual)  # Remove o elemento 'c' da lista
     opcoes.insert(0, opcaoAtual)
 
-    return render_template('user/edit.html', ordem=data1[0], opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao)
+    query = """SELECT * FROM tb_funcionario"""
+    tb_funcionarios = pd.read_sql_query(query, conn)
+    tb_funcionarios['matricula_nome'] = tb_funcionarios['matricula'] + " - " + tb_funcionarios['nome']
+    tb_funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
+    
+
+    return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao)
  
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
