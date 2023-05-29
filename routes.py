@@ -287,7 +287,6 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     return render_template('user/index.html', list_users = list_users)
 
 @routes_bp.route('/add_student', methods=['POST']) 
-@login_required
 def add_student(): # Criar ordem de serviço
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
