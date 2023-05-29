@@ -1,4 +1,4 @@
-certifi @ file:///C:/b/abs_ac29jvt43w/croot/certifi_1665076682579/work/certifi
+# certifi @ file:///C:/b/abs_ac29jvt43w/croot/certifi_1665076682579/work/certifi
 Flask==2.2.3
 Flask-Login==0.6.2
 Flask-Migrate==4.0.4
