@@ -6,12 +6,9 @@ import datetime
 import pandas as pd
 import numpy as np
 import json
-import plotly.graph_objs as go
-import plotly.offline as opy
 from funcoes import gerador_de_semanas_informar_manutencao, login_required
 import warnings
 from flask import session
-from functools import wraps
 import base64
 from datetime import datetime
 from pandas.tseries.offsets import BMonthEnd
