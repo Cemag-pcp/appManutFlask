@@ -21,48 +21,32 @@
         <h3>Abrir OS</h3>
       </div>  
       <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data">
-        <div class="form-group">      
-            <label for="setor">Setor</label>
-            <select class="form-control" id="setor" name="setor">
-              <option value="" selected disabled hidden></option>  
-              <option>Administrativo</option>
-              <option>Estamparia</option>
-              <option>Solda</option>
-              <option>Montagem</option>
-              <option>Pintura</option>
-              <option>Carpintaria</option>
-              <option>Almoxarifado</option>
-              <option>Usinagem</option>
-              <option>Serra</option>
-              <option>Corte</option>
-              <option>Serralheria</option>
-              <option>Manutenção</option>              
-            </select>
-        </div>
-
-        <div class="form-group" id="maquina-select">
-          <label for="maquina">Máquina:</label>
-          <select class="form-control select2" name="maquina">
-            {% for maquina in lista_maquinas %}
-            <option value="" selected disabled hidden></option>  
-            <option value="{{maquina[0]}}">{{maquina[0]}}</option>
-            {% endfor %}
+        <div class="form-group">
+          <label for="setor">Setor</label>
+          <select class="form-control" id="setor" name="setor" onchange="getMaquinasPorSetor()">
+            <option value="" selected disabled hidden></option>
+            <option value="Administrativo">Administrativo</option>
+            <option value="Estamparia">Estamparia</option>
+            <option value="Solda">Solda</option>
+            <option value="Montagem">Montagem</option>
+            <option value="Pintura">Pintura</option>
+            <option value="Carpintaria">Carpintaria</option>
+            <option value="Almoxarifado">Almoxarifado</option>
+            <option value="Usinagem">Usinagem</option>
+            <option value="Serra">Serra</option>
+            <option value="Corte">Corte</option>
+            <option value="Serralheria">Serralheria</option>
+            <option value="Manutenção">Manutenção</option>
           </select>
         </div>
 
-        <div class="form-group" id="maquina-input">
-          <label for="maquina">Área:</label>
-          <!-- <input class="select2" name="maquina" > -->
-          <select class="form-control form-control select2" id="maquina" name="maquina">
+        <div class="form-group" id="maquina-select">
+          <label for="maquina">Máquina/Local:</label>
+          <select class="form-control" data-live-search="true" name="maquina" id="maquina">
             <option value="" selected disabled hidden></option>  
-            <option>RH</option>
-            <option>Vendas</option>
-            <option>Contabilidade</option>
-            <option>PCP</option>
-            <option>Marketing</option>
-            <option>TI</option>
-            <option>Projetos</option>
-            <option>Compras</option>              
+            {% for maquina in lista_maquinas %}
+            <option value="{{maquina[0]}}">{{maquina[0]}}</option>
+            {% endfor %}
           </select>
         </div>
          
@@ -71,8 +55,16 @@
           <textarea id="problema" name="problema" rows="5" cols="39" required placeholder=" Descreva o problema..."></textarea>
         </div>
 
+        <div class="form-group">
+          <label for="maquina-parada">Máquina parada?</label>
+          <label class="switch">
+            <input type="checkbox" name="maquina-parada" id="maquina-parada">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
         <div class="form-group">        
-          <label for="risco">Risco</label>
+          <label for="risco">Impacto na produção:</label>
           <select class="form-control form-control" id="risco" name="risco" required>
               <option value="" selected disabled hidden></option>  
               <option>Alto</option>
@@ -95,34 +87,57 @@
   </div>
 </div>
 
-
-<!-- Script para desabilitar os campos de acordo com o setor-->
 <script>
-  document.getElementById('setor').addEventListener('change', function() {
-    var setorValue = this.value;
-    var maquinaSelect = document.getElementById('maquina-select');
-    var maquinaInput = document.getElementById('maquina-input');
-    
-    if (setorValue === '') {
-      maquinaSelect.style.display = 'none';
-      maquinaInput.style.display = 'none';
-    } else if (setorValue === 'Administrativo') {
-      maquinaSelect.style.display = 'none';
-      maquinaInput.style.display = '';
+  function getMaquinasPorSetor() {
+    var setorSelect = document.getElementById('setor');
+    var maquinaSelect = document.getElementById('maquina');
+    var setorSelecionado = setorSelect.value;
+
+    // Limpa as opções atuais do menu de máquinas
+    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
+
+    // Verifica se um setor foi selecionado
+    if (setorSelecionado !== '') {
+      // Faz uma chamada assíncrona para o servidor Flask
+      $.ajax({
+        url: '/maquinas/' + setorSelecionado,
+        type: 'GET',
+        success: function(data) {
+          // Atualiza o menu de máquinas com as opções retornadas do servidor
+          for (var i = 0; i < data.length; i++) {
+            var option = document.createElement('option');
+            option.text = data[i];
+            option.value = data[i];
+            maquinaSelect.add(option);
+          }
+        }
+      });
+    }
+  }
+</script>
+
+<!-- Inicialize o Bootstrap Select -->
+<script>
+  $(document).ready(function() {
+    $('#maquina').select2({
+      placeholder: 'Pesquisar máquina',
+      allowClear: true,
+      width: '100%',
+    });
+  });
+</script>
+
+<script>
+  var maquinaParadaCheckbox = document.getElementById('maquina-parada');
+  var maquinaParadaHiddenInput = document.querySelector('input[name="maquina-parada"][type="hidden"]');
+
+  maquinaParadaCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+      maquinaParadaHiddenInput.value = "true";
     } else {
-      maquinaSelect.style.display = '';
-      maquinaInput.style.display = 'none';
+      maquinaParadaHiddenInput.value = "false";
     }
   });
 </script>
-
-
-<!-- Script para gerar o dropdown com filtro por nome -->
-<script>
-  $(document).ready(function() {
-    $('.select2').select2();
-  });
-</script>
-
 
 {% endblock %}

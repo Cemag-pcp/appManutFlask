@@ -303,6 +303,14 @@ def add_student(): # Criar ordem de serviço
         n_ordem = 0
         status = 'Em espera'
 
+        try:
+            maquina_parada = request.form['maquina-parada']
+
+        except:
+            maquina_parada = 'false'
+
+        print(maquina_parada)
+
         maquina = maquina.split(" - ")
         maquina = maquina[0]
         
@@ -326,7 +334,7 @@ def add_student(): # Criar ordem de serviço
 
         try:
 
-            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura))
+            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada))
 
             if 'imagem' in request.files:
                 imagem = request.files['imagem']
@@ -336,10 +344,9 @@ def add_student(): # Criar ordem de serviço
                 cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data))
                 conn.commit()
-
         except:
             id = 0
-            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco, status, problemaaparente, id_ordem,n_ordem ,dataabertura) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (id, setor, maquina, risco, status, problema,ultima_os, n_ordem, dataAbertura))
+            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco, status, problemaaparente, id_ordem,n_ordem ,dataabertura, maquina_parada) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (id, setor, maquina, risco, status, problema,ultima_os, n_ordem, dataAbertura, maquina_parada))
             
             if 'imagem' in request.files:
                 imagem = request.files['imagem']
@@ -481,19 +488,29 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
 @routes_bp.route('/openOs')
 def open_os(): # Página de abrir OS
 
+    return render_template("user/openOs.html")
+
+@routes_bp.route('/maquinas/<setor>')
+def filtro_maquinas(setor):
+   
+    setor = setor.upper()
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """
-        SELECT * FROM tb_maquinas
-    """
+        SELECT * FROM tb_maquinas WHERE setor = {}
+    """.format("'" + setor + "'")
 
     lista_maquinas = pd.read_sql_query(query, conn)
-
     lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
     lista_maquinas = lista_maquinas[['codigo_desc']].values.tolist()
+    
+    if setor == 'ADMINISTRATIVO':
 
-    return render_template("user/openOs.html", lista_maquinas=lista_maquinas)
+        lista_maquinas = ['RH','Vendas','Contabilidade','PCP','Marketing','TI','Projetos','Compras']
+
+    return jsonify(lista_maquinas)
 
 @routes_bp.route('/edit_material/<id_ordem>', methods = ['POST', 'GET'])
 @login_required
