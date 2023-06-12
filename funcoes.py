@@ -83,7 +83,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar().week
+            semana_inicial = primeira_manutencao.isocalendar()[1]
             data_manutencao = primeira_manutencao + 39 * BDay()
             
             # Loop pelas semanas
@@ -117,7 +117,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar().week
+            semana_inicial = primeira_manutencao.isocalendar()[1]
             data_manutencao = primeira_manutencao + 6 * BDay()
             
             # Loop pelas semanas
@@ -151,7 +151,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar().week
+            semana_inicial = primeira_manutencao.isocalendar()[1]
             data_manutencao = primeira_manutencao + 180 * BDay()
             
             # Loop pelas semanas
