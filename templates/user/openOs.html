@@ -1,30 +1,29 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-  <div class="col-md-4 offset-md-4">
-    {% with messages = get_flashed_messages()  %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">×</span>
-      </button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+<div class="col-md-4 offset-md-4">
+  {% with messages = get_flashed_messages()  %}
+  {% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
   </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
 </div>
-
   <div class="col-md-4 offset-md-4">
     <div id ="formulario_abertura" class="card card-body">
+      <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+        <h3>Abrir OS</h3>
+      </div>  
       <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data">
-
-        <div class="form-group"> 
-          <div id = 'abertura_titulo' class="row" style="width: 120px; display: flex; justify-content: center; align-items: center; margin-left: 80px;"><h3>Abrir OS</h3></div>       
+        <div class="form-group">      
             <label for="setor">Setor</label>
-            <select class="form-control form-control" id="setor" name="setor">
+            <select class="form-control" id="setor" name="setor">
               <option value="" selected disabled hidden></option>  
               <option>Administrativo</option>
               <option>Estamparia</option>
@@ -43,7 +42,7 @@
 
         <div class="form-group" id="maquina-select">
           <label for="maquina">Máquina:</label>
-          <select style = 'width: 100%;' class="select2" name="maquina" >
+          <select class="form-control select2" name="maquina">
             {% for maquina in lista_maquinas %}
             <option value="" selected disabled hidden></option>  
             <option value="{{maquina[0]}}">{{maquina[0]}}</option>
