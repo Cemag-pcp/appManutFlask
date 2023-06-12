@@ -22,6 +22,13 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
 
     df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
     
+    codigo_maquina = 'ABC'
+    grupo = 'ABC'
+    maquina = 'ABC'
+    classificacao = 'A'
+    ultima_manutencao = '2023-06-12'
+    periodicidade = 'Quinzenal'
+
     # Converte a coluna de data para o tipo datetime
     df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
     
@@ -50,9 +57,21 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 while data_manutencao.weekday() in [5, 6]:
                     data_manutencao = data_manutencao + 1 * BDay()
         
-                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
-                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
-                    
+                # df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                #                                     'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+                
+
+                df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
+                           'Última Manutenção': data_manutencao,
+                           'Código da máquina': nome_maquina,
+                           'Descrição da máquina': desc_maquina,
+                           'Periodicidade': periodicidade,
+                           'Grupo': grupo,
+                           'Classificação': classificacao},
+                            index=[0])
+
+                df_manutencao = pd.concat([df_manutencao, df_new_row], ignore_index=True)
+
                 # Avança para a próxima data de manutenção
                 data_manutencao = data_manutencao + 14 * BDay()
         
@@ -73,9 +92,20 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 while data_manutencao.weekday() in [5, 6]:
                     data_manutencao = data_manutencao + 1 * BDay()
         
-                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
-                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
-                                        
+                # df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                #                                     'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+                
+                df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
+                           'Última Manutenção': data_manutencao,
+                           'Código da máquina': nome_maquina,
+                           'Descrição da máquina': desc_maquina,
+                           'Periodicidade': periodicidade,
+                           'Grupo': grupo,
+                           'Classificação': classificacao},
+                            index=[0])
+
+                df_manutencao = pd.concat([df_manutencao, df_new_row], ignore_index=True)
+
                 # Avança para a próxima data de manutenção
                 data_manutencao = data_manutencao + 39 * BDay()
                 
@@ -96,9 +126,20 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 while data_manutencao.weekday() in [5, 6]:
                     data_manutencao = data_manutencao + 1 * BDay()
         
-                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
-                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
-                                        
+                # df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                #                                     'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+
+                df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
+                           'Última Manutenção': data_manutencao,
+                           'Código da máquina': nome_maquina,
+                           'Descrição da máquina': desc_maquina,
+                           'Periodicidade': periodicidade,
+                           'Grupo': grupo,
+                           'Classificação': classificacao},
+                            index=[0])
+
+                df_manutencao = pd.concat([df_manutencao, df_new_row], ignore_index=True)                      
+
                 # Avança para a próxima data de manutenção
                 data_manutencao = data_manutencao + 6 * BDay()
 
@@ -119,9 +160,20 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 while data_manutencao.weekday() in [5, 6]:
                     data_manutencao = data_manutencao + 1 * BDay()
         
-                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
-                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
-                                        
+                # df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                #                                     'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+
+                df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
+                           'Última Manutenção': data_manutencao,
+                           'Código da máquina': nome_maquina,
+                           'Descrição da máquina': desc_maquina,
+                           'Periodicidade': periodicidade,
+                           'Grupo': grupo,
+                           'Classificação': classificacao},
+                            index=[0])
+
+                df_manutencao = pd.concat([df_manutencao, df_new_row], ignore_index=True)                     
+
                 # Avança para a próxima data de manutenção
                 data_manutencao = data_manutencao + 180 * BDay()
 
@@ -172,7 +224,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             number_week = df_filter['Week_Number'][k]
             df_52semanas[number_week] = df_filter['Última Manutenção'][k]
             
-        df_vazio = df_vazio.append(df_52semanas) 
+        df_vazio = pd.concat([df_vazio, df_52semanas], ignore_index=True)
     
     df_vazio = df_vazio.replace(np.nan, '')
     
