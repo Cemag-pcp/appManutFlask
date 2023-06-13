@@ -44,7 +44,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
         if periodicidade == 'Quinzenal':
             nome_maquina = row['Código da máquina']
             desc_maquina = row['Descrição da máquina']
-            primeira_manutencao = datetime.datetime.strptime(row['Última Manutenção'], "%Y-%m-%d").date()
+            primeira_manutencao = datetime.datetime.strptime(row['Última manutenção'], "%d/%m/%Y").date()
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
