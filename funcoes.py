@@ -44,11 +44,11 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
         if periodicidade == 'Quinzenal':
             nome_maquina = row['Código da máquina']
             desc_maquina = row['Descrição da máquina']
-            primeira_manutencao = datetime.datetime.strptime(row['Última manutenção'], "%d/%m/%Y").date()
+            primeira_manutencao = row['Última Manutenção']
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar().week
+            semana_inicial = primeira_manutencao.strftime("%V")
             data_manutencao = primeira_manutencao + 14 * BDay()
             
             # Loop pelas semanas
