@@ -22,12 +22,12 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
 
     df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
     
-    codigo_maquina = 'ABC'
-    grupo = 'ABC'
-    maquina = 'ABC'
-    classificacao = 'A'
-    ultima_manutencao = '2023-06-12'
-    periodicidade = 'Quinzenal'
+    # codigo_maquina = 'ABC'
+    # grupo = 'ABC'
+    # maquina = 'ABC'
+    # classificacao = 'A'
+    # ultima_manutencao = '2023-06-12'
+    # periodicidade = 'Quinzenal'
 
     # Converte a coluna de data para o tipo datetime
     df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
@@ -48,7 +48,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar()[1]
+            semana_inicial = primeira_manutencao.isocalendar().week
             data_manutencao = primeira_manutencao + 14 * BDay()
             
             # Loop pelas semanas
@@ -83,7 +83,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar()[1]
+            semana_inicial = primeira_manutencao.isocalendar().week
             data_manutencao = primeira_manutencao + 39 * BDay()
             
             # Loop pelas semanas
@@ -117,7 +117,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar()[1]
+            semana_inicial = primeira_manutencao.isocalendar().week
             data_manutencao = primeira_manutencao + 6 * BDay()
             
             # Loop pelas semanas
@@ -151,7 +151,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar()[1]
+            semana_inicial = primeira_manutencao.isocalendar().week
             data_manutencao = primeira_manutencao + 180 * BDay()
             
             # Loop pelas semanas
