@@ -809,6 +809,10 @@ def plan_52semanas(): # Tabela com as 52 semanas
         manut_inicial = request.form['manut_inicial']
         periodicidade = request.form['periodicidade']
         
+        df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,criticidade,manut_inicial,periodicidade)
+
+        print(df)
+
         s = ("""
             select codigo from tb_maquinas
         """.format(codigo))
