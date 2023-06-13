@@ -48,7 +48,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.strftime("%V")
+            semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 14 * BDay()
             
             # Loop pelas semanas
