@@ -340,3 +340,46 @@ def tempo_os():
     df_timeline = df_timeline.values.tolist()
 
     return df_timeline
+
+# def create_table_sql():
+
+#      # Criar um cursor
+#     cur = conn.cursor()
+
+#     # Criar a tabela no banco de dados
+#     create_table_query = f"CREATE TABLE tb_maquinas_preventivas ("
+
+#     for column_name, column_type in df_final.dtypes.items():
+#         if column_type == 'object':
+#             create_table_query += f'"{column_name}" VARCHAR,'    
+#         # Adicione outros tipos de dados de acordo com suas colunas
+
+#     # Remover a vírgula extra no final da query
+#     create_table_query = create_table_query.rstrip(',') + ")"
+
+#     cur.execute(create_table_query)
+
+#     # Inserir os dados do DataFrame na tabela
+#     insert_query = f"INSERT INTO tb_maquinas_preventivas ("
+
+#     for column_name in df_final.columns:
+#         insert_query += f'"{column_name}",'
+        
+#     # Remover a vírgula extra no final da query
+#     insert_query = insert_query.rstrip(',') + ") VALUES ("
+
+#     for _, row in df_final.iterrows():
+#         values = []
+#         for _, value in row.items():
+#             if isinstance(value, str):
+#                 values.append(f"'{value}'")
+#             else:
+#                 values.append(str(value))
+#         cur.execute(insert_query + ','.join(values) + ")")
+
+#     # Confirmar as alterações
+#     conn.commit()
+
+#     # Fechar a conexão
+#     cur.close()
+#     conn.close()

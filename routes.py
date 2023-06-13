@@ -828,22 +828,14 @@ def plan_52semanas(): # Tabela com as 52 semanas
             flash("Máquina cadastrada com sucesso", category='sucess')
             return redirect('/52semanas')
 
-    s = (""" SELECT * FROM tb_maquinas """)
+    s = (""" SELECT * FROM tb_maquinas_preventivas """)
 
     df_maquinas = pd.read_sql_query(s, conn)
     
-    df_final = pd.DataFrame()
+    colunas = df_maquinas.columns.tolist()
+    df_maquinas = df_maquinas.values.tolist()
 
-    for i in range(len(df_maquinas)):    
-        
-        df_planejamento = gerador_de_semanas_informar_manutencao(df_maquinas['setor'][i], df_maquinas['codigo'][i], df_maquinas['descricao'][i], df_maquinas['criticidade'][i], df_maquinas['manut_inicial'][i], df_maquinas['periodicidade'][i])
-        df_final = pd.concat([df_final, df_planejamento], axis=0)
-
-    df_final = df_final.replace('','-')
-    colunas = df_final.columns.tolist()
-    df_final = df_final.values.tolist()
-
-    return render_template('user/52semanas.html', data=df_final, colunas=colunas)
+    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas)
 
 @routes_bp.route('/visualizar_imagem/<id_ordem>', methods=['GET'])
 @login_required
