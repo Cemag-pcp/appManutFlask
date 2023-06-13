@@ -22,12 +22,12 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
 
     df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
     
-    # codigo_maquina = 'ABC'
-    # grupo = 'ABC'
-    # maquina = 'ABC'
-    # classificacao = 'A'
-    # ultima_manutencao = '2023-06-12'
-    # periodicidade = 'Quinzenal'
+    codigo_maquina = 'ABC'
+    grupo = 'ABC'
+    maquina = 'ABC'
+    classificacao = 'A'
+    ultima_manutencao = '2023-06-12'
+    periodicidade = 'Quinzenal'
 
     # Converte a coluna de data para o tipo datetime
     df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
