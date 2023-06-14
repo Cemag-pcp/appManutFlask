@@ -800,13 +800,14 @@ def plan_52semanas(): # Tabela com as 52 semanas
     
         # Obtém os dados do formulário
         codigo = request.form['codigo']
+        tombamento = request.form['tombamento']
         descricao = request.form['descricao']
         setor = request.form['setor']
         criticidade = request.form['criticidade']
         manut_inicial = request.form['manut_inicial']
         periodicidade = request.form['periodicidade']
         
-        df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,criticidade,manut_inicial,periodicidade)
+        df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manut_inicial,periodicidade)
 
         df = df.replace('','-', regex=True)  
 

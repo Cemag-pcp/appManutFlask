@@ -1,6 +1,12 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
+<style>
+  th, td {
+    text-align: center;
+  }
+</style>
+
 <div id = 'linha_tempo'class="card card-body">
   <div class="row justify-content-md-center">
     <div class="row"><h3>Histórico de preventivas da máquina: {{ maquina }}</h3></div>

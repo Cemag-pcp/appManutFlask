@@ -15,13 +15,13 @@ DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
 
-def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade): # Função para gerar as 52 semanas
-
+def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,tombamento,classificacao,ultima_manutencao,periodicidade):
+    
     lista_campos = []
 
-    lista_campos.append([codigo_maquina,grupo,maquina,classificacao,ultima_manutencao,periodicidade])
+    lista_campos.append([codigo_maquina,grupo,maquina,tombamento,classificacao,ultima_manutencao,periodicidade])
 
-    df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
+    df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Tombamento','Classificação','Última Manutenção','Periodicidade'])
     
     # codigo_maquina = 'ABC'
     # grupo = 'ABC'
@@ -48,6 +48,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             primeira_manutencao = row['Última Manutenção']
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
+            tombamento = row['Tombamento']
             
             semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 29 * BDay()
@@ -65,6 +66,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
                            'Última Manutenção': data_manutencao,
                            'Código da máquina': nome_maquina,
+                           'Tombamento': tombamento,                           
                            'Descrição da máquina': desc_maquina,
                            'Periodicidade': periodicidade,
                            'Grupo': grupo,
@@ -82,6 +84,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             primeira_manutencao = row['Última Manutenção']
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
+            tombamento = row['Tombamento']
             
             semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 14 * BDay()
@@ -99,6 +102,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
                            'Última Manutenção': data_manutencao,
                            'Código da máquina': nome_maquina,
+                           'Tombamento': tombamento,                           
                            'Descrição da máquina': desc_maquina,
                            'Periodicidade': periodicidade,
                            'Grupo': grupo,
@@ -117,6 +121,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             primeira_manutencao = row['Última Manutenção']
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
+            tombamento = row['Tombamento']
             
             semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 39 * BDay()
@@ -133,6 +138,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
                            'Última Manutenção': data_manutencao,
                            'Código da máquina': nome_maquina,
+                           'Tombamento': tombamento,
                            'Descrição da máquina': desc_maquina,
                            'Periodicidade': periodicidade,
                            'Grupo': grupo,
@@ -151,6 +157,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             primeira_manutencao = row['Última Manutenção']
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
+            tombamento = row['Tombamento']
             
             semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 6 * BDay()
@@ -167,6 +174,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
                            'Última Manutenção': data_manutencao,
                            'Código da máquina': nome_maquina,
+                           'Tombamento': tombamento,                           
                            'Descrição da máquina': desc_maquina,
                            'Periodicidade': periodicidade,
                            'Grupo': grupo,
@@ -185,6 +193,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             primeira_manutencao = row['Última Manutenção']
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
+            tombamento = row['Tombamento']
             
             semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 180 * BDay()
@@ -201,6 +210,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
                 df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
                            'Última Manutenção': data_manutencao,
                            'Código da máquina': nome_maquina,
+                           'Tombamento': tombamento,                           
                            'Descrição da máquina': desc_maquina,
                            'Periodicidade': periodicidade,
                            'Grupo': grupo,
@@ -232,7 +242,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
     
     df_vazio = pd.DataFrame()
     
-    list_52 = ['Código da máquina','Grupo', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção']
+    list_52 = ['Código da máquina','Tombamento','Grupo', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção']
     
     for li in range(1,53):
         list_52.append(li)
@@ -247,12 +257,13 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
         df_filter = df_manutencao.loc[(df_manutencao['Código da máquina'] == lista_maq[i])] 
         df_filter = df_filter.reset_index(drop=True)
         df_52semanas['Código da máquina'] = df_filter['Código da máquina'][i]
+        df_52semanas['Tombamento'] = df_filter['Tombamento'][i]
         df_52semanas['Descrição da máquina'] = df_filter['Descrição da máquina'][i]
         df_52semanas['Periodicidade'] = df_filter['Periodicidade'][i]
         df_52semanas['Classificação'] = df_filter['Classificação'][i]
         df_52semanas['Grupo'] = df_filter['Grupo'][i]
         df_52semanas['Última manutenção'] = df_filter['primeira_manutencao'][i]
-        
+
         index = index + 1
         
         for k in range(len(df_filter)):
@@ -365,9 +376,37 @@ def tempo_os():
 
     return df_timeline
 
+
+# df_final = pd.DataFrame()
+
+# for i in range(26,len(df1)):
+    
+#     codigo_maquina = df1['Código'][i]
+#     grupo = df1['Setor'][i]
+#     maquina = df1['Descrição'][i]
+#     tombamento = df1['Tombamento'][i]
+#     classificacao = df1['Criticidade'][i]
+#     ultima_manutencao = df1['Manutenção inicial'][i]
+#     periodicidade = df1['Periodicidade'][i]
+
+#     df_inicial = gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,tombamento,classificacao,ultima_manutencao,periodicidade)
+
+#     df_final = pd.concat([df_final,df_inicial])
+
+# conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+# cur = conn.cursor()
+
+# delete_query = "DROP TABLE tb_maquinas_preventivas;"
+# cur.execute(delete_query)
+
+# conn.commit()
+
+# cur.close()
+# conn.close()
+
 # def create_table_sql():
 
-#      # Criar um cursor
+#     # Criar um cursor
 #     cur = conn.cursor()
 
 #     # Criar a tabela no banco de dados
