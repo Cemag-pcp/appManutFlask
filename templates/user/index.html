@@ -22,11 +22,11 @@
                     <thead>
                         <tr>
                             <th>OS</th>
-                            <th>Setor</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
                             <th>Risco</th>
                             <th>Status</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
@@ -52,7 +52,7 @@
                             {% endif %}
                             
                             
-                            <td>{{row[6]}}</td>
+                            <td>{{row[16]}}</td>
                             <td>{{row[13]}}</td>
                             <td class="coluna-valores">R${{row[0]}}</td>                    
                             <td>
@@ -84,12 +84,12 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th class="sorting sorting_asc"></th>
+                            <th style="min-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ordem</th>
                             <th>Setor</th>
                             <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                            <th style="min-width: 150px">Risco</th>
+                            <th style="min-width: 100px">Risco</th>
                             <th>Status</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
                             <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
                             <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
                             <th></th>
@@ -122,7 +122,6 @@
     </div>
 </div>
 
-  
 <script>
 
     function showImageModal(id_ordem) {
@@ -181,6 +180,4 @@
     }
 </script>
   
-
-
 {% endblock %}

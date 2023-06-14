@@ -8,6 +8,7 @@ from flask import redirect, url_for, session
 from functools import wraps
 import psycopg2
 import psycopg2.extras
+from psycopg2 import Error
 
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
@@ -40,7 +41,41 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
     for i, row in df_maquinas.iterrows():
         # Define as variáveis da máquina atual
         periodicidade = row['Periodicidade']
+
+        if periodicidade == 'Mensal':
+            nome_maquina = row['Código da máquina']
+            desc_maquina = row['Descrição da máquina']
+            primeira_manutencao = row['Última Manutenção']
+            periodicidade = row['Periodicidade']
+            grupo = row['Grupo']
+            
+            semana_inicial = int(primeira_manutencao.strftime("%V"))
+            data_manutencao = primeira_manutencao + 29 * BDay()
+            
+            # Loop pelas semanas
+            for j in range(52-semana_inicial):
+                # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
+                while data_manutencao.weekday() in [5, 6]:
+                    data_manutencao = data_manutencao + 1 * BDay()
         
+                # df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                #                                     'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+                
+
+                df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
+                           'Última Manutenção': data_manutencao,
+                           'Código da máquina': nome_maquina,
+                           'Descrição da máquina': desc_maquina,
+                           'Periodicidade': periodicidade,
+                           'Grupo': grupo,
+                           'Classificação': classificacao},
+                            index=[0])
+
+                df_manutencao = pd.concat([df_manutencao, df_new_row], ignore_index=True)
+
+                # Avança para a próxima data de manutenção
+                data_manutencao = data_manutencao + 29 * BDay()
+ 
         if periodicidade == 'Quinzenal':
             nome_maquina = row['Código da máquina']
             desc_maquina = row['Descrição da máquina']
@@ -83,7 +118,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar().week
+            semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 39 * BDay()
             
             # Loop pelas semanas
@@ -117,7 +152,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar().week
+            semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 6 * BDay()
             
             # Loop pelas semanas
@@ -151,7 +186,7 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
             periodicidade = row['Periodicidade']
             grupo = row['Grupo']
             
-            semana_inicial = primeira_manutencao.isocalendar().week
+            semana_inicial = int(primeira_manutencao.strftime("%V"))
             data_manutencao = primeira_manutencao + 180 * BDay()
             
             # Loop pelas semanas
@@ -241,29 +276,20 @@ def login_required(func): # Lógica do parâmetro de login_required, onde escolh
 def trigger_ordem_planejada():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    s = (""" SELECT * FROM tb_maquinas """)
-    df_maquinas = pd.read_sql_query(s, conn)
-
-    df_final = pd.DataFrame()
-
-    for i in range(len(df_maquinas)):    
-        try:
-            df_planejamento = gerador_de_semanas_informar_manutencao(df_maquinas['setor'][i], df_maquinas['codigo'][i],
-                                                                      df_maquinas['descricao'][i], df_maquinas['criticidade'][i],
-                                                                        df_maquinas['manut_inicial'][i], df_maquinas['periodicidade'][i])
-            df_final = pd.concat([df_final, df_planejamento], axis=0)
-        except:
-            pass
-
+    s = (""" SELECT * FROM tb_maquinas_preventivas """)
+    df_final = pd.read_sql_query(s, conn)
+    
     # Obtendo a data atual
     data_atual = datetime.date.today()
 
     # Obtendo o número da semana atual
-    numero_semana = data_atual.isocalendar()[1] + 1    
+    numero_semana = str(data_atual.isocalendar()[1] + 1)    
     
     df_final = df_final[['Código da máquina','Grupo', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção',numero_semana]]
-    df_final = df_final[df_final[numero_semana] != ''].reset_index(drop=True)
+    df_final = df_final[df_final[numero_semana] != '-'].reset_index(drop=True)
+    df_final[numero_semana] = pd.to_datetime(df_final[numero_semana])
 
     for i in range(len(df_final)):
         
@@ -275,8 +301,6 @@ def trigger_ordem_planejada():
             df_final['Classificação'][i] = 'Baixo'
     
     df_final['Grupo'] = df_final['Grupo'].str.title()
-
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     n_ordem = 0
     problemaaparente = 'Manutenção Planejada'
@@ -302,8 +326,8 @@ def trigger_ordem_planejada():
 
         cur.execute(sql, values)    
 
-    
     conn.commit()
+    conn.close()
 
 def tempo_os():
     

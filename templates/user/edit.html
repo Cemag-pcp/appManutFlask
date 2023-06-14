@@ -63,7 +63,7 @@
                 {% else %}
 
                 <div class="form-group">
-                    <label for="operador">Área de manutenção</label>
+                    <label for="area">Área de manutenção</label>
                     <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control" readonly="readonly">
                 </div>
                 {% endif %}
@@ -73,10 +73,10 @@
                 <input id="data_edit" type="text" name="datetimes" />
             </div>
             <div class="form-group" style="width: 530px;"> 
-                <label for="operador">Operadores</label>
-                <select class="form-control form-control" id="operador" name="operador" multiple required>
+                <label for="operador_label">Operadores</label>
+                <select class="form-control" id="operador" name="operador" multiple required>
                     {% for funcionario in tb_funcionarios %}
-                    <option value={{funcionario[0]}}>{{funcionario[0]}}</option>
+                        <option>{{funcionario[0]}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -104,9 +104,6 @@
     </div>
 </div>
 </div>
-
-
-
 
 <script>
 $(function() {

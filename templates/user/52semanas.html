@@ -29,12 +29,12 @@
         <table>
             <thead> 
                 <tr id = 'semanas_primeira_tabela'>
-                    <td>Codigo</td>
-                    <td>Descrição</td>
-                    <td>Setor</td>
-                    <td>Criticidade</td>
-                    <td>Data inicial</td>
-                    <td>Periodicidade</td>
+                  <td>Codigo</td>
+                  <td>Descrição</td>
+                  <td>Setor</td>
+                  <td>Criticidade</td>
+                  <td>Data inicial</td>
+                  <td>Periodicidade</td>
                 </tr>
             </thead>
             <tbody>
@@ -76,7 +76,9 @@
                           <option value="" selected disabled hidden></option>  
                           <option>Semanal</option>
                           <option>Quinzenal</option>
+                          <option>Mensal</option>
                           <option>Bimestral</option>
+                          <option>Semestral</option>
                         </select>
                       </div>
                     </td>
@@ -96,6 +98,7 @@
       <table id="table2" class="table table-striped">
         <thead>
           <tr>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
             {% for coluna in colunas %}
               <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ coluna }}</th>
             {% endfor %}
@@ -104,6 +107,21 @@
         <tbody>
           {% for row in data %}
             <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
+                <td>
+                  <div class="dropdown">
+                      <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                          <a id="dropdown_os" class="dropdown-item" href="/edit/{{row[11]}}"> 
+                              <i class="fas fa-wrench"></i> 
+                          </a>    
+                          <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn"> 
+                              <i class="fas fa-clock"></i> 
+                          </a>
+                      </div>
+                  </div>
+                </td>
                 <td>{{ row[0] }}</td>
                 <td>{{ row[1] }}</td>
                 <td>{{ row[2] }}</td>

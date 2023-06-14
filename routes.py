@@ -12,6 +12,8 @@ from flask import session
 import base64
 from datetime import datetime
 from pandas.tseries.offsets import BMonthEnd
+from psycopg2 import Error
+import json
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -412,7 +414,6 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     tb_funcionarios['matricula_nome'] = tb_funcionarios['matricula'] + " - " + tb_funcionarios['nome']
     tb_funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
     
-
     return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao)
  
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
@@ -440,15 +441,20 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         except:
             ultimo_id = 0
         
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = (""" 
+            SELECT natureza FROM tb_ordens where id_ordem = {}
+        """).format(id_ordem)
+        
+        df = pd.read_sql_query(s, conn)
+
+        natureza = df['natureza'][0]
+
         setor = request.form['setor']
         maquina = request.form['maquina']
         risco = request.form['risco']
         status = request.form['statusLista']
         problema = request.form['problema']
-        # datainicio = request.form['datainicio']
-        # horainicio = request.form['horainicio']
-        # datafim = request.form['datafim']
-        # horafim = request.form['horafim']
         id_ordem = id_ordem
         n_ordem = request.form['n_ordem']
         descmanutencao = request.form['descmanutencao']
@@ -457,7 +463,8 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         tipo_manutencao = request.form['tipo_manutencao']
         datetimes = request.form['datetimes']
         area_manutencao = request.form['area_manutencao']
-        # print(datetimes)
+        natureza = natureza
+        print(operador)
 
         # Divida a string em duas partes: data/hora inicial e data/hora final
         data_hora_inicial_str, data_hora_final_str = datetimes.split(" - ")
@@ -478,8 +485,8 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
-            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, tipo_manutencao, area_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador],tipo_manutencao, area_manutencao))
+            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, natureza, tipo_manutencao, area_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao))
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
@@ -789,18 +796,6 @@ def plan_52semanas(): # Tabela com as 52 semanas
 
     if request.method == 'POST':
     
-        # Obtendo o ultimo id
-
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        s = ("""
-            SELECT MAX(id) FROM tb_maquinas
-        """)
-        cur.execute(s)
-        try:
-            max_id = cur.fetchall()[0][0] + 1
-        except:
-            max_id = 0
-
         # Obtém os dados do formulário
         codigo = request.form['codigo']
         descricao = request.form['descricao']
@@ -811,23 +806,47 @@ def plan_52semanas(): # Tabela com as 52 semanas
         
         df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,criticidade,manut_inicial,periodicidade)
 
-        print(df)
+        df = df.replace('','-', regex=True)  
+
+        lista = df.values.tolist()
+        lista = lista[0]
 
         s = ("""
-            select codigo from tb_maquinas
-        """.format(codigo))
+            SELECT * FROM tb_maquinas_preventivas
+            """)
 
         maquina_cadastrada = pd.read_sql_query(s,conn)
 
-        if  len(maquina_cadastrada[maquina_cadastrada['codigo'] == codigo]) > 0:
+        if  len(maquina_cadastrada[maquina_cadastrada['Código da máquina'] == codigo]) > 0:
             flash("Máquina ja cadastrada", category='danger')
         
             return redirect('/52semanas')
         
         else:
-            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            cur.execute("INSERT INTO tb_maquinas (id, codigo, descricao, setor, criticidade, manut_inicial, periodicidade) VALUES (%s,%s,%s,%s,%s,%s,%s)", (max_id, codigo, descricao, setor, criticidade, manut_inicial, periodicidade))
-            conn.commit()
+            try:
+                conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+                
+                # Consulta SQL para inserir os dados na tabela
+                sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(','.join(['%s'] * len(lista)))
+
+                # Criar o cursor para executar a consulta SQL
+                cursor = conn.cursor()
+
+                # Executar a consulta SQL com a lista de dados
+                cursor.execute(sql_insert, lista)
+
+                # Confirmar a transação
+                conn.commit()
+
+                print("Dados inseridos com sucesso na tabela.")
+
+            except Error as e:
+                print(f"Ocorreu um erro ao conectar ou executar a consulta no PostgreSQL: {e}")
+
+            finally:
+                # Fechar o cursor e a conexão com o banco de dados
+                cursor.close()
+                conn.close()
 
             flash("Máquina cadastrada com sucesso", category='sucess')
             return redirect('/52semanas')
@@ -853,3 +872,51 @@ def visualizar_imagem(id_ordem):
     imagem_base64 = base64.b64encode(imagem_data).decode('utf-8')
 
     return jsonify(imagem_data=imagem_base64, id_ordem=id_ordem)
+
+@routes_bp.route('/timeline-preventiva/<maquina>', methods=['POST', 'GET'])
+@login_required
+def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela máquina
+    
+    print(maquina)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Obtém os dados da tabela
+    s = ("""
+        SELECT * 
+        FROM tb_ordens
+        """)
+    
+    df = pd.read_sql_query(s, conn)
+    df['maquina'] = df['maquina'].str.strip()
+
+    df = df[df['maquina'] == maquina]
+    df = df[df['natureza'] == 'Planejada'].reset_index(drop=True)
+
+    df[['dataabertura','id_ordem']]
+
+    # Limpar a coluna
+    for i in range(len(df)):
+        try:
+            df['operador'][i] = df['operador'][i].replace("{","").replace("}","").replace("[","").replace("]","").replace("\\","").replace('"', '').replace("]}","").replace("}}","")
+        except:
+            pass
+
+    # Criar um dicionário para mapear cada ID à sua respectiva data
+    id_data_map = {}
+
+    # Iterar sobre os IDs únicos e encontrar a data correspondente para cada um
+    for id_ordem in df['id_ordem'].unique():
+        data = df.loc[df['id_ordem'] == id_ordem, 'dataabertura'].iloc[0]
+        id_data_map[id_ordem] = data
+
+    # Atualizar os valores de dataabertura para cada ID
+    df['dataabertura'] = df['id_ordem'].map(id_data_map)
+
+    df = df.drop_duplicates(subset='id_ordem', keep='last')
+    
+    data = df.values.tolist()
+
+    return render_template('user/timeline_preventiva.html', data=data, maquina=maquina)
