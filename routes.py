@@ -284,6 +284,8 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 
     df['total'] = df['total'].apply(lambda x: round(x, 2))
 
+    df = df.sort_values('ultima_atualizacao', ascending=False)
+
     list_users = df.values.tolist()
 
     return render_template('user/index.html', list_users = list_users)
@@ -917,6 +919,8 @@ def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela m
 
     df = df.drop_duplicates(subset='id_ordem', keep='last')
     
+    df = df.sort_values('id_ordem', ascending=True)
+
     data = df.values.tolist()
 
     return render_template('user/timeline_preventiva.html', data=data, maquina=maquina)

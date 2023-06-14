@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="font-awesome-4.7.0\css\font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/user.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/toggleButton.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/button_back.css') }}">
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>  
@@ -37,6 +38,17 @@
 
 </head>
 <body>
+
+  {% block voltar %}
+
+  <div>
+    <a href="#" onclick="window.history.back();" class="botao-voltar">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+  </div>
+
+  {% endblock %}
+
   <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
     <div id="menu">
       <div class="logo">

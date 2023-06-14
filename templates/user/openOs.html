@@ -1,6 +1,9 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
+{% block voltar %}
+{% endblock %}
+
 <div class="col-md-4 offset-md-4">
   {% with messages = get_flashed_messages()  %}
   {% if messages %}
