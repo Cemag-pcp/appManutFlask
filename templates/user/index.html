@@ -31,23 +31,23 @@
                     <thead>
                         <tr>
                             <th style="width: 50px;">OS</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                            <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
+                            <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
                             <th>Risco</th>
                             <th style="text-align: center;">Status</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
+                            <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
-                            <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última atualização</th>
+                            <th style="max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
+                            <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última atualização</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in list_users %}
                         <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <td style="width: 100px;">{{row[11]}}</td>
-                            <td style="padding-bottom: 0px;">{{row[2]}}</td>
-                            <td style="padding-bottom: 0px;">{{row[3]}}</td>
+                            <td style="max-width: 200px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
+                            <td style="max-width: 215px; padding-bottom: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[2]}}</td>
+                            <td style="max-width: 80px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
                             <td style="padding-bottom: 0px;">{{row[4]}}</td>
                             
 
@@ -62,11 +62,11 @@
                             {% endif %}
                             
                             
-                            <td>{{row[16]}}</td>
-                            <td>{{row[13]}}</td>
-                            <td style="width: 100px;" class="coluna-valores">R${{row[0]}}</td>
-                            <td style="width: 100px;">{{row[20]}}</td>                    
-                            <td>
+                            <td style="padding-bottom: 0px;">{{row[16]}}</td>
+                            <td style="padding-bottom: 0px;">{{row[13]}}</td>
+                            <td style="max-width: 60px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" class="coluna-valores">R${{row[0]}}</td>
+                            <td style="max-width: 80px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[20]}}</td>                    
+                            <td style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
                                 <div class="dropdown">
                                     <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
@@ -95,13 +95,13 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th style="width: 50px;">Ordem</th>
+                            <th style="min-width: 120px;">Ordem</th>
                             <th>Setor</th>
                             <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
                             <th style="min-width: 100px">Risco</th>
                             <th>Status</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
-                            <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
+                            <th style="max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
+                            <th style="min-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
                             <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo Material</th>
                             <th style="width: 100px;"></th>
                             <th></th>

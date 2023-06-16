@@ -27,67 +27,73 @@
     </div> 
 
     <form action="{{ url_for('routes.plan_52semanas') }}" method="POST" enctype="multipart/form-data">
-      <div class="form-group">
-        <label for="codigo">Codigo</label>
-        <input type="text" class="form-control" name="codigo" required>
+
+      <div class="form-row">
+          <div class="form-group">
+            <label for="codigo">Codigo</label>
+            <input type="text" class="form-control" style="height: 38px;" name="codigo" required>
+          </div>
+
+        <div class="form-group">
+          <label for="tombamento">Tombamento</label>
+          <input type="text" class="form-control" style="height: 38px;" name="tombamento">
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="tombamento">Tombamento</label>
-        <input type="text" class="form-control" name="tombamento">
-      </div>
-        
       <div class="form-group">
         <label for="descricao">Descrição</label>
-        <input type="text" class="form-control" name="descricao" required>
+        <input type="text" class="form-control" style="height: 38px;" name="descricao" required>
       </div>
+      
+      <div class="form-row">
+          <div class="form-group" style="width: 200px;">         
+            <label for="setor-label">Setor</label>
+            <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
+              <option value="" selected disabled hidden></option>  
+              <option>Administrativo</option>
+              <option>Estamparia</option>
+              <option>Solda</option>
+              <option>Montagem</option>
+              <option>Pintura</option>
+              <option>Carpintaria</option>
+              <option>Almoxarifado</option>
+              <option>Usinagem</option>
+              <option>Serra</option>
+              <option>Corte</option>
+              <option>Serralheria</option>
+            </select>
+          </div>
+    
+          <div class="form-group" style="width: 150px;">  
+            <label for="criticidade-label">Criticidade</label>              
+            <select style = 'width: 90px; height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
+              <option value="" selected disabled hidden></option>  
+              <option>A</option>
+              <option>B</option>
+              <option>C</option>
+            </select>
+          </div>
+    </div>
 
-      <div class="form-group" style="margin-left: 15px; margin-top: 15px; padding: 3px; width: 170px;">         
-        <label for="setor-label">Setor</label>
-        <select class="form-control form-control" id="setor" name="setor" required>
-          <option value="" selected disabled hidden></option>  
-          <option>Administrativo</option>
-          <option>Estamparia</option>
-          <option>Solda</option>
-          <option>Montagem</option>
-          <option>Pintura</option>
-          <option>Carpintaria</option>
-          <option>Almoxarifado</option>
-          <option>Usinagem</option>
-          <option>Serra</option>
-          <option>Corte</option>
-          <option>Serralheria</option>
-        </select>
-      </div>
+    <div class="form-row">
+        <div class="form-group">
+          <label for="manut_inicial">Data inicio</label>
+          <input style='height: 38px;' type="date" class="form-control" name="manut_inicial" required>
+        </div>
 
-      <div class="form-group" style="margin-right: 3px; margin-top: 15px; padding: 3px; width: 100px;">  
-        <label for="criticidade-label">Criticidade</label>              
-        <select style = 'width: 60px; margin-left: 20px;' class="form-control form-control" id="criticidade" name="criticidade" required>
-          <option value="" selected disabled hidden></option>  
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="manut_inicial">Data inicio</label>
-        <input style='width: 170px;' type="date" class="form-control" name="manut_inicial" required>
-      </div>
-
-      <div class="form-group" style="margin-left: 15px; margin-top: 15px; padding: 3px; width: 150px;"> 
-        <label for="periodicidade-label">Periodicidade</label>               
-        <select class="form-control form-control" id="periodicidade" name="periodicidade" required>
-          <option value="" selected disabled hidden></option>  
-          <option>Semanal</option>
-          <option>Quinzenal</option>
-          <option>Mensal</option>
-          <option>Bimestral</option>
-          <option>Semestral</option>
-        </select>
-      </div>
-
-      <div class="form-group">        
+        <div class="form-group"> 
+          <label for="periodicidade-label">Periodicidade</label>               
+          <select class="form-control form-control" style="height: 38px;" id="periodicidade" name="periodicidade" required>
+            <option value="" selected disabled hidden></option>  
+            <option>Semanal</option>
+            <option>Quinzenal</option>
+            <option>Mensal</option>
+            <option>Bimestral</option>
+            <option>Semestral</option>
+          </select>
+        </div>
+    </div>
+      <div class="form-group" style="margin-top: 20px;">        
         <label for="pdf">Checklist em pdf:</label>
         <input type="file" class="form-control-file" id="pdf" name="pdf">
       </div>
