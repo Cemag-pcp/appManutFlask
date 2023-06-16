@@ -279,13 +279,13 @@ body {
   color: rgb(255, 255, 255); 
   background-color: rgba(51, 211, 145, 0.8); 
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-  width: 120px;
+  width: 160px;
   border-radius: 20px; 
   text-align: center; 
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   padding: 4px; 
-  margin-top: 8px; 
+  margin-top: 10px; 
   display: flex; 
   justify-content: center; 
   align-items: center;
@@ -295,13 +295,13 @@ body {
   color: rgb(255, 255, 255); 
   background-color: rgba(253, 188, 100, 0.8); 
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-  width: 120px;
+  width: 160px;
   border-radius: 20px; 
   text-align: center; 
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   padding: 5px; 
-  margin-top: 8px; 
+  margin-top: 10px; 
   display: flex; 
   justify-content: center; 
   align-items: center;
@@ -311,13 +311,13 @@ body {
   color: rgb(255, 255, 255); 
   background-color: rgba(22, 93, 226, 0.6);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08); 
-  width: 140px;
+  width: 160px;
   border-radius: 20px; 
   text-align: center; 
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   padding: 5px; 
-  margin-top: 8px; 
+  margin-top: 10px; 
   display: flex; 
   justify-content: center; 
   align-items: center;
@@ -333,7 +333,7 @@ body {
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   padding: 5px; 
-  margin-top: 8px; 
+  margin-top: 10px; 
   display: flex; 
   justify-content: center; 
   align-items: center;
@@ -411,6 +411,35 @@ body {
 
 .dropdown-item {
   padding: 0.25rem 1rem; /* Adjust padding as needed */
+}
+
+.custom-dropdown {
+  display: none;
+  background-color: #2f436d; /* Cor de fundo desejada */
+}
+
+.custom-dropdown:hover{
+  background: #2f436d;
+  cursor: pointer;
+}
+
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.fa-plus {
+  margin-right: 5px;
+}
+
+.dropdown.open .custom-dropdown{
+  display: block;
+}
+
+.custom-dropdown:hover li{
+  background: #2f436d;
+  font-weight: bold; 
+  padding-left: 15px;
 }
 
 .modal-body img{

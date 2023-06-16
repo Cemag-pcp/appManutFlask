@@ -59,7 +59,15 @@
         <div class="navbar-nav"> -->
       <ul class="item">
         <li onclick="location.href='/index'"><i class="fa-solid fa-arrow-down-short-wide"></i><a href="/index"></a></li>
-        <li onclick="location.href='/openOs'"><i class="fa-solid fa-plus"></i><a href="/openOs"></a></li>  
+        <li class="dropdown" onclick="toggleDropdown(event)">
+          <span class="icon">
+            <i class="fa-solid fa-plus"></i>
+          </span>
+          <ul class="dropdown-menu custom-dropdown" style="padding: 0;">
+            <li onclick="location.href='/openOs'"><a href="/openOs" style="font-weight: bold; padding-left: 10px;">Abrir OS</a></li>
+            <li onclick="location.href='/cadastrar52'"><a href="/cadastrar52" style="font-weight: bold; font-size: 13px;">Cadastrar 52</a></li>
+          </ul>
+        </li> 
         <li onclick="location.href='/grafico'"><i class="fa-solid fa-chart-line"></i><a href="/grafico"></a></li>
         <li onclick="location.href='/52semanas'"><i class="fa-sharp fa-solid fa-calendar-week"></i><a href="/52semanas"></a></li>
         <li id="logout_navbar" onclick="location.href='/logout'"><i class="fa-sharp fa-solid fa-arrow-right-from-bracket"></i><a href="/logout"></a></li>
@@ -151,7 +159,9 @@
         } 
     );
 
-
+    function toggleDropdown(event) {
+      event.currentTarget.classList.toggle('open');
+}
 
 
 // // Obtém o elemento do botão "Abrir Menu"

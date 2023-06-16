@@ -46,40 +46,43 @@
 
         <div class="form-group" id="maquina-select">
           <label for="maquina">Máquina/Local:</label>
-          <select class="form-control" data-live-search="true" name="maquina" id="maquina">
-            <option value="" selected disabled hidden></option>  
-            {% for maquina in lista_maquinas %}
-            <option value="{{maquina[0]}}">{{maquina[0]}}</option>
-            {% endfor %}
-          </select>
+            <select class="form-control form-control" sdata-live-search="true" name="maquina" id="maquina">
+              <option value="" selected disabled hidden></option>  
+              {% for maquina in lista_maquinas %}
+              <option value="{{maquina[0]}}">{{maquina[0]}}</option>
+              {% endfor %}
+            </select>
         </div>
          
         <div class="form-group">
           <label for="problema">Descrição:</label>
           <textarea id="problema" name="problema" rows="5" cols="39" required placeholder=" Descreva o problema..."></textarea>
         </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maquina-parada">Máquina parada?</label>
+            <label class="switch">
+              <input type="checkbox" name="maquina-parada" id="maquina-parada">
+              <span class="slider round"></span>
+            </label>
+          </div>
 
-        <div class="form-group">
-          <label for="maquina-parada">Máquina parada?</label>
-          <label class="switch">
-            <input type="checkbox" name="maquina-parada" id="maquina-parada">
-            <span class="slider round"></span>
-          </label>
-        </div>
-
-        <div class="form-group">        
-          <label for="risco">Impacto na produção:</label>
-          <select class="form-control form-control" id="risco" name="risco" required>
-              <option value="" selected disabled hidden></option>  
-              <option>Alto</option>
-              <option>Médio</option>
-              <option>Baixo</option>
-          </select>
+          
+          <div class="form-group">        
+            <label for="risco">Impacto na produção:</label>
+            <select class="form-control form-control" id="risco" name="risco" required>
+                <option value="" selected disabled hidden></option>  
+                <option>Alto</option>
+                <option>Médio</option>
+                <option>Baixo</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">        
           <label for="imagem">Imagem:</label>
-          <input type="file" class="form-control-file" id="imagem" name="imagem">
+          <input type="file" class="form-control-file" id="imagem" name="imagem" multiple>
         </div>
 
         <button id = 'salvar' class="btn btn-block">
