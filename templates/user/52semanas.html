@@ -27,82 +27,12 @@ th, td {
   {% endif %}
 {% endwith %}
 
-
-<div id = 'filtro_semanas' class='row'>  
-  <div class="carta">
-    <div><h3 class="sem">52 semanas</h3></div>
-    <form action="{{ url_for('routes.plan_52semanas') }}" method="POST">
-        <table>
-            <thead> 
-                <tr id = 'semanas_primeira_tabela'>
-                  <td>Codigo</td>
-                  <td>Tombamento</td>
-                  <td>Descrição</td>
-                  <td>Setor</td>
-                  <td>Criticidade</td>
-                  <td>Data inicial</td>
-                  <td>Periodicidade</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><input type="text" class="form-control" name="codigo" required></td>
-                    <td><input type="text" class="form-control" name="tombamento" ></td>
-                    <td><input style = 'margin-left: 15px; width: 180px;' type="text" class="form-control" name="descricao" required></td>
-                    <td>
-                      <div class="form-group" style="margin-left: 15px; margin-top: 15px; padding: 3px; width: 170px;">                
-                        <select class="form-control form-control" id="setor" name="setor" required>
-                          <option value="" selected disabled hidden></option>  
-                          <option>Administrativo</option>
-                          <option>Estamparia</option>
-                          <option>Solda</option>
-                          <option>Montagem</option>
-                          <option>Pintura</option>
-                          <option>Carpintaria</option>
-                          <option>Almoxarifado</option>
-                          <option>Usinagem</option>
-                          <option>Serra</option>
-                          <option>Corte</option>
-                          <option>Serralheria</option>
-                        </select>
-                      </div>
-                    </td>
-                      <td>
-                        <div class="form-group" style="margin-right: 3px; margin-top: 15px; padding: 3px; width: 100px;">                
-                          <select style = 'width: 60px; margin-left: 20px;' class="form-control form-control" id="criticidade" name="criticidade" required>
-                            <option value="" selected disabled hidden></option>  
-                            <option>A</option>
-                            <option>B</option>
-                            <option>C</option>
-                          </select>
-                        </div>
-                      </td>
-                    <td><input style='width: 170px;' type="date" class="form-control" name="manut_inicial" required></td>
-                    <td>
-                      <div class="form-group" style="margin-left: 15px; margin-top: 15px; padding: 3px; width: 150px;">                
-                        <select class="form-control form-control" id="periodicidade" name="periodicidade" required>
-                          <option value="" selected disabled hidden></option>  
-                          <option>Semanal</option>
-                          <option>Quinzenal</option>
-                          <option>Mensal</option>
-                          <option>Bimestral</option>
-                          <option>Semestral</option>
-                        </select>
-                      </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <button id = 'botao_52semanas' class="btn btn-primary btn-block">
-            Inserir 
-        </button>
-    </form>
-  </div>
-</div>
-
 <div id = "tabela2" class='container-fluid'>
   <div class="row justify-content-md-center">
     <div class = "board2" style="overflow-x: auto;">
+      <div id = "titulo" class="row">
+        <h1 class="visao">Planejamento</h1>
+      </div>
       <table id="table2" class="table table-striped">
         <thead>
           <tr>
@@ -116,10 +46,20 @@ th, td {
           {% for row in data %}
             <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
                 <td>
-                  <a href="/timeline-preventiva/{{row[0]}}"> 
-                      <i class="fas fa-clock"></i> 
-                  </a>
-                </td>
+                  <div class="dropdown">
+                      <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                        <a id = 'dropdown_os' class = "dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=row[0]) }}" class="btn" target="_blank">
+                          <i class="fas fa-clipboard-list"></i> <!-- Ícone "eye" -->
+                        </a>
+                        <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
+                          <i class="fas fa-clock"></i>
+                        </a>
+                      </div>
+                  </div>
+                </td>                
                 <td>{{ row[0] }}</td>
                 <td>{{ row[1] }}</td>
                 <td>{{ row[2] }}</td>

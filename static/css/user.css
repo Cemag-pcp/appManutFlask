@@ -271,7 +271,7 @@ body {
 #titulo .visao{
   top:5%;
   left: 50%;
-  transform: translate(120%,-13%);
+  transform: translate(180%,-13%);
   padding: 10px;
 }
 
@@ -510,6 +510,25 @@ body {
   }
 }
 
+#formulario_preventiva{
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,20%);
+  background-color: rgba(255, 255, 255,0.5);
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  width: 450px;
+  height: auto;
+  border-radius: 20px;
+}
+
+@media (max-width: 767px) { /* Tamanho da tela de celular */
+  #formulario_preventiva {
+      width: 100%; /* Ocupar toda a largura disponível */
+      max-width: 450px; /* Limitar a largura máxima */
+      margin-bottom: 21 0px;
+  }
+}
+
 #input_table{
   position: relative;
   width: 100%;
@@ -631,7 +650,7 @@ body {
 }
 
 .sem{
-  left: 5%;
+  left: 100%;
   transform: translate(40%);
   margin: 10px;
   margin-bottom: 15px;

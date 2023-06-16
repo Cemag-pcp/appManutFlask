@@ -286,6 +286,9 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 
     df = df.sort_values('ultima_atualizacao', ascending=False)
 
+    df['ultima_atualizacao'] = pd.to_datetime(df['ultima_atualizacao'])
+    df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime("%Y-%m-%d %H:%M:%S")
+
     list_users = df.values.tolist()
 
     return render_template('user/index.html', list_users = list_users)
@@ -492,7 +495,7 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
-        return redirect(url_for('routes.Index'))
+        return redirect(url_for('routes.get_employee', id_ordem=id_ordem))
 
 @routes_bp.route('/openOs')
 def open_os(): # Página de abrir OS
@@ -809,7 +812,7 @@ def plan_52semanas(): # Tabela com as 52 semanas
         
         df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manut_inicial,periodicidade)
 
-        df = df.replace('','-', regex=True)  
+        #df = df.replace('','-', regex=True)  
 
         lista = df.values.tolist()
         lista = lista[0]
@@ -821,11 +824,21 @@ def plan_52semanas(): # Tabela com as 52 semanas
         maquina_cadastrada = pd.read_sql_query(s,conn)
 
         if  len(maquina_cadastrada[maquina_cadastrada['Código da máquina'] == codigo]) > 0:
-            flash("Máquina ja cadastrada", category='danger')
-        
-            return redirect('/52semanas')
+            flash("Máquina ja cadastrada", category='danger')        
         
         else:
+
+            if 'pdf' in request.files:
+                pdf = request.files['pdf']
+                # Ler os dados do arquivo PDF
+                pdf_data = pdf.read()
+
+                cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                cur.execute("INSERT INTO tb_checklist (codigo_maquina, checklist) VALUES (%s,%s)", (codigo, pdf_data))
+                conn.commit()
+            else:
+                pass
+
             try:
                 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
                 
@@ -852,8 +865,9 @@ def plan_52semanas(): # Tabela com as 52 semanas
                 conn.close()
 
             flash("Máquina cadastrada com sucesso", category='sucess')
-            return redirect('/52semanas')
-
+        
+        return redirect('/52semanas')
+    
     s = (""" SELECT * FROM tb_maquinas_preventivas """)
 
     df_maquinas = pd.read_sql_query(s, conn)
@@ -862,6 +876,12 @@ def plan_52semanas(): # Tabela com as 52 semanas
     df_maquinas = df_maquinas.values.tolist()
 
     return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas)
+
+@routes_bp.route('/cadastrar52')
+@login_required
+def cadastro_preventiva():
+    
+    return render_template('user/cadastrar52.html')
 
 @routes_bp.route('/visualizar_imagem/<id_ordem>', methods=['GET'])
 @login_required
@@ -925,3 +945,23 @@ def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela m
     data = df.values.tolist()
 
     return render_template('user/timeline_preventiva.html', data=data, maquina=maquina)
+ 
+@routes_bp.route('/mostrar_pdf/<codigo_maquina>', methods=['GET'])
+@login_required
+def mostrar_pdf(codigo_maquina):
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT checklist FROM tb_checklist WHERE codigo_maquina = %s", (codigo_maquina,))
+        pdf_data = cur.fetchone()
+
+        if pdf_data:
+            # Configurar o cabeçalho da resposta para indicar que é um arquivo PDF
+            headers = {'Content-Type': 'application/pdf',
+                       'Content-Disposition': 'inline; filename=arquivo.pdf'}
+
+            return Response(pdf_data['checklist'], headers=headers)
+        else:
+            raise Exception('Arquivo PDF não encontrado.')
+    except Exception as e:
+        flash(str(e))
+        return redirect(url_for('routes.plan_52semanas'))

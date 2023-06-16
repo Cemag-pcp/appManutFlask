@@ -1,0 +1,104 @@
+{% extends "user/layout.html" %}
+{% block body %}
+
+{% block voltar %}
+{% endblock %}
+
+<div class="col-md-4 offset-md-4">
+  {% with messages = get_flashed_messages()  %}
+  {% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+</div>
+
+<div class="col-md-4 offset-md-4">
+  <div id ="formulario_preventiva" class="card card-body">
+    
+    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+      <h3>Cadastrar preventiva</h3>
+    </div> 
+
+    <form action="{{ url_for('routes.plan_52semanas') }}" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="codigo">Codigo</label>
+        <input type="text" class="form-control" name="codigo" required>
+      </div>
+
+      <div class="form-group">
+        <label for="tombamento">Tombamento</label>
+        <input type="text" class="form-control" name="tombamento">
+      </div>
+        
+      <div class="form-group">
+        <label for="descricao">Descrição</label>
+        <input type="text" class="form-control" name="descricao" required>
+      </div>
+
+      <div class="form-group" style="margin-left: 15px; margin-top: 15px; padding: 3px; width: 170px;">         
+        <label for="setor-label">Setor</label>
+        <select class="form-control form-control" id="setor" name="setor" required>
+          <option value="" selected disabled hidden></option>  
+          <option>Administrativo</option>
+          <option>Estamparia</option>
+          <option>Solda</option>
+          <option>Montagem</option>
+          <option>Pintura</option>
+          <option>Carpintaria</option>
+          <option>Almoxarifado</option>
+          <option>Usinagem</option>
+          <option>Serra</option>
+          <option>Corte</option>
+          <option>Serralheria</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-right: 3px; margin-top: 15px; padding: 3px; width: 100px;">  
+        <label for="criticidade-label">Criticidade</label>              
+        <select style = 'width: 60px; margin-left: 20px;' class="form-control form-control" id="criticidade" name="criticidade" required>
+          <option value="" selected disabled hidden></option>  
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="manut_inicial">Data inicio</label>
+        <input style='width: 170px;' type="date" class="form-control" name="manut_inicial" required>
+      </div>
+
+      <div class="form-group" style="margin-left: 15px; margin-top: 15px; padding: 3px; width: 150px;"> 
+        <label for="periodicidade-label">Periodicidade</label>               
+        <select class="form-control form-control" id="periodicidade" name="periodicidade" required>
+          <option value="" selected disabled hidden></option>  
+          <option>Semanal</option>
+          <option>Quinzenal</option>
+          <option>Mensal</option>
+          <option>Bimestral</option>
+          <option>Semestral</option>
+        </select>
+      </div>
+
+      <div class="form-group">        
+        <label for="pdf">Checklist em pdf:</label>
+        <input type="file" class="form-control-file" id="pdf" name="pdf">
+      </div>
+
+      <button id = 'salvar' class="btn btn-primary btn-block">
+        Inserir 
+      </button>
+      
+    </form>
+  </div>
+</div>
+</div>
+
+{% endblock %}

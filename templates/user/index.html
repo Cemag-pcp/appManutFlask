@@ -1,6 +1,12 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
+<style>
+    th, td {
+      text-align: center;
+    }
+</style>
+
 {% with messages = get_flashed_messages()  %}
 {% if messages %}
 {% for message in messages %}
@@ -17,7 +23,9 @@
 <div id = "tabela" class="container-fluid">
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
-            <div id = "titulo" class="row"><h3 class="visao">Visão das ordens de serviço</h3></div>
+            <div id = "titulo" class="row">
+                <h1 class="visao">Ordem de serviço</h1>
+            </div>
             <div class="table-responsive">
                 <table id="table1" class="table table-striped">
                     <thead>
