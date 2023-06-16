@@ -1,0 +1,63 @@
+{% extends "user/layout.html" %}
+{% block body %}
+
+<style>
+    th, td {
+      text-align: center;
+      width: auto;
+    }
+</style>
+
+{% with messages = get_flashed_messages()  %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success" role="sucess">
+    <strong>Sucesso!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="sucess" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div id = "tabela" class="container-fluid">
+    <div class="row justify-content-md-center">
+        <div class = "board" style="overflow-x: auto;">
+            <div id = "titulo" class="row">
+                <h1 class="visao">Máquinas cadastradas</h1>
+            </div>
+            <div class="table-responsive">
+                <table id="table1" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Setor</th>
+                            <th>Descrição</th>
+                            <th>Preventiva</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{row[0]}}</td>
+                            <td>{{row[1]}}</td>
+                            <td>{{row[2]}}</td>
+                            <td>
+                                {% if  row[3] == 'Y' %}
+                                    <i class="fas fa-check-circle habilitado"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle desabilitado"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

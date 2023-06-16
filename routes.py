@@ -135,7 +135,7 @@ def calculo_indicadores(query):
     df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='maquina')
 
     s = ("""
-    SELECT codigo FROM tb_maquinas
+    SELECT codigo FROM tb_maquinas_preventivas
     """)
 
     df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
@@ -965,3 +965,27 @@ def mostrar_pdf(codigo_maquina):
     except Exception as e:
         flash(str(e))
         return redirect(url_for('routes.plan_52semanas'))
+    
+@routes_bp.route('/lista_maquinas', methods=['GET'])
+@login_required
+def lista_maquinas():
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute(""" SELECT "Código da máquina","Grupo", "Descrição da máquina" 
+                FROM tb_maquinas_preventivas """)
+    
+    df_c_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao'])
+    df_c_preventivas['setor'] = df_c_preventivas['setor'].str.title() 
+    df_c_preventivas['preventiva'] = 'Y'
+
+    cur.execute(""" SELECT codigo, setor, descricao 
+                FROM tb_maquinas """)
+    
+    df_s_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao'])
+    df_s_preventivas['setor'] = df_s_preventivas['setor'].str.title() 
+    df_s_preventivas['preventiva'] = 'N'
+
+    df_final = pd.concat([df_c_preventivas,df_s_preventivas]).drop_duplicates(subset='codigo',keep='first').reset_index(drop=True)
+    data = df_final.values.tolist()
+    
+    return render_template('user/lista_maquinas.html', data=data)
