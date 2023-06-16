@@ -1,9 +1,6 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-{% block voltar %}
-{% endblock %}
-
 <div class="col-md-4 offset-md-4">
   {% with messages = get_flashed_messages()  %}
   {% if messages %}
@@ -23,7 +20,7 @@
   <div id ="formulario_preventiva" class="card card-body">
     
     <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
-      <h3>Cadastrar preventiva</h3>
+      <h3>Cadastro de máquinas</h3>
     </div> 
 
     <form action="{{ url_for('routes.plan_52semanas') }}" method="POST" enctype="multipart/form-data">
@@ -63,6 +60,16 @@
               <option>Serralheria</option>
             </select>
           </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="maquina-parada">Preventiva</label>
+              <label class="switch">
+                <input type="checkbox" name="maquina-parada" id="maquina-parada" onchange="toggleCampos()">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
     
           <div class="form-group" style="width: 150px;">  
             <label for="criticidade-label">Criticidade</label>              
@@ -78,7 +85,7 @@
     <div class="form-row">
         <div class="form-group">
           <label for="manut_inicial">Data inicio</label>
-          <input style='height: 38px;' type="date" class="form-control" name="manut_inicial" required>
+          <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" required>
         </div>
 
         <div class="form-group"> 
@@ -93,9 +100,20 @@
           </select>
         </div>
     </div>
+
       <div class="form-group" style="margin-top: 20px;">        
         <label for="pdf">Checklist em pdf:</label>
-        <input type="file" class="form-control-file" id="pdf" name="pdf">
+        <input type="file" class="form-control-file" id="pdf" name="pdf" multiple>
+      </div>
+
+      <div class="form-group" style="margin-top: 20px;">        
+        <label for="imagem">Imagem:</label>
+        <input type="file" class="form-control-file" id="imagem" name="imagem" multiple>
+      </div>
+    
+      <div class="form-group" style="margin-top: 20px;">        
+        <label for="pdf">Documento:</label>
+        <input type="file" class="form-control-file" id="pdf" name="pdf" multiple>
       </div>
 
       <button id = 'salvar' class="btn btn-primary btn-block">
@@ -107,4 +125,26 @@
 </div>
 </div>
 
+<script>
+  function toggleCampos() {
+    var maquinaParadaCheckbox = document.getElementById("maquina-parada");
+    var criticidadeSelect = document.getElementById("criticidade");
+    var manutInicialInput = document.getElementById("manut_inicial");
+    var periodicidadeSelect = document.getElementById("periodicidade");
+  
+    if (maquinaParadaCheckbox.checked) {
+      criticidadeSelect.removeAttribute("disabled");
+      manutInicialInput.removeAttribute("disabled");
+      periodicidadeSelect.removeAttribute("disabled");
+    } else {
+      criticidadeSelect.setAttribute("disabled", "disabled");
+      manutInicialInput.setAttribute("disabled", "disabled");
+      periodicidadeSelect.setAttribute("disabled", "disabled");
+    }
+  }
+  
+  // Chamada inicial para garantir que os campos estejam corretamente habilitados/desabilitados ao carregar a página
+  toggleCampos();
+</script>
+  
 {% endblock %}
