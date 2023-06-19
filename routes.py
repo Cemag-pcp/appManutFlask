@@ -1,5 +1,5 @@
 #app.py
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash,Blueprint, Response
+from flask import Flask, current_app, send_file,jsonify, render_template, request, redirect, url_for, flash,Blueprint, Response
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
 import datetime
@@ -14,8 +14,13 @@ from datetime import datetime
 from pandas.tseries.offsets import BMonthEnd
 from psycopg2 import Error
 import json
+from urllib.parse import urlencode
+import os
+import zipfile
 
 routes_bp = Blueprint('routes', __name__)
+
+#routes_bp.config['UPLOAD_FOLDER'] = r'C:\Users\pcp2\projetoManutencao\appManutFlask-3\UPLOAD_FOLDER'
 
 warnings.filterwarnings("ignore")
  
@@ -800,7 +805,9 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
 @routes_bp.route('/52semanas', methods=['GET'])
 @login_required
 def plan_52semanas(): # Tabela com as 52 semanas
-        
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
     s = (""" SELECT * FROM tb_maquinas_preventivas """)
 
     df_maquinas = pd.read_sql_query(s, conn)
@@ -1017,7 +1024,7 @@ def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela m
 def mostrar_pdf(codigo_maquina):
     try:
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT checklist FROM tb_anexo WHERE codigo_maquina = %s", (codigo_maquina,))
+        cur.execute("SELECT checklist FROM tb_anexos WHERE codigo_maquina = %s", (codigo_maquina,))
         pdf_data = cur.fetchone()
 
         if pdf_data:
@@ -1053,6 +1060,5 @@ def lista_maquinas():
 
     df_final = pd.concat([df_c_preventivas,df_s_preventivas]).drop_duplicates(subset='codigo',keep='first').reset_index(drop=True)
     data = df_final.values.tolist()
-    
-    return render_template('user/lista_maquinas.html', data=data)
 
+    return render_template('user/lista_maquinas.html', data=data)
