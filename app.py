@@ -5,6 +5,7 @@ import psycopg2 #pip install psycopg2
 import psycopg2.extras
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = r'C:\Users\pcp2\projetoManutencao\appManutFlask-3\UPLOAD_FOLDER'
 app.register_blueprint(routes_bp)
 app.register_blueprint(login_bp)
 app.secret_key = "manutencaoprojeto"

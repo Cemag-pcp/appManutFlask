@@ -22,7 +22,7 @@
       <h3>Cadastro de máquinas</h3>
     </div> 
 
-    <form action="{{ url_for('routes.plan_52semanas') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ url_for('routes.cadastro_preventiva') }}" method="POST" enctype="multipart/form-data">
 
       <div class="form-row">
           <div class="form-group">
@@ -62,9 +62,9 @@
 
           <div class="form-row" style="margin-left: 20px;">
             <div class="form-group">
-              <label for="maquina-parada">Preventiva</label>
+              <label for="cadastrar-preventiva">Preventiva</label>
               <label class="switch">
-                <input type="checkbox" name="maquina-parada" id="maquina-parada" onchange="toggleCampos()">
+                <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()">
                 <span class="slider round"></span>
               </label>
             </div>
@@ -81,7 +81,7 @@
           </div>
     </div>
 
-    <div class="form-row">
+      <div class="form-row">
         <div class="form-group">
           <label for="manut_inicial">Data inicio</label>
           <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" required>
@@ -98,7 +98,7 @@
             <option>Semestral</option>
           </select>
         </div>
-    </div>
+      </div>
 
       <div class="file-upload" style="margin-top: 20px;">
           <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple>
@@ -113,7 +113,7 @@
       </div>
     
       <div class="file-upload" style="margin-top: 20px;">
-        <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple>
+        <input class="file-upload__input" type="file" name="pdf2" id="pdf2" multiple>
         <button class="file-upload__button" type="button" name="pdf" id="pdf">Documento</button>
         <span class="file-upload__label">Nenhum Arquivo selecionado</span>
       </div>
@@ -129,12 +129,12 @@
 
 <script>
   function toggleCampos() {
-    var maquinaParadaCheckbox = document.getElementById("maquina-parada");
+    var cadastrarPreventivaCheckbox = document.getElementById("cadastrar-preventiva");
     var criticidadeSelect = document.getElementById("criticidade");
     var manutInicialInput = document.getElementById("manut_inicial");
     var periodicidadeSelect = document.getElementById("periodicidade");
   
-    if (maquinaParadaCheckbox.checked) {
+    if (cadastrarPreventivaCheckbox.checked) {
       criticidadeSelect.removeAttribute("disabled");
       manutInicialInput.removeAttribute("disabled");
       periodicidadeSelect.removeAttribute("disabled");
@@ -148,5 +148,18 @@
   // Chamada inicial para garantir que os campos estejam corretamente habilitados/desabilitados ao carregar a página
   toggleCampos();
 </script>
-  
+
+<script>
+  var maquinaParadaCheckbox = document.getElementById('cadastrar-preventiva');
+  var maquinaParadaHiddenInput = document.querySelector('input[name="cadastrar-preventiva"][type="hidden"]');
+
+  maquinaParadaCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+      maquinaParadaHiddenInput.value = "true";
+    } else {
+      maquinaParadaHiddenInput.value = "false";
+    }
+  });
+</script>
+
 {% endblock %}
