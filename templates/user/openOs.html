@@ -3,12 +3,10 @@
 
 {% block voltar %}
 {% endblock %}
-
-<div class="col-md-4 offset-md-4">
   {% with messages = get_flashed_messages()  %}
   {% if messages %}
   {% for message in messages %}
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
+  <div class="alert-success alert-dismissible fade show" id="alerta_Os" role="alert">
     {{ message }}
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">×</span>
@@ -27,7 +25,7 @@
       <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data">
         <div class="form-group">
           <label for="setor">Setor</label>
-          <select class="form-control" id="setor" name="setor" onchange="getMaquinasPorSetor()">
+          <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()">
             <option value="" selected disabled hidden></option>
             <option value="Administrativo">Administrativo</option>
             <option value="Estamparia">Estamparia</option>
@@ -46,7 +44,7 @@
 
         <div class="form-group" id="maquina-select">
           <label for="maquina">Máquina/Local:</label>
-            <select class="form-control form-control" sdata-live-search="true" name="maquina" id="maquina">
+            <select class="form-control" sdata-live-search="true" name="maquina" id="maquina">
               <option value="" selected disabled hidden></option>  
               {% for maquina in lista_maquinas %}
               <option value="{{maquina[0]}}">{{maquina[0]}}</option>
@@ -56,7 +54,7 @@
          
         <div class="form-group">
           <label for="problema">Descrição:</label>
-          <textarea id="problema" name="problema" rows="5" cols="39" required placeholder=" Descreva o problema..."></textarea>
+          <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
         </div>
         
         <div class="form-row">
@@ -71,7 +69,7 @@
           
           <div class="form-group">        
             <label for="risco">Impacto na produção:</label>
-            <select class="form-control form-control" id="risco" name="risco" required>
+            <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" required>
                 <option value="" selected disabled hidden></option>  
                 <option>Alto</option>
                 <option>Médio</option>
