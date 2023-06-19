@@ -135,11 +135,12 @@ def calculo_indicadores(query):
     df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='maquina')
 
     s = ("""
-    SELECT codigo FROM tb_maquinas_preventivas
+    SELECT * FROM tb_maquinas_preventivas
     """)
 
     df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
-    df_maquinas = df_maquinas.rename(columns={'codigo':'maquina'})
+    df_maquinas = df_maquinas[['Código da máquina']]
+    df_maquinas = df_maquinas.rename(columns={'Código da máquina':'maquina'})
 
     df_combinado = df_combinado.merge(df_maquinas, on='maquina')
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
@@ -597,8 +598,11 @@ def grafico(): # Dashboard
     cur.execute("SELECT DISTINCT setor FROM tb_ordens")
     setores = cur.fetchall()
 
-    cur.execute("SELECT DISTINCT CONCAT(codigo, ' - ', descricao) AS codigo_concatenado FROM tb_maquinas")
-    maquinas = cur.fetchall()
+    cur.execute("SELECT * FROM tb_maquinas_preventivas")
+    name_cols = ['codigo','tombamento','setor','descricao','criticidade','periodicidade']
+    df_maquinas = pd.DataFrame(cur.fetchall()).iloc[:,:6]
+    df_maquinas = df_maquinas.rename(columns=dict(zip(df_maquinas.columns, name_cols)))
+    maquinas = df_maquinas.values.tolist()
 
     query = "SELECT * FROM tb_ordens"
 
@@ -793,81 +797,10 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
 
     return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_timeline)
 
-@routes_bp.route('/52semanas', methods=['POST','GET'])
+@routes_bp.route('/52semanas', methods=['GET'])
 @login_required
 def plan_52semanas(): # Tabela com as 52 semanas
-    
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-
-    if request.method == 'POST':
-    
-        # Obtém os dados do formulário
-        codigo = request.form['codigo']
-        tombamento = request.form['tombamento']
-        descricao = request.form['descricao']
-        setor = request.form['setor']
-        criticidade = request.form['criticidade']
-        manut_inicial = request.form['manut_inicial']
-        periodicidade = request.form['periodicidade']
         
-        df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manut_inicial,periodicidade)
-
-        #df = df.replace('','-', regex=True)  
-
-        lista = df.values.tolist()
-        lista = lista[0]
-
-        s = ("""
-            SELECT * FROM tb_maquinas_preventivas
-            """)
-
-        maquina_cadastrada = pd.read_sql_query(s,conn)
-
-        if  len(maquina_cadastrada[maquina_cadastrada['Código da máquina'] == codigo]) > 0:
-            flash("Máquina ja cadastrada", category='danger')        
-        
-        else:
-
-            if 'pdf' in request.files:
-                pdf = request.files['pdf']
-                # Ler os dados do arquivo PDF
-                pdf_data = pdf.read()
-
-                cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                cur.execute("INSERT INTO tb_checklist (codigo_maquina, checklist) VALUES (%s,%s)", (codigo, pdf_data))
-                conn.commit()
-            else:
-                pass
-
-            try:
-                conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-                
-                # Consulta SQL para inserir os dados na tabela
-                sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(','.join(['%s'] * len(lista)))
-
-                # Criar o cursor para executar a consulta SQL
-                cursor = conn.cursor()
-
-                # Executar a consulta SQL com a lista de dados
-                cursor.execute(sql_insert, lista)
-
-                # Confirmar a transação
-                conn.commit()
-
-                print("Dados inseridos com sucesso na tabela.")
-
-            except Error as e:
-                print(f"Ocorreu um erro ao conectar ou executar a consulta no PostgreSQL: {e}")
-
-            finally:
-                # Fechar o cursor e a conexão com o banco de dados
-                cursor.close()
-                conn.close()
-
-            flash("Máquina cadastrada com sucesso", category='sucess')
-        
-        return redirect('/52semanas')
-    
     s = (""" SELECT * FROM tb_maquinas_preventivas """)
 
     df_maquinas = pd.read_sql_query(s, conn)
@@ -877,10 +810,143 @@ def plan_52semanas(): # Tabela com as 52 semanas
 
     return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas)
 
-@routes_bp.route('/cadastrar52')
+@routes_bp.route('/cadastrar52', methods=['POST', 'GET'])
 @login_required
 def cadastro_preventiva():
     
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    if request.method == 'POST':
+            
+        try:
+            togglePreventiva = request.form['cadastrar-preventiva']
+            codigo = request.form['codigo']
+            tombamento = request.form['tombamento']
+            descricao = request.form['descricao']
+            setor = request.form['setor']
+            criticidade = request.form['criticidade']
+            manut_inicial = request.form['manut_inicial']
+            periodicidade = request.form['periodicidade']
+
+            df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manut_inicial,periodicidade)
+        
+            lista = df.values.tolist()
+            lista = lista[0]
+
+            s = ("""
+                SELECT * FROM tb_maquinas_preventivas
+                """)
+
+            maquina_cadastrada = pd.read_sql_query(s,conn)
+
+            if len(maquina_cadastrada[maquina_cadastrada['Código da máquina'] == codigo]) > 0:
+                flash("Máquina ja cadastrada", category='danger')        
+            
+            else:
+
+                if 'pdf' in request.files:
+                    pdf = request.files['pdf']
+                    # Ler os dados do arquivo PDF
+                    pdf_data = pdf.read()
+
+                    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                    cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist) VALUES (%s,%s)", (codigo, pdf_data))
+                    conn.commit()
+                else:
+                    pass
+
+                if 'imagem' in request.files:
+                    imagem = request.files['imagem']
+                    # Ler os dados do arquivo PDF
+                    imagem_data = imagem.read()
+
+                    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                    cur.execute("INSERT INTO tb_anexos (codigo_maquina, imagem) VALUES (%s,%s)", (codigo, imagem_data))
+                    conn.commit()
+                else:
+                    pass
+
+                try:
+                    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+                    
+                    # Consulta SQL para inserir os dados na tabela
+                    sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(','.join(['%s'] * len(lista)))
+
+                    # Criar o cursor para executar a consulta SQL
+                    cursor = conn.cursor()
+
+                    # Executar a consulta SQL com a lista de dados
+                    cursor.execute(sql_insert, lista)
+
+                    # Confirmar a transação
+                    conn.commit()
+
+                    print("Dados inseridos com sucesso na tabela.")
+
+                except Error as e:
+                    print(f"Ocorreu um erro ao conectar ou executar a consulta no PostgreSQL: {e}")
+
+                finally:
+                    # Fechar o cursor e a conexão com o banco de dados
+                    cursor.close()
+                    conn.close()
+
+                flash("Máquina cadastrada com sucesso", category='sucess')
+            
+            return render_template('user/cadastrar52.html')
+
+        except:
+            
+            togglePreventiva = 'false'
+            codigo = request.form['codigo']
+            tombamento = request.form['tombamento']
+            descricao = request.form['descricao']
+            setor = request.form['setor']
+
+            s = ("""
+                SELECT * FROM tb_maquinas
+                """)
+
+            maquina_cadastrada = pd.read_sql_query(s,conn)
+
+            if len(maquina_cadastrada[maquina_cadastrada['codigo'] == codigo]) > 0:
+                flash("Máquina ja cadastrada", category='danger')        
+
+            else:
+
+                if 'pdf' in request.files:
+                    pdf = request.files['pdf']
+                    # Ler os dados do arquivo PDF
+                    pdf_data = pdf.read()
+                else:
+                    pdf_data = None
+
+                if 'imagem' in request.files:
+                    imagem = request.files['imagem']
+                    # Ler os dados do arquivo de imagem
+                    imagem_data = imagem.read()
+                else:
+                    imagem_data = None
+
+                if 'documento' in request.files:
+                    documento = request.files['documento']
+                    # Ler os dados do arquivo de imagem
+                    documento_data = documento.read()
+                else:
+                    documento_data = None
+
+                cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                
+                cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist, imagem, documento) VALUES (%s, %s, %s, %s)",
+                             (codigo, pdf_data, imagem_data, documento_data))
+
+                cur.execute("INSERT INTO tb_maquinas (setor, codigo, descricao, tombamento) VALUES (%s, %s, %s, %s)",
+                            (setor, codigo, descricao, tombamento))
+                
+                conn.commit()
+                
+            return render_template('user/cadastrar52.html')
+        
     return render_template('user/cadastrar52.html')
 
 @routes_bp.route('/visualizar_imagem/<id_ordem>', methods=['GET'])
@@ -951,7 +1017,7 @@ def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela m
 def mostrar_pdf(codigo_maquina):
     try:
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT checklist FROM tb_checklist WHERE codigo_maquina = %s", (codigo_maquina,))
+        cur.execute("SELECT checklist FROM tb_anexo WHERE codigo_maquina = %s", (codigo_maquina,))
         pdf_data = cur.fetchone()
 
         if pdf_data:
@@ -989,3 +1055,4 @@ def lista_maquinas():
     data = df_final.values.tolist()
     
     return render_template('user/lista_maquinas.html', data=data)
+
