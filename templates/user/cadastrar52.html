@@ -1,11 +1,10 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-<div class="col-md-4 offset-md-4">
   {% with messages = get_flashed_messages()  %}
   {% if messages %}
   {% for message in messages %}
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
+  <div class="alert-success alert-dismissible fade show" id="alert_cadast_52" role="alert">
     {{ message }}
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">×</span>
@@ -101,19 +100,22 @@
         </div>
     </div>
 
-      <div class="form-group" style="margin-top: 20px;">        
-        <label for="pdf">Checklist em pdf:</label>
-        <input type="file" class="form-control-file" id="pdf" name="pdf" multiple>
+      <div class="file-upload" style="margin-top: 20px;">
+          <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple>
+          <button class="file-upload__button" type="button" name="pdf" id="pdf">Checklist em pdf</button>
+          <span class="file-upload__label">Nenhum Arquivo selecionado</span>
       </div>
 
-      <div class="form-group" style="margin-top: 20px;">        
-        <label for="imagem">Imagem:</label>
-        <input type="file" class="form-control-file" id="imagem" name="imagem" multiple>
+      <div class="file-upload" style="margin-top: 20px;">
+        <input class="file-upload__input" type="file" name="imagem" id="imagem" multiple>
+        <button class="file-upload__button" type="button" name="imagem" id="imagem">Imagem</button>
+        <span class="file-upload__label">Nenhum Arquivo selecionado</span>
       </div>
     
-      <div class="form-group" style="margin-top: 20px;">        
-        <label for="pdf">Documento:</label>
-        <input type="file" class="form-control-file" id="pdf" name="pdf" multiple>
+      <div class="file-upload" style="margin-top: 20px;">
+        <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple>
+        <button class="file-upload__button" type="button" name="pdf" id="pdf">Documento</button>
+        <span class="file-upload__label">Nenhum Arquivo selecionado</span>
       </div>
 
       <button id = 'salvar' class="btn btn-primary btn-block">
