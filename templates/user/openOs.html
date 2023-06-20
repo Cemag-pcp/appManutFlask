@@ -68,7 +68,7 @@
 
           <div class="form-group">        
             <label for="risco">Impacto na produção:</label>
-            <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" required>
+            <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
                 <option value="" selected disabled hidden></option>  
                 <option>Alto</option>
                 <option>Médio</option>
@@ -143,6 +143,22 @@
       maquinaParadaHiddenInput.value = "false";
     }
   });
+</script>
+
+<script>
+  function setImpactoProducao() {
+      var setorSelect = document.getElementById("setor");
+      var riscoSelect = document.getElementById("risco");
+
+      if (setorSelect.value === "Administrativo") {
+          riscoSelect.value = "Baixo";
+      } else if (riscoSelect.value === "") {
+          riscoSelect.value = "Alto"; // Definir um valor padrão para o campo se nenhum estiver selecionado
+      }
+  }
+
+  // Adicione o evento oninput ao campo "Setor"
+  document.getElementById("setor").addEventListener("input", setImpactoProducao);
 </script>
 
 {% endblock %}
