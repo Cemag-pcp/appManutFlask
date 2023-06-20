@@ -345,34 +345,22 @@ def add_student(): # Criar ordem de serviço
         except:
             ultima_os = 0
 
-        try:
+        cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada))
 
-            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada))
-
-            if 'imagem' in request.files:
-                imagem = request.files['imagem']
-                # Ler os dados da imagem
-                imagem_data = imagem.read()
-
-                cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data))
-                conn.commit()
-        except:
-            id = 0
-            cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco, status, problemaaparente, id_ordem,n_ordem ,dataabertura, maquina_parada) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (id, setor, maquina, risco, status, problema,ultima_os, n_ordem, dataAbertura, maquina_parada))
+        imagem = request.files['imagem']
+        
+        if imagem.filename != '':             
             
-            if 'imagem' in request.files:
-                imagem = request.files['imagem']
-                # Ler os dados da imagem
-                imagem_data = imagem.read()
+            # Ler os dados da imagem
+            imagem_data = imagem.read()
 
-                cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data))
-                conn.commit()
-                
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data))
             conn.commit()
 
-        cur.close()
+        else:
+            print('sem imagem')             
+            conn.commit()
 
         flash('OS de número {} aberta com sucesso!'.format(ultima_os))
         return redirect(url_for('routes.open_os'))
@@ -763,7 +751,7 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
 
     # Obtém os dados da tabela
     s = ("""
-        SELECT n_ordem, status, datainicio, datafim, operador,
+        SELECT dataabertura, n_ordem, status, datainicio, datafim, operador,
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
             TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
         FROM tb_ordens
@@ -797,6 +785,11 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
         df_timeline['diferenca'] = 0
     
     df_timeline = df_timeline.sort_values(by='n_ordem', ascending=True)
+
+    if df_timeline['datainicio'][0] == '-':
+        df_timeline['datainicio'][0] = df_timeline['dataabertura'][0]
+
+    df_timeline = df_timeline.iloc[:,1:]
 
     df_timeline = df_timeline.values.tolist()
 
