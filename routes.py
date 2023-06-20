@@ -944,6 +944,8 @@ def cadastro_preventiva():
                             (setor, codigo, descricao, tombamento))
                 
                 conn.commit()
+
+                flash("Máquina cadastrada com sucesso", category='sucess')
                 
             return render_template('user/cadastrar52.html')
         
