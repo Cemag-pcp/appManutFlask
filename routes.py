@@ -510,13 +510,15 @@ def filtro_maquinas(setor):
 
     lista_maquinas = pd.read_sql_query(query, conn)
     lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
-    lista_maquinas = lista_maquinas[['codigo_desc']].values.tolist()
-    
+    lista_maquinas_ = []
+    lista_maquinas_.insert(0, 'Outros')
+    lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
+
     if setor == 'ADMINISTRATIVO':
 
-        lista_maquinas = ['RH','Vendas','Contabilidade','PCP','Marketing','TI','Projetos','Compras']
+        lista_maquinas_ = ['Outros','RH','Vendas','Contabilidade','PCP','Marketing','TI','Projetos','Compras']
 
-    return jsonify(lista_maquinas)
+    return jsonify(lista_maquinas_)
 
 @routes_bp.route('/edit_material/<id_ordem>', methods = ['POST', 'GET'])
 @login_required

@@ -45,9 +45,8 @@
         <div class="form-group" id="maquina-select">
           <label for="maquina">Máquina/Local:</label>
             <select class="form-control" sdata-live-search="true" name="maquina" id="maquina">
-              <option value="" selected disabled hidden></option>
-              <option value="Outros">Outros</option>  
-              {% for maquina in lista_maquinas %}
+              <option value="" selected disabled hidden></option>  
+              {% for maquina in lista_maquinas_ %}
               <option value="{{maquina[0]}}">{{maquina[0]}}</option>
               {% endfor %}
             </select>
