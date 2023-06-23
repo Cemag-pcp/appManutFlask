@@ -17,6 +17,8 @@ import json
 from urllib.parse import urlencode
 import os
 import zipfile
+from PIL import Image
+import io
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -354,8 +356,20 @@ def add_student(): # Criar ordem de serviço
             # Ler os dados da imagem
             imagem_data = imagem.read()
 
+            # Abrir a imagem usando a biblioteca Pillow
+            image = Image.open(io.BytesIO(imagem_data))
+
+            # Redimensionar a imagem para um tamanho desejado
+            max_size = (800, 600)
+            image.thumbnail(max_size)
+
+            # Salvar a imagem com uma qualidade reduzida
+            buffer = io.BytesIO()
+            image.save(buffer, format='JPEG', quality=80)
+            imagem_data_comprimida = buffer.getvalue()
+
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data))
+            cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data_comprimida))
             conn.commit()
 
         else:

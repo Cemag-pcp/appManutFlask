@@ -105,6 +105,7 @@
     // Verifica se um setor foi selecionado
     if (setorSelecionado !== '') {
       // Faz uma chamada assíncrona para o servidor Flask
+      showLoading()
       $.ajax({
         url: '/maquinas/' + setorSelecionado,
         type: 'GET',
@@ -116,6 +117,7 @@
             option.value = data[i];
             maquinaSelect.add(option);
           }
+          hideLoading();
         }
       });
     }

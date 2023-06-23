@@ -376,7 +376,6 @@ def tempo_os():
 
     return df_timeline
 
-
 # df_final = pd.DataFrame()
 
 # for i in range(26,len(df1)):

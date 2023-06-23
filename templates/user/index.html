@@ -129,7 +129,7 @@
         url: '/visualizar_imagem/' + id_ordem,
         type: 'GET',
         success: function(response) {
-            hideLoading();
+            
             var imagemData = response.imagem_data;
             var modalBody = '<img src="data:image/png;base64,' + imagemData + '" alt="Imagem" />';
             
@@ -138,6 +138,11 @@
             
             // Exiba o modal
             $('#imagemModal').modal('show');
+            
+            // Oculta a tela de carregamento após um pequeno atraso (500 milissegundos)
+            setTimeout(function() {
+                hideLoading(); // Esconde o indicador de carregamento
+            }, 10);
         },
         error: function(error) {
             hideLoading();
