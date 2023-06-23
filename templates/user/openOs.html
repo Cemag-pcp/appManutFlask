@@ -17,80 +17,78 @@
   {% endwith %}
 </div>
 
-  <div class="col-md-4 offset-md-4">
-    <div id ="formulario_abertura" class="card card-body">
-      <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
-        <h3>Abrir OS</h3>
-      </div>  
-      <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data">
+<div class="col-md-4 offset-md-4">
+  <div id ="formulario_abertura" class="card card-body">
+    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+      <h3>Abrir OS</h3>
+    </div>  
+    <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data">
 
-        <div class="form-group">
-          <label for="setor">Setor</label>
-          <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
-            <option value="" selected disabled hidden></option>
-            <option value="Administrativo">Administrativo</option>
-            <option value="Almoxarifado">Almoxarifado</option>
-            <option value="Corte e estamparia">Corte e estamparia</option>
-            <option value="Expedição">Expedição</option>
-            <option value="Equipamentos de Movimentacao">Equipamentos de Movimentação</option>
-            <option value="Solda">Solda</option>
-            <option value="Montagem">Montagem</option>
-            <option value="Pintura">Pintura</option>
-            <option value="Carpintaria">Carpintaria</option>
-            <option value="Usinagem">Usinagem</option>
-            <option value="Serra">Serra</option>
-            <option value="Serralheria">Serralheria</option>
-            <option value="Manutenção">Manutenção</option>
+      <div class="form-group">
+        <label for="setor">Setor</label>
+        <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
+          <option value="" selected disabled hidden></option>
+          <option value="Administrativo">Administrativo</option>
+          <option value="Almoxarifado">Almoxarifado</option>
+          <option value="Corte e estamparia">Corte e estamparia</option>
+          <option value="Expedição">Expedição</option>
+          <option value="Equipamentos de Movimentacao">Equipamentos de Movimentação</option>
+          <option value="Solda">Solda</option>
+          <option value="Montagem">Montagem</option>
+          <option value="Pintura">Pintura</option>
+          <option value="Carpintaria">Carpintaria</option>
+          <option value="Usinagem">Usinagem</option>
+          <option value="Serra">Serra</option>
+          <option value="Serralheria">Serralheria</option>
+          <option value="Manutenção">Manutenção</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="maquina-select">
+        <label for="maquina">Máquina/Local:</label>
+          <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
+            <option value="" selected disabled hidden></option>  
+            {% for maquina in lista_maquinas_ %}
+            <option value="{{maquina[0]}}">{{maquina[0]}}</option>
+            {% endfor %}
           </select>
-        </div>
-
-        <div class="form-group" id="maquina-select">
-          <label for="maquina">Máquina/Local:</label>
-            <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
-              <option value="" selected disabled hidden></option>  
-              {% for maquina in lista_maquinas_ %}
-              <option value="{{maquina[0]}}">{{maquina[0]}}</option>
-              {% endfor %}
-            </select>
-        </div>
-         
-        <div class="form-group">
-          <label for="problema">Descrição:</label>
-          <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
-        </div>
+      </div>
         
-        <div class="form-row">
-          <div class="form-group">
-            <label for="maquina-parada">Máquina parada?</label>
-            <label class="switch">
-              <input type="checkbox" name="maquina-parada" id="maquina-parada">
-              <span class="slider round"></span>
-            </label>
-          </div>
+      <div class="form-group">
+        <label for="problema">Descrição:</label>
+        <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="maquina-parada">Máquina parada?</label>
+        <label class="switch">
+          <input type="checkbox" name="maquina-parada" id="maquina-parada">
+          <span class="slider round"></span>
+        </label>
+      </div>
 
-          <div class="form-group">        
-            <label for="risco">Impacto na produção:</label>
-            <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
-                <option value="" selected disabled hidden></option>
-                <option>Alto</option>
-                <option>Médio</option>
-                <option>Baixo</option>
-            </select>
-          </div>
-        </div>
+      <div class="form-group">        
+        <label for="risco">Impacto na produção:</label>
+        <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
+          <option value="" selected disabled hidden></option>
+          <option>Alto</option>
+          <option>Médio</option>
+          <option>Baixo</option>
+        </select>
+      </div>
+      
 
-        <div class="file-upload">
-          <input class="file-upload__input" type="file" name="imagem" id="imagem" multiple>
-          <button class="file-upload__button" type="button" name="imagem" id="imagem">Escolha o Arquivo</button>
-          <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-        </div>
+      <div class="file-upload">
+        <input class="file-upload__input" type="file" name="imagem" id="imagem" multiple>
+        <button class="file-upload__button" type="button" name="imagem" id="imagem">Escolha o Arquivo</button>
+        <span class="file-upload__label">Nenhum Arquivo selecionado</span>
+      </div>
 
-        <button id = 'salvar' class="btn btn-block">
-          Save 
-        </button>
-        
-      </form>
-    </div>
+      <button id = 'salvar' class="btn btn-block">
+        Save 
+      </button>
+      
+    </form>
   </div>
 </div>
 
@@ -156,13 +154,24 @@
 
       if (setorSelect.value === "Administrativo") {
           riscoSelect.value = "Baixo";
+          riscoSelect.disabled = true; // Desabilita o campo "Risco" para o setor "Administrativo"
       } else {
-          riscoSelect.value = ""; // Define um valor padrão para o campo se o setor for diferente de "Administrativo"
+          riscoSelect.disabled = false; // Habilita o campo "Risco" para outros setores
       }
   }
 
-  // Adicione o evento oninput ao campo "Setor"
-  document.getElementById("setor").addEventListener("input", setImpactoProducao);
+  // Adiciona o evento onchange ao campo "Setor"
+  document.getElementById("setor").addEventListener("change", setImpactoProducao);
+
+  // Adiciona o evento onchange ao campo "Risco"
+  document.getElementById("risco").addEventListener("change", function() {
+      var setorSelect = document.getElementById("setor");
+      var riscoSelect = document.getElementById("risco");
+
+      if (setorSelect.value === "Administrativo") {
+          riscoSelect.value = "Baixo";
+      }
+  });
 </script>
 
 {% endblock %}
