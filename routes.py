@@ -513,7 +513,9 @@ def open_os(): # Página de abrir OS
 @routes_bp.route('/maquinas/<setor>')
 def filtro_maquinas(setor):
    
-    setor = setor.upper()
+    #setor = setor.upper()
+
+    print(setor)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -523,14 +525,18 @@ def filtro_maquinas(setor):
     """.format("'" + setor + "'")
 
     lista_maquinas = pd.read_sql_query(query, conn)
+    
     lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
+    lista_maquinas = lista_maquinas.dropna(subset=['codigo_desc'])
     lista_maquinas_ = []
     lista_maquinas_.insert(0, 'Outros')
     lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
 
-    if setor == 'ADMINISTRATIVO':
+    if setor == 'Administrativo':
 
         lista_maquinas_ = ['Outros','RH','Vendas','Contabilidade','PCP','Marketing','TI','Projetos','Compras']
+
+    print(lista_maquinas_)
 
     return jsonify(lista_maquinas_)
 
