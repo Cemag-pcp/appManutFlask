@@ -621,7 +621,7 @@ def grafico(): # Dashboard
 
     espera = df_cards[df_cards['status'] == 'Em espera'].shape[0]
     material = df_cards[df_cards['status'] == 'Aguardando material'].shape[0]
-    finalizado = df_cards[df_cards['status'] == 'Finalizado'].shape[0]
+    finalizado = df_cards[df_cards['status'] == 'Finalizada'].shape[0]
     execucao = df_cards[df_cards['status'] == 'Em execução'].shape[0]
 
     lista_qt = [espera,material,finalizado,execucao]
@@ -685,7 +685,7 @@ def grafico(): # Dashboard
 
         espera = df_cards[df_cards['status'] == 'Em espera'].shape[0]
         material = df_cards[df_cards['status'] == 'Aguardando material'].shape[0]
-        finalizado = df_cards[df_cards['status'] == 'Finalizado'].shape[0]
+        finalizado = df_cards[df_cards['status'] == 'Finalizada'].shape[0]
         execucao = df_cards[df_cards['status'] == 'Em execução'].shape[0]
 
         lista_qt = [espera,material,finalizado,execucao]
