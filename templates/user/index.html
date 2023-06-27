@@ -68,9 +68,9 @@
                                         <a id = 'dropdown_os' class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn"> 
                                             <i class="fas fa-clock"></i> 
                                         </a>
-                                        <a id = 'dropdown_os' class = "dropdown-item" href="" class="btn"> 
-                                            <i class="fas fa-trash"></i> 
-                                        </a>
+                                        <a id="dropdown_os_excluir" class="dropdown-item btn" onclick="abrirModalExclusao('{{ row[11] }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>  
                                         <!-- <a>
                                             <button type="button" class="btn btn-primary" onclick="showImageModal('{{ row[11] }}')">Exibir Imagem</button>
                                         </a>  -->
@@ -107,14 +107,12 @@
 <!-- Modal excluir ordem -->
 <div id="modalEnviar" class="modal">
     <div class="modal-content">
-    <span class="close">&times;</span> <!-- Botão de fechar -->
-    
-    <div>
-        <label for="observacao">Motivo da exclusão:</label>
-        <textarea id="observacao" rows="4" cols="45"></textarea>
-    </div>
-
-    <button class="enviarModal" onchange="enviarDadosParaBackend()">Enviar</button>
+        <span class="close">&times;</span> <!-- Botão de fechar -->
+            <div>
+                <label for="observacao">Motivo da exclusão da os:</label>
+                <textarea id="observacao" rows="4" cols="45"></textarea>
+            </div>
+        <button class="enviarModal" onclick="enviarDadosParaBackend()">Enviar</button>
     </div>
 </div>
 
@@ -137,6 +135,76 @@
       </div>
     </div>
 </div>
+
+<script>
+    function abrirModalExclusao(idLinha) {
+      const modalEnviar = document.getElementById('modalEnviar');
+      const observacao = document.getElementById('observacao');
+  
+      // Defina o ID da linha no atributo personalizado do botão "enviarModal"
+      const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
+      enviarModalButton.setAttribute('data-id-linha', idLinha);
+  
+      // Limpe o campo de observação antes de abrir o modal
+      observacao.value = '';
+  
+      // Abra o modal
+      modalEnviar.style.display = 'block';
+    }
+  
+    function enviarDadosParaBackend() {
+      const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
+      const idLinha = enviarModalButton.getAttribute('data-id-linha');
+      const observacao = document.getElementById('observacao').value;
+  
+      // Lógica para enviar os dados para o backend, incluindo o ID da linha e a observação
+      // ...
+  
+      // Feche o modal após enviar os dados
+      const modalEnviar = document.getElementById('modalEnviar');
+      modalEnviar.style.display = 'none';
+    }
+  
+    // Obtém o botão de fechar e adiciona um evento de clique para fechar o modal
+    const closeModalButton = document.querySelector('#modalEnviar .close');
+    closeModalButton.addEventListener('click', () => {
+      const modalEnviar = document.getElementById('modalEnviar');
+      modalEnviar.style.display = 'none';
+    });
+</script>
+
+<script>
+    function enviarDadosParaBackend() {
+        const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
+        const idLinha = enviarModalButton.getAttribute('data-id-linha');
+        const observacao = document.getElementById('observacao').value;
+    
+        const dados = {
+        id: idLinha,
+        texto: observacao
+        };
+    
+        fetch('/excluir-ordem', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dados)
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log(data); // Exemplo: imprime a resposta do backend no console
+            // Faça o processamento adicional ou exiba uma mensagem de sucesso para o usuário
+        })
+        .catch(error => {
+            console.error('Erro:', error); // Tratamento de erro
+            // Exiba uma mensagem de erro para o usuário
+        });
+    
+        const modalEnviar = document.getElementById('modalEnviar');
+        modalEnviar.style.display = 'none';
+    }
+</script>
 
 <script>
 
