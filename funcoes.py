@@ -301,6 +301,7 @@ def trigger_ordem_planejada():
     df_final = df_final[['Código da máquina','Grupo', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção',numero_semana]]
     df_final = df_final[df_final[numero_semana] != '-'].reset_index(drop=True)
     df_final[numero_semana] = pd.to_datetime(df_final[numero_semana])
+    df_final = df_final.dropna().reset_index(drop=True)
 
     for i in range(len(df_final)):
         
@@ -328,6 +329,7 @@ def trigger_ordem_planejada():
 
         sql = """ INSERT INTO tb_ordens (id,setor, maquina, risco, status, problemaaparente, id_ordem, n_ordem, dataabertura, natureza) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
         
+        df_final = df_final.dropna().reset_index(drop=True)
         df_final[numero_semana][i] = pd.to_datetime(df_final[numero_semana][i], format='%d-%m-%Y').strftime("%Y-%m-%d")
 
         values = (max_id, df_final['Grupo'][i], df_final['Código da máquina'][i], df_final['Classificação'][i], status, problemaaparente,max_ordem,n_ordem, df_final[numero_semana][i] , natureza)

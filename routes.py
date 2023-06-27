@@ -837,6 +837,7 @@ def plan_52semanas(): # Tabela com as 52 semanas
 def cadastro_preventiva():
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if request.method == 'POST':
             
@@ -928,6 +929,11 @@ def cadastro_preventiva():
             s = ("""
                 SELECT * FROM tb_maquinas
                 """)
+            
+            query_max = ("""SELECT max(id) FROM tb_maquinas""")
+            cur.execute(query_max)
+            id = cur.fetchall()
+            id = id[0][0] + 1
 
             maquina_cadastrada = pd.read_sql_query(s,conn)
 
@@ -962,8 +968,8 @@ def cadastro_preventiva():
                 cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist, imagem, documento) VALUES (%s, %s, %s, %s)",
                              (codigo, pdf_data, imagem_data, documento_data))
 
-                cur.execute("INSERT INTO tb_maquinas (setor, codigo, descricao, tombamento) VALUES (%s, %s, %s, %s)",
-                            (setor, codigo, descricao, tombamento))
+                cur.execute("INSERT INTO tb_maquinas (id, setor, codigo, descricao, tombamento) VALUES (%s,%s, %s, %s, %s)",
+                            (id, setor, codigo, descricao, tombamento))
                 
                 conn.commit()
 
