@@ -1096,8 +1096,7 @@ def lista_maquinas():
 
     return render_template('user/lista_maquinas.html', data=data)
 
-@routes_bp.route('/lista_maquinas', methods=['POST'])
-@login_required
-def excluir_ordem():
+# @routes_bp.route('/lista_maquinas', methods=['POST'])
+# @login_required
+# def excluir_ordem():
 
-    

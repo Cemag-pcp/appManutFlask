@@ -68,6 +68,9 @@
                                         <a id = 'dropdown_os' class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn"> 
                                             <i class="fas fa-clock"></i> 
                                         </a>
+                                        <a id = 'dropdown_os' class = "dropdown-item" href="" class="btn"> 
+                                            <i class="fas fa-trash"></i> 
+                                        </a>
                                         <!-- <a>
                                             <button type="button" class="btn btn-primary" onclick="showImageModal('{{ row[11] }}')">Exibir Imagem</button>
                                         </a>  -->
@@ -98,6 +101,20 @@
             </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal excluir ordem -->
+<div id="modalEnviar" class="modal">
+    <div class="modal-content">
+    <span class="close">&times;</span> <!-- Botão de fechar -->
+    
+    <div>
+        <label for="observacao">Motivo da exclusão:</label>
+        <textarea id="observacao" rows="4" cols="45"></textarea>
+    </div>
+
+    <button class="enviarModal" onchange="enviarDadosParaBackend()">Enviar</button>
     </div>
 </div>
 
