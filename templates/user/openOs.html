@@ -44,6 +44,16 @@
         </select>
       </div>
 
+      <div class="form-group" id="solicitante-select">
+        <label for="solicitante">Solicitante:</label>
+          <select class="form-control" sdata-live-search="true" name="solicitante" id="solicitante" required>
+            <option value="" selected disabled hidden></option>  
+            {% for solicitante in solicitantes %}
+            <option value="{{solicitante[0]}}">{{solicitante[0]}}</option>
+            {% endfor %}
+          </select>
+      </div>
+
       <div class="form-group" id="maquina-select">
         <label for="maquina">Máquina/Local:</label>
           <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
@@ -59,24 +69,25 @@
         <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
       </div>
       
-      <div class="form-group">
-        <label for="maquina-parada">Máquina parada?</label>
-        <label class="switch">
-          <input type="checkbox" name="maquina-parada" id="maquina-parada">
-          <span class="slider round"></span>
-        </label>
-      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="maquina-parada">Máquina parada?</label>
+          <label class="switch">
+            <input type="checkbox" name="maquina-parada" id="maquina-parada">
+            <span class="slider round"></span>
+          </label>
+        </div>
 
-      <div class="form-group">        
-        <label for="risco">Impacto na produção:</label>
-        <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
-          <option value="" selected disabled hidden></option>
-          <option>Alto</option>
-          <option>Médio</option>
-          <option>Baixo</option>
-        </select>
+        <div class="form-group">        
+          <label for="risco">Impacto na produção:</label>
+          <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
+            <option value="" selected disabled hidden></option>
+            <option>Alto</option>
+            <option>Médio</option>
+            <option>Baixo</option>
+          </select>
+        </div>
       </div>
-      
 
       <div class="file-upload">
         <input class="file-upload__input" type="file" name="imagem" id="imagem" multiple>
@@ -128,6 +139,14 @@
   $(document).ready(function() {
     $('#maquina').select2({
       placeholder: 'Pesquisar máquina',
+      allowClear: true,
+      width: '100%',
+    });
+  });
+
+  $(document).ready(function() {
+    $('#solicitante').select2({
+      placeholder: 'Pesquisar solicitante',
       allowClear: true,
       width: '100%',
     });

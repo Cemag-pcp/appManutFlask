@@ -301,7 +301,7 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 
     return render_template('user/index.html', list_users = list_users)
 
-@routes_bp.route('/add_student', methods=['POST']) 
+@routes_bp.route('/add_student', methods=['POST', 'GET']) 
 def add_student(): # Criar ordem de serviço
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
@@ -312,19 +312,21 @@ def add_student(): # Criar ordem de serviço
 
         setor = request.form['setor']
         maquina = request.form['maquina']
-        risco = request.form['risco']
         problema = request.form['problema']
         dataAbertura = datetime.now()
         n_ordem = 0
         status = 'Em espera'
 
         try:
+            risco = request.form['risco']
+        except:
+            risco = 'Baixo'
+
+        try:
             maquina_parada = request.form['maquina-parada']
 
         except:
             maquina_parada = 'false'
-
-        print(maquina_parada)
 
         maquina = maquina.split(" - ")
         maquina = maquina[0]
@@ -334,7 +336,7 @@ def add_student(): # Criar ordem de serviço
         maior_valor = cur.fetchone()[0]
 
         try:
-            maior_valor = maior_valor+1
+            maior_valor =+ 1
         except:
             maior_valor = 0
 
@@ -347,7 +349,7 @@ def add_student(): # Criar ordem de serviço
         except:
             ultima_os = 0
 
-        cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada))
+        #cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada,solicitante))
 
         imagem = request.files['imagem']
         
@@ -508,7 +510,20 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
 @routes_bp.route('/openOs')
 def open_os(): # Página de abrir OS
 
-    return render_template("user/openOs.html")
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_matriculas"""
+
+    cur.execute(query)
+    data = cur.fetchall()
+    df_data = pd.DataFrame(data, columns=['id','matricula','nome'])
+
+    df_data['matricula_nome'] = df_data['matricula'] + " - " + df_data['nome']
+
+    solicitantes = df_data[['matricula_nome']].values.tolist()
+
+    return render_template("user/openOs.html", solicitantes=solicitantes)
 
 @routes_bp.route('/maquinas/<setor>')
 def filtro_maquinas(setor):
