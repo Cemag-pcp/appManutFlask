@@ -313,6 +313,7 @@ def add_student(): # Criar ordem de serviço
         setor = request.form['setor']
         maquina = request.form['maquina']
         problema = request.form['problema']
+        solicitante = request.form['solicitante']
         dataAbertura = datetime.now()
         n_ordem = 0
         status = 'Em espera'
@@ -336,7 +337,7 @@ def add_student(): # Criar ordem de serviço
         maior_valor = cur.fetchone()[0]
 
         try:
-            maior_valor =+ 1
+            maior_valor += 1
         except:
             maior_valor = 0
 
@@ -1094,3 +1095,9 @@ def lista_maquinas():
     data = df_final.values.tolist()
 
     return render_template('user/lista_maquinas.html', data=data)
+
+@routes_bp.route('/lista_maquinas', methods=['POST'])
+@login_required
+def excluir_ordem():
+
+    
