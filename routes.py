@@ -277,10 +277,10 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     df.reset_index(drop=True, inplace=True)
     df.replace(np.nan, '', inplace=True)
 
-    # Loop para percorrer todas as linhas da coluna
-    for i in range(len(df['dataabertura'])):
-        if df['dataabertura'][i] == '':
-            df['dataabertura'][i] = df['dataabertura'][i-1]
+    df = df[df['ordem_excluida'] != True]
+
+    df['dataabertura'] = df['dataabertura'].fillna(method='ffill')
+    df['dataabertura'] = df['dataabertura'].replace('', method='ffill')
 
     df = df.drop_duplicates(subset=['id_ordem'], keep='last')
     df = df.sort_values(by='id_ordem')
@@ -620,7 +620,7 @@ def grafico(): # Dashboard
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    cur.execute("SELECT DISTINCT setor FROM tb_ordens")
+    cur.execute("SELECT DISTINCT setor FROM tb_ordens WHERE ordem_excluida IS NULL OR ordem_excluida = FALSE;")
     setores = cur.fetchall()
 
     cur.execute("SELECT * FROM tb_maquinas_preventivas")
@@ -629,7 +629,7 @@ def grafico(): # Dashboard
     df_maquinas = df_maquinas.rename(columns=dict(zip(df_maquinas.columns, name_cols)))
     maquinas = df_maquinas.values.tolist()
 
-    query = "SELECT * FROM tb_ordens"
+    query = "SELECT * FROM tb_ordens WHERE ordem_excluida IS NULL OR ordem_excluida = FALSE"
 
     df_cards = pd.read_sql_query(query, conn)
     df_cards = df_cards.drop_duplicates(subset='id_ordem', keep='last')
@@ -647,7 +647,7 @@ def grafico(): # Dashboard
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
             TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
         FROM tb_ordens
-        WHERE 1=1
+        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE
     """)
 
     context = calculo_indicadores(query)
@@ -655,7 +655,7 @@ def grafico(): # Dashboard
     query = ("""
         SELECT maquina, area_manutencao, datafim, id_ordem
         FROM tb_ordens
-        WHERE 1=1
+        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE
     """)  
 
     pizza_context = grafico_area(query)
@@ -679,7 +679,7 @@ def grafico(): # Dashboard
             pass
 
         # Monta a query base
-        query = "SELECT * FROM tb_ordens WHERE 1=1"
+        query = "SELECT * FROM tb_ordens WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE"
 
         # Adiciona as condições de filtro se os campos não estiverem vazios
         if setor_selecionado:
@@ -711,7 +711,7 @@ def grafico(): # Dashboard
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
             TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
         FROM tb_ordens
-        WHERE 1=1
+        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE
         """)
 
         if setor_selecionado:
@@ -732,8 +732,8 @@ def grafico(): # Dashboard
         SELECT datafim, maquina, n_ordem,
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
             TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-        FROM tb_ordens
-        WHERE 1=1
+        FROM tb_ordens 
+        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE
         """)
 
         if setor_selecionado:
@@ -747,8 +747,8 @@ def grafico(): # Dashboard
 
         query = ("""
         SELECT maquina, area_manutencao, datafim, id_ordem
-        FROM tb_ordens
-        WHERE 1=1
+        FROM tb_ordens 
+        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE
         """)    
 
         if setor_selecionado:
@@ -765,7 +765,7 @@ def grafico(): # Dashboard
                                area_manutencao=area_manutencao)
     
     # Se o método for GET, exibe todos os itens
-    cur.execute("SELECT * FROM tb_ordens")
+    cur.execute("SELECT * FROM tb_ordens WHERE ordem_excluida IS NULL OR ordem_excluida = FALSE")
     itens = cur.fetchall()
 
     cur.close()
@@ -787,7 +787,7 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
             TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
         FROM tb_ordens
-        WHERE id_ordem = {}
+        WHERE id_ordem = {} AND ordem_excluida IS NULL OR ordem_excluida = FALSE
     """).format(int(id_ordem))
 
     df_timeline = pd.read_sql_query(s, conn)
@@ -1016,6 +1016,7 @@ def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela m
     s = ("""
         SELECT * 
         FROM tb_ordens
+        WHERE ordem_excluida IS NULL OR ordem_excluida = FALSE
         """)
     
     df = pd.read_sql_query(s, conn)
@@ -1102,5 +1103,16 @@ def excluir_ordem():
     data = request.get_json()
     id_linha = data['id']
     texto = data['texto']
-       
+    
+    query = """UPDATE tb_ordens
+            SET ordem_excluida = 'yes', motivo_exclusao = %s
+            WHERE id_ordem = %s
+            """
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute(query, [texto, id_linha])
+    conn.commit()
+
+    print(id_linha,texto)
+
     return 'Dados recebidos com sucesso!'

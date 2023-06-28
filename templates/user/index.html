@@ -108,11 +108,13 @@
 <div id="modalEnviar" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span> <!-- Botão de fechar -->
+        <form>
             <div>
                 <label for="observacao">Motivo da exclusão da os:</label>
-                <textarea id="observacao" rows="4" cols="45"></textarea>
+                <textarea id="observacao" rows="4" cols="45" required></textarea>
             </div>
-        <button class="enviarModal" onclick="enviarDadosParaBackend()">Enviar</button>
+            <button class="enviarModal" type="submit" onclick="enviarDadosParaBackend()">Enviar</button>
+        </form>
     </div>
 </div>
 
@@ -178,18 +180,24 @@
         const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
         const idLinha = enviarModalButton.getAttribute('data-id-linha');
         const observacao = document.getElementById('observacao').value;
-    
+
+        if (!observacao) {
+            // Exibir uma mensagem de erro ou realizar alguma ação caso o campo esteja vazio
+            alert('Por favor, preencha o campo de observação.');
+            return;
+        }
+
         const dados = {
-        id: idLinha,
-        texto: observacao
+            id: idLinha,
+            texto: observacao
         };
-    
+
         fetch('/excluir-ordem', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dados)
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dados)
         })
         .then(response => response.text())
         .then(data => {
@@ -200,10 +208,11 @@
             console.error('Erro:', error); // Tratamento de erro
             // Exiba uma mensagem de erro para o usuário
         });
-    
+
         const modalEnviar = document.getElementById('modalEnviar');
         modalEnviar.style.display = 'none';
     }
+
 </script>
 
 <script>
