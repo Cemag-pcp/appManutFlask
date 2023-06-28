@@ -544,6 +544,8 @@ def filtro_maquinas(setor):
     
     lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
     lista_maquinas = lista_maquinas.dropna(subset=['codigo_desc'])
+    lista_maquinas = lista_maquinas.drop_duplicates(subset=['codigo'])
+    
     lista_maquinas_ = []
     lista_maquinas_.insert(0, 'Outros')
     lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
@@ -783,7 +785,7 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
 
     # Obtém os dados da tabela
     s = ("""
-        SELECT dataabertura, n_ordem, status, datainicio, datafim, operador,
+        SELECT dataabertura, n_ordem, status, datainicio, datafim, operador, descmanutencao,
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
             TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
         FROM tb_ordens
@@ -1094,6 +1096,8 @@ def lista_maquinas():
 
     df_final = pd.concat([df_c_preventivas,df_s_preventivas]).drop_duplicates(subset='codigo',keep='first').reset_index(drop=True)
     data = df_final.values.tolist()
+
+    df_final[df_final['setor'] == 'Pintura']
 
     return render_template('user/lista_maquinas.html', data=data)
 
