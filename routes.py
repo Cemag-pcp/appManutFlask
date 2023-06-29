@@ -1,5 +1,5 @@
 #app.py
-from flask import Flask, current_app, send_file,jsonify, render_template, request, redirect, url_for, flash,Blueprint, Response
+from flask import Flask, current_app, send_file,jsonify, render_template, request, redirect, url_for, flash,Blueprint, Response, send_from_directory, send_file,current_app
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
 import datetime
@@ -14,18 +14,16 @@ from datetime import datetime
 from pandas.tseries.offsets import BMonthEnd
 from psycopg2 import Error
 import json
-from urllib.parse import urlencode
-import os
-import zipfile
 from PIL import Image
 import io
+from openpyxl import load_workbook
 
 routes_bp = Blueprint('routes', __name__)
 
 #routes_bp.config['UPLOAD_FOLDER'] = r'C:\Users\pcp2\projetoManutencao\appManutFlask-3\UPLOAD_FOLDER'
 
 warnings.filterwarnings("ignore")
- 
+
 # DB_HOST = "localhost"
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
@@ -246,6 +244,50 @@ def tempo_os2(query):
     # df_timeline = df_timeline.values.tolist()
 
     return df_agrupado
+    
+def formulario_os(id_ordem):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_ordens WHERE id_ordem = {}""".format(id_ordem)
+    cur.execute(query)
+    df = pd.read_sql_query(query, conn)
+    
+    wb = load_workbook('modelo_os_new.xlsx')
+    ws = wb.active
+
+    # Obter a data atual
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+
+    # Obter a hora atual
+    hora_atual = datetime.now().strftime('%H:%M')
+
+    ws['G8'] = data_atual
+    ws['G9'] = hora_atual
+
+    ws['B10'] = df['solicitante'][0]
+    ws['B8'] = df['id_ordem'][0]
+    ws['B9'] = df['setor'][0]
+    ws['B11'] = df['maquina'][0]
+    ws['B12'] = df['problemaaparente'][0]
+    
+    if df['maquina_parada'][0] == True:
+        ws['G11'] = 'Sim'
+    else:
+        ws['G11'] = 'Não'
+    
+    df = df.drop_duplicates(subset=['id_ordem'], keep='last').reset_index()
+
+    ws['G10'] = df['status'][0]
+
+    wb.save('modelo_os_new.xlsx')
+
+    # Caminho completo do arquivo gerado
+    arquivo_gerado = 'modelo_os_new.xlsx'
+
+    # Retorna o arquivo para download
+    return send_file(arquivo_gerado, as_attachment=True)
 
 @routes_bp.route('/')
 @login_required
@@ -1120,3 +1162,8 @@ def excluir_ordem():
     print(id_linha,texto)
 
     return 'Dados recebidos com sucesso!'
+
+@routes_bp.route('/visualizar_pdf/<id_ordem>')
+def visualizar_pdf(id_ordem):
+    
+    return formulario_os(id_ordem)

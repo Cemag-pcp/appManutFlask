@@ -3,6 +3,7 @@ from routes import routes_bp
 from login import login_bp
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
+import os
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = r'C:\Users\pcp2\projetoManutencao\appManutFlask-3\UPLOAD_FOLDER'
