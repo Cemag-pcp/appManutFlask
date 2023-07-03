@@ -18,7 +18,7 @@
             <td>Data Inicio</td>
             <td>Data Fim</td>
             <td>Operadores</td>
-            <td>Tempo de duração</td>
+            <td>Duração (minutos)</td>
             <td>Comentários</td>
           </tr>
         </thead>
@@ -42,6 +42,11 @@
             <td>{{data[4]}}</td>
             <td>{{data[8]}}</td>
             <td>{{data[5]}}</td>
+            <td>
+              <a id="dropdown_os" class="dropdown-item" href="/editar_ordem/{{id_ordem}}"> 
+                <i class="fas fa-pencil"></i> 
+              </a>
+            </td>
         </tr>
         {% endfor %}
         </tbody>

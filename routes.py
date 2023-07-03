@@ -473,7 +473,7 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     tb_funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
     
     return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao)
- 
+
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
 def update_student(id_ordem): # Inserir as edições no banco de dados
@@ -549,6 +549,146 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         conn.commit()
 
         return redirect(url_for('routes.get_employee', id_ordem=id_ordem))
+
+@routes_bp.route('/editar_ordem/<id_ordem>', methods = ['POST', 'GET'])
+@login_required
+def editar_ordem(id_ordem):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    s = ('SELECT * FROM tb_ordens WHERE id_ordem = {}'.format(int(id_ordem)))
+    cur.execute(s)
+    data1 = pd.read_sql_query(s, conn)
+
+    data1 = data1.sort_values(by='n_ordem')
+    data1.reset_index(drop=True, inplace=True)
+    data1.replace(np.nan, '', inplace=True)
+
+    # Loop para percorrer todas as linhas da coluna
+    for i in range(len(data1['dataabertura'])):
+        if data1['dataabertura'][i] == '':
+            data1['dataabertura'][i] = data1['dataabertura'][i-1]
+
+    data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
+    data1 = data1.sort_values(by='id_ordem')
+    
+    desc_manutencao = data1['descmanutencao'].values.tolist()[0]
+
+    executante = data1['operador'].values.tolist()[0].replace("{","").replace("[","").replace("\\","").replace('"', '').replace("]}","")
+    executante = [exec.strip() for exec in executante.split(',')]
+
+    tipo_manutencao = data1['tipo_manutencao'].values.tolist()[0]
+    area_manutencao = data1['area_manutencao'].values.tolist()[0]
+
+    data1 = data1.values.tolist()
+    opcaoAtual = data1[0][4]
+
+    cur.close()
+    
+    lista_opcoes = ['Em execução','Finalizada','Aguardando material']
+    
+    opcoes = []
+    opcoes.append(opcaoAtual)
+
+    for opcao in lista_opcoes:
+        opcoes.append(opcao)
+    
+    opcoes = list(set(opcoes))
+    opcoes.remove(opcaoAtual)  # Remove o elemento 'c' da lista
+    opcoes.insert(0, opcaoAtual)
+
+    query = """SELECT * FROM tb_funcionario"""
+    tb_funcionarios = pd.read_sql_query(query, conn)
+    tb_funcionarios['matricula_nome'] = tb_funcionarios['matricula'] + " - " + tb_funcionarios['nome']
+    tb_funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
+    
+    return render_template('user/editar_ordem.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao,
+                            area_manutencao=area_manutencao, executante=executante, desc_manutencao=desc_manutencao)
+ 
+@routes_bp.route('/update_ordem/<id_ordem>', methods=['POST'])
+@login_required
+def update_ordem(id_ordem): # Inserir as edições no banco de dados
+
+    # # Execute a instrução SQL para alterar o tipo da coluna
+    # alter_query = "ALTER TABLE tb_ordens ALTER COLUMN tipo_manutencao TYPE TEXT;"
+    # cur.execute(alter_query)
+    # conn.commit()
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    if request.method == 'POST':
+            
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(""" 
+            SELECT MAX(id) FROM tb_ordens
+        """)
+        
+        ultimo_id = cur.fetchone()[0]
+        
+        try:
+            ultimo_id = ultimo_id+1
+        except:
+            ultimo_id = 0
+        
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = (""" 
+            SELECT natureza FROM tb_ordens where id_ordem = {} 
+        """).format(id_ordem)
+        
+        df = pd.read_sql_query(s, conn)
+
+        natureza = df['natureza'][0]
+
+        setor = request.form['setor']
+        maquina = request.form['maquina']        
+        risco = request.form['risco']
+        status = request.form['statusLista']
+        problema = request.form['problema']
+        id_ordem = id_ordem
+        n_ordem = request.form['n_ordem']
+        descmanutencao = request.form['descmanutencao']
+        operador = request.form.getlist('operador')
+        operador = json.dumps(operador)
+        tipo_manutencao = request.form['tipo_manutencao1']
+        datetimes = request.form['datetimes']
+        area_manutencao = request.form['area_manutencao1']
+        natureza = natureza
+
+        # Divida a string em duas partes: data/hora inicial e data/hora final
+        data_hora_inicial_str, data_hora_final_str = datetimes.split(" - ")
+
+        # Faça o parsing das strings de data e hora
+        data_inicial = datetime.strptime(data_hora_inicial_str, "%d/%m/%y %I:%M %p")
+        data_final = datetime.strptime(data_hora_final_str, "%d/%m/%y %I:%M %p")
+
+        # Formate as datas e horas no formato desejado
+        datainicio = data_inicial.strftime("%Y-%m-%d")
+        horainicio = data_inicial.strftime("%H:%M:%S")
+        datafim = data_final.strftime("%Y-%m-%d")
+        horafim = data_final.strftime("%H:%M:%S")
+
+        print(setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem)
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        cur.execute("""
+        UPDATE tb_ordens
+        SET setor=%s,maquina=%s,risco=%s,status=%s,problemaaparente=%s,
+            datainicio=%s,horainicio=%s,datafim=%s,horafim=%s,id_ordem=%s,
+            n_ordem=%s, descmanutencao=%s, operador=%s, natureza=%s, tipo_manutencao=%s, area_manutencao=%s
+
+        WHERE n_ordem = %s and id_ordem = %s
+        """, (setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem, id_ordem))
+
+        # cur.execute("""
+        #     INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, natureza, tipo_manutencao, area_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        # """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao))
+        flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
+        conn.commit()
+        cur.close()
+
+        return redirect(url_for('routes.timeline_os', id_ordem=id_ordem))
 
 @routes_bp.route('/openOs')
 def open_os(): # Página de abrir OS
