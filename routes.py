@@ -17,6 +17,10 @@ import json
 from PIL import Image
 import io
 from openpyxl import load_workbook
+import  jpype     
+import  asposecells     
+jpype.startJVM() 
+from asposecells.api import Workbook
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -283,11 +287,11 @@ def formulario_os(id_ordem):
 
     wb.save('modelo_os_new.xlsx')
 
-    # Caminho completo do arquivo gerado
-    arquivo_gerado = 'modelo_os_new.xlsx'
+    workbook = Workbook("modelo_os_new.xlsx")
+    workbook.save("Ordem de Serviço.pdf")
 
     # Retorna o arquivo para download
-    return send_file(arquivo_gerado, as_attachment=True)
+    return send_file("Ordem de Serviço.pdf", as_attachment=True)
 
 @routes_bp.route('/')
 @login_required
@@ -1165,5 +1169,5 @@ def excluir_ordem():
 
 @routes_bp.route('/visualizar_pdf/<id_ordem>')
 def visualizar_pdf(id_ordem):
-    
+
     return formulario_os(id_ordem)

@@ -55,6 +55,34 @@
             {% endfor %}
           </select>
       </div>
+      
+      <!-- Se o setor for solda -->
+      <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
+        <label for="Equipamento em falha">Equipamento em falha:</label>
+        <select class="form-control" name="falha" id="falha" onchange="verificarFalha()" required>
+            <option value="" selected disabled hidden></option>  
+            <option value="Máquina de Solda">Máquina de Solda</option>
+            <option value="Monovia">Monovia</option>
+            <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
+            <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
+        </select>
+      </div>
+
+      <!-- Se o equipamento em falha for máquina de solda -->
+      <div class="form-group" id="maquina_de_solda" style="display: none;">
+        <label for="Maquina de Solda">Setor da Máquina de Solda:</label>
+        <select class="form-control" sdata-live-search="true" name="solda_maquina" id="solda_maquina" required>
+            <option value="" selected disabled hidden></option>  
+            <option value="Laterais">Laterais</option>
+            <option value="Eixos">Eixos</option>
+            <option value="Içamento">Içamento</option>
+            <option value="Laterais">Plataforma "Esqueleto"</option>
+            <option value="Eixos">Chassi</option>
+            <option value="Içamento">Tanque</option>
+            <option value="Laterais">Caçamba</option>
+            <option value="Eixos">Serralheria</option>
+        </select>
+      </div>
 
       <div class="form-group" id="maquina-select">
         <label for="maquina">Máquina/Local:</label>
@@ -65,8 +93,23 @@
             {% endfor %}
           </select>
       </div>
-        
-      <div class="form-group">
+      
+      <div class="form-group" id="ferramenta" style="display: none;">
+        <label for="ferramenta">Qual é a ferramenta?</label>
+        <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramenta" required>
+          <option value="" selected disabled hidden></option>  
+          <option value="Esmerilhadeira">Esmerilhadeira</option>
+          <option value="Lixadeira">Lixadeira</option>
+          <option value="Tocha">Tocha</option>
+        </select>
+      </div>
+      
+      <div class="form-group" id="codigo_equip" style="display: none;">
+        <label for="codigo_equip">Qual o código que apresenta no equipamento?</label>
+        <textarea id="codigo_equip" class="form-control" name="codigo_equip" rows="5" cols="39" required placeholder="Digite o código..."></textarea>
+      </div>
+      
+      <div class="form-group" id = "descricao">
         <label for="problema">Descrição:</label>
         <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
       </div>
@@ -109,6 +152,15 @@
 
 <script>
   function getMaquinasPorSetor() {
+    var setorSelecionado = document.getElementById("setor").value;
+    var equipamentoEmFalha = document.getElementById("equipamento_em_falha");
+
+    if (setorSelecionado === "Solda") {
+      equipamentoEmFalha.style.display = "block";
+    } else {
+      equipamentoEmFalha.style.display = "none";
+    }
+
     var setorSelect = document.getElementById('setor');
     var maquinaSelect = document.getElementById('maquina');
     var setorSelecionado = setorSelect.value;
@@ -195,6 +247,41 @@
           riscoSelect.value = "Baixo";
       }
   });
+</script>
+
+<script>
+  function verificarFalha() {
+    var falhaSelecionada = document.getElementById("falha").value;
+    var ferramenta = document.getElementById("ferramenta");
+    var codigoEquip = document.getElementById("codigo_equip");
+    var maquinaSelect = document.getElementById("maquina-select");
+    var maquinaSolda = document.getElementById("maquina_de_solda");
+
+    if (falhaSelecionada === "Ferramentas(esmerilhadeiras; lixadeiras e tochas)") {
+      ferramenta.style.display = "block";
+      codigoEquip.style.display = "block";
+      maquinaSelect.style.display = "none";
+      maquinaSolda.style.display = "none";
+
+    } else if (falhaSelecionada === "SO-RB-01 - ROBÔ - KUKA"){
+      ferramenta.style.display = "none";
+      codigoEquip.style.display = "none";
+      maquinaSelect.style.display = "none";
+      maquinaSolda.style.display = "none";
+
+    } else if (falhaSelecionada === "Máquina de Solda"){
+      ferramenta.style.display = "none";
+      codigoEquip.style.display = "none";
+      maquinaSelect.style.display = "block";
+      maquinaSolda.style.display = "block";
+    
+    } else {
+      ferramenta.style.display = "none";
+      codigoEquip.style.display = "none";
+      maquinaSelect.style.display = "block";
+      maquinaSolda.style.display = "none";
+    }
+  }
 </script>
 
 {% endblock %}
