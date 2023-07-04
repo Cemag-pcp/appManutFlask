@@ -18,9 +18,10 @@ from PIL import Image
 import io
 from openpyxl import load_workbook
 import  jpype     
-import  asposecells     
-jpype.startJVM() 
+import  asposecells      
 from asposecells.api import Workbook
+
+jpype.startJVM()
 
 routes_bp = Blueprint('routes', __name__)
 
