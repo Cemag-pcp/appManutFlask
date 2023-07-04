@@ -550,28 +550,19 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
 
         return redirect(url_for('routes.get_employee', id_ordem=id_ordem))
 
-@routes_bp.route('/editar_ordem/<id_ordem>', methods = ['POST', 'GET'])
+@routes_bp.route('/editar_ordem/<id_ordem>/<n_ordem>', methods = ['POST', 'GET'])
 @login_required
-def editar_ordem(id_ordem):
+def editar_ordem(id_ordem,n_ordem):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    s = ('SELECT * FROM tb_ordens WHERE id_ordem = {}'.format(int(id_ordem)))
+    s = ('SELECT * FROM tb_ordens WHERE id_ordem = {} AND n_ordem = {}'.format(int(id_ordem), int(n_ordem)))
     cur.execute(s)
     data1 = pd.read_sql_query(s, conn)
 
-    data1 = data1.sort_values(by='n_ordem')
     data1.reset_index(drop=True, inplace=True)
     data1.replace(np.nan, '', inplace=True)
-
-    # Loop para percorrer todas as linhas da coluna
-    for i in range(len(data1['dataabertura'])):
-        if data1['dataabertura'][i] == '':
-            data1['dataabertura'][i] = data1['dataabertura'][i-1]
-
-    data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
-    data1 = data1.sort_values(by='id_ordem')
     
     desc_manutencao = data1['descmanutencao'].values.tolist()[0]
 
@@ -580,6 +571,15 @@ def editar_ordem(id_ordem):
 
     tipo_manutencao = data1['tipo_manutencao'].values.tolist()[0]
     area_manutencao = data1['area_manutencao'].values.tolist()[0]
+    
+    data_inicio = datetime.strptime(str(data1['datainicio'].values[0]), '%Y-%m-%d').strftime('%d/%m/%Y')
+    hora_inicio = datetime.strptime(str(data1['horainicio'].values[0]), '%H:%M:%S').strftime('%H:%M')
+    data_fim = datetime.strptime(str(data1['datafim'].values[0]), '%Y-%m-%d').strftime('%d/%m/%Y')
+    hora_fim = datetime.strptime(str(data1['horafim'].values[0]), '%H:%M:%S').strftime('%H:%M')
+
+    data_atual = f'{data_inicio} {hora_inicio} - {data_fim} {hora_fim}'
+
+    print(data_atual)
 
     data1 = data1.values.tolist()
     opcaoAtual = data1[0][4]
@@ -604,7 +604,7 @@ def editar_ordem(id_ordem):
     tb_funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
     
     return render_template('user/editar_ordem.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao,
-                            area_manutencao=area_manutencao, executante=executante, desc_manutencao=desc_manutencao)
+                            area_manutencao=area_manutencao, executante=executante, desc_manutencao=desc_manutencao, data_atual=data_atual)
  
 @routes_bp.route('/update_ordem/<id_ordem>', methods=['POST'])
 @login_required
