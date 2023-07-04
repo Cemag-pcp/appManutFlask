@@ -17,10 +17,16 @@ import json
 from PIL import Image
 import io
 from openpyxl import load_workbook
-import  jpype     
-import  asposecells 
-jpype.startJVM()    
-from asposecells.api import Workbook
+# import  jpype     
+# import  asposecells 
+# jpype.startJVM()    
+# from asposecells.api import Workbook
+
+
+from win32com import client
+import os
+import win32com.client 
+
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -287,11 +293,26 @@ def formulario_os(id_ordem):
 
     wb.save('modelo_os_new.xlsx')
 
-    workbook = Workbook("modelo_os_new.xlsx")
-    workbook.save("Ordem de Serviço.pdf")
+    # workbook = Workbook("modelo_os_new.xlsx")
+    # workbook.save("Ordem de Serviço.pdf")
+
+    app=client.Dispatch("Excel.Application")
+    app.Interactive = False
+    app.Visible = False
+
+    excel = win32com.client.Dispatch("Excel.Application")
+    workbook = excel.Workbooks.Open(file_location)
+    filename = 'modelo_os_new.xlsx'
+    file_location = os.path.join(os.getcwd(), filename)
+
+    output = os.path.splitext(file_location)
+    worksheet = workbook.ActiveSheet
+
+    worksheet.ExportAsFixedFormat(0, output)
+    workbook.Close()
 
     # Retorna o arquivo para download
-    return send_file("Ordem de Serviço.pdf", as_attachment=True)
+    return send_file("modelo_os_new.pdf", as_attachment=True)
 
 @routes_bp.route('/')
 @login_required
