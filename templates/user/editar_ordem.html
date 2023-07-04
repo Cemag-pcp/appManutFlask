@@ -1,0 +1,138 @@
+{% extends "user/layout.html" %}
+{% block body %}
+
+{% with messages = get_flashed_messages()  %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success" role="sucess" style="width: 45%;">
+    <strong>Sucesso!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="sucess" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div id = 'edicao' class = 'card card-body'>
+<div class="row">
+    <div class = 'col offset'>
+        <form action="/update_ordem/{{ordem[10]}}" method="POST">
+            <div class="form-group">
+                <label for="setor">Setor:</label>
+                <input type="text" name="setor" value="{{ordem[1]}}" class="form-control" readonly="readonly">
+            </div>
+            <div class="form-group">
+                <label for="maquina">Máquina ou Local:</label>
+                <input type="text" name="maquina" value="{{ordem[2]}}" class="form-control" readonly="readonly">
+            </div>
+            <div class="form-group">
+                <label for="problema">Descrição do usuário:</label>
+                <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="risco">Risco</label>    
+                    <input style="width: 250px;" type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
+                </div>
+                <div class="form-group">
+                    <label for="n_ordem">Número da execução:</label>
+                    <input style ="width: 245px;" type="text" name="n_ordem" value="{{ordem[11]}}" class="form-control" readonly="readonly">
+                </div>
+            </div>
+            <div class="form-row">
+                
+                <div class="form-group" style="width: 245px;"> 
+                    <label for="tipo_manutencao">Tipo de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control" name="tipo_manutencao1" id="tipo_manutencao1">
+                        <option value="{{ tipo_manutencao }}">{{ tipo_manutencao }}</option>  
+                        <option value="Corretiva">Corretiva</option>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Preditiva">Preditiva</option>
+                        <option value="Apoio">Apoio</option>
+                        <option value="Projetos">Projetos</option>
+                        <option value="sesmt">SESMT</option>  
+                    </select>               
+                </div>
+
+                <div class="form-group" style="width: 250px;"> 
+                    <label for="area_manutencao">Área de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control" name="area_manutencao1" id="area_manutencao1">
+                        <option value="{{ area_manutencao }}">{{ area_manutencao }}</option>  
+                        <option value="Predial">Predial</option>
+                        <option value="Mecânica">Mecânica</option>
+                        <option value="Elétrica">Elétrica</option>
+                    </select>               
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label for="statusLista">Data e hora</label>
+                <input id="data_edit" type="text" name="datetimes" value="{{data_atual}}" />
+            </div>
+            <div class="form-group" style="width: 530px;"> 
+                <label for="operador_label">Operadores</label>
+                <select class="form-control" id="operador" name="operador" multiple required>
+                    {% for funcionario in tb_funcionarios %}
+                        {% if funcionario[0] in executante %}
+                            <option selected>{{ funcionario[0] }}</option>
+                        {% else %}
+                            <option>{{ funcionario[0] }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+    </div>
+
+    <div class = 'col-md-12 offset'>
+            <div class="form-group">
+                <label for="descmanutencao">Observação da manutenção:</label>
+                <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41">{{ desc_manutencao }}</textarea>
+            </div>
+            <div class="form-group">        
+                <label for="statusLista">Status</label>
+                <select class="form-control form-control" id="statusLista" name="statusLista">
+                    {% for opcao in opcoes %}
+                    <option value="{{ opcao }}">{{ opcao }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <br>
+            <div class="form-group">
+            <button id = 'salvar_edicao' type="submit" class="btn btn-primary btn-block">
+                Salvar
+            </button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+
+<script>
+    $(function() {
+      var dataAtual = "{{ data_atual }}";
+      var dataInicial = dataAtual.split(" - ")[0];
+      var dataFinal = dataAtual.split(" - ")[1];
+    
+      $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        startDate: moment(dataInicial, 'YYYY-MM-DD HH:mm:ss'),
+        endDate: moment(dataFinal, 'YYYY-MM-DD HH:mm:ss'),
+        locale: {
+          format: 'DD/MM/YY hh:mm A'
+        }
+      });
+    
+      $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
+        var startDate = picker.startDate;
+        var endDate = picker.endDate;
+    
+        if (endDate.isBefore(startDate)) {
+          alert("A data final não pode ser menor que a data inicial");
+          picker.setEndDate(startDate);
+        }
+      });
+    });
+</script>
+
+{% endblock %}
