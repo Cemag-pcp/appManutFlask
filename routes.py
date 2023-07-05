@@ -17,6 +17,8 @@ import json
 from PIL import Image
 import io
 from openpyxl import load_workbook
+import os
+import win32com.client
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -284,6 +286,22 @@ def formulario_os(id_ordem):
 
     # Caminho completo do arquivo gerado
     arquivo_gerado = 'modelo_os_new.xlsx'
+
+    filename = 'modelo_os_new.xlsx'
+    file_location = os.path.join(os.getcwd(), filename)
+    output_pdf = os.path.splitext(file_location)[0] + '.pdf'
+
+    excel = win32com.client.Dispatch("Excel.Application")
+    excel.Visible = False
+    excel.DisplayAlerts = False
+
+    workbook = excel.Workbooks.Open(file_location)
+    worksheet = workbook.ActiveSheet
+
+    worksheet.ExportAsFixedFormat(0, output_pdf)
+
+    workbook.Close()
+    excel.Quit()
 
     # Retorna o arquivo para download
     return send_file(arquivo_gerado, as_attachment=True)
