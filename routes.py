@@ -252,22 +252,15 @@ def formulario_os(id_ordem):
 
     query = """SELECT * FROM tb_ordens WHERE id_ordem = {}""".format(id_ordem)
     cur.execute(query)
-    df = pd.read_sql_query(query, conn)
+    df.columns = pd.read_sql_query(query, conn)
     
+    ultima_atualizacao = df['ultima_atualizacao'][0]
+
     wb = load_workbook('modelo_os_new.xlsx')
     ws = wb.active
 
-    # Obter a data atual
-    data_atual = datetime.now().strftime('%d/%m/%Y')
-
-    # Obter a hora atual
-    hora_atual = datetime.now()
-
-    intervalo = timedelta(hours=3)
-
-    nova_hora = hora_atual - intervalo
-
-    nova_hora_formatada = nova_hora.strftime('%H:%M')
+    nova_hora_formatada = ultima_atualizacao.strftime('%H:%M')
+    data_atual = ultima_atualizacao.strftime('%d/%m/%Y')
 
     ws['G8'] = data_atual
     ws['G9'] = nova_hora_formatada
