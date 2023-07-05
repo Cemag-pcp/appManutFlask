@@ -10,18 +10,14 @@ from funcoes import gerador_de_semanas_informar_manutencao, login_required
 import warnings
 from flask import session
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
 from pandas.tseries.offsets import BMonthEnd
 from psycopg2 import Error
 import json
 from PIL import Image
 import io
 from openpyxl import load_workbook
-import  jpype     
-import  asposecells      
-from asposecells.api import Workbook
-
-jpype.startJVM()
+# import convertapi
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -259,17 +255,16 @@ def formulario_os(id_ordem):
     cur.execute(query)
     df = pd.read_sql_query(query, conn)
     
+    ultima_atualizacao = df['ultima_atualizacao'][0] - timedelta(hours=3)
+
     wb = load_workbook('modelo_os_new.xlsx')
     ws = wb.active
 
-    # Obter a data atual
-    data_atual = datetime.now().strftime('%d/%m/%Y')
-
-    # Obter a hora atual
-    hora_atual = datetime.now().strftime('%H:%M')
+    nova_hora_formatada = ultima_atualizacao.strftime('%H:%M')
+    data_atual = ultima_atualizacao.strftime('%d/%m/%Y')
 
     ws['G8'] = data_atual
-    ws['G9'] = hora_atual
+    ws['G9'] = nova_hora_formatada
 
     ws['B10'] = df['solicitante'][0]
     ws['B8'] = df['id_ordem'][0]
@@ -288,11 +283,18 @@ def formulario_os(id_ordem):
 
     wb.save('modelo_os_new.xlsx')
 
-    workbook = Workbook("modelo_os_new.xlsx")
-    workbook.save("Ordem de Serviço.pdf")
+    # workbook = Workbook("modelo_os_new.xlsx")
+    # workbook.save("Ordem de Serviço.pdf")
+
+    # convertapi.api_secret = 'vkVdyOJxS8xz4uWq'
+    # convertapi.convert('pdf', {
+    #     'File': 'modelo_os_new.xlsx'
+    # }, from_format = 'xlsx').save_files('modelo_os_new.pdf')
+    
+    # arquivo_final = 'modelo_os_new.pdf'
 
     # Retorna o arquivo para download
-    return send_file("Ordem de Serviço.pdf", as_attachment=True)
+    return send_file("modelo_os_new.pdf", as_attachment=True)
 
 @routes_bp.route('/')
 @login_required
