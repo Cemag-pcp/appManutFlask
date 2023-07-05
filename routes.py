@@ -245,15 +245,17 @@ def tempo_os2(query):
 
     return df_agrupado
     
-def formulario_os(id_ordem):
+from fpdf import FPDF
 
+def formulario_os(id_ordem):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """SELECT * FROM tb_ordens WHERE id_ordem = {}""".format(id_ordem)
     cur.execute(query)
     df = pd.read_sql_query(query, conn)
-    
+
+    # Carregar o arquivo Excel
     wb = load_workbook('modelo_os_new.xlsx')
     ws = wb.active
 
@@ -289,11 +291,32 @@ def formulario_os(id_ordem):
 
     wb.save('modelo_os_new.xlsx')
 
+    # Converter o arquivo Excel para PDF
+    excel_to_pdf('modelo_os_new.xlsx', 'modelo_os_new.pdf')
+
     # Caminho completo do arquivo gerado
-    arquivo_gerado = 'modelo_os_new.xlsx'
+    arquivo_gerado = 'modelo_os_new.pdf'
 
     # Retorna o arquivo para download
     return send_file(arquivo_gerado, as_attachment=True)
+
+def excel_to_pdf(excel_file='modelo_os_new.xlsx', pdf_file='modelo_os_new.pdf'):
+    # Criar um objeto PDF
+    pdf = FPDF()
+    pdf.add_page()
+
+    # Carregar o arquivo Excel
+    wb = load_workbook(excel_file)
+    ws = wb.active
+
+
+    # Ler as células do arquivo Excel e adicionar ao PDF
+    for row in ws.iter_rows():
+        for cell in row:
+            pdf.cell(40, 10, str(cell.value))
+
+    # Salvar o arquivo PDF
+    pdf.output(pdf_file)
 
 @routes_bp.route('/')
 @login_required
