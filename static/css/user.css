@@ -183,11 +183,16 @@ body {
   cursor: pointer;
   outline: none;
 }
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   /* Ajuste para telas menores (menu oculto) */
   #menu-button {
     position: absolute;
-    margin-left: 70px;
+    top: 50%;
+    left: 50%;
+    transform: translate(160%,-550%);
+    background-color: #f2f3f5;
+    border-radius: 15px;
+    padding-top: 16.2px;
   }
 }
 
@@ -260,20 +265,49 @@ body {
   padding: 30px;
   margin: 0;
 }
-@media (max-width: 767px) { /* Tamanho da tela de celular */
-  #tabela .board {
-      width: 100%; /* Ocupar toda a largura disponível */
-      margin-left: auto;
-      margin-right: auto;
+
+#titulo .visao{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+}
+
+@media (max-width: 768px) { 
+  #titulo .visao{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 5px;
+    font-size: 35px;
   }
 }
 
-#titulo .visao{
-  top:5%;
-  left: 50%;
-  transform: translate(180%,-13%);
-  padding: 10px;
-}
+@media only screen and (max-width: 768px) {
+  .responsive-table {
+      max-width: 100%;
+      overflow-x: auto;
+  }
+  
+  .responsive-table thead {
+      display: none;
+  }
+  
+  .responsive-table td,
+  .responsive-table th {
+      display: block;
+      text-align: center;
+  }
+  
+  .responsive-table td:before {
+      content: attr(data-label);
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+  }
+  }
 
 #titulo .visao2{
   top:5%;

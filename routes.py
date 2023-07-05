@@ -17,7 +17,7 @@ import json
 from PIL import Image
 import io
 from openpyxl import load_workbook
-import convertapi
+# import convertapi
 
 routes_bp = Blueprint('routes', __name__)
 
