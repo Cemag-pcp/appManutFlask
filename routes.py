@@ -255,7 +255,7 @@ def formulario_os(id_ordem):
     cur.execute(query)
     df = pd.read_sql_query(query, conn)
     
-    ultima_atualizacao = df['ultima_atualizacao'][0]
+    ultima_atualizacao = df['ultima_atualizacao'][0] - timedelta(hours=3)
 
     wb = load_workbook('modelo_os_new.xlsx')
     ws = wb.active
@@ -295,7 +295,6 @@ def formulario_os(id_ordem):
 
     # Retorna o arquivo para download
     return send_file(arquivo_gerado, as_attachment=True)
-
 
 @routes_bp.route('/')
 @login_required
