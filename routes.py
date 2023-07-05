@@ -252,7 +252,7 @@ def formulario_os(id_ordem):
 
     query = """SELECT * FROM tb_ordens WHERE id_ordem = {}""".format(id_ordem)
     cur.execute(query)
-    df.columns = pd.read_sql_query(query, conn)
+    df = pd.read_sql_query(query, conn)
     
     ultima_atualizacao = df['ultima_atualizacao'][0]
 
