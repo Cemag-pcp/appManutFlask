@@ -286,15 +286,15 @@ def formulario_os(id_ordem):
     # Caminho completo do arquivo gerado
     arquivo_gerado = 'modelo_os_new.xlsx'
 
-    convertapi.api_secret = 'vkVdyOJxS8xz4uWq'
-    convertapi.convert('pdf', {
-        'File': 'modelo_os_new.xlsx'
-    }, from_format = 'xlsx').save_files('modelo_os_new.pdf')
+    # convertapi.api_secret = 'vkVdyOJxS8xz4uWq'
+    # convertapi.convert('pdf', {
+    #     'File': 'modelo_os_new.xlsx'
+    # }, from_format = 'xlsx').save_files('modelo_os_new.pdf')
     
-    arquivo_final = 'modelo_os_new.pdf'
+    # arquivo_final = 'modelo_os_new.pdf'
 
     # Retorna o arquivo para download
-    return send_file(arquivo_final, as_attachment=True)
+    return send_file(arquivo_gerado, as_attachment=True)
 
 
 @routes_bp.route('/')
