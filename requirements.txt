@@ -12,4 +12,4 @@ numpy==1.21.6
 pillow==9.3.0
 openpyxl==3.0.9
 pip==21.1.2
-pywin32==306
+pywin32
