@@ -10,7 +10,7 @@ from funcoes import gerador_de_semanas_informar_manutencao, login_required
 import warnings
 from flask import session
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
 from pandas.tseries.offsets import BMonthEnd
 from psycopg2 import Error
 import json
@@ -261,10 +261,16 @@ def formulario_os(id_ordem):
     data_atual = datetime.now().strftime('%d/%m/%Y')
 
     # Obter a hora atual
-    hora_atual = datetime.now().strftime('%H:%M')
+    hora_atual = datetime.now()
+
+    intervalo = timedelta(hours=3)
+
+    nova_hora = hora_atual - intervalo
+
+    nova_hora_formatada = nova_hora.strftime('%H:%M')
 
     ws['G8'] = data_atual
-    ws['G9'] = hora_atual
+    ws['G9'] = nova_hora_formatada
 
     ws['B10'] = df['solicitante'][0]
     ws['B8'] = df['id_ordem'][0]
