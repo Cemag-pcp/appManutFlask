@@ -294,7 +294,7 @@ def formulario_os(id_ordem):
     # arquivo_final = 'modelo_os_new.pdf'
 
     # Retorna o arquivo para download
-    return send_file("modelo_os_new.pdf", as_attachment=True)
+    return send_file("modelo_os_new.xlsx", as_attachment=True)
 
 @routes_bp.route('/')
 @login_required
