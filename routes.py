@@ -359,11 +359,17 @@ def add_student(): # Criar ordem de serviço
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        setor = request.form['setor']
-        maquina = request.form['maquina']
-        problema = request.form['problema']
-        solicitante = request.form['solicitante']
+        setor = request.form.get('setor')
+        maquina = request.form.get('maquina')
+        problema = request.form.get('problema')
+        solicitante = request.form.get('solicitante')
         dataAbertura = datetime.now()
+        equipamento_em_falha = request.form.get('falha')
+        setor_maquina_solda = request.form.get('solda_maquina')
+        qual_ferramenta = request.form.get('ferramenta')
+
+        print(equipamento_em_falha,setor_maquina_solda,qual_ferramenta)
+
         n_ordem = 0
         status = 'Em espera'
 
@@ -378,8 +384,9 @@ def add_student(): # Criar ordem de serviço
         except:
             maquina_parada = 'false'
 
-        maquina = maquina.split(" - ")
-        maquina = maquina[0]
+        if maquina != None:
+            maquina = maquina.split(" - ")
+            maquina = maquina[0]
         
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("SELECT MAX(id) FROM tb_ordens")
@@ -399,7 +406,7 @@ def add_student(): # Criar ordem de serviço
         except:
             ultima_os = 0
 
-        cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada,solicitante))
+        cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta))
 
         imagem = request.files['imagem']
         
