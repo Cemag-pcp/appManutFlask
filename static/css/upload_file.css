@@ -70,3 +70,15 @@
   white-space: nowrap;
   font-family: 'Poppins', sans-serif;
 }
+
+@media(max-width:600px){
+  
+  .file-upload__label {
+    max-width: 150px;
+    font-size: 0.95em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: 'Poppins', sans-serif;
+  }
+}

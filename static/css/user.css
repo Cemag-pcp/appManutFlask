@@ -183,13 +183,18 @@ body {
   cursor: pointer;
   outline: none;
 }
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   /* Ajuste para telas menores (menu oculto) */
   #menu-button {
     position: absolute;
-    margin-left: 70px;
+    left: 360px;
+    top: 10px;
+    background-color: #f2f3f5;
+    border-radius: 15px;
+    padding-top: 16.2px;
   }
 }
+
 
 #menu .item {
   margin-top: 80px;
@@ -269,10 +274,46 @@ body {
 }
 
 #titulo .visao{
-  top:5%;
-  left: 50%;
-  transform: translate(180%,-13%);
-  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+}
+
+@media (max-width: 768px) { 
+  #titulo .visao{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 5px;
+    font-size: 35px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .responsive-table {
+      max-width: 100%;
+      overflow-x: auto;
+  }
+  
+  .responsive-table thead {
+      display: none;
+  }
+  
+  .responsive-table td,
+  .responsive-table th {
+      display: block;
+      text-align: center;
+  }
+  
+  .responsive-table td:before {
+      content: attr(data-label);
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+  }
 }
 
 #titulo .visao2{
