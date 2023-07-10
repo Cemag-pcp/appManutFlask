@@ -321,8 +321,17 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     """)
 
     df = pd.read_sql_query(s, conn)
-    df = df.sort_values(by='n_ordem')
+    df = df.sort_values(by='id_ordem').reset_index(drop=True)
     
+    for i in range(len(df)):
+        try:
+            if df['id_ordem'][i] == df['id_ordem'][i-1]:
+                df['maquina_parada'][i] = df['maquina_parada'][i-1]
+        except:
+            pass
+        
+    df = df.sort_values(by='n_ordem')
+
     df.reset_index(drop=True, inplace=True)
     df.replace(np.nan, '', inplace=True)
 
@@ -347,6 +356,16 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime("%Y-%m-%d %H:%M:%S")
 
     list_users = df.values.tolist()
+
+
+    # s = (""" 
+    #     SELECT id_ordem, maquina_parada 
+    #     FROM tb_ordens 
+    #     WHERE ordem_excluida isnull and horafim isnull 
+    # """)
+
+    # df = pd.read_sql_query(s, conn)
+    # df_maquina_parada = df.values.tolist()
 
     return render_template('user/index.html', list_users = list_users)
 

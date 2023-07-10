@@ -106,6 +106,29 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="form-row">
+                <div class="toggle">
+                  <label for="maquina-realmente-parada">Máquina está realmente parada?</label>
+                  <label class="switch2" style="left: 180px;">
+                    <input type="checkbox" name="maquina-parada" id="maquina-parada">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="toggle">
+                    <label for="execucao-maquina-parada">Execução feita c/ a máquina parada?</label>
+                    <label class="switch2" style="left: 145px;">
+                      <input type="checkbox" name="maquina-parada" id="maquina-parada">
+                      <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="toggle" id="apos-execucao-toggle" style="display: none;">
+                    <label for="apos-execucao-maquina-parada">Após a execução, a máquina está funcionando?</label>
+                    <label class="switch2" style="left: 62px;">
+                      <input type="checkbox" name="maquina-parada" id="maquina-parada">
+                      <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
             <br>
             <div class="form-group">
             <button id = 'salvar_edicao' type="submit" class="btn btn-primary btn-block">
@@ -139,5 +162,27 @@ $(function() {
     });
   });
 </script>  
+
+<script>
+  $(document).ready(function() {
+  // Event handler for status dropdown change
+  $('#statusLista').on('change', function() {
+    var selectedStatus = $(this).val();
+    updateToggleVisibility(selectedStatus);
+  });
+
+  // Update toggle visibility on page load
+  var selectedStatus = $('#statusLista').val();
+  updateToggleVisibility(selectedStatus);
+
+  function updateToggleVisibility(status) {
+    if (status === 'Finalizada') {
+      $('#apos-execucao-toggle').show();
+    } else {
+      $('#apos-execucao-toggle').hide();
+    }
+  }
+});
+</script>
 
 {% endblock %}
