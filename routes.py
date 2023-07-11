@@ -548,7 +548,25 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         datetimes = request.form['datetimes']
         area_manutencao = request.form['area_manutencao']
         natureza = natureza
-        print(operador)
+
+        try:
+            botao1 = request.form['maquina-parada-1']
+
+        except:
+            botao1 = 'false'
+        try:
+            botao2 = request.form['maquina-parada-2']
+
+        except:
+            botao2 = 'false'
+        try:
+            botao3 = request.form['maquina-parada-3']
+        except:
+            botao3 = 'false'
+
+        print(botao1)
+        print(botao2)
+        print(botao3)
 
         # Divida a string em duas partes: data/hora inicial e data/hora final
         data_hora_inicial_str, data_hora_final_str = datetimes.split(" - ")
@@ -563,9 +581,9 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         datafim = data_final.strftime("%Y-%m-%d")
         horafim = data_final.strftime("%H:%M:%S")
 
-        # print(datainicio, horainicio, datafim, horafim)
+        print(datainicio, horainicio, datafim, horafim)
 
-        #print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
+        print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
@@ -738,8 +756,6 @@ def open_os(): # Página de abrir OS
 def filtro_maquinas(setor):
    
     #setor = setor.upper()
-
-    print(setor)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)

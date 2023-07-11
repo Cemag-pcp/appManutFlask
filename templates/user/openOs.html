@@ -59,9 +59,7 @@
       <!-- Se o setor for solda -->
       <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
         <label for="Equipamento em falha">Equipamento em falha:</label>
-        <a href="#" onclick="exibirImagem()">
-          <img id="imagem_falha" src="uploads\346796e5-2551-4429-a312-962c754836e0.jpg" alt="Imagem" width="200" height="200" style="cursor: pointer; display: none;">
-        </a>
+        <a href="#" onclick="showImageModalOS()"><i class="fa-solid fa-image"></i></a>
         <select class="form-control" name="falha" id="falha" onchange="verificarFalha()" required>
           <option value="" selected disabled hidden></option>  
           <option value="Máquina de Solda">Máquina de Solda</option>
@@ -151,17 +149,54 @@
   </div>
 </div>
 
-<script>
-  function exibirImagem() {
-    var imagem = document.getElementById('imagem_falha');
-    if (imagem.style.display === 'none') {
-      imagem.style.display = 'block';
-    } else {
-      imagem.style.display = 'none';
-    }
-  }
-</script>
+<div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content2">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imagemModalLabel">Foto</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Aqui é onde a imagem será exibida -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script>
+
+  function showImageModalOS() {
+          showLoading()
+          $.ajax({
+            success: function() {
+              
+              var modalBody = '<img src="static/img/equipamento.png" alt="Foto"/>';
+              
+              // Preencha o conteúdo do modal com a imagem
+              $('#imagemModal .modal-body').html(modalBody);
+              
+              // Exiba o modal
+              $('#imagemModal').modal('show');
+              
+              // Oculta a tela de carregamento após um pequeno atraso (500 milissegundos)
+              setTimeout(function() {
+                  hideLoading(); // Esconde o indicador de carregamento
+              }, 10);
+          },
+          error: function(error) {
+              hideLoading();
+              alert('Essa Ordem de Serviço não contém imagem')
+              console.log(error);
+          }
+          });
+      }
+  
+</script>
 
 <script>
   function getMaquinasPorSetor() {

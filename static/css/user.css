@@ -53,6 +53,39 @@ body {
   border-radius: 20px;
 }
 
+@media (max-width:600px){
+  #edicao{
+    top: 50%;
+    left: 50%;
+    transform: translate(-30%,-15%);
+    background-color: rgba(255, 255, 255,0.5);
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    margin-top: 200px;
+    margin-bottom: 90px;
+    width: 150%;
+    height: 125vh;
+    border-radius: 20px;
+    position: absolute;
+  }
+
+  .card{
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: row;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+}
+
 .form-row {
   display: flex;
   justify-content: space-between;
@@ -496,6 +529,16 @@ body {
   height: auto;
   display: flex;
   justify-content: center;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 7;
+  background-color: #000;
 }
 
 /* #titulo .visao{

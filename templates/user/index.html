@@ -17,22 +17,22 @@
                 <table id="table1" class="table table-striped">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">OS</th>
+                            <th style="width: 30px;">OS</th>
                             <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
-                            <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
+                            <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. ou Local</th>
                             <th>Risco</th>
                             <th style="text-align: center;">Status</th>
                             <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                            <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última atualização</th>
-                            <th style="max-width: 165px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina Parada?</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Abertura</th>
+                            <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Últ. atualização</th>
+                            <th style="max-width: 165px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in list_users %}
                         <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <td style="max-width: 200px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
+                            <td style="max-width: 90px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
                             <td style="max-width: 215px; padding-bottom: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[2]}}</td>
                             <td style="max-width: 80px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
                             <td style="padding-bottom: 0px;">{{row[4]}}</td>
@@ -53,7 +53,7 @@
                             <td style="padding-bottom: 0px;">{{row[13]}}</td>
                             
                             <!-- <td style="max-width: 60px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" class="coluna-valores">R${{row[0]}}</td> -->
-                            <td style="max-width: 80px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[20]}}</td>  
+                            <td style="max-width: 180px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[20]}}</td>  
                             {% if row[19] == True %}
                             <td style="padding-bottom: 0px;"><i class="fa-solid fa-check"></i></td>
                             {% else %}
@@ -128,7 +128,7 @@
 <!-- Modal Imagem -->
 <div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-      <div class="modal-content">
+      <div class="modal-content2">
         <div class="modal-header">
           <h5 class="modal-title" id="imagemModalLabel">Foto</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
