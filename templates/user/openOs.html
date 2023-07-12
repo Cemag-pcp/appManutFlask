@@ -59,7 +59,7 @@
       <!-- Se o setor for solda -->
       <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
         <label for="Equipamento em falha">Equipamento em falha:</label>
-        <select class="form-control" name="falha" id="falha" onchange="verificarFalha()" required>
+        <select class="form-control" name="falha" id="falha" onchange="verificarFalha();getFalhas()" required>
             <option value="" selected disabled hidden></option>  
             <option value="Máquina de Solda">Máquina de Solda</option>
             <option value="Monovia">Monovia</option>
@@ -149,6 +149,38 @@
 </div>
 
 
+
+<script>
+  function getFalhas() {
+
+    var falhaSelect = document.getElementById('falha');
+    var maquinaSelect = document.getElementById('maquina');
+    var falhaSelecionado = falhaSelect.value;
+
+    // Limpa as opções atuais do menu de máquinas
+    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
+
+    // Verifica se um setor foi selecionado
+    if (falhaSelecionado !== '') {
+      // Faz uma chamada assíncrona para o servidor Flask
+      showLoading()
+      $.ajax({
+        url: '/falha/' + falhaSelecionado,
+        type: 'GET',
+        success: function(data) {
+          // Atualiza o menu de máquinas com as opções retornadas do servidor
+          for (var i = 0; i < data.length; i++) {
+            var option = document.createElement('option');
+            option.text = data[i];
+            option.value = data[i];
+            maquinaSelect.add(option);
+          }
+          hideLoading();
+        }
+      });
+    }
+  }
+</script>
 
 <script>
   function getMaquinasPorSetor() {

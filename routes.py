@@ -307,7 +307,8 @@ def inicio(): # Redirecionar para a página de login
 def Index(): # Página inicial (Página com a lista de ordens de serviço)
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
     #s = "SELECT * FROM tb_ordens"
     s = (""" 
         SELECT DISTINCT t1.total, t2.* 
@@ -348,7 +349,7 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 
     list_users = df.values.tolist()
 
-    return render_template('user/index.html', list_users = list_users)
+    return render_template('user/index.html', list_users=list_users)
 
 @routes_bp.route('/add_student', methods=['POST', 'GET']) 
 def add_student(): # Criar ordem de serviço
@@ -367,6 +368,7 @@ def add_student(): # Criar ordem de serviço
         equipamento_em_falha = request.form.get('falha')
         setor_maquina_solda = request.form.get('solda_maquina')
         qual_ferramenta = request.form.get('ferramenta')
+        cod_equipamento = request.form.get('codigo_equip')
 
         print(equipamento_em_falha,setor_maquina_solda,qual_ferramenta)
 
@@ -406,7 +408,8 @@ def add_student(): # Criar ordem de serviço
         except:
             ultima_os = 0
 
-        cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta))
+        cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                     (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento))
 
         imagem = request.files['imagem']
         
@@ -466,8 +469,6 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
 
     data1 = data1.values.tolist()
     opcaoAtual = data1[0][4]
-
-    cur.close()
     
     lista_opcoes = ['Em execução','Finalizada','Aguardando material']
     
@@ -485,8 +486,14 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     tb_funcionarios = pd.read_sql_query(query, conn)
     tb_funcionarios['matricula_nome'] = tb_funcionarios['matricula'] + " - " + tb_funcionarios['nome']
     tb_funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
+
+    query = """SELECT CONCAT(codigo, ' - ', descricao) AS codigo_descricao
+            FROM tb_ordens AS t1
+            JOIN tb_maquinas AS t2 ON t1.maquina = t2.codigo"""
+    cur.execute(query)
+    maquinas = cur.fetchall()
     
-    return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao)
+    return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao, maquinas=maquinas)
 
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
@@ -595,6 +602,8 @@ def editar_ordem(id_ordem,n_ordem):
 
     print(data_atual)
 
+    print(data_atual)
+
     data1 = data1.values.tolist()
     opcaoAtual = data1[0][4]
 
@@ -619,7 +628,48 @@ def editar_ordem(id_ordem,n_ordem):
     
     return render_template('user/editar_ordem.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao,
                             area_manutencao=area_manutencao, executante=executante, desc_manutencao=desc_manutencao, data_atual=data_atual)
- 
+
+@routes_bp.route('/editar_ordem_inicial/<id_ordem>/<n_ordem>', methods = ['POST', 'GET'])
+@login_required
+def editar_ordem_inicial(id_ordem,n_ordem):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    s = ('SELECT * FROM tb_ordens WHERE id_ordem = {} AND n_ordem = {}'.format(int(id_ordem), int(n_ordem)))
+    cur.execute(s)
+    data1 = pd.read_sql_query(s, conn)
+
+    data1.reset_index(drop=True, inplace=True)
+    data1.replace(np.nan, '', inplace=True)
+    maquina = data1['maquina'][0]
+
+    try:
+        maquina = maquina.split(" - ")[0]
+    except:
+        pass
+
+    data1 = data1.values.tolist()
+
+    s = ("""
+        SELECT CONCAT(codigo , ' - ' , descricao) as codigo_descricao 
+        FROM tb_maquinas
+        WHERE codigo = '{}'
+        """.format(maquina))
+    cur.execute(s)
+    
+    maquina = cur.fetchall()
+    
+    try:
+        maquina = maquina[0]
+    except:
+        maquina = maquina
+
+    if len(maquina) == 0:
+        maquina.append('Outros')
+
+    return render_template('user/editar_ordem_inicial.html', ordem=data1[0], maquina=maquina, n_ordem=n_ordem)
+
 @routes_bp.route('/update_ordem/<id_ordem>', methods=['POST'])
 @login_required
 def update_ordem(id_ordem): # Inserir as edições no banco de dados
@@ -703,6 +753,48 @@ def update_ordem(id_ordem): # Inserir as edições no banco de dados
         cur.close()
 
         return redirect(url_for('routes.timeline_os', id_ordem=id_ordem))
+
+@routes_bp.route('/guardar_ordem_editada/<id_ordem>/<n_ordem>', methods=['POST'])
+@login_required
+def guardar_ordem_editada(id_ordem, n_ordem): # Inserir as edições no banco de dados
+
+    if request.method == 'POST':
+        
+        id_ordem = id_ordem
+        setor = request.form['setor']
+        maquina = request.form.get('maquina')        
+        equipamento_em_falha = request.form.get('falha')
+        setor_maquina_solda = request.form.get('solda_maquina')
+        qual_ferramenta = request.form.get('ferramenta')
+        codigo_equipamento = request.form.get("codigo_equip")
+        problema = request.form['problema']
+        risco = request.form.get("risco")
+        maquina_parada = request.form.get('maquina-parada')
+        
+        try:
+            maquina = maquina.split(" - ")[0]
+        except:
+            pass
+
+        if maquina_parada:
+            maquina_parada = 'True'
+        else:
+            maquina_parada = 'False'
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        cur.execute("""
+            UPDATE tb_ordens
+            SET setor=%s,maquina=%s,risco=%s,maquina_parada=%s,equipamento_em_falha=%s,setor_maquina_solda=%s,
+            qual_ferramenta=%s,cod_equipamento=%s,problemaaparente=%s
+            WHERE id_ordem = %s
+            """, (setor, maquina, risco, maquina_parada, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, codigo_equipamento, problema, id_ordem))
+
+        conn.commit()
+        cur.close()
+        
+        return redirect(url_for('routes.Index'))
 
 @routes_bp.route('/openOs')
 def open_os(): # Página de abrir OS
@@ -1321,3 +1413,29 @@ def excluir_ordem():
 def visualizar_pdf(id_ordem):
 
     return formulario_os(id_ordem)
+
+@routes_bp.route('/falha/<falhaSelecionado>')
+def falha_selecionada(falhaSelecionado):
+
+    print(falhaSelecionado)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """
+        SELECT *
+        FROM tb_maquinas
+        WHERE descricao LIKE '%{}%';
+    """.format(falhaSelecionado)
+
+    lista_maquinas = pd.read_sql_query(query, conn)
+    
+    lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
+    lista_maquinas = lista_maquinas.dropna(subset=['codigo_desc'])
+    lista_maquinas = lista_maquinas.drop_duplicates(subset=['codigo'])
+    
+    lista_maquinas_ = []
+    lista_maquinas_.insert(0, 'Outros')
+    lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
+
+    return jsonify(lista_maquinas_)
