@@ -1,0 +1,206 @@
+{% extends "user/layout.html" %}
+{% block body %}
+
+{% with messages = get_flashed_messages()  %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success" role="sucess" style="width: 45%;">
+    <strong>Sucesso!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="sucess" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div id = 'edicao' class = 'card card-body'>
+    <div class="row">
+        <div class = 'col offset'>
+            <form action="/guardar_ordem_editada/{{ordem[10]}}/{{n_ordem}}" method="POST">
+                <div class="form-group">
+                    <label for="solicitante">Solicitante:</label>
+                    <input type="text" name="solicitante" value="{{ordem[20]}}" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="setor">Setor:</label>
+                    <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
+                      <option value="{{ordem[1]}}">{{ordem[1]}}</option>
+                      <option value="Administrativo">Administrativo</option>
+                      <option value="Almoxarifado">Almoxarifado</option>
+                      <option value="Corte e estamparia">Corte e estamparia</option>
+                      <option value="Expedição">Expedição</option>
+                      <option value="Equipamentos de Movimentacao">Equipamentos de Movimentação</option>
+                      <option value="Solda">Solda</option>
+                      <option value="Montagem">Montagem</option>
+                      <option value="Pintura">Pintura</option>
+                      <option value="Carpintaria">Carpintaria</option>
+                      <option value="Usinagem">Usinagem</option>  
+                      <option value="Serra">Serra</option>
+                      <option value="Serralheria">Serralheria</option>
+                      <option value="Manutenção">Manutenção</option>
+                      <option value="Forjaria">Forjaria</option>
+                      <option value="Utilidades">Utilidades</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group" id="maquina-select">
+                        <label for="maquina">Máquina/Local:</label>
+                        <select class="form-control" sdata-live-search="true" name="maquina" id="maquina">
+                            <option value="{{maquina[0]}}">{{maquina[0]}}</option>  
+                            {% for maquina in lista_maquinas_ %}
+                            <option value="{{maquina[0]}}">{{maquina[0]}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                
+                    <div class="form-group" id="equipamento_em_falha" style="padding: .375rem .25rem;">
+                        <label for="Equipamento em falha">Equipamento em falha:</label>
+                        <select class="form-control" name="falha" id="falha" onchange="verificarFalha()">
+                            <option value="{{ordem[23]}}" >{{ordem[23]}}</option> 
+                            <option value=""></option> 
+                            <option value="Máquina de Solda">Máquina de Solda</option>
+                            <option value="Monovia">Monovia</option>
+                            <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
+                            <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
+                        </select>
+                    </div>
+
+                </div>
+                
+                <div class="form-row">
+
+                    <div class="form-group" id="maquina_de_solda">
+                        <label for="Maquina de Solda">Setor da Máquina de Solda:</label>
+                        <select class="form-control" sdata-live-search="true" name="solda_maquina" id="solda_maquina">
+                            <option value="{{ordem[24]}}">{{ordem[24]}}</option> 
+                            <option value=""></option> 
+                            <option value="Laterais">Laterais</option>
+                            <option value="Eixos">Eixos</option>
+                            <option value="Içamento">Içamento</option>
+                            <option value="Laterais">Plataforma "Esqueleto"</option>
+                            <option value="Eixos">Chassi</option>
+                            <option value="Içamento">Tanque</option>
+                            <option value="Laterais">Caçamba</option>
+                            <option value="Eixos">Serralheria</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="ferramenta">
+                        <label for="ferramenta">Qual é a ferramenta?</label>
+                        <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramenta">
+                          <option value="{{ordem[25]}}" >{{ordem[25]}}</option>  
+                          <option value=""></option>
+                          <option value="Esmerilhadeira">Esmerilhadeira</option>
+                          <option value="Lixadeira">Lixadeira</option>
+                          <option value="Tocha">Tocha</option>
+                        </select>
+                    </div>
+
+                </div>
+                
+                <div class="form-group" id="codigo_equip">
+                    <label for="codigo_equip">Qual o código que apresenta no equipamento?</label>
+                    <textarea id="codigo_equip" class="form-control" name="codigo_equip" rows="5" cols="39" placeholder="Digite o código..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="problema">Descrição do usuário:</label>
+                    <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required>{{ordem[5]}}</textarea >
+                </div>
+                <div class="form-row">
+                    
+                    <div class="form-group">        
+                        <label for="risco">Impacto na produção:</label>
+                        <select class="form-control form-control" sdata-live-search="true" id="risco" name="risco" style='padding: .375rem .25rem;' >
+                          <option value="{{ordem[3]}}">{{ordem[3]}}</option>
+                          <option value="Alto">Alto</option>  
+                          <option value="Médio">Médio</option>
+                          <option value="Baixo">Baixo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="n_ordem">Número da execução:</label>
+                        <input style ="width: 245px;" type="text" name="n_ordem" value="{{ordem[11]}}" class="form-control" readonly>
+                    </div>
+
+                </div>
+
+                {% if ordem[18] == True %}
+                <div class="form-group">
+                    <label for="maquina-parada">Máquina parada?</label>
+                    <label class="switch">
+                        <input type="checkbox" name="maquina-parada" id="maquina-parada" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                {% else %}
+                <div class="form-group">
+                    <label for="maquina-parada">Máquina parada?</label>
+                    <label class="switch">
+                        <input type="checkbox" name="maquina-parada" id="maquina-parada">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                {% endif %}
+                
+                <button id = 'salvar' class="btn btn-block">
+                    Salvar 
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getMaquinasPorSetor() {
+      var setorSelecionado = document.getElementById("setor").value;
+  
+      var setorSelect = document.getElementById('setor');
+      var maquinaSelect = document.getElementById('maquina');
+      var setorSelecionado = setorSelect.value;
+  
+      // Limpa as opções atuais do menu de máquinas
+      maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
+  
+      // Verifica se um setor foi selecionado
+      if (setorSelecionado !== '') {
+        // Faz uma chamada assíncrona para o servidor Flask
+        showLoading()
+        $.ajax({
+          url: '/maquinas/' + setorSelecionado,
+          type: 'GET',
+          success: function(data) {
+            // Atualiza o menu de máquinas com as opções retornadas do servidor
+            for (var i = 0; i < data.length; i++) {
+              var option = document.createElement('option');
+              option.text = data[i];
+              option.value = data[i];
+              maquinaSelect.add(option);
+            }
+            hideLoading();
+          }
+        });
+      }
+    }
+</script>
+
+
+<script>
+    var maquinaParadaCheckbox = document.getElementById('maquina-parada');
+    var maquinaParadaHiddenInput = document.querySelector('input[name="maquina-parada"][type="hidden"]');
+  
+    maquinaParadaCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInput.value = "true";
+      } else {
+        maquinaParadaHiddenInput.value = "false";
+      }
+    });
+</script>
+
+{% endblock %}
