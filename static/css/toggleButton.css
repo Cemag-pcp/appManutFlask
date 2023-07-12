@@ -60,3 +60,20 @@
   .slider.round:before {
     border-radius: 50%;
   }
+
+  .toggle{
+    margin-left: 5px;
+  }
+
+  .switch2 {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+
+  .switch2 input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }

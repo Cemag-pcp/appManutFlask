@@ -53,6 +53,39 @@ body {
   border-radius: 20px;
 }
 
+@media (max-width:600px){
+  #edicao{
+    top: 50%;
+    left: 50%;
+    transform: translate(-30%,-15%);
+    background-color: rgba(255, 255, 255,0.5);
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    margin-top: 200px;
+    margin-bottom: 90px;
+    width: 150%;
+    height: 125vh;
+    border-radius: 20px;
+    position: absolute;
+  }
+
+  .card{
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: row;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+}
+
 .form-row {
   display: flex;
   justify-content: space-between;
@@ -183,13 +216,18 @@ body {
   cursor: pointer;
   outline: none;
 }
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   /* Ajuste para telas menores (menu oculto) */
   #menu-button {
     position: absolute;
-    margin-left: 70px;
+    left: 360px;
+    top: 10px;
+    background-color: #f2f3f5;
+    border-radius: 15px;
+    padding-top: 16.2px;
   }
 }
+
 
 #menu .item {
   margin-top: 80px;
@@ -269,10 +307,46 @@ body {
 }
 
 #titulo .visao{
-  top:5%;
-  left: 50%;
-  transform: translate(180%,-13%);
-  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+}
+
+@media (max-width: 768px) { 
+  #titulo .visao{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 5px;
+    font-size: 35px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .responsive-table {
+      max-width: 100%;
+      overflow-x: auto;
+  }
+  
+  .responsive-table thead {
+      display: none;
+  }
+  
+  .responsive-table td,
+  .responsive-table th {
+      display: block;
+      text-align: center;
+  }
+  
+  .responsive-table td:before {
+      content: attr(data-label);
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+  }
 }
 
 #titulo .visao2{
@@ -455,6 +529,16 @@ body {
   height: auto;
   display: flex;
   justify-content: center;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 7;
+  background-color: #000;
 }
 
 /* #titulo .visao{

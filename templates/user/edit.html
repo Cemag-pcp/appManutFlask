@@ -106,6 +106,29 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="form-row">
+                <div class="toggle">
+                  <label for="maquina-realmente-parada">Máquina está parada?</label>
+                  <label class="switch2" style="left: 265px;">
+                    <input type="checkbox" name="maquina-parada-1" id="maquina-parada-1" value="true"> 
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="toggle">
+                    <label for="execucao-maquina-parada">Execução feita c/ a máquina parada?</label>
+                    <label class="switch2" style="left: 145px;">
+                      <input type="checkbox" name="maquina-parada-2" id="maquina-parada-2" value="true">
+                      <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="toggle" id="apos-execucao-toggle" style="display: none;">
+                    <label for="apos-execucao-maquina-parada">Após a execução, a máquina está funcionando?</label>
+                    <label class="switch2" style="left: 62px;">
+                      <input type="checkbox" name="maquina-parada-3" id="maquina-parada-3" value="true">
+                      <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
             <br>
             <div class="form-group">
             <button id = 'salvar_edicao' type="submit" class="btn btn-primary btn-block">
@@ -140,4 +163,58 @@ $(function() {
   });
 </script>  
 
+<script>
+  $(document).ready(function() {
+  // Event handler for status dropdown change
+  $('#statusLista').on('change', function() {
+    var selectedStatus = $(this).val();
+    updateToggleVisibility(selectedStatus);
+  });
+
+  // Update toggle visibility on page load
+  var selectedStatus = $('#statusLista').val();
+  updateToggleVisibility(selectedStatus);
+
+  function updateToggleVisibility(status) {
+    if (status === 'Finalizada') {
+      $('#apos-execucao-toggle').show();
+    } else {
+      $('#apos-execucao-toggle').hide();
+    }
+  }
+});
+</script>
+
+<script>
+    var maquinaParadaCheckboxOne = document.getElementById('maquina-parada-1');
+    var maquinaParadaHiddenInputOne = document.querySelector('input[name="maquina-parada-1"][type="hidden"]');
+  
+    maquinaParadaCheckboxOne.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInputOne.value = "true";
+      } else {
+        maquinaParadaHiddenInputOne.value = "false";
+      }
+    });
+    var maquinaParadaCheckboxTwo = document.getElementById('maquina-parada-2');
+    var maquinaParadaHiddenInputTwo = document.querySelector('input[name="maquina-parada-2"][type="hidden"]');
+  
+    maquinaParadaCheckboxTwo.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInputTwo.value = "true";
+      } else {
+        maquinaParadaHiddenInputTwo.value = "false";
+      }
+    });
+    var maquinaParadaCheckboxThree = document.getElementById('maquina-parada-3');
+    var maquinaParadaHiddenInputThree = document.querySelector('input[name="maquina-parada-3"][type="hidden"]');
+  
+    maquinaParadaCheckboxThree.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInputThree.value = "true";
+      } else {
+        maquinaParadaHiddenInputThree.value = "false";
+      }
+    });
+  </script>
 {% endblock %}

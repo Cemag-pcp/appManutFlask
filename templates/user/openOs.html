@@ -45,7 +45,7 @@
           <option value="Utilidades">Utilidades</option>
         </select>
       </div>
-
+      
       <div class="form-group" id="solicitante-select">
         <label for="solicitante">Solicitante:</label>
           <select class="form-control" sdata-live-search="true" name="solicitante" id="solicitante" required>
@@ -59,15 +59,16 @@
       <!-- Se o setor for solda -->
       <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
         <label for="Equipamento em falha">Equipamento em falha:</label>
+        <a href="#" onclick="showImageModalOS()"><i class="fa-solid fa-image"></i></a>
         <select class="form-control" name="falha" id="falha" onchange="verificarFalha();getFalhas()" required>
-            <option value="" selected disabled hidden></option>  
-            <option value="Máquina de Solda">Máquina de Solda</option>
-            <option value="Monovia">Monovia</option>
-            <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
-            <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
+          <option value="" selected disabled hidden></option>  
+          <option value="Máquina de Solda">Máquina de Solda</option>
+          <option value="Monovia">Monovia</option>
+          <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
+          <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
         </select>
-      </div>
-
+      </div>      
+      
       <!-- Se o equipamento em falha for máquina de solda -->
       <div class="form-group" id="maquina_de_solda" style="display: none;">
         <label for="Maquina de Solda">Setor da Máquina de Solda:</label>
@@ -148,7 +149,86 @@
   </div>
 </div>
 
+<div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content2">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imagemModalLabel">Foto</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Aqui é onde a imagem será exibida -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script>
+
+  function showImageModalOS() {
+          showLoading()
+          $.ajax({
+            success: function() {
+              
+              var modalBody = '<img src="static/img/equipamento.png" alt="Foto"/>';
+              
+              // Preencha o conteúdo do modal com a imagem
+              $('#imagemModal .modal-body').html(modalBody);
+              
+              // Exiba o modal
+              $('#imagemModal').modal('show');
+              
+              // Oculta a tela de carregamento após um pequeno atraso (500 milissegundos)
+              setTimeout(function() {
+                  hideLoading(); // Esconde o indicador de carregamento
+              }, 10);
+          },
+          error: function(error) {
+              hideLoading();
+              alert('Essa Ordem de Serviço não contém imagem')
+              console.log(error);
+          }
+          });
+      }
+  
+</script>
+
+<script>
+  function getFalhas() {
+
+    var falhaSelect = document.getElementById('falha');
+    var maquinaSelect = document.getElementById('maquina');
+    var falhaSelecionado = falhaSelect.value;
+
+    // Limpa as opções atuais do menu de máquinas
+    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
+
+    // Verifica se um setor foi selecionado
+    if (falhaSelecionado !== '') {
+      // Faz uma chamada assíncrona para o servidor Flask
+      showLoading()
+      $.ajax({
+        url: '/falha/' + falhaSelecionado,
+        type: 'GET',
+        success: function(data) {
+          // Atualiza o menu de máquinas com as opções retornadas do servidor
+          for (var i = 0; i < data.length; i++) {
+            var option = document.createElement('option');
+            option.text = data[i];
+            option.value = data[i];
+            maquinaSelect.add(option);
+          }
+          hideLoading();
+        }
+      });
+    }
+  }
+</script>
 
 <script>
   function getFalhas() {
@@ -186,9 +266,33 @@
   function getMaquinasPorSetor() {
     var setorSelecionado = document.getElementById("setor").value;
     var equipamentoEmFalha = document.getElementById("equipamento_em_falha");
-
-    if (setorSelecionado === "Solda") {
+    var falhaSelect = document.getElementById("falha");
+    
+    if (setorSelecionado === "Solda" || setorSelecionado === "Serralheria") {
       equipamentoEmFalha.style.display = "block";
+      
+      if (setorSelecionado === "Serralheria") {
+        var options = falhaSelect.options;
+        for (var i = 0; i < options.length; i++) {
+          var optionValue = options[i].value;
+          if (optionValue === "Monovia" || optionValue === "SO-RB-01 - ROBÔ - KUKA") {
+            options[i].style.display = "none";
+          } else {
+            options[i].style.display = "block";
+          }
+        }
+        
+        // Reset the selected option if it's hidden
+        if (falhaSelect.value === "Monovia" || falhaSelect.value === "SO-RB-01 - ROBÔ - KUKA") {
+          falhaSelect.value = "";
+        }
+      } else {
+        // Reset the display style of all options
+        var options = falhaSelect.options;
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "block";
+        }
+      }
     } else {
       equipamentoEmFalha.style.display = "none";
     }
