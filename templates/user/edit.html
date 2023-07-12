@@ -37,7 +37,7 @@
                 </div>
                 <div class="form-group">
                     <label for="n_ordem">Número da execução:</label>
-                    <input style ="width: 245px;" type="text" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
+                    <input style ="width: 245px;" type="text" id="n_ordem" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
                 </div>
             </div>
             <div class="form-row">
@@ -107,14 +107,14 @@
                 </select>
             </div>
             <div class="form-row">
-                <div class="toggle">
+              <div class="toggle" id="maquina-parada-toggle" style="display: none;">
                   <label for="maquina-realmente-parada">Máquina está parada?</label>
                   <label class="switch2" style="left: 265px;">
                     <input type="checkbox" name="maquina-parada-1" id="maquina-parada-1" value="true"> 
                     <span class="slider round"></span>
                   </label>
                 </div>
-                <div class="toggle">
+                <div class="toggle" id="execucao-maquina-toggle" style="display: none;">
                     <label for="execucao-maquina-parada">Execução feita c/ a máquina parada?</label>
                     <label class="switch2" style="left: 145px;">
                       <input type="checkbox" name="maquina-parada-2" id="maquina-parada-2" value="true">
@@ -168,21 +168,45 @@ $(function() {
   // Event handler for status dropdown change
   $('#statusLista').on('change', function() {
     var selectedStatus = $(this).val();
-    updateToggleVisibility(selectedStatus);
+    var nOrdem = parseInt($('#n_ordem').val());
+
+    updateToggleVisibility(selectedStatus, nOrdem);
   });
 
   // Update toggle visibility on page load
   var selectedStatus = $('#statusLista').val();
-  updateToggleVisibility(selectedStatus);
+  var nOrdem = parseInt($('#n_ordem').val());
+  updateToggleVisibility(selectedStatus, nOrdem);
 
-  function updateToggleVisibility(status) {
-    if (status === 'Finalizada') {
+  function updateToggleVisibility(status, nOrdem) {
+    if (nOrdem === 1 && status === 'Finalizada') {
+      $('#maquina-parada-toggle').hide();
+      $('#execucao-maquina-toggle').show();
+      $('#apos-execucao-toggle').hide();
+    } else if (nOrdem === 2 && status === 'Finalizada') {
+      $('#maquina-parada-toggle').hide();
+      $('#execucao-maquina-toggle').show();
+      $('#apos-execucao-toggle').hide();
+    } else if (status === 'Finalizada') {
+      $('#maquina-parada-toggle').hide();
+      $('#execucao-maquina-toggle').show();
+      $('#apos-execucao-toggle').hide();
+    } else if (nOrdem === 1) {
+      $('#maquina-parada-toggle').show();
+      $('#execucao-maquina-toggle').show();
+      $('#apos-execucao-toggle').hide();
+    }else if (nOrdem === 2) {
+      $('#maquina-parada-toggle').show();
+      $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').show();
     } else {
-      $('#apos-execucao-toggle').hide();
+      $('#maquina-parada-toggle').show();
+      $('#execucao-maquina-toggle').show();
+      $('#apos-execucao-toggle').show();
     }
   }
 });
+
 </script>
 
 <script>
