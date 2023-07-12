@@ -358,16 +358,6 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 
     list_users = df.values.tolist()
 
-
-    # s = (""" 
-    #     SELECT id_ordem, maquina_parada 
-    #     FROM tb_ordens 
-    #     WHERE ordem_excluida isnull and horafim isnull 
-    # """)
-
-    # df = pd.read_sql_query(s, conn)
-    # df_maquina_parada = df.values.tolist()
-
     return render_template('user/index.html', list_users=list_users)
 
 @routes_bp.route('/add_student', methods=['POST', 'GET']) 
@@ -595,14 +585,18 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         datafim = data_final.strftime("%Y-%m-%d")
         horafim = data_final.strftime("%H:%M:%S")
 
-        print(datainicio, horainicio, datafim, horafim)
+        # print(datainicio, horainicio, datafim, horafim)
 
-        print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
+        # print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("""
-            INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, natureza, tipo_manutencao, area_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao))
+            INSERT INTO tb_ordens ( id, setor,maquina,risco,status,problemaaparente,
+                                    datainicio,horainicio,datafim,horafim,id_ordem,n_ordem,
+                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao) 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
+               datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao))
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
@@ -1461,7 +1455,7 @@ def falha_selecionada(falhaSelecionado):
         SELECT *
         FROM tb_maquinas
         WHERE descricao LIKE '%{}%';
-    """.format(falhaSelecionado)
+    """.format(falhaSelecionado.upper())
 
     lista_maquinas = pd.read_sql_query(query, conn)
     
