@@ -7,13 +7,75 @@
     }
 </style>
 
+
+
 <div id = "tabela" class="container-fluid">
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
             <div id = "titulo" class="row">
                 <h1 class="visao">Ordem de serviço</h1>
             </div>
-            <div class="table-responsive">
+
+            <table class="table">
+                <thead>
+                  <tr class="filters">
+                    <th>OS
+                        <input class="form-control form-control" id="os-filter" style='padding: .375rem .25rem;' name="os-filter">
+                    </th>
+                    <th>Setor
+                        <select class="form-control" id="setor-filter" name="setor-filter">
+                          <option value="">Todos</option>
+                          <option value="Administrativo">Administrativo</option>
+                          <option value="Almoxarifado">Almoxarifado</option>
+                          <option value="Corte e estamparia">Corte e estamparia</option>
+                          <option value="Expedição">Expedição</option>
+                          <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                          <option value="Solda">Solda</option>
+                          <option value="Montagem">Montagem</option>
+                          <option value="Pintura">Pintura</option>
+                          <option value="Carpintaria">Carpintaria</option>
+                          <option value="Usinagem">Usinagem</option>  
+                          <option value="Serra">Serra</option>
+                          <option value="Serralheria">Serralheria</option>
+                          <option value="Manutenção">Manutenção</option>
+                          <option value="Forjaria">Forjaria</option>
+                          <option value="Utilidades">Utilidades</option>
+                        </select>
+                    </th>
+                    <th>Máquina
+                        <input id="maquina-filter" class="form-control">
+                    </th>
+                    <th>Risco
+                        <select class="form-control form-control" id="risco-filter" style='padding: .375rem .25rem;' name="risco-filter">
+                            <option value="">Todos</option>
+                            <option>Alto</option>
+                            <option>Médio</option>
+                            <option>Baixo</option>
+                        </select>
+                    </th>
+                    <th>Status
+                        <select class="form-control form-control" id="status-filter" style='padding: .375rem .25rem;' name="status-filter">
+                            <option value="">Todos</option>
+                            <option>Em execução</option>
+                            <option>Finalizada</option>
+                            <option>Aguardando material</option>
+                            <option>Em espera</option>
+                        </select>
+                    </th>
+                    <th>Natureza
+                        <select class="form-control form-control" id="natureza-filter" style='padding: .375rem .25rem;' name="natureza-filter">
+                            <option value="">Todos</option>
+                            <option>OS</option>
+                            <option>Planejada</option>
+                        </select>
+                    </th>
+                  </tr>
+
+
+                </thead>
+            </table>
+
+            <div class="table">
                 <table id="table1" class="table table-striped">
                     <thead>
                         <tr>
@@ -21,7 +83,7 @@
                             <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
                             <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. ou Local</th>
                             <th>Risco</th>
-                            <th style="text-align: center;">Status</th>
+                            <th>Status</th>
                             <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Abertura</th>
                             <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Últ. atualização</th>
@@ -33,22 +95,28 @@
                         {% for row in list_users %}
                         <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             <td style="max-width: 90px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
-                            <td style="max-width: 215px; padding-bottom: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[2]}}</td>
+                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
                             <td style="max-width: 80px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
                             <td style="padding-bottom: 0px;">{{row[4]}}</td>
-                            
 
-                            {% if row[5].strip() == 'Finalizada' %}
-                            <td style="text-align: center;" id="status_os_finalizadas">{{ row[5] }}</td>
-                            {% elif row[5].strip() == 'Em espera' %}
-                            <td style="text-align: center;" id="status_os_espera">{{ row[5] }}</td>
-                            {% elif row[5].strip() == 'Em execução' %}
-                            <td style="text-align: center;" id="status_os_execução">{{ row[5] }}</td>
+                            {% if row[5] == 'Finalizada' %}
+                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-finalizado">Finalizada</span>
+                            </td>
+                            {% elif row[5] == 'Em execução' %}
+                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-em-execucao">Em execução</span>
+                            </td>
+                            {% elif row[5] == 'Aguardando material' %}
+                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-aguardando">Aguardando material</span>
+                            </td>
                             {% else %}
-                            <td style="text-align: center;" id="status_os_aguardando">{{ row[5] }}</td>
+                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-em-espera">Em espera</span>
+                            </td>    
                             {% endif %}
-                            
-                            
+
                             <td style="padding-bottom: 0px;">{{row[16]}}</td>
                             <td style="padding-bottom: 0px;">{{row[13]}}</td>
                             
@@ -95,20 +163,12 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th style="min-width: 120px;">Ordem</th>
-                            <th>Setor</th>
-                            <th style="min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máquina ou Local</th>
-                            <th style="min-width: 100px">Risco</th>
-                            <th>Status</th>
-                            <th style="max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
-                            <th style="min-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Data de abertura</th>
-                            <th style="width: 100px;">Atualização</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
                 </table>
+                <div id="pagination">
+                    <button id="previous-button">Anterior</button>
+                    <span id="current-page"></span>/<span id="total-pages"></span>
+                    <button id="next-button">Próximo</button>
+                </div>
             </div>
             </div>
         </div>
@@ -287,5 +347,68 @@
     }
     }
 </script>
-  
+
+<script>
+    // Função para aplicar os filtros na tabela
+    // Função para aplicar os filtros na tabela
+    function applyFilters() {
+        // Obtém os valores dos filtros
+        var osFilterValue = document.getElementById('os-filter').value.toLowerCase();
+        var setorFilterValue = document.getElementById('setor-filter').value.toLowerCase();
+        var riscoFilterValue = document.getElementById('risco-filter').value.toLowerCase();
+        var maquinaFilterValue = document.getElementById('maquina-filter').value.toLowerCase();
+        var statusFilterValue = document.getElementById('status-filter').value.toLowerCase();
+        var naturezaFilterValue = document.getElementById('natureza-filter').value.toLowerCase();
+
+        // Obtém as linhas da tabela
+        var table = document.getElementById('table1');
+        var rows = table.getElementsByTagName('tr');
+
+        // Itera pelas linhas da tabela (começando em 1 para ignorar o cabeçalho)
+        for (var i = 1; i < rows.length; i++) {
+            var row = rows[i];
+            var osValue = row.cells[0].textContent.toLowerCase();
+            var setorValue = row.cells[1].textContent.toLowerCase();
+            var maquinaValue = row.cells[2].textContent.toLowerCase();
+            var riscoValue = row.cells[3].textContent.toLowerCase();
+            var statusValue = row.cells[4].textContent.toLowerCase();
+            var naturezaValue = row.cells[5].textContent.toLowerCase();
+
+            // Verifica se a linha corresponde aos filtros e exibe/oculta conforme necessário
+            if (
+            osValue.includes(osFilterValue) &&
+            setorValue.includes(setorFilterValue) &&
+            riscoValue.includes(riscoFilterValue) &&
+            maquinaValue.includes(maquinaFilterValue) &&
+            statusValue.includes(statusFilterValue) &&
+            naturezaValue.includes(naturezaFilterValue)
+            ) {
+            row.style.display = ''; // Exibe a linha
+            } else {
+            row.style.display = 'none'; // Oculta a linha
+            }
+        }
+    }
+
+    // Obtém os elementos de filtro por seus IDs
+    var osFilter = document.getElementById('os-filter');
+    var setorFilter = document.getElementById('setor-filter');
+    var riscoFilter = document.getElementById('risco-filter');
+    var maquinaFilter = document.getElementById('maquina-filter');
+    var statusFilter = document.getElementById('status-filter');
+    var naturezaFilter = document.getElementById('natureza-filter');
+
+    // Adiciona event listeners para detectar mudanças nos filtros
+    osFilter.addEventListener('input', applyFilters);
+    setorFilter.addEventListener('change', applyFilters);
+    riscoFilter.addEventListener('change', applyFilters);
+    maquinaFilter.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    naturezaFilter.addEventListener('change', applyFilters);
+
+    // Chama a função applyFilters inicialmente para exibir a tabela completa
+    applyFilters();
+
+</script>
+
 {% endblock %}

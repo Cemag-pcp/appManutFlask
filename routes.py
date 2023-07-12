@@ -354,6 +354,7 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     df = df.sort_values('ultima_atualizacao', ascending=False)
 
     df['ultima_atualizacao'] = pd.to_datetime(df['ultima_atualizacao'])
+    df['ultima_atualizacao'] = df['ultima_atualizacao'] - timedelta(hours=3)
     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime("%Y-%m-%d %H:%M:%S")
 
     list_users = df.values.tolist()
@@ -496,12 +497,19 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     tb_funcionarios['matricula_nome'] = tb_funcionarios['matricula'] + " - " + tb_funcionarios['nome']
     tb_funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
 
-    query = """SELECT CONCAT(codigo, ' - ', descricao) AS codigo_descricao
+    query = """SELECT DISTINCT CONCAT(codigo, ' - ', descricao) AS codigo_descricao
             FROM tb_ordens AS t1
-            JOIN tb_maquinas AS t2 ON t1.maquina = t2.codigo"""
+            JOIN tb_maquinas AS t2 ON t1.maquina = t2.codigo
+            WHERE t1.id_ordem = {}""".format((int(id_ordem)))
     cur.execute(query)
+
     maquinas = cur.fetchall()
     
+    if len(maquinas) == 0:
+        maquinas.append('Outros')
+    else:
+        maquinas = maquinas[0]
+
     return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao, maquinas=maquinas)
 
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
@@ -845,6 +853,7 @@ def open_os(): # Página de abrir OS
 
     return render_template("user/openOs.html", solicitantes=solicitantes)
 
+@login_required
 @routes_bp.route('/maquinas/<setor>')
 def filtro_maquinas(setor):
    
@@ -1438,11 +1447,13 @@ def excluir_ordem():
 
     return 'Dados recebidos com sucesso!'
 
+@login_required
 @routes_bp.route('/visualizar_pdf/<id_ordem>')
 def visualizar_pdf(id_ordem):
 
     return formulario_os(id_ordem)
 
+@login_required
 @routes_bp.route('/falha/<falhaSelecionado>')
 def falha_selecionada(falhaSelecionado):
 
@@ -1454,7 +1465,7 @@ def falha_selecionada(falhaSelecionado):
     query = """
         SELECT *
         FROM tb_maquinas
-        WHERE descricao LIKE '%{}%';
+        WHERE descricao LIKE '%{}%' AND setor = 'Solda';
     """.format(falhaSelecionado.upper())
 
     lista_maquinas = pd.read_sql_query(query, conn)
