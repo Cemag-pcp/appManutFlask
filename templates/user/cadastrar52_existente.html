@@ -36,36 +36,26 @@
       <div class="form-row">
           <div class="form-group">
             <label for="codigo">Codigo</label>
-            <input type="text" class="form-control" style="height: 38px;" name="codigo" required>
+            <input type="text" class="form-control" style="height: 38px;" name="codigo" value="{{codigo}}" required>
           </div>
 
         <div class="form-group">
           <label for="tombamento">Tombamento</label>
-          <input type="text" class="form-control" style="height: 38px;" name="tombamento">
+          <input type="text" class="form-control" style="height: 38px;" name="tombamento" value="{{tombamento}}">
         </div>
       </div>
 
       <div class="form-group">
         <label for="descricao">Descrição</label>
-        <input type="text" class="form-control" style="height: 38px;" name="descricao" required>
+        <input type="text" class="form-control" style="height: 38px;" name="descricao" value="{{descricao}}" required>
       </div>
       
-      <div class="form-row">
+        <div class="form-row">
+          
           <div class="form-group" style="width: 160px; margin-right: 5px;">         
             <label for="setor-label">Setor</label>
             <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
-              <option value="" selected disabled hidden></option>  
-              <option>Administrativo</option>
-              <option>Estamparia</option>
-              <option>Solda</option>
-              <option>Montagem</option>
-              <option>Pintura</option>
-              <option>Carpintaria</option>
-              <option>Almoxarifado</option>
-              <option>Usinagem</option>
-              <option>Serra</option>
-              <option>Corte</option>
-              <option>Serralheria</option>
+              <option value="{{setor}}" >{{setor}}</option>  
             </select>
           </div>
 
@@ -73,7 +63,7 @@
             <div class="form-group">
               <label for="cadastrar-preventiva">Preventiva</label>
               <label class="switch">
-                <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()">
+                <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()" checked>
                 <span class="slider round"></span>
               </label>
             </div>
@@ -88,7 +78,8 @@
               <option>C</option>
             </select>
           </div>
-    </div>
+          
+        </div>
 
       <div class="form-row">
         <div class="form-group">

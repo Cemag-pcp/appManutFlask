@@ -1188,7 +1188,7 @@ def cadastro_preventiva():
     if request.method == 'POST':
             
         try:
-            togglePreventiva = request.form['cadastrar-preventiva']
+            togglePreventiva = request.form.get('cadastrar-preventiva')
             codigo = request.form['codigo']
             tombamento = request.form['tombamento']
             descricao = request.form['descricao']
@@ -1265,13 +1265,12 @@ def cadastro_preventiva():
             return render_template('user/cadastrar52.html')
 
         except:
-            
             togglePreventiva = 'false'
             codigo = request.form['codigo']
             tombamento = request.form['tombamento']
             descricao = request.form['descricao']
             setor = request.form['setor']
-
+            
             s = ("""
                 SELECT * FROM tb_maquinas
                 """)
@@ -1487,3 +1486,101 @@ def falha_selecionada(falhaSelecionado):
     lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
 
     return jsonify(lista_maquinas_)
+
+@routes_bp.route('/maquina-52-semanas/<codigo>')
+@login_required
+def transformar_maquina(codigo):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo)
+
+    cur.execute(query)
+    data = cur.fetchall()
+
+    codigo = codigo
+    setor = data[0][1]
+    descricao = data[0][3]
+    tombamento = data[0][4]
+
+    if not tombamento:
+        tombamento = ''
+
+    return render_template('user/cadastrar52_existente.html', codigo=codigo,
+                           setor=setor,descricao=descricao,tombamento=tombamento)
+
+@routes_bp.route('/editar-maquina/<codigo>')
+@login_required
+def editar_maquina(codigo):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo)
+
+    cur.execute(query)
+    data = cur.fetchall()
+
+    codigo = codigo
+    setor = data[0][1]
+    descricao = data[0][3]
+    tombamento = data[0][4]
+
+    if not tombamento:
+        tombamento = ''
+
+    return render_template('user/editar_maquina.html', codigo=codigo,
+                           setor=setor,descricao=descricao,tombamento=tombamento)
+
+@routes_bp.route('/editar-maquina-bd/<codigo>', methods=['POST'])
+@login_required
+def salvar_edicao_maquina(codigo):
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    codigo_inicial = codigo
+    codigo_novo = request.form['codigo']
+    tombamento = request.form['tombamento']
+    descricao = request.form['descricao']
+    setor = request.form['setor']
+    
+    print(setor, codigo_novo, descricao, tombamento)
+   
+    if codigo_novo != codigo_inicial:
+        query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo_novo)
+        data = pd.read_sql_query(query, conn)
+
+        if len(data) > 0:
+            flash("Código já cadastrado.",category='error')
+            codigo = codigo_novo
+            conn.close()
+        else:
+            """Query para editar a linha do codigo escolhido"""
+            cur.execute("""
+                UPDATE tb_maquinas
+                SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
+                WHERE codigo = %s
+                """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
+            
+            conn.commit()
+            conn.close()
+            codigo = codigo_novo
+            """Enviar mensagem de sucesso"""
+            flash("Código editado com sucesso", category='success')
+    
+    else:
+        """Query para editar a linha do codigo escolhido"""
+        cur.execute("""
+            UPDATE tb_maquinas
+            SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
+            WHERE codigo = %s
+            """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
+
+        conn.commit()
+        conn.close()
+        
+        """Enviar mensagem de sucesso"""
+        flash("Código editado com sucesso", category='success')
+
+    return render_template('user/editar_maquina.html', codigo=codigo, tombamento=tombamento, descricao=descricao, setor=setor)

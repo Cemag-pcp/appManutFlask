@@ -28,88 +28,38 @@
   <div id ="formulario_preventiva" class="card card-body">
     
     <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
-      <h3>Cadastro de máquinas</h3>
+      <h3>Edição de máquinas</h3>
     </div> 
 
-    <form action="{{ url_for('routes.cadastro_preventiva') }}" method="POST" enctype="multipart/form-data">
+    <form action="/editar-maquina-bd/{{codigo}}" method="POST" enctype="multipart/form-data">
 
       <div class="form-row">
           <div class="form-group">
             <label for="codigo">Codigo</label>
-            <input type="text" class="form-control" style="height: 38px;" name="codigo" required>
+            <input type="text" class="form-control" style="height: 38px;" name="codigo" value="{{codigo}}" required>
           </div>
 
         <div class="form-group">
           <label for="tombamento">Tombamento</label>
-          <input type="text" class="form-control" style="height: 38px;" name="tombamento">
+          <input type="text" class="form-control" style="height: 38px;" name="tombamento" value="{{tombamento}}">
         </div>
       </div>
 
       <div class="form-group">
         <label for="descricao">Descrição</label>
-        <input type="text" class="form-control" style="height: 38px;" name="descricao" required>
+        <input type="text" class="form-control" style="height: 38px;" name="descricao" value="{{descricao}}" required>
       </div>
       
-      <div class="form-row">
-          <div class="form-group" style="width: 160px; margin-right: 5px;">         
-            <label for="setor-label">Setor</label>
-            <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
-              <option value="" selected disabled hidden></option>  
-              <option>Administrativo</option>
-              <option>Estamparia</option>
-              <option>Solda</option>
-              <option>Montagem</option>
-              <option>Pintura</option>
-              <option>Carpintaria</option>
-              <option>Almoxarifado</option>
-              <option>Usinagem</option>
-              <option>Serra</option>
-              <option>Corte</option>
-              <option>Serralheria</option>
-            </select>
-          </div>
-
-          <div class="form-row" style="margin-left: 20px;">
-            <div class="form-group">
-              <label for="cadastrar-preventiva">Preventiva</label>
-              <label class="switch">
-                <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()">
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-    
-          <div class="form-group" style="width: 30px; margin-right: 50px;">  
-            <label for="criticidade-label">Criticidade</label>              
-            <select style = 'width: 60px; height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
-              <option value="" selected disabled hidden></option>  
-              <option>A</option>
-              <option>B</option>
-              <option>C</option>
-            </select>
-          </div>
-    </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="manut_inicial">Data inicio</label>
-          <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" required>
-        </div>
-
-        <div class="form-group"> 
-          <label for="periodicidade-label">Periodicidade</label>               
-          <select class="form-control form-control" style="height: 38px;" id="periodicidade" name="periodicidade" required>
-            <option value="" selected disabled hidden></option>  
-            <option>Semanal</option>
-            <option>Quinzenal</option>
-            <option>Mensal</option>
-            <option>Bimestral</option>
-            <option>Semestral</option>
-          </select>
-        </div>
+          
+      <div class="form-group">         
+        <label for="setor-label">Setor</label>
+        <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
+          <option value="{{setor}}" >{{setor}}</option>  
+        </select>
       </div>
+          
 
-      <div class="file-upload" style="margin-top: 20px;">
+      <!-- <div class="file-upload" style="margin-top: 20px;">
           <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple disabled hidden>
           <button class="file-upload__button" type="button" name="pdf" id="pdf" disabled>Checklist em pdf</button>
           <span class="file-upload__label">Nenhum Arquivo selecionado</span>
@@ -125,7 +75,7 @@
         <input class="file-upload__input" type="file" name="pdf2" id="pdf2" multiple disabled>
         <button class="file-upload__button" type="button" name="pdf" id="pdf" disabled>Documento</button>
         <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-      </div>
+      </div> -->
 
       <button id = 'salvar' class="btn btn-primary btn-block">
         Inserir 

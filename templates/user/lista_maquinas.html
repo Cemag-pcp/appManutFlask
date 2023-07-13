@@ -35,7 +35,7 @@
                             <th>Setor</th>
                             <th>Descrição</th>
                             <th>Preventiva</th>
-                            <th>Anexos</th>
+                            <th>Menu</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,10 +51,17 @@
                                     <i class="fas fa-times-circle desabilitado"></i>
                                 {% endif %}
                             </td>
-                            <td>
+                            <!-- <td>
                                 <button type="button" class="btn btn-primary" onclick="abrirModal('{{ row[0] }}')">Docs</button>
-                            </td>
-                            
+                            </td> -->
+                            <td>
+                                <a id="dropdown_os" href="/maquina-52-semanas/{{row[0]}}">
+                                    <img src="static/icons/manutencao.png" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao"> 
+                                </a>
+                                <a id="dropdown_os" href="/editar-maquina/{{row[0]}}">
+                                    <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
+                                </a>
+                            </td>                            
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -83,7 +90,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
                 <button type="button" class="btn btn-primary">Salvar mudanças</button>
-                <button type="button" class="btn btn-primary">Mudar para preventiva</button>
             </div>
         </div>
     </div>
