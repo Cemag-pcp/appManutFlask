@@ -721,9 +721,9 @@ def editar_ordem_inicial(id_ordem,n_ordem):
 
     return render_template('user/editar_ordem_inicial.html', ordem=data1[0], maquina=maquina, n_ordem=n_ordem)
 
-@routes_bp.route('/update_ordem/<id_ordem>', methods=['POST'])
+@routes_bp.route('/update_ordem/<id_ordem>/<n_ordem>', methods=['POST'])
 @login_required
-def update_ordem(id_ordem): # Inserir as edições no banco de dados
+def update_ordem(id_ordem, n_ordem): # Inserir as edições no banco de dados
 
     # # Execute a instrução SQL para alterar o tipo da coluna
     # alter_query = "ALTER TABLE tb_ordens ALTER COLUMN tipo_manutencao TYPE TEXT;"
@@ -754,14 +754,13 @@ def update_ordem(id_ordem): # Inserir as edições no banco de dados
         df = pd.read_sql_query(s, conn)
 
         natureza = df['natureza'][0]
-
-        setor = request.form['setor']
-        maquina = request.form['maquina']        
-        risco = request.form['risco']
+        #setor = request.form['setor']
+        #maquina = request.form['maquina']        
+        #risco = request.form['risco']
         status = request.form['statusLista']
-        problema = request.form['problema']
+        #problema = request.form['problema']
         id_ordem = id_ordem
-        n_ordem = request.form['n_ordem']
+        n_ordem = n_ordem
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
         operador = json.dumps(operador)
@@ -773,28 +772,24 @@ def update_ordem(id_ordem): # Inserir as edições no banco de dados
         # Divida a string em duas partes: data/hora inicial e data/hora final
         data_hora_inicial_str, data_hora_final_str = datetimes.split(" - ")
 
-        # Faça o parsing das strings de data e hora
-        data_inicial = datetime.strptime(data_hora_inicial_str, "%d/%m/%y %I:%M %p")
-        data_final = datetime.strptime(data_hora_final_str, "%d/%m/%y %I:%M %p")
-
+        data_inicial = datetime.strptime(data_hora_inicial_str, "%d/%m/%Y %H:%M")
+        data_final = datetime.strptime(data_hora_final_str, "%d/%m/%Y %H:%M")
+        
         # Formate as datas e horas no formato desejado
         datainicio = data_inicial.strftime("%Y-%m-%d")
         horainicio = data_inicial.strftime("%H:%M:%S")
         datafim = data_final.strftime("%Y-%m-%d")
         horafim = data_final.strftime("%H:%M:%S")
 
-        print(setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem)
-
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("""
         UPDATE tb_ordens
-        SET setor=%s,maquina=%s,risco=%s,status=%s,problemaaparente=%s,
-            datainicio=%s,horainicio=%s,datafim=%s,horafim=%s,id_ordem=%s,
+        SET status=%s,datainicio=%s,horainicio=%s,datafim=%s,horafim=%s,id_ordem=%s,
             n_ordem=%s, descmanutencao=%s, operador=%s, natureza=%s, tipo_manutencao=%s, area_manutencao=%s
 
         WHERE n_ordem = %s and id_ordem = %s
-        """, (setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem, id_ordem))
+        """, (status, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem, id_ordem))
 
         # cur.execute("""
         #     INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, natureza, tipo_manutencao, area_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
@@ -804,6 +799,7 @@ def update_ordem(id_ordem): # Inserir as edições no banco de dados
         cur.close()
 
         return redirect(url_for('routes.timeline_os', id_ordem=id_ordem))
+
 
 @routes_bp.route('/guardar_ordem_editada/<id_ordem>/<n_ordem>', methods=['POST'])
 @login_required
