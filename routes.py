@@ -716,9 +716,9 @@ def editar_ordem_inicial(id_ordem,n_ordem):
 
     return render_template('user/editar_ordem_inicial.html', ordem=data1[0], maquina=maquina, n_ordem=n_ordem)
 
-@routes_bp.route('/update_ordem/<id_ordem>', methods=['POST'])
+@routes_bp.route('/update_ordem/<id_ordem>/<n_ordem>', methods=['POST'])
 @login_required
-def update_ordem(id_ordem): # Inserir as edições no banco de dados
+def update_ordem(id_ordem, n_ordem): # Inserir as edições no banco de dados
 
     # # Execute a instrução SQL para alterar o tipo da coluna
     # alter_query = "ALTER TABLE tb_ordens ALTER COLUMN tipo_manutencao TYPE TEXT;"
@@ -749,14 +749,13 @@ def update_ordem(id_ordem): # Inserir as edições no banco de dados
         df = pd.read_sql_query(s, conn)
 
         natureza = df['natureza'][0]
-
-        setor = request.form['setor']
-        maquina = request.form['maquina']        
-        risco = request.form['risco']
+        #setor = request.form['setor']
+        #maquina = request.form['maquina']        
+        #risco = request.form['risco']
         status = request.form['statusLista']
-        problema = request.form['problema']
+        #problema = request.form['problema']
         id_ordem = id_ordem
-        n_ordem = request.form['n_ordem']
+        n_ordem = n_ordem
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
         operador = json.dumps(operador)
@@ -768,28 +767,24 @@ def update_ordem(id_ordem): # Inserir as edições no banco de dados
         # Divida a string em duas partes: data/hora inicial e data/hora final
         data_hora_inicial_str, data_hora_final_str = datetimes.split(" - ")
 
-        # Faça o parsing das strings de data e hora
-        data_inicial = datetime.strptime(data_hora_inicial_str, "%d/%m/%y %I:%M %p")
-        data_final = datetime.strptime(data_hora_final_str, "%d/%m/%y %I:%M %p")
-
+        data_inicial = datetime.strptime(data_hora_inicial_str, "%d/%m/%Y %H:%M")
+        data_final = datetime.strptime(data_hora_final_str, "%d/%m/%Y %H:%M")
+        
         # Formate as datas e horas no formato desejado
         datainicio = data_inicial.strftime("%Y-%m-%d")
         horainicio = data_inicial.strftime("%H:%M:%S")
         datafim = data_final.strftime("%Y-%m-%d")
         horafim = data_final.strftime("%H:%M:%S")
 
-        print(setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem)
-
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("""
         UPDATE tb_ordens
-        SET setor=%s,maquina=%s,risco=%s,status=%s,problemaaparente=%s,
-            datainicio=%s,horainicio=%s,datafim=%s,horafim=%s,id_ordem=%s,
+        SET status=%s,datainicio=%s,horainicio=%s,datafim=%s,horafim=%s,id_ordem=%s,
             n_ordem=%s, descmanutencao=%s, operador=%s, natureza=%s, tipo_manutencao=%s, area_manutencao=%s
 
         WHERE n_ordem = %s and id_ordem = %s
-        """, (setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem, id_ordem))
+        """, (status, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao, n_ordem, id_ordem))
 
         # cur.execute("""
         #     INSERT INTO tb_ordens (id, setor,maquina,risco,status,problemaaparente,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem, descmanutencao, operador, natureza, tipo_manutencao, area_manutencao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
@@ -1535,21 +1530,37 @@ def editar_maquina(codigo):
 @routes_bp.route('/editar-maquina-bd/<codigo>', methods=['POST'])
 @login_required
 def salvar_edicao_maquina(codigo):
-
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     codigo_inicial = codigo
-    codigo = request.form['codigo']
+    codigo_novo = request.form['codigo']
     tombamento = request.form['tombamento']
     descricao = request.form['descricao']
     setor = request.form['setor']
-
-    if codigo != codigo_inicial:
-        cur.execute("""SELECT * FROM tb_maquinas WHERE codigo = %s""", (codigo))
     
-    data = cur.fetchall()
-    print(data)
+    print(setor, codigo_novo, descricao, tombamento)
+   
+    if codigo_novo != codigo_inicial:
+        query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo_novo)
+        data = pd.read_sql_query(query, conn)
+
+        if len(data) > 0:
+            flash("Código já cadastrado.",category='error')
+        else:
+            """Query para editar a linha do codigo escolhido"""
+            """Enviar mensagem de sucesso"""
+
+    else:
+        """Query para editar a linha do codigo escolhido"""
+        """Enviar mensagem de sucesso"""
+        cur.execute("""
+            UPDATE tb_maquinas
+            SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
+            WHERE codigo = %s
+            """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
+        
+        flash("Código editado com sucesso", category='')
 
     # cur.execute("""
     #     UPDATE tb_maquinas
@@ -1557,5 +1568,4 @@ def salvar_edicao_maquina(codigo):
     #     WHERE codigo = %s
     #     """, (setor, maquina, risco, maquina_parada, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, codigo_equipamento, problema, id_ordem))
 
-
-    return redirect(url_for('routes.salvar_edicao_maquina'))
+    return render_template('user/editar_maquina.html', codigo=codigo, tombamento=tombamento, descricao=descricao, setor=setor)
