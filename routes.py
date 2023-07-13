@@ -1547,25 +1547,34 @@ def salvar_edicao_maquina(codigo):
 
         if len(data) > 0:
             flash("Código já cadastrado.",category='error')
+            codigo = codigo_novo
+            conn.close()
         else:
             """Query para editar a linha do codigo escolhido"""
+            cur.execute("""
+                UPDATE tb_maquinas
+                SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
+                WHERE codigo = %s
+                """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
+            
+            conn.commit()
+            conn.close()
+            codigo = codigo_novo
             """Enviar mensagem de sucesso"""
-
+            flash("Código editado com sucesso", category='success')
+    
     else:
         """Query para editar a linha do codigo escolhido"""
-        """Enviar mensagem de sucesso"""
         cur.execute("""
             UPDATE tb_maquinas
             SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
             WHERE codigo = %s
             """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
-        
-        flash("Código editado com sucesso", category='')
 
-    # cur.execute("""
-    #     UPDATE tb_maquinas
-    #     SET codigo=%s,tombamento=%s,descricao=%s,setor=%s
-    #     WHERE codigo = %s
-    #     """, (setor, maquina, risco, maquina_parada, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, codigo_equipamento, problema, id_ordem))
+        conn.commit()
+        conn.close()
+        
+        """Enviar mensagem de sucesso"""
+        flash("Código editado com sucesso", category='success')
 
     return render_template('user/editar_maquina.html', codigo=codigo, tombamento=tombamento, descricao=descricao, setor=setor)
