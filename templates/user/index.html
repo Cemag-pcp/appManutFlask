@@ -67,6 +67,15 @@
                             <option>Planejada</option>
                         </select>
                     </th>
+                    
+                    <th>Máquina Parada
+                        <select class="form-control form-control" style='padding: .375rem .25rem;' id="maquina-parada-filter">
+                            <option value="">Todos</option>
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </th>
+
                   </tr>
 
 
@@ -352,6 +361,7 @@
         var maquinaFilterValue = document.getElementById('maquina-filter').value.toLowerCase();
         var statusFilterValue = document.getElementById('status-filter').value.toLowerCase();
         var naturezaFilterValue = document.getElementById('natureza-filter').value.toLowerCase();
+        var maquinaParadaFilterValue = document.getElementById('maquina-parada-filter').value.toLowerCase();
 
         // Obtém as linhas da tabela
         var table = document.getElementById('table1');
@@ -366,20 +376,25 @@
             var riscoValue = row.cells[3].textContent.toLowerCase();
             var statusValue = row.cells[4].textContent.toLowerCase();
             var naturezaValue = row.cells[5].textContent.toLowerCase();
+            var maquinaParadaValue = row.cells[8].querySelector('i');
 
             // Verifica se a linha corresponde aos filtros e exibe/oculta conforme necessário
-            if (
-            osValue.includes(osFilterValue) &&
-            setorValue.includes(setorFilterValue) &&
-            riscoValue.includes(riscoFilterValue) &&
-            maquinaValue.includes(maquinaFilterValue) &&
-            statusValue.includes(statusFilterValue) &&
-            naturezaValue.includes(naturezaFilterValue)
-            ) {
-            row.style.display = ''; // Exibe a linha
-            } else {
-            row.style.display = 'none'; // Oculta a linha
+            var shouldDisplay =
+                osValue.includes(osFilterValue) &&
+                setorValue.includes(setorFilterValue) &&
+                maquinaValue.includes(maquinaFilterValue) &&
+                riscoValue.includes(riscoFilterValue) &&
+                statusValue.includes(statusFilterValue) &&
+                naturezaValue.includes(naturezaFilterValue);
+
+
+            if (maquinaParadaFilterValue === 'true') {
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check');
+            } else if (maquinaParadaFilterValue === 'false') {
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-xmark');
             }
+
+            row.style.display = shouldDisplay ? '' : 'none';
         }
     }
 
@@ -390,6 +405,7 @@
     var maquinaFilter = document.getElementById('maquina-filter');
     var statusFilter = document.getElementById('status-filter');
     var naturezaFilter = document.getElementById('natureza-filter');
+    var maquinaParadaFilter = document.getElementById('maquina-parada-filter');
 
     // Adiciona event listeners para detectar mudanças nos filtros
     osFilter.addEventListener('input', applyFilters);
@@ -398,6 +414,7 @@
     maquinaFilter.addEventListener('input', applyFilters);
     statusFilter.addEventListener('change', applyFilters);
     naturezaFilter.addEventListener('change', applyFilters);
+    maquinaParadaFilter.addEventListener('change', applyFilters);
 
     // Chama a função applyFilters inicialmente para exibir a tabela completa
     applyFilters();
