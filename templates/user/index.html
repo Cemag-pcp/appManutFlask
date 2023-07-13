@@ -94,7 +94,7 @@
                             <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Abertura</th>
                             <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Últ. atualização</th>
-                            <th style="max-width: 165px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
+                            <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ação</th>
                         </tr>
                     </thead>
@@ -130,9 +130,9 @@
                             <!-- <td style="max-width: 60px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" class="coluna-valores">R${{row[0]}}</td> -->
                             <td style="max-width: 180px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[20]}}</td>  
                             {% if row[19] == True %}
-                            <td style="padding-bottom: 0px;"><i class="fa-solid fa-check"></i></td>
+                            <td style="padding-bottom: 0px;"><i class="fas fa-check-circle habilitado"></i></td>
                             {% else %}
-                            <td style="padding-bottom: 0px;"><i class="fa-solid fa-xmark"></i></td>
+                            <td style="padding-bottom: 0px;"><i class="fas fa-times-circle desabilitado"></i></td>
                             {% endif %}                  
                             <td style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
                                 <div class="dropdown">
@@ -389,9 +389,9 @@
 
 
             if (maquinaParadaFilterValue === 'true') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check');
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check-circle');
             } else if (maquinaParadaFilterValue === 'false') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-xmark');
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-times-circle');
             }
 
             row.style.display = shouldDisplay ? '' : 'none';
