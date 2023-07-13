@@ -576,6 +576,11 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         except:
             botao3 = 'false'
 
+        if status == 'Finalizada':
+            botao3 = 'true'
+
+
+
         print(botao1)
         print(botao2)
         print(botao3)
