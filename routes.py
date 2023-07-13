@@ -598,6 +598,7 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         # print(ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio, datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador])
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
         cur.execute("""
             INSERT INTO tb_ordens ( id, setor,maquina,risco,status,problemaaparente,
                                     datainicio,horainicio,datafim,horafim,id_ordem,n_ordem,
@@ -605,6 +606,12 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
                datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao))
+
+        cur.execute("""
+            INSERT INTO tb_paradas (id_ordem,n_ordem, parada1, parada2, parada3) 
+                    VALUES (%s,%s,%s,%s,%s)
+        """, (id_ordem,n_ordem,botao1,botao2,botao3))
+        
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
