@@ -1187,7 +1187,7 @@ def cadastro_preventiva():
     if request.method == 'POST':
             
         try:
-            togglePreventiva = request.form['cadastrar-preventiva']
+            togglePreventiva = request.form.get('cadastrar-preventiva')
             codigo = request.form['codigo']
             tombamento = request.form['tombamento']
             descricao = request.form['descricao']
@@ -1264,13 +1264,12 @@ def cadastro_preventiva():
             return render_template('user/cadastrar52.html')
 
         except:
-            
             togglePreventiva = 'false'
             codigo = request.form['codigo']
             tombamento = request.form['tombamento']
             descricao = request.form['descricao']
             setor = request.form['setor']
-
+            
             s = ("""
                 SELECT * FROM tb_maquinas
                 """)
@@ -1454,14 +1453,14 @@ def excluir_ordem():
 
     return 'Dados recebidos com sucesso!'
 
-@login_required
 @routes_bp.route('/visualizar_pdf/<id_ordem>')
+@login_required
 def visualizar_pdf(id_ordem):
 
     return formulario_os(id_ordem)
 
-@login_required
 @routes_bp.route('/falha/<falhaSelecionado>')
+@login_required
 def falha_selecionada(falhaSelecionado):
 
     print(falhaSelecionado)
@@ -1486,3 +1485,77 @@ def falha_selecionada(falhaSelecionado):
     lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
 
     return jsonify(lista_maquinas_)
+
+@routes_bp.route('/maquina-52-semanas/<codigo>')
+@login_required
+def transformar_maquina(codigo):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo)
+
+    cur.execute(query)
+    data = cur.fetchall()
+
+    codigo = codigo
+    setor = data[0][1]
+    descricao = data[0][3]
+    tombamento = data[0][4]
+
+    if not tombamento:
+        tombamento = ''
+
+    return render_template('user/cadastrar52_existente.html', codigo=codigo,
+                           setor=setor,descricao=descricao,tombamento=tombamento)
+
+@routes_bp.route('/editar-maquina/<codigo>')
+@login_required
+def editar_maquina(codigo):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo)
+
+    cur.execute(query)
+    data = cur.fetchall()
+
+    codigo = codigo
+    setor = data[0][1]
+    descricao = data[0][3]
+    tombamento = data[0][4]
+
+    if not tombamento:
+        tombamento = ''
+
+    return render_template('user/editar_maquina.html', codigo=codigo,
+                           setor=setor,descricao=descricao,tombamento=tombamento)
+
+@routes_bp.route('/editar-maquina-bd/<codigo>', methods=['POST'])
+@login_required
+def salvar_edicao_maquina(codigo):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    codigo_inicial = codigo
+    codigo = request.form['codigo']
+    tombamento = request.form['tombamento']
+    descricao = request.form['descricao']
+    setor = request.form['setor']
+
+    if codigo != codigo_inicial:
+        cur.execute("""SELECT * FROM tb_maquinas WHERE codigo = %s""", (codigo))
+    
+    data = cur.fetchall()
+    print(data)
+
+    # cur.execute("""
+    #     UPDATE tb_maquinas
+    #     SET codigo=%s,tombamento=%s,descricao=%s,setor=%s
+    #     WHERE codigo = %s
+    #     """, (setor, maquina, risco, maquina_parada, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, codigo_equipamento, problema, id_ordem))
+
+
+    return redirect(url_for('routes.salvar_edicao_maquina'))
