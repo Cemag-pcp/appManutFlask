@@ -1459,14 +1459,14 @@ def excluir_ordem():
 
     return 'Dados recebidos com sucesso!'
 
-@login_required
 @routes_bp.route('/visualizar_pdf/<id_ordem>')
+@login_required
 def visualizar_pdf(id_ordem):
 
     return formulario_os(id_ordem)
 
-@login_required
 @routes_bp.route('/falha/<falhaSelecionado>')
+@login_required
 def falha_selecionada(falhaSelecionado):
 
     print(falhaSelecionado)
