@@ -389,9 +389,9 @@
 
 
             if (maquinaParadaFilterValue === 'true') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check');
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check-circle');
             } else if (maquinaParadaFilterValue === 'false') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-xmark');
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-times-circle');
             }
 
             row.style.display = shouldDisplay ? '' : 'none';
