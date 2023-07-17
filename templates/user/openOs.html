@@ -89,7 +89,7 @@
         <label for="maquina">Máquina/Local:</label>
           <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
             <option value="" selected disabled hidden></option>  
-            {% for maquina in lista_maquinas_ %}
+            {% for maquina in lista_maquinas_monovia %}
             <option value="{{maquina[0]}}">{{maquina[0]}}</option>
             {% endfor %}
           </select>
@@ -175,7 +175,7 @@
           $.ajax({
             success: function() {
               
-              var modalBody = '<img src="static/img/maquina.png" alt="Foto"/>';
+              var modalBody = '<img src="static/img/maquinas.png" alt="Foto"/>';
               
               // Preencha o conteúdo do modal com a imagem
               $('#imagemModal .modal-body').html(modalBody);
@@ -418,7 +418,7 @@
       ferramenta.style.display = "none";
       codigoEquip.style.display = "none";
       maquinaSelect.style.display = "block";
-      maquinaSolda.style.display = "none";
+      maquinaSolda.style.display = "block";
     }
   }
 </script>
