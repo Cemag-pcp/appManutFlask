@@ -5,6 +5,7 @@
 <form id = 'form_filtros_graficos' action="{{ url_for('routes.grafico') }}" method="POST">
     <label for="filtro_setor">Setor:</label>
     <select class="select2" id="filtro_setor" name="filtro_setor" value="{{ setor }}">
+        <option value="">Todos</option>
         <option value="{{setor_selecionado}}" selected disabled hidden>{{setor_selecionado}}</option>
         {% for setor in setores %}
         <option>{{ setor[0] }}</option>
@@ -14,6 +15,7 @@
     
     <label for="filtro_maquinas">Máquina:</label>
     <select class="select2"id="filtro_maquinas" name="filtro_maquinas">
+        <option value="">Todos</option>
         <option value="{{maquina_selecionado}}" selected disabled hidden>{{maquina_selecionado}}</option>
         {% for maquina in maquinas %}
         <option>{{maquina[0]}}</option>
@@ -22,6 +24,7 @@
 
     <label for="area_manutencao">Área de Manutenção:</label>
     <select class="select2"id="area_manutencao" name="area_manutencao">
+        <option value="">Todos</option>
         <option value="{{area_manutencao}}" selected disabled hidden>{{area_manutencao}}</option>
         <option value="Predial" >Predial</option>
         <option value="Mecânica" >Mecânica</option>

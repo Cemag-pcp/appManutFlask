@@ -45,7 +45,7 @@ def dias_uteis():
     ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
 
     # Obter a sequência de datas úteis no mês atual
-    datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
+    datas_uteis = pd.bdate_range(primeiro_dia_mes, data_atual)
 
     # Contar o número de dias úteis
     qtd_dias_uteis = len(datas_uteis)
@@ -128,8 +128,11 @@ def calculo_indicadores(query):
     
     # df_timeline = df_timeline[['datafim','diferenca']]
     
-    df_timeline['maquina'] = df_timeline['maquina'].str.strip()
+    df_timeline['maquina'] = df_timeline['maquina']
+    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
+    
     df_agrupado_tempo = df_timeline.groupby(['maquina'])['diferenca'].sum().reset_index()
+    df_agrupado_tempo['maquina'] = df_agrupado_tempo['maquina'].str.split(' - ').str[0]
 
     df_agrupado_qtd = df_timeline[['maquina']]
     
@@ -141,12 +144,12 @@ def calculo_indicadores(query):
     df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='maquina')
 
     s = ("""
-    SELECT * FROM tb_maquinas_preventivas
+    SELECT * FROM tb_maquinas
     """)
 
     df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
-    df_maquinas = df_maquinas[['Código da máquina']]
-    df_maquinas = df_maquinas.rename(columns={'Código da máquina':'maquina'})
+    df_maquinas = df_maquinas[['codigo']]
+    df_maquinas = df_maquinas.rename(columns={'codigo':'maquina'})
 
     df_combinado = df_combinado.merge(df_maquinas, on='maquina')
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
@@ -164,13 +167,14 @@ def calculo_indicadores(query):
         grafico1_mtbf = df_combinado['MTBF'].tolist() # eixo y gráfico 1
         grafico2_mttr = df_combinado['MTTR'].tolist() # eixo y grafico 2
 
-        sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf, grafico2_mttr), key=lambda x: x[0])
 
         # Desempacotar as tuplas classificadas em duas listas separadas
-        grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
+        grafico1_maquina, grafico1_mtbf, grafico2_mttr = zip(*sorted_tuples)
 
         grafico1_maquina = list(grafico1_maquina)
         grafico1_mtbf = list(grafico1_mtbf)
+        grafico2_mttr = list(grafico2_mttr)
 
         context = {'grafico1_maquina': grafico1_maquina, 'grafico1_mtbf': grafico1_mtbf,
                 'grafico2_maquina':grafico1_maquina, 'grafico2_mttr':grafico2_mttr}
@@ -203,13 +207,13 @@ def grafico_area(query):
     df_area = df_area[df_area['mes'] == mes_atual]
     df_area = df_area.drop_duplicates(subset='id_ordem', keep='last')
     df_area = df_area.dropna()
-    df_area = df_area[['area_manutencao']]
+    df_area = df_area[['area_manutencao']].reset_index(drop=True)
 
-    contagem = df_area.value_counts(subset='area_manutencao')
-    df_area['qtde_area'] = df_area['area_manutencao'].map(contagem)
+    contagem = df_area['area_manutencao'].value_counts()
+    #df_area['qtde_area'] = df_area['area_manutencao'].map(contagem)
     
-    area = df_area['area_manutencao'].values.tolist()
-    quantidade_area = df_area['qtde_area'].values.tolist()
+    area = df_area['area_manutencao'].unique().tolist()
+    quantidade_area = contagem.tolist()
 
     pizza_context = {'pizza1_area': area, 'pizza1_quantidade':quantidade_area}        
 
@@ -800,7 +804,6 @@ def update_ordem(id_ordem, n_ordem): # Inserir as edições no banco de dados
 
         return redirect(url_for('routes.timeline_os', id_ordem=id_ordem))
 
-
 @routes_bp.route('/guardar_ordem_editada/<id_ordem>/<n_ordem>', methods=['POST'])
 @login_required
 def guardar_ordem_editada(id_ordem, n_ordem): # Inserir as edições no banco de dados
@@ -1015,7 +1018,7 @@ def grafico(): # Dashboard
             pass
 
         # Monta a query base
-        query = "SELECT * FROM tb_ordens WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE"
+        query = "SELECT * FROM tb_ordens WHERE 1=1"
 
         # Adiciona as condições de filtro se os campos não estiverem vazios
         if setor_selecionado:
@@ -1025,6 +1028,8 @@ def grafico(): # Dashboard
         if area_manutencao:
             query += f" AND area_manutencao = '{area_manutencao}'"
 
+        query += 'AND ordem_excluida IS NULL OR ordem_excluida = FALSE;'
+        
         # Executa a query
         cur.execute(query)
         itens_filtrados = cur.fetchall()
@@ -1064,12 +1069,14 @@ def grafico(): # Dashboard
 
         df_tempos['datafim'] = df_tempos['datafim'].astype(str)
 
+        """Criando gráficos de barras"""
+
         query = ("""
         SELECT datafim, maquina, n_ordem,
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
             TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
         FROM tb_ordens 
-        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE
+        WHERE 1=1
         """)
 
         if setor_selecionado:
@@ -1079,12 +1086,16 @@ def grafico(): # Dashboard
         if area_manutencao:
             query += f" AND area_manutencao = '{area_manutencao}'"
 
+        query += ' AND ordem_excluida IS NULL OR ordem_excluida = FALSE'
+
         context = calculo_indicadores(query)
+
+        """Criando gráfico de área, onde mostra a quantidade de ordens abertas por área"""
 
         query = ("""
         SELECT maquina, area_manutencao, datafim, id_ordem
         FROM tb_ordens 
-        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE
+        WHERE 1=1
         """)    
 
         if setor_selecionado:
@@ -1093,6 +1104,8 @@ def grafico(): # Dashboard
             query += f" AND maquina = '{maquina_selecionado}'"
         if area_manutencao:
             query += f" AND area_manutencao = '{area_manutencao}'"
+
+        query += ' AND ordem_excluida IS NULL OR ordem_excluida = FALSE'
 
         pizza_context = grafico_area(query)
 
@@ -1208,7 +1221,7 @@ def cadastro_preventiva():
 
             maquina_cadastrada = pd.read_sql_query(s,conn)
 
-            if len(maquina_cadastrada[maquina_cadastrada['Código da máquina'] == codigo]) > 0:
+            if len(maquina_cadastrada[maquina_cadastrada['codigo'] == codigo]) > 0:
                 flash("Máquina ja cadastrada", category='danger')        
             
             else:
@@ -1413,7 +1426,7 @@ def mostrar_pdf(codigo_maquina):
 def lista_maquinas():
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute(""" SELECT "Código da máquina","Grupo", "Descrição da máquina" 
+    cur.execute(""" SELECT codigo,setor, descricao 
                 FROM tb_maquinas_preventivas """)
     
     df_c_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao'])
@@ -1563,6 +1576,12 @@ def salvar_edicao_maquina(codigo):
                 WHERE codigo = %s
                 """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
             
+            cur.execute("""
+                UPDATE tb_maquinas_preventivas
+                SET codigo=%s,tombamento=%s,setor=%s,codigo=%s
+                WHERE codigo = %s
+                """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
+            
             conn.commit()
             conn.close()
             codigo = codigo_novo
@@ -1576,6 +1595,12 @@ def salvar_edicao_maquina(codigo):
             SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
             WHERE codigo = %s
             """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
+
+        cur.execute("""
+            UPDATE tb_maquinas_preventivas
+            SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
+            WHERE codigo = %s
+            """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
 
         conn.commit()
         conn.close()
