@@ -7,15 +7,15 @@
         <div class="form-box login">
             <div class="form-content">
             <form action="{{ url_for('login.login') }}" method="POST">
-                <h2><strong>Login</strong></h2>
+                <h2><strong id="log">Login</strong></h2>
                 <div class="input-box center">
-                    <span class="icon"><ion-icon style="color: white;"></ion-icon></span>
+                    <span class="icon"><ion-icon></ion-icon></span>
                     <input id="username" name="username" type="email" required>
                     <label class="opacity-100" for="username">E-mail</label>
                 </div>
 
                 <div class="input-box center">
-                    <span class="icon"><ion-icon name="lock-closed" style="color: white;"></ion-icon></span>
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
                     <input id="password" name="password" type="password" required>
                     <label class="opacity-100" for="password">Senha</label>
                 </div>
