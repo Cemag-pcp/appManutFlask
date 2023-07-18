@@ -1477,8 +1477,6 @@ def visualizar_pdf(id_ordem):
 @login_required
 def falha_selecionada(falhaSelecionado):
 
-    print(falhaSelecionado)
-
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -1494,11 +1492,11 @@ def falha_selecionada(falhaSelecionado):
     lista_maquinas = lista_maquinas.dropna(subset=['codigo_desc'])
     lista_maquinas = lista_maquinas.drop_duplicates(subset=['codigo'])
     
-    lista_maquinas_ = []
-    lista_maquinas_.insert(0, 'Outros')
-    lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
+    lista_maquinas_monovia = []
+    lista_maquinas_monovia.insert(0, 'Outros')
+    lista_maquinas_monovia.extend(lista_maquinas[['codigo_desc']].values.tolist())
 
-    return jsonify(lista_maquinas_)
+    return jsonify(lista_maquinas_monovia)
 
 @routes_bp.route('/maquina-52-semanas/<codigo>')
 @login_required

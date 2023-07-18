@@ -33,16 +33,16 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="risco">Risco</label>    
-                    <input style="width: 250px;" type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
+                    <input style="width: 100%;" type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
                 </div>
                 <div class="form-group">
                     <label for="n_ordem">Número da execução:</label>
-                    <input style ="width: 245px;" type="text" id="n_ordem" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
+                    <input style ="width: 100%;" type="text" id="n_ordem" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
                 </div>
             </div>
             <div class="form-row">
                 {% if tipo_manutencao == '' %}
-                <div class="form-group" style="width: 245px;"> 
+                <div class="form-group" style="width: 100%;"> 
                     <label for="operador">Tipo de manutenção</label>
                     <select style = 'height: 50px;' class="form-control form-control" name="tipo_manutencao">
                         <option value="" selected disabled hidden></option>  
@@ -63,7 +63,7 @@
                 {% endif %}
 
                 {% if area_manutencao == '' %}
-                <div class="form-group" style="width: 250px;"> 
+                <div class="form-group" style="width: 100%;"> 
                     <label for="operador">Área de manutenção</label>
                     <select style = 'height: 50px;' class="form-control form-control" name="area_manutencao">
                         <option value="" selected disabled hidden></option>  
@@ -84,7 +84,7 @@
                 <label for="statusLista">Data e hora</label>
                 <input id="data_edit" type="text" name="datetimes" />
             </div>
-            <div class="form-group" style="width: 530px;"> 
+            <div class="form-group" style="width: 100%;"> 
                 <label for="operador_label">Operadores</label>
                 <select class="form-control" id="operador" name="operador" multiple required>
                     {% for funcionario in tb_funcionarios %}
@@ -109,21 +109,21 @@
             <div class="form-row">
               <div class="toggle" id="maquina-parada-toggle" style="display: none;">
                   <label for="maquina-realmente-parada">Máquina está parada?</label>
-                  <label class="switch2" style="left: 265px;">
+                  <label class="switch2">
                     <input type="checkbox" name="maquina-parada-1" id="maquina-parada-1" value="true"> 
                     <span class="slider round"></span>
                   </label>
                 </div>
                 <div class="toggle" id="execucao-maquina-toggle" style="display: none;">
                     <label for="execucao-maquina-parada">Execução feita c/ a máquina parada?</label>
-                    <label class="switch2" style="left: 145px;">
+                    <label class="switch2">
                       <input type="checkbox" name="maquina-parada-2" id="maquina-parada-2" value="true">
                       <span class="slider round"></span>
                     </label>
                 </div>
                 <div class="toggle" id="apos-execucao-toggle" style="display: none;">
                     <label for="apos-execucao-maquina-parada">Após a execução, a máquina está funcionando?</label>
-                    <label class="switch2" style="left: 62px;">
+                    <label class="switch2">
                       <input type="checkbox" name="maquina-parada-3" id="maquina-parada-3" value="true">
                       <span class="slider round"></span>
                     </label>
