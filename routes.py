@@ -1425,6 +1425,7 @@ def mostrar_pdf(codigo_maquina):
 @login_required
 def lista_maquinas():
 
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(""" SELECT codigo,setor, descricao 
                 FROM tb_maquinas_preventivas """)
@@ -1607,3 +1608,34 @@ def salvar_edicao_maquina(codigo):
         flash("Código editado com sucesso", category='success')
 
     return render_template('user/editar_maquina.html', codigo=codigo, tombamento=tombamento, descricao=descricao, setor=setor)
+
+@routes_bp.route('/excluir-maquina/<codigo>', methods=['POST'])
+@login_required
+def excluir_maquina(codigo):
+    
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    query = """DELETE FROM tb_maquinas
+            WHERE codigo = %s;
+            """
+
+    cur.execute(query, [codigo])
+    
+    query = """DELETE FROM tb_maquinas_preventivas
+            WHERE codigo = %s;
+            """
+
+    cur.execute(query, [codigo])    
+    
+    conn.commit()
+
+    return 'Dados recebidos com sucesso!'
+
+
+@routes_bp.route('/excluir_dados', methods=['POST'])
+@login_required
+def excluir_dados():
+    # Aqui você pode implementar a lógica para excluir os dados do banco de dados
+    # Por enquanto, retornamos uma resposta de exemplo
+    resposta = {'message': 'Os dados foram excluídos com sucesso!'}
+    return jsonify(resposta)

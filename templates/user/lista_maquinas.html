@@ -55,11 +55,19 @@
                                 <button type="button" class="btn btn-primary" onclick="abrirModal('{{ row[0] }}')">Docs</button>
                             </td> -->
                             <td>
+                                {% if row[3] == 'Y' %}
+                                <a></a>
+                                {% else %}
                                 <a id="dropdown_os" href="/maquina-52-semanas/{{row[0]}}">
                                     <img src="static/icons/manutencao.png" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao"> 
                                 </a>
+                                {% endif %}
                                 <a id="dropdown_os" href="/editar-maquina/{{row[0]}}">
                                     <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
+                                </a>
+                                <!-- Exluir máquina -->
+                                <a id="dropdown_os" href="#" onclick="abrirModal('{{ row[0] }}')">
+                                    <i class="fas fa-trash" title="Excluir máquina" id="meu-botao"></i>
                                 </a>
                             </td>                            
                         </tr>
@@ -72,20 +80,22 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal para excluir maquina -->
 <div class="modal fade" id="modalAnexos" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="TituloModalCentralizado">Anexos</h5>
+                <h5 class="modal-title" id="TituloModalCentralizado">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                    Atenção
+                </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-            checklist
-            imagem
-            documento                      
+            Tem certeza que quer remover essa máquina do cadastro? Ela também será removida do planejamento de 52 semanas. 
+            Esse processo é irreversível.
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
