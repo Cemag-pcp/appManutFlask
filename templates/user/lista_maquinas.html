@@ -53,23 +53,38 @@
                             </td>
                             <!-- <td>
                                 <button type="button" class="btn btn-primary" onclick="abrirModal('{{ row[0] }}')">Docs</button>
-                            </td> -->
-                            <td>
-                                {% if row[3] == 'Y' %}
-                                <a></a>
-                                {% else %}
-                                <a id="dropdown_os" href="/maquina-52-semanas/{{row[0]}}">
-                                    <img src="static/icons/manutencao.png" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao"> 
-                                </a>
-                                {% endif %}
-                                <a id="dropdown_os" href="/editar-maquina/{{row[0]}}">
-                                    <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
-                                </a>
-                                <!-- Exluir máquina -->
-                                <a id="dropdown_os" href="#" onclick="abrirModal('{{ row[0] }}')">
-                                    <i class="fas fa-trash" title="Excluir máquina" id="meu-botao"></i>
-                                </a>
-                            </td>                            
+                            </td> -->                           
+                            <td style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
+                                <div class="dropdown">
+                                    <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-menu" class="dropdown-item" aria-labelledby="dropdownMenu2">
+                                        {% if row[3] == 'Y' %}
+                                        <a></a>
+                                        {% else %}
+                                        <a id="dropdown_os" class="dropdown-item" href="/maquina-52-semanas/{{row[0]}}">
+                                            <img src="static/icons/manutencao.png" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao"> 
+                                        </a>
+                                        {% endif %}
+                                        <a id="dropdown_os" class="dropdown-item" href="/editar-maquina/{{row[0]}}">
+                                            <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
+                                        </a>
+                                        <!-- Exluir máquina -->
+                                        <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalExclusao('{{ row[0] }}')">
+                                            <i class="fas fa-trash" title="Excluir máquina" id="meu-botao"></i>
+                                        </a>
+                                        <!-- Parar a preventiva da máquina -->
+                                        {% if row[3] == 'Y' %}
+                                        <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalPreventiva('{{ row[0] }}')">
+                                            <img src="static/icons/stop-preventiva.png" alt="Ícone de Manutenção" title="Remover do planejamento anual" class="icon-tamanho-padrao"> 
+                                        </a>
+                                        {% else %}
+                                        <a></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -81,7 +96,7 @@
 </div>
 
 <!-- Modal para excluir maquina -->
-<div class="modal fade" id="modalAnexos" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+<div class="modal fade" id="modalExclusao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -99,19 +114,112 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary">Salvar mudanças</button>
+                <button type="button" class="btn btn-primary" id="btnExcluir">Excluir</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal para parar a preventiva da máquina -->
+<div class="modal fade" id="modalPreventiva" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="TituloModalCentralizado">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                    Atenção
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            Tem certeza que quer remover essa máquina do planejamento? O histórico dela permanecerá, porém elá não estará nas próximas preventivas. 
+            Esse processo é irreversível.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="btnExcluirPreventiva">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para modal de exclusão de máquina -->
 <script>
+    function modalExclusao(codigo_maquina) {
+        // Exibir o modal
+        $('#modalExclusao').modal('show');
 
-    function abrirModal(codigo_maquina) {
-                // Exibir o modal
-                $('#modalAnexos').modal('show');
-            }
+        // Armazenar o código da máquina em uma variável
+        var codigoMaquina = codigo_maquina;
 
+        // Adicionar um evento de clique ao botão "Excluir" do modal
+        $('#btnExcluir').click(function() {
+            showLoading();
+            // Realizar a requisição AJAX para o backend
+            $.ajax({
+                type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+                url: '/excluir-maquina',  // URL do backend onde irá processar a exclusão da máquina
+                data: { codigo_maquina: codigoMaquina },  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+                success: function(response) {
+                    // Aqui você pode tratar a resposta do servidor, caso necessário
+                    console.log(response);
+                    // Fechar o modal após a requisição ser enviada
+                    $('#modalExclusao').modal('hide');
+                    hideLoading();
+                    // Recarregar a página após a exclusão ser concluída
+                    location.reload();
+                },
+                error: function(error) {
+                    // Caso ocorra algum erro na requisição, você pode tratar aqui
+                    console.log('Erro na requisição:', error);
+                    hideLoading();
+                }
+                
+            });
+            
+        });
+    }
+</script>
+
+<!-- Script para modal de exclusão de preventiva de máquina -->
+<script>
+    function modalPreventiva(codigo_maquina) {
+        // Exibir o modal
+        $('#modalPreventiva').modal('show');
+
+        // Armazenar o código da máquina em uma variável
+        var codigoMaquina = codigo_maquina;
+
+        // Adicionar um evento de clique ao botão "Excluir" do modal
+        $('#btnExcluirPreventiva').click(function() {
+            showLoading();
+            // Realizar a requisição AJAX para o backend
+            $.ajax({
+                type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+                url: '/excluir-preventiva',  // URL do backend onde irá processar a exclusão da máquina
+                data: { codigo_maquina: codigoMaquina },  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+                success: function(response) {
+                    // Aqui você pode tratar a resposta do servidor, caso necessário
+                    console.log(response);
+                    // Fechar o modal após a requisição ser enviada
+                    $('#modalPreventiva').modal('hide');
+                    
+                    // Recarregar a página após a exclusão ser concluída
+                    location.reload();
+                    hideLoading();
+                },
+                error: function(error) {
+                    // Caso ocorra algum erro na requisição, você pode tratar aqui
+                    console.log('Erro na requisição:', error);
+                    hideLoading();
+                }
+                
+            });
+            
+        });
+    }
 </script>
 
 {% endblock %}

@@ -1474,30 +1474,30 @@ def visualizar_pdf(id_ordem):
 
     return formulario_os(id_ordem)
 
-@routes_bp.route('/falha/<falhaSelecionado>')
-@login_required
-def falha_selecionada(falhaSelecionado):
+# @routes_bp.route('/falha/<falhaSelecionado>')
+# @login_required
+# def falha_selecionada(falhaSelecionado):
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """
-        SELECT *
-        FROM tb_maquinas
-        WHERE descricao LIKE '%{}%' AND setor = 'Solda';
-    """.format(falhaSelecionado.upper())
+#     query = """
+#         SELECT *
+#         FROM tb_maquinas
+#         WHERE descricao LIKE '%{}%' AND setor = 'Solda';
+#     """.format(falhaSelecionado.upper())
 
-    lista_maquinas = pd.read_sql_query(query, conn)
+#     lista_maquinas = pd.read_sql_query(query, conn)
     
-    lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
-    lista_maquinas = lista_maquinas.dropna(subset=['codigo_desc'])
-    lista_maquinas = lista_maquinas.drop_duplicates(subset=['codigo'])
+#     lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + " - " + lista_maquinas['descricao']
+#     lista_maquinas = lista_maquinas.dropna(subset=['codigo_desc'])
+#     lista_maquinas = lista_maquinas.drop_duplicates(subset=['codigo'])
     
-    lista_maquinas_monovia = []
-    lista_maquinas_monovia.insert(0, 'Outros')
-    lista_maquinas_monovia.extend(lista_maquinas[['codigo_desc']].values.tolist())
+#     lista_maquinas_monovia = []
+#     lista_maquinas_monovia.insert(0, 'Outros')
+#     lista_maquinas_monovia.extend(lista_maquinas[['codigo_desc']].values.tolist())
 
-    return jsonify(lista_maquinas_monovia)
+#     return jsonify(lista_maquinas_monovia)
 
 @routes_bp.route('/maquina-52-semanas/<codigo>')
 @login_required
@@ -1609,33 +1609,55 @@ def salvar_edicao_maquina(codigo):
 
     return render_template('user/editar_maquina.html', codigo=codigo, tombamento=tombamento, descricao=descricao, setor=setor)
 
-@routes_bp.route('/excluir-maquina/<codigo>', methods=['POST'])
+@routes_bp.route('/excluir-maquina', methods=['POST'])
 @login_required
-def excluir_maquina(codigo):
+def excluir_maquina():
+    if request.method == 'POST':
+        # Obter o código da máquina enviado pelo frontend
+        codigo_maquina = request.form.get('codigo_maquina')
+        
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        query = """DELETE FROM tb_maquinas
+                WHERE codigo = %s;
+                """
+
+        cur.execute(query, [codigo_maquina])
+        
+        query = """DELETE FROM tb_maquinas_preventivas
+                WHERE codigo = %s;
+                """
+
+        cur.execute(query, [codigo_maquina])    
+        
+        conn.commit()
+        conn.close()
+        
+        flash("Máquina excluída com sucesso", category='sucess')
+
+        return 'Dados recebidos com sucesso!'
     
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    query = """DELETE FROM tb_maquinas
-            WHERE codigo = %s;
-            """
-
-    cur.execute(query, [codigo])
-    
-    query = """DELETE FROM tb_maquinas_preventivas
-            WHERE codigo = %s;
-            """
-
-    cur.execute(query, [codigo])    
-    
-    conn.commit()
-
-    return 'Dados recebidos com sucesso!'
-
-
-@routes_bp.route('/excluir_dados', methods=['POST'])
+@routes_bp.route('/excluir-preventiva', methods=['POST'])
 @login_required
-def excluir_dados():
-    # Aqui você pode implementar a lógica para excluir os dados do banco de dados
-    # Por enquanto, retornamos uma resposta de exemplo
-    resposta = {'message': 'Os dados foram excluídos com sucesso!'}
-    return jsonify(resposta)
+def excluir_preventiva():
+    
+    if request.method == 'POST':
+        # Obter o código da máquina enviado pelo frontend
+        codigo_maquina = request.form.get('codigo_maquina')
+        
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        query = """DELETE FROM tb_maquinas_preventivas
+                WHERE codigo = %s;
+                """
+
+        cur.execute(query, [codigo_maquina])    
+        
+        conn.commit()
+        conn.close()
+        
+        flash("Máquina excluída com sucesso", category='sucess')
+
+        return 'Dados recebidos com sucesso!'
