@@ -869,6 +869,8 @@ def open_os(): # Página de abrir OS
 def filtro_maquinas(setor):
    
     #setor = setor.upper()
+    if setor == 'Serralheria':
+        setor = 'Solda'
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)

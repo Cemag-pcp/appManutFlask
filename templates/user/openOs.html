@@ -230,7 +230,7 @@
   }
 </script> -->
 
-<script>
+<!-- <script>
   function getFalhas() {
 
     var falhaSelect = document.getElementById('falha');
@@ -260,7 +260,7 @@
       });
     }
   }
-</script>
+</script> -->
 
 <script>
   function getMaquinasPorSetor() {
@@ -305,6 +305,9 @@
 
     // Verifica se um setor foi selecionado
     if (setorSelecionado !== '') {
+      if (setorSelecionado === 'Serralheria') {
+        setorSelecionado == 'Solda';
+      }
       // Faz uma chamada assíncrona para o servidor Flask
       showLoading()
       $.ajax({
