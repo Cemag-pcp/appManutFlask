@@ -89,9 +89,12 @@
         <canvas id="grafico4"></canvas>
         <canvas id="grafico5"></canvas>
     </div>
+
 </div>
 
 <script>
+
+    // Gráfico MTTR por máquina
 
     var eixo_y = {{ grafico2_mttr | safe }};
     var eixo_x = {{ grafico2_maquina | safe }};
@@ -113,26 +116,7 @@
         }
     });
 
-    // var eixo_y = {{ grafico1_maquina | safe }};
-    // var eixo_x = {{ grafico1_mtbf | safe }};
-    // var ctx = document.getElementById('grafico2').getContext('2d');
-
-    // var grafico = new Chart(ctx, {
-    //     type: 'line',
-    //     data: {
-    //         labels: eixo_x,
-    //         datasets: [{
-    //             label: 'Quantidade de OS Abertas',
-    //             data: eixo_y,
-    //             fill: false,
-    //             borderColor: 'rgb(75, 192, 192)',
-    //             tension: 0.1
-    //         }]
-    //     },
-    //     options: {
-    //         responsive: false
-    //     }
-    // });
+    // Gráfico MTBF por máquina
 
     var eixo_y = {{ grafico1_mtbf | safe }};
     var eixo_x = {{ grafico1_maquina | safe }};
@@ -154,16 +138,18 @@
         }
     });
 
-    var eixo_y = {{ pizza1_quantidade | safe }};
-    var eixo_x = {{ pizza1_area | safe }};
+    // Gráfico MTTR por setor
+
+    var eixo_y = {{ grafico2_mttr_setor | safe }};
+    var eixo_x = {{ grafico2_setor | safe }};
     var ctx = document.getElementById('grafico4').getContext('2d');
 
     var grafico = new Chart(ctx, {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'Quantidade de OS Abertas',
+                label: 'MTTR',
                 data: eixo_y,
                 fill: false,
                 tension: 0.1
@@ -174,16 +160,18 @@
         }
     });
 
-    var eixo_y = {{ grafico1_maquina | safe }};
-    var eixo_x = {{ grafico1_mtbf | safe }};
+    // Gráfico MTBF por setor
+
+    var eixo_y = {{ grafico1_mtbf_setor | safe }};
+    var eixo_x = {{ grafico1_setor | safe }};
     var ctx = document.getElementById('grafico5').getContext('2d');
 
     var grafico = new Chart(ctx, {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'Quantidade de OS Abertas',
+                label: 'MTBF',
                 data: eixo_y,
                 fill: false,
                 tension: 0.1
@@ -193,6 +181,7 @@
             responsive: false
         }
     });
+
 </script>
 
 <script>
