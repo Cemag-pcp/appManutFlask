@@ -807,47 +807,44 @@ body {
   padding: 40px;
 }
 
-.info-row{
-  padding: 30px;
-  display: flex;
+.cardBox{
+  position: relative;
+  width: 90%;
+  padding: 20px;
+  margin-left: 5%;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 30px;
+}
+
+.cardBox .card{
+  position: relative;
   flex-direction: row;
-  justify-content: space-between;
-  left: 5%;
-  top: 5%;
-  transform: translate(30%,60%);
-  align-items: center;
-  background-color: rgba(255, 255, 255,0.5);
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-  width: 300px;
-  height: auto;
+  background: var(--white);
+  padding: 30px;
   border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
 }
 
-.info-row p {
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-.info-row h5 {
-  margin-top: 10px;
-}
-
-#infos_graficos .card-title{
-  color: var(--black2);
-  font-size: 1.1em;
-}
-
-#infos_graficos .card-text{
+.cardBox .card .card-text{
+  position: relative;
   font-weight: 500;
   font-size: 2.5em;
   color: var(--blue);
 }
 
-#infos_graficos i{
-  font-size: 2.5em;
-  color: rgba(0, 0, 0,0.3);
-
+.cardBox .card .card-title{
+  color: var(--black2);
+  font-size: 1.1em;
+  margin-top: 5px;
 }
+.cardBox .card .iconBx{
+  font-size: 3.0em;
+  color: rgb(172, 172, 172);
+}
+
 
 /* #andamento{
   margin-left: 30px;
@@ -967,15 +964,12 @@ input #file{
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  left: 5%;
-  top: 5%;
-  transform: translate(30%,0%);
-  width: 1200px;
+  width: 50%;
   height: 100px;
   align-items: center;
-  margin-top: 60px; /* Ajuste esse valor conforme necessário */
+  margin: 60px auto; /* "auto" centraliza horizontalmente e 60px define o espaçamento superior */
   border-radius: 20px;
-  background-color: rgba(255, 255, 255,0.5);
+  background-color: rgba(255, 255, 255, 0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
 }
 
@@ -1018,52 +1012,56 @@ input #file{
   width: 160px;
 }
 
-#grafico2{
-  left: 5%;
-  top:5%;
-  transform: translate(8.5%,30%);
-  padding: 60px;
-  width: 800px;
-  height: 600px;
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255,0.5);
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+.graphBox{
+  position: relative;
+  width: 90%;
+  padding: 20px;
+  padding: 20px;
+  margin-left: 5%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 30px;
+  min-height: 200px;
 }
 
-#grafico3{
-  left: 5%;
-  top:5%;
-  transform: translate(120%,-70%);
-  padding: 60px;
-  width: 800px;
-  height: 600px;
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255,0.5);
+.graphBox .box{
+  position: relative;
+  background: #fff;
+  padding: 20px;
+  width: 90%;
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
 }
 
-#grafico4{
-  left: 5%;
-  top:5%;
-  transform: translate(50%,-50%);
-  padding: 60px;
-  width: 450px;
-  height: 300px;
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255,0.5);
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+@media(max-width:991px){
+  .graphBox{
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .cardBox{
+    grid-template-columns: repeat(2,1fr);
+  }
+  #form_filtros_graficos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 20px;
+    width: 80%;
+    height: auto;
+    margin: 60px auto;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    align-content: center;
+  }
+  .select2{
+    width: 100%;
+  }
 }
 
-#grafico5{
-  left: 5%;
-  top:5%;
-  transform: translate(250%,-150%);
-  padding: 60px;
-  width: 450px;
-  height: 300px;
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255,0.5);
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+@media(max-width: 480px){
+  .cardBox{
+    grid-template-columns: repeat(1,1fr);
+  }
 }
 
 .popup {
