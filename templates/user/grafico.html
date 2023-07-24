@@ -34,53 +34,17 @@
     <button type="submit">Filtrar</button>
 </form>
 
-<div id = 'pagina_graficos'>
-    <div class='row' style="width:1800px">
-        <div class="col-sm-3 col-md-3">
-            <div id = 'andamento'>
-                <div id = "infos_graficos">
-                    <div class="info-row">
-                        <h5 class="card-title">Em andamento</h5> 
-                        <i class="fa-solid fa-bars-progress"></i> 
-                        <p class="card-text">{{lista_qt[3]}}</p> 
-                    </div>           
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3 col-md-3">
-            <div id = 'abertas'>
-                <div id = "infos_graficos">
-                    <div class="info-row">
-                        <h5 class="card-title"></i>Em Espera</h5>   
-                        <i class="fa-solid fa-lock-open"></i>  
-                        <p class="card-text">{{lista_qt[0]}}</p>            
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3 col-md-3">
-            <div id = 'finalizadas'>
-                <div id = "infos_graficos">
-                    <div class="info-row">
-                        <h5 class="card-title"></i>Finalizadas</h5>    
-                        <i class="fa-sharp fa-solid fa-square-check"></i> 
-                        <p class="card-text">{{lista_qt[2]}}</p>             
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3 col-md-3">
-            <div id = 'aguardando_material'>
-                <div id = "infos_graficos" class="w">
-                    <div class="info-row">
-                        <h5 class="card-title">Aguardando material</h5> 
-                        <i class="fa-solid fa-spinner"></i>   
-                        <p class="card-text">{{lista_qt[1]}}</p>                 
-                    </div>            
-                </div>
-            </div>
+<div class="cardBox">
+    <div class='card'>
+        <div>
+            <h5 class="card-title">Em andamento</h5> 
+            <p class="card-text">{{lista_qt[3]}}</p> 
+        </div>  
+        <div class="iconBx"> 
+            <i class="fa-solid fa-bars-progress"></i>   
         </div>
     </div>
+<<<<<<< HEAD
         <br>
 
     <div>
@@ -90,9 +54,64 @@
         <canvas id="grafico5"></canvas>
         <canvas id="grafico6"></canvas>
         <canvas id="grafico7"></canvas>
+=======
+    <div class='card'>
+        <div>
+            <h5 class="card-title"></i>Em Espera</h5>   
+            <p class="card-text">{{lista_qt[0]}}</p>  
+        </div>
+        <div class="iconBx">
+            <i class="fa-solid fa-lock-open"></i>            
+        </div>
+    </div>
+    <div class='card'>
+        <div>
+            <h5 class="card-title"></i>Finalizadas</h5>    
+            <p class="card-text">{{lista_qt[2]}}</p>    
+        </div>
+        <div class="iconBx">
+            <i class="fa-sharp fa-solid fa-square-check"></i>
+        </div>
+    </div>
+    <div class='card'>
+        <div>
+            <h5 class="card-title">Aguardando material</h5>  
+            <p class="card-text">{{lista_qt[1]}}</p>      
+        </div>
+        <div class="iconBx">
+            <i class="fa-solid fa-spinner"></i>          
+        </div>            
+>>>>>>> origin/dashboard_responsive
     </div>
 
 </div>
+    <div class="graphBox">
+        <div class="box">
+            <canvas id="grafico2"></canvas>
+        </div>
+        <div class="box">
+            <canvas id="grafico3"></canvas>
+        </div>
+        <div class="box">
+            <canvas id="grafico4"></canvas>
+        </div>
+        <div class="box">
+            <canvas id="grafico5"></canvas>
+        </div>
+        <div class="box">
+            <canvas id="grafico6"></canvas>
+        </div>
+        <div class="box">
+            <canvas id="grafico7"></canvas>
+        </div>
+        <div class="box">
+            <canvas id="grafico8"></canvas>
+        </div>
+        <div class="box">
+            <canvas id="grafico9"></canvas>
+        </div>
+    </div>
+
 
 <script>
 
@@ -114,7 +133,7 @@
             }]
         },
         options: {
-            responsive: false
+            responsive: true
         }
     });
 
@@ -136,15 +155,100 @@
             }]
         },
         options: {
-            responsive: false
+            responsive: true
         }
     });
 
+<<<<<<< HEAD
     // Gráfico MTTR por setor
 
     var eixo_y = {{ dados_mttr_setor | safe }};
     var eixo_x = {{ labels_mttr_setor | safe }};
     var ctx = document.getElementById('grafico4').getContext('2d');
+=======
+    var eixo_y = {{ grafico2_mttr | safe }};
+    var eixo_x = {{ grafico2_maquina | safe }};
+    var ctx = document.getElementById('grafico4').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'MTTR',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var eixo_y = {{ grafico2_mttr | safe }};
+    var eixo_x = {{ grafico2_maquina | safe }};
+    var ctx = document.getElementById('grafico5').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'MTTR',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var eixo_y = {{ grafico2_mttr | safe }};
+    var eixo_x = {{ grafico2_maquina | safe }};
+    var ctx = document.getElementById('grafico6').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'MTTR',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    var eixo_y = {{ grafico2_mttr | safe }};
+    var eixo_x = {{ grafico2_maquina | safe }};
+    var ctx = document.getElementById('grafico7').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'MTTR',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+    var eixo_y = {{ pizza1_quantidade | safe }};
+    var eixo_x = {{ pizza1_area | safe }};
+    var ctx = document.getElementById('grafico8').getContext('2d');
+>>>>>>> origin/dashboard_responsive
 
     var grafico = new Chart(ctx, {
         type: 'bar',
@@ -162,11 +266,17 @@
         }
     });
 
+<<<<<<< HEAD
     // Gráfico MTBF por setor
 
     var eixo_y = {{ dados_mtbf_setor | safe }};
     var eixo_x = {{ labels_mtbf_setor | safe }};
     var ctx = document.getElementById('grafico5').getContext('2d');
+=======
+    var eixo_y = {{ grafico1_maquina | safe }};
+    var eixo_x = {{ grafico1_mtbf | safe }};
+    var ctx = document.getElementById('grafico9').getContext('2d');
+>>>>>>> origin/dashboard_responsive
 
     var grafico = new Chart(ctx, {
         type: 'bar',
