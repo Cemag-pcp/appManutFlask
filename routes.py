@@ -600,7 +600,7 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
     df_combinado['MTBF'] = (df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']
     df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
 
-    df_combinado['disponibilidade'] = (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR']))*100
+    df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
 
     if len(df_combinado)> 0:
 

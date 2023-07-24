@@ -44,17 +44,6 @@
             <i class="fa-solid fa-bars-progress"></i>   
         </div>
     </div>
-<<<<<<< HEAD
-        <br>
-
-    <div>
-        <canvas id="grafico2"></canvas>
-        <canvas id="grafico3"></canvas>
-        <canvas id="grafico4"></canvas>
-        <canvas id="grafico5"></canvas>
-        <canvas id="grafico6"></canvas>
-        <canvas id="grafico7"></canvas>
-=======
     <div class='card'>
         <div>
             <h5 class="card-title"></i>Em Espera</h5>   
@@ -81,67 +70,44 @@
         <div class="iconBx">
             <i class="fa-solid fa-spinner"></i>          
         </div>            
->>>>>>> origin/dashboard_responsive
     </div>
 
 </div>
+
     <div class="graphBox">
+        <div class="box">
+            <canvas id="grafico1"></canvas>
+        </div>
         <div class="box">
             <canvas id="grafico2"></canvas>
         </div>
+    </div>
+
+    <div class="graphBox">
         <div class="box">
             <canvas id="grafico3"></canvas>
         </div>
         <div class="box">
             <canvas id="grafico4"></canvas>
         </div>
+    </div>   
+    
+    <div class="graphBox">
         <div class="box">
             <canvas id="grafico5"></canvas>
         </div>
         <div class="box">
             <canvas id="grafico6"></canvas>
         </div>
-        <div class="box">
-            <canvas id="grafico7"></canvas>
-        </div>
-        <div class="box">
-            <canvas id="grafico8"></canvas>
-        </div>
-        <div class="box">
-            <canvas id="grafico9"></canvas>
-        </div>
-    </div>
-
+    </div> 
 
 <script>
-
-    // Gráfico MTTR por máquina
-
-    var eixo_y = {{ dados_mttr_maquina | safe }};
-    var eixo_x = {{ labels_mttr_maquina | safe }};
-    var ctx = document.getElementById('grafico2').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'MTTR  por máquina',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
 
     // Gráfico MTBF por máquina
 
     var eixo_y = {{ dados_mtbf_maquina | safe }};
     var eixo_x = {{ labels_mtbf_maquina | safe }};
-    var ctx = document.getElementById('grafico3').getContext('2d');
+    var ctx = document.getElementById('grafico1').getContext('2d');
 
     var grafico = new Chart(ctx, {
         type: 'bar',
@@ -159,124 +125,11 @@
         }
     });
 
-<<<<<<< HEAD
-    // Gráfico MTTR por setor
-
-    var eixo_y = {{ dados_mttr_setor | safe }};
-    var eixo_x = {{ labels_mttr_setor | safe }};
-    var ctx = document.getElementById('grafico4').getContext('2d');
-=======
-    var eixo_y = {{ grafico2_mttr | safe }};
-    var eixo_x = {{ grafico2_maquina | safe }};
-    var ctx = document.getElementById('grafico4').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'MTTR',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-
-    var eixo_y = {{ grafico2_mttr | safe }};
-    var eixo_x = {{ grafico2_maquina | safe }};
-    var ctx = document.getElementById('grafico5').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'MTTR',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-
-    var eixo_y = {{ grafico2_mttr | safe }};
-    var eixo_x = {{ grafico2_maquina | safe }};
-    var ctx = document.getElementById('grafico6').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'MTTR',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-
-    var eixo_y = {{ grafico2_mttr | safe }};
-    var eixo_x = {{ grafico2_maquina | safe }};
-    var ctx = document.getElementById('grafico7').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'MTTR',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true
-        }
-    });
-    var eixo_y = {{ pizza1_quantidade | safe }};
-    var eixo_x = {{ pizza1_area | safe }};
-    var ctx = document.getElementById('grafico8').getContext('2d');
->>>>>>> origin/dashboard_responsive
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'MTTR por setor',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: false
-        }
-    });
-
-<<<<<<< HEAD
     // Gráfico MTBF por setor
 
     var eixo_y = {{ dados_mtbf_setor | safe }};
     var eixo_x = {{ labels_mtbf_setor | safe }};
-    var ctx = document.getElementById('grafico5').getContext('2d');
-=======
-    var eixo_y = {{ grafico1_maquina | safe }};
-    var eixo_x = {{ grafico1_mtbf | safe }};
-    var ctx = document.getElementById('grafico9').getContext('2d');
->>>>>>> origin/dashboard_responsive
+    var ctx = document.getElementById('grafico2').getContext('2d');
 
     var grafico = new Chart(ctx, {
         type: 'bar',
@@ -290,15 +143,59 @@
             }]
         },
         options: {
-            responsive: false
+            responsive: true
         }
     });
 
-    // Gráfico disponibilidade por maquina
+    // Gráfico MTTR por máquina
+
+    var eixo_y = {{ dados_mttr_maquina | safe }};
+    var eixo_x = {{ labels_mttr_maquina | safe }};
+    var ctx = document.getElementById('grafico3').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'MTTR por máquina',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    // Gráfico MTTR por setor
+
+    var eixo_y = {{ dados_mttr_setor | safe }};
+    var eixo_x = {{ labels_mttr_setor | safe }};
+    var ctx = document.getElementById('grafico4').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'MTTR por setor',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true
+        },
+    });
+
+    // Disponibilidade por maquina
 
     var eixo_y = {{ dados_disponibilidade_maquina | safe }};
     var eixo_x = {{ labels_disponibilidade_maquina | safe }};
-    var ctx = document.getElementById('grafico6').getContext('2d');
+    var ctx = document.getElementById('grafico5').getContext('2d');
 
     var grafico = new Chart(ctx, {
         type: 'bar',
@@ -307,35 +204,48 @@
             datasets: [{
                 label: 'Disponibilidade por máquina',
                 data: eixo_y,
-                fill: false,
-                tension: 0.1
             }]
         },
-        options: {
-            responsive: false
-        }
     });
 
-    // Gráfico disponibilidade por setor
-
+    // Disponibilidade por setor
+    
     var eixo_y = {{ dados_disponibilidade_setor | safe }};
     var eixo_x = {{ labels_disponibilidade_setor | safe }};
-    var ctx = document.getElementById('grafico7').getContext('2d');
+    var ctx = document.getElementById('grafico6').getContext('2d');
 
     var grafico = new Chart(ctx, {
-        type: 'bar',
+        type: 'pie', // Alterando o tipo de gráfico para pizza
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'Disponibilidade por setor',
                 data: eixo_y,
-                fill: false,
-                tension: 0.1
+                borderWidth: 1
             }]
         },
         options: {
-            responsive: false
-        }
+            responsive: true,
+            plugins: {
+                datalabels: {
+                    color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
+                    formatter: function(value, context) {
+                        return value + '%'; // Adiciona o símbolo "%" ao lado do número
+                    }
+                }
+            },
+            title: {
+                display: true,
+                text: 'Disponibilidade por Setor', // Define o texto do título do gráfico
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
     });
 
 </script>
