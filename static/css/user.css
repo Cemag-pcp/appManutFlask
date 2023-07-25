@@ -960,29 +960,45 @@ input #file{
 }
 
 #form_filtros_graficos {
-  padding-right: 10px;
+  padding-right: 7%;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  width: 50%;
+  justify-content: end;
+  width: 100%;
   height: 100px;
   align-items: center;
-  margin: 60px auto; /* "auto" centraliza horizontalmente e 60px define o espaçamento superior */
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 80px; /* "auto" centraliza horizontalmente e 60px define o espaçamento superior */
+  background-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
 }
 
 #form_filtros_graficos button{
-  padding: 5px;
-  margin-left: 15px;
-  background-color: #adadad4b;
-  border: solid 2px;
-  border-radius: 10px;
-  border-color: rgba(0, 0, 0, 0.1);
-  font-family: 'Poppins', sans-serif;
+  background: rgb(255, 161, 113);
+  border: 2px solid rgb(255, 142, 85);
+  border-radius: 4px;
   outline: none;
+  padding: 0.5em 0.8em;
+  width: 80px;
+  height: 28px;
+  display: flex;
+  margin-left: 30px;
+  color: #ffffff;
+  font-size: 0.8em;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+#form_filtros_graficos button:hover {
+  background: rgb(255, 142, 85);;
+  outline: none;
+}
+
+#form_filtros_graficos button:active {
+  background: rgb(255, 142, 85);;
+  outline: none;
 }
 
 #form_filtros_graficos label,
@@ -1028,7 +1044,7 @@ input #file{
   position: relative;
   background: #fff;
   padding: 20px;
-  width: 90%;
+  width: 100%;
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   border-radius: 20px;
 }
@@ -1052,6 +1068,24 @@ input #file{
     background-color: rgba(255, 255, 255, 0.5);
     box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
     align-content: center;
+  }
+  #form_filtros_graficos button {
+    background: rgb(255, 161, 113);
+    border: 2px solid rgb(255, 142, 85);
+    border-radius: 4px;
+    outline: none;
+    padding: 0.5em 0.8em;
+    width: 80px;
+    height: 28px;
+    display: flex;
+    margin-left: 20px;
+    color: #ffffff;
+    font-size: 0.8em;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
   }
   .select2{
     width: 100%;

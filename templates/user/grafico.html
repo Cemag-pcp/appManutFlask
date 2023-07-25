@@ -114,15 +114,57 @@
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'MTBF por máquina',
+                label: 'MTBF',
                 data: eixo_y,
                 fill: false,
-                tension: 0.1
+                tension: 0.1,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
             }]
         },
         options: {
-            responsive: true
+            responsive: true,
+            scales: {
+                x: {
+                display: true, // Defina como false para remover as grades do eixo x
+            },
+                y: {
+                display: true, // Defina como false para remover as grades do eixo y
+            }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'MTBF por máquina',
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
         }
+        },
+        plugins: [ChartDataLabels]
     });
 
     // Gráfico MTBF por setor
@@ -136,15 +178,57 @@
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'MTBF por setor',
+                label: 'MTBF',
                 data: eixo_y,
                 fill: false,
-                tension: 0.1
+                tension: 0.1,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
             }]
         },
         options: {
-            responsive: true
+            responsive: true,
+            scales: {
+                x: {
+                display: true, // Defina como false para remover as grades do eixo x
+            },
+                y: {
+                display: true, // Defina como false para remover as grades do eixo y
+            }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'MTBF por setor',
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
         }
+        },
+        plugins: [ChartDataLabels]
     });
 
     // Gráfico MTTR por máquina
@@ -158,15 +242,57 @@
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'MTTR por máquina',
+                label: 'MTTR',
                 data: eixo_y,
                 fill: false,
-                tension: 0.1
+                tension: 0.1,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
             }]
         },
         options: {
-            responsive: true
+            responsive: true,
+            scales: {
+                x: {
+                display: true, // Defina como false para remover as grades do eixo x
+            },
+                y: {
+                display: true, // Defina como false para remover as grades do eixo y
+            }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'MTTR por máquina',
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                },            
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
         }
+        },
+        plugins: [ChartDataLabels]
     });
 
     // Gráfico MTTR por setor
@@ -180,15 +306,57 @@
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'MTTR por setor',
+                label: 'MTTR',
                 data: eixo_y,
                 fill: false,
-                tension: 0.1
+                tension: 0.1,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
             }]
         },
         options: {
-            responsive: true
+            responsive: true,
+            scales: {
+                x: {
+                display: true, // Defina como false para remover as grades do eixo x
+            },
+                y: {
+                display: true, // Defina como false para remover as grades do eixo y
+            }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'MTTR por setor',
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
+        }
         },
+        plugins: [ChartDataLabels]
     });
 
     // Disponibilidade por maquina
@@ -202,10 +370,56 @@
         data: {
             labels: eixo_x,
             datasets: [{
-                label: 'Disponibilidade por máquina',
+                label: 'Disponibilidade',
                 data: eixo_y,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
             }]
         },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                display: true, // Defina como false para remover as grades do eixo x
+            },
+                y: {
+                display: true, // Defina como false para remover as grades do eixo y
+            }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'Disponibilidade por máquina',
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
+        }
+        
+        },
+        plugins: [ChartDataLabels]
     });
 
     // Disponibilidade por setor
@@ -215,11 +429,30 @@
     var ctx = document.getElementById('grafico6').getContext('2d');
 
     var grafico = new Chart(ctx, {
-        type: 'pie', // Alterando o tipo de gráfico para pizza
+        type: 'bar', // Alterando o tipo de gráfico para pizza
         data: {
             labels: eixo_x,
             datasets: [{
+                label: 'Disponibilidade',
                 data: eixo_y,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
                 borderWidth: 1
             }]
         },
