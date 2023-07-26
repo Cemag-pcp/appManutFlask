@@ -174,7 +174,7 @@ def mtbf_setor(query_mtbf):
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
     
-    df_timeline['MTBF'] = (df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']
+    df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
 
     if len(df_timeline)> 0:
 
@@ -342,7 +342,7 @@ def mttr_setor(query_mttr):
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
     
-    df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
+    df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
 
     if len(df_combinado)> 0:
 

@@ -114,6 +114,10 @@
         data: {
             labels: eixo_x,
             datasets: [{
+                color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
                 label: 'MTBF',
                 data: eixo_y,
                 fill: false,
@@ -177,6 +181,10 @@
         data: {
             labels: eixo_x,
             datasets: [{
+                color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
                 label: 'MTBF',
                 data: eixo_y,
                 fill: false,
@@ -204,28 +212,22 @@
         },
         options: {
             responsive: true,
-            scales: {
-                x: {
-                display: true, // Defina como false para remover as grades do eixo x
-            },
-                y: {
-                display: true, // Defina como false para remover as grades do eixo y
-            }
-            },
             plugins: {
-            title: {
+                datalabels: {
+                    color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
+                },
+                title: {
                 display: true,
-                text: 'MTBF por setor',
+                text: 'MTBF por setor (horas)', // Define o texto do título do gráfico
                 font: {
                     size: 18, // Define o tamanho da fonte do título
                     weight: 'bold' // Define o peso (negrito) da fonte do título
-                },
-                padding: {
-                    top: 10,
-                    bottom: 30
                 }
+            },
             }
-        }
         },
         plugins: [ChartDataLabels]
     });
@@ -241,6 +243,10 @@
         data: {
             labels: eixo_x,
             datasets: [{
+                color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
                 label: 'MTTR',
                 data: eixo_y,
                 fill: false,
@@ -304,6 +310,10 @@
         data: {
             labels: eixo_x,
             datasets: [{
+                color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
                 label: 'MTTR',
                 data: eixo_y,
                 fill: false,
@@ -331,28 +341,22 @@
         },
         options: {
             responsive: true,
-            scales: {
-                x: {
-                display: true, // Defina como false para remover as grades do eixo x
-            },
-                y: {
-                display: true, // Defina como false para remover as grades do eixo y
-            }
-            },
             plugins: {
-            title: {
+                datalabels: {
+                    color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
+                },
+                title: {
                 display: true,
-                text: 'MTTR por setor',
+                text: 'MTTR por setor (horas)', // Define o texto do título do gráfico
                 font: {
                     size: 18, // Define o tamanho da fonte do título
                     weight: 'bold' // Define o peso (negrito) da fonte do título
-                },
-                padding: {
-                    top: 10,
-                    bottom: 30
                 }
+            },
             }
-        }
         },
         plugins: [ChartDataLabels]
     });
@@ -368,6 +372,10 @@
         data: {
             labels: eixo_x,
             datasets: [{
+                color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
                 label: 'Disponibilidade',
                 data: eixo_y,
                 backgroundColor: [
@@ -464,15 +472,15 @@
                     formatter: function(value, context) {
                         return value + '%'; // Adiciona o símbolo "%" ao lado do número
                     }
-                }
-            },
-            title: {
+                },
+                title: {
                 display: true,
                 text: 'Disponibilidade por Setor', // Define o texto do título do gráfico
                 font: {
                     size: 18, // Define o tamanho da fonte do título
                     weight: 'bold' // Define o peso (negrito) da fonte do título
                 }
+            },
             }
         },
         plugins: [ChartDataLabels]
