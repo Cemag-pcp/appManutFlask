@@ -998,10 +998,20 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     data1.replace(np.nan, '', inplace=True)
 
     # Loop para percorrer todas as linhas da coluna
-    for i in range(len(data1['dataabertura'])):
+    for i in range(1,len(data1['dataabertura'])):
         if data1['dataabertura'][i] == '':
             data1['dataabertura'][i] = data1['dataabertura'][i-1]
-
+        if data1['solicitante'][i] == '':
+            data1['solicitante'][i] = data1['solicitante'][i-1]
+        if data1['equipamento_em_falha'][i] == '':
+            data1['equipamento_em_falha'][i] = data1['equipamento_em_falha'][i-1]
+        if data1['setor_maquina_solda'][i] == '':
+            data1['setor_maquina_solda'][i] = data1['setor_maquina_solda'][i-1]
+        if data1['qual_ferramenta'][i] == '':
+            data1['qual_ferramenta'][i] = data1['qual_ferramenta'][i-1]
+        if data1['cod_equipamento'][i] == '':
+            data1['cod_equipamento'][i] = data1['cod_equipamento'][i-1]
+            
     data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
     data1 = data1.sort_values(by='id_ordem')
     
@@ -1249,6 +1259,8 @@ def editar_ordem_inicial(id_ordem,n_ordem):
 
     if len(maquina) == 0:
         maquina.append('Outros')
+
+    
 
     return render_template('user/editar_ordem_inicial.html', ordem=data1[0], maquina=maquina, n_ordem=n_ordem)
 
