@@ -1011,7 +1011,7 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
             data1['qual_ferramenta'][i] = data1['qual_ferramenta'][i-1]
         if data1['cod_equipamento'][i] == '':
             data1['cod_equipamento'][i] = data1['cod_equipamento'][i-1]
-            
+    
     data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
     data1 = data1.sort_values(by='id_ordem')
     
