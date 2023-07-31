@@ -831,17 +831,17 @@ body {
 .cardBox .card .card-text{
   position: relative;
   font-weight: 500;
-  font-size: 2.5em;
+  font-size: 2em;
   color: var(--blue);
 }
 
 .cardBox .card .card-title{
   color: var(--black2);
-  font-size: 1.1em;
+  font-size: 1em;
   margin-top: 5px;
 }
 .cardBox .card .iconBx{
-  font-size: 3.0em;
+  font-size: 2.5em;
   color: rgb(172, 172, 172);
 }
 
@@ -1034,6 +1034,7 @@ input #file{
   padding: 20px;
   padding: 20px;
   margin-left: 5%;
+  margin-bottom: 20px;
   display: flex;
   grid-template-columns: 1fr;
   gap: 30px;
@@ -1047,7 +1048,7 @@ input #file{
 .graphBox .box{
   display: grid;
   position: relative;
-  max-width: 70%;
+  width: 70%;
   grid-template-columns: 1fr 1fr;
   padding: 20px;
 }
@@ -1057,19 +1058,20 @@ input #file{
   width: 100%;
   padding: 20px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 30px;
   margin-top: 10px;
 }
 
 .details .recentOrders{
-   position: relative;
-   display: grid;
-   min-height: 500px;
-   background: var(--white);
-   padding: 20px;
-   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-   border: 1px solid rgb(167, 167, 167);
+  position: relative;
+  display: flex;
+  background: var(--white);
+  padding: 30px;
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgb(167, 167, 167,0.2);
+  flex-direction: column;
+  min-width: 45vh;
 }
 
 .cardHeader{
@@ -1078,19 +1080,19 @@ input #file{
   align-items: flex-start;
 }
 
-.cardHeader h2{
+.cardHeader h3{
   font-weight: 600;
   color: var(--blue);
 }
 
-.ver{
+/* .ver{
   position: relative;
   padding: 5px 10px;
   background: var(--blue);
   text-decoration: none;
   color: var(--white);
   border-radius: 6px;
-}
+} */
 
 .details .table{
   width: 100%;
@@ -1113,12 +1115,98 @@ input #file{
 
 .details .recentOrders table tr td{
   padding: 10px;
+  text-align: center;
+  font-size: 13px;
+}
+
+@media(max-width: 1550px){
+
+  .details .recentOrders table tr td{
+    padding: 10px;
+    text-align: center;
+    font-size: 10px;
+  }
+
+  .dataTables_paginate{
+    font-size: 8px;
+  }
+
+  .cardHeader h3{
+    font-weight: 600;
+    color: var(--blue);
+    font-size: 20px;
+  }
+
+  .graphBox{
+    position: relative;
+    width: 100%;
+    padding: 0;
+    margin-left: 0;
+    margin-bottom: 20px;
+    display: flex;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    min-height: 200px;
+    background: #fff;
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+  }
+
+  .graphBox .box{
+    display: grid;
+    position: relative;
+    width: 100%;
+    grid-template-columns: 1fr ;
+    padding: 20px;
+  }
+
+  .cardBox .card{
+    position: relative;
+    flex-direction: row;
+    background: var(--white);
+    width: 100%;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+  }
+
+  .cardBox {
+    position: relative;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    padding: 0;
+    margin-left: 0;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+.details {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin-top: 10px;
+}
+.details .recentOrders {
+  position: relative;
+  display: flex;
+  background: var(--white);
+  padding: 20px;
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgb(167, 167, 167,0.2);
+  flex-direction: column;
+  font-size: 12px;
+  min-width: 35vh;
+}
 }
 
 @media(max-width:991px){
   .graphBox{
     grid-template-columns: 1fr;
-    height: auto;
   }
   .cardBox{
     grid-template-columns: repeat(2,1fr);
@@ -1208,3 +1296,19 @@ input #file{
   color: red;
   font-size: 20px;
 }
+
+.col-md-7 {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.col-sm-12 {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+.col-md-5 {
+  display: none;
+}
+

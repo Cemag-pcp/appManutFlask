@@ -120,7 +120,10 @@ def mtbf_maquina(query_mtbf):
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
     
-    df_timeline['MTBF'] = (df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']
+    df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
+    
+    df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+
 
     if len(df_timeline)> 0:
 
@@ -143,7 +146,7 @@ def mtbf_maquina(query_mtbf):
 
         context_mtbf_maquina = {'labels_mtbf_maquina': grafico1_maquina, 'dados_mtbf_maquina': grafico1_mtbf}
 
-    return context_mtbf_maquina
+    return context_mtbf_maquina,df_timeline_copia
 
 def mtbf_setor(query_mtbf):
 
@@ -176,6 +179,8 @@ def mtbf_setor(query_mtbf):
     
     df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
 
+    df_timeline_mtbf_setor = df_timeline[['maquina','setor','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+
     if len(df_timeline)> 0:
 
         grafico1_maquina = df_timeline['setor'].tolist() # eixo x
@@ -197,7 +202,7 @@ def mtbf_setor(query_mtbf):
 
         context_mtbf_setor = {'labels_mtbf_setor': grafico1_maquina, 'dados_mtbf_setor': grafico1_mtbf}
 
-    return context_mtbf_setor
+    return context_mtbf_setor,df_timeline_mtbf_setor
 
 def mttr_maquina(query_mttr):
     
@@ -267,6 +272,12 @@ def mttr_maquina(query_mttr):
     
     df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
 
+    df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
+
+    df_combinado['MTTR'] = df_combinado['MTTR'].round(2)
+
+    df_combinado_mttr = df_combinado[['maquina','qtd_manutencao','diferenca','MTTR']].values.tolist()
+
     if len(df_combinado)> 0:
 
         grafico1_maquina = df_combinado['maquina'].tolist() # eixo x
@@ -289,7 +300,7 @@ def mttr_maquina(query_mttr):
 
         context_mtbf_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr} 
 
-    return context_mtbf_maquina
+    return context_mtbf_maquina,df_combinado_mttr
 
 def mttr_setor(query_mttr):
     
@@ -341,8 +352,12 @@ def mttr_setor(query_mttr):
     qtd_dias_uteis = dias_uteis()
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
-    
+
     df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
+    
+    df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
+
+    df_combinado_mttr_setor = df_combinado[['setor','qtd_manutencao','diferenca','MTTR']].values.tolist()
 
     if len(df_combinado)> 0:
 
@@ -366,7 +381,7 @@ def mttr_setor(query_mttr):
 
         context_mtbf_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr} 
 
-    return context_mtbf_setor
+    return context_mtbf_setor,df_combinado_mttr_setor
 
 
 
@@ -516,10 +531,13 @@ def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
     
-    df_combinado['MTBF'] = (df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']
-    df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
+    df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
+    df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
 
-    df_combinado['disponibilidade'] = (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100
+
+    df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+
+    df_combinado_disponibilidade = df_combinado[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
 
     if len(df_combinado)> 0:
 
@@ -543,7 +561,7 @@ def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
 
         context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}        
 
-    return context_disponibilidade
+    return context_disponibilidade,df_combinado_disponibilidade
 
 def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
     
@@ -597,10 +615,12 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 7
     
-    df_combinado['MTBF'] = (df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']
-    df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
+    df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
+    df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
 
     df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+
+    df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].values.tolist()
 
     if len(df_combinado)> 0:
 
@@ -624,7 +644,7 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
         context_disponibilidade_setor = {'labels_disponibilidade_setor': labels, 'dados_disponibilidade_setor': dados_disponibilidade}
 
-    return context_disponibilidade_setor
+    return context_disponibilidade_setor,df_disponibilidade_setor
 
 def tempo_fechamento_os(query_mttr):
     
@@ -1636,8 +1656,8 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_mtbf_maquina = mtbf_maquina(query_mtbf)
-    context_mtbf_setor = mtbf_setor(query_mtbf)
+    context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf)
+    context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf)
 
     query_mttr = (
     """
@@ -1648,8 +1668,8 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_mttr_maquina = mttr_maquina(query_mttr)
-    context_mttr_setor = mttr_setor(query_mttr)
+    context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query_mttr)
+    context_mttr_setor,lista_mttr_setor = mttr_setor(query_mttr)
     context_horas_por_setor = tempo_fechamento_os(query_mttr)
     
     query_disponibilidade = ("""
@@ -1660,8 +1680,8 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_disponiblidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade)
-    context_disponiblidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade)
+    context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade)
+    context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1685,7 +1705,8 @@ def grafico(): # Dashboard
     return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens,
                             **context_mtbf_maquina, **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor,
                             **context_disponiblidade_maquina, **context_disponiblidade_setor, **context_horas_por_setor,
-                            setor_selecionado='', maquina_selecionado='', area_manutencao='')
+                            lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,setor_selecionado='', 
+                            lista_disponibilidade_setor=lista_disponibilidade_setor,lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina,maquina_selecionado='', area_manutencao='')
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
