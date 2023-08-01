@@ -106,6 +106,40 @@
             </div>
         </div>
     </div>
+
+    <div class="graphBox">
+        <div class="box">
+            <canvas id="grafico1top10"></canvas>
+            <div class="details">
+                <div class="recentOrders">
+                    <div class="cardHeader">
+                        <h3>Top 10 MTBF por máquina</h3>
+                    </div>
+                    <table class="table" id="tabela_grafico1top10">
+                        <thead>
+                            <tr>
+                                <td>Máquina</td>
+                                <td>Quantidade</td>
+                                <td>Carga</td>
+                                <td>MTBF</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mtbf_maquina in lista_mtbf_maquina %}
+                            <tr>
+                                <td>{{mtbf_maquina[0]}}</td>
+                                <td>{{mtbf_maquina[1]}}</td>
+                                <td>{{mtbf_maquina[2]}}</td>
+                                <td>{{mtbf_maquina[3]}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="graphBox">
         <div class="box">
             <canvas id="grafico2"></canvas>
@@ -117,7 +151,6 @@
                     <table class="table" id="tabela_graficos2">
                         <thead>
                             <tr>
-                                <td>Máquina</td>
                                 <td>Setor</td>
                                 <td>Quant.</td>
                                 <td>Carga</td>
@@ -127,7 +160,6 @@
                         <tbody>
                             {% for mtbf_setor in lista_mtbf_setor %}
                             <tr>
-                                <td>{{mtbf_setor[0]}}</td>
                                 <td>{{mtbf_setor[1]}}</td>
                                 <td>{{mtbf_setor[2]}}</td>
                                 <td>{{mtbf_setor[3]}}</td>
@@ -268,65 +300,152 @@
             </div>
         </div>
     </div> 
-
+    <div class="graphBox">
+        <div class="box2">
+            <canvas id="grafico7"></canvas>
+            <div class="details">
+                <div class="recentOrders">
+                    <div class="cardHeader">
+                        <h3>Disponibilidade Setor</h3>
+                    </div>
+                    <table class="table" id="tabela_graficos7">
+                        <thead>
+                            <tr>
+                                <td>Setor</td>
+                                <td>MTBF</td>
+                                <td>MTTR</td>
+                                <td>Disponibilidade</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disponibilidade_setor in lista_disponibilidade_setor %}
+                            <tr>
+                                <td>{{disponibilidade_setor[0]}}</td>
+                                <td>{{disponibilidade_setor[1]}}</td>
+                                <td>{{disponibilidade_setor[2]}}</td>
+                                <td>{{disponibilidade_setor[3]}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <div class="graphBox">
+        <div class="box2">
+            <canvas id="grafico8"></canvas>
+            <div class="details">
+                <div class="recentOrders">
+                    <div class="cardHeader">
+                        <h3>Disponibilidade Setor</h3>
+                    </div>
+                    <table class="table" id="tabela_graficos8">
+                        <thead>
+                            <tr>
+                                <td>Setor</td>
+                                <td>MTBF</td>
+                                <td>MTTR</td>
+                                <td>Disponibilidade</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disponibilidade_setor in lista_disponibilidade_setor %}
+                            <tr>
+                                <td>{{disponibilidade_setor[0]}}</td>
+                                <td>{{disponibilidade_setor[1]}}</td>
+                                <td>{{disponibilidade_setor[2]}}</td>
+                                <td>{{disponibilidade_setor[3]}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> 
 <script>
     // Gráfico MTBF por máquina
-    function setChartSize() {
-        const canvas = document.getElementById('grafico1');
-        if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-            canvas.width = 400;
-            canvas.height = 600;
-        } else { // Para telas maiores ou iguais a 768 pixels (PC)
-            canvas.width = 500;
-            canvas.height = 300;
-        }
-        const canvas2 = document.getElementById('grafico2');
-            if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-                canvas2.width = 400;
-                canvas2.height = 600;
-            } else { // Para telas maiores ou iguais a 768 pixels (PC)
-                canvas2.width = 500;
-                canvas2.height = 300;
-            }
-        const canvas3 = document.getElementById('grafico3');
-            if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-                canvas3.width = 400;
-                canvas3.height = 600;
-            } else { // Para telas maiores ou iguais a 768 pixels (PC)
-                canvas3.width = 500;
-                canvas3.height = 300;
-            }
+    // function setChartSize() {
+    //     const canvas = document.getElementById('grafico1');
+    //     if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //         canvas.width = 400;
+    //         canvas.height = 600;
+    //     } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //         canvas.width = 500;
+    //         canvas.height = 300;
+    //     }
+    //     const canvastop10 = document.getElementById('grafico1top10');
+    //     if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //         canvastop10.width = 400;
+    //         canvastop10.height = 600;
+    //     } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //         canvastop10.width = 500;
+    //         canvastop10.height = 300;
+    //     }
+    //     const canvas2 = document.getElementById('grafico2');
+    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //             canvas2.width = 400;
+    //             canvas2.height = 600;
+    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //             canvas2.width = 500;
+    //             canvas2.height = 300;
+    //         }
+    //     const canvas3 = document.getElementById('grafico3');
+    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //             canvas3.width = 400;
+    //             canvas3.height = 600;
+    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //             canvas3.width = 500;
+    //             canvas3.height = 300;
+    //         }
         
-        const canvas4 = document.getElementById('grafico4');
-            if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-                canvas4.width = 400;
-                canvas4.height = 600;
-            } else { // Para telas maiores ou iguais a 768 pixels (PC)
-                canvas4.width = 500;
-                canvas4.height = 300;
-            }
+    //     const canvas4 = document.getElementById('grafico4');
+    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //             canvas4.width = 400;
+    //             canvas4.height = 600;
+    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //             canvas4.width = 500;
+    //             canvas4.height = 300;
+    //         }
         
-        const canvas5 = document.getElementById('grafico5');
-            if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-                canvas5.width = 400;
-                canvas5.height = 600;
-            } else { // Para telas maiores ou iguais a 768 pixels (PC)
-                canvas5.width = 500;
-                canvas5.height = 300;
-            }
+    //     const canvas5 = document.getElementById('grafico5');
+    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //             canvas5.width = 400;
+    //             canvas5.height = 600;
+    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //             canvas5.width = 500;
+    //             canvas5.height = 300;
+    //         }
         
-        const canvas6 = document.getElementById('grafico6');
-            if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-                canvas6.width = 400;
-                canvas6.height = 600;
-            } else { // Para telas maiores ou iguais a 768 pixels (PC)
-                canvas6.width = 500;
-                canvas6.height = 300;
-            }
-        }
+    //     const canvas6 = document.getElementById('grafico6');
+    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //             canvas6.width = 400;
+    //             canvas6.height = 600;
+    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //             canvas6.width = 500;
+    //             canvas6.height = 300;
+    //         }
+    //     const canvas7 = document.getElementById('grafico7');
+    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //             canvas7.width = 300;
+    //             canvas7.height = 300;
+    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //             canvas7.width = 400;
+    //             canvas7.height = 400;
+    //         }
+    //     const canvas8 = document.getElementById('grafico8');
+    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
+    //             canvas8.width = 300;
+    //             canvas8.height = 300;
+    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
+    //             canvas8.width = 400;
+    //             canvas8.height = 400;
+    //         }
+    //     }
     // Chame a função para definir o tamanho do gráfico inicialmente e também adicione um ouvinte de evento para atualizar o tamanho quando a janela for redimensionada.
-    setChartSize();
-    window.addEventListener('resize', setChartSize);
+    // setChartSize();
+    // window.addEventListener('resize', setChartSize);
 
     var eixo_y = {{ dados_mtbf_maquina | safe }};
     var eixo_x = {{ labels_mtbf_maquina | safe }};
@@ -393,6 +512,71 @@
         }
     });
 
+    var eixo_y = {{ dados_mtbf_maquina | safe }};
+    var eixo_x = {{ labels_mtbf_maquina | safe }};
+    var ctx = document.getElementById('grafico1top10').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
+                label: 'MTBF',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                display: true, // Defina como false para remover as grades do eixo x
+            },
+                y: {
+                display: true, // Defina como false para remover as grades do eixo y
+            }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'MTBF por máquina (top 10)',
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
+        }
+        }
+    });
     // Gráfico MTBF por setor
 
     var eixo_y = {{ dados_mtbf_setor | safe }};
@@ -416,7 +600,6 @@
                 '#1155cc',
                 'rgba(255, 99, 132, 1)',
                 '#b7b7b7',
-                '#0b5394',
                 '#0b5394',
                 '#f1c232',
                 '#f1894d',
@@ -546,7 +729,6 @@
                 'rgba(255, 99, 132, 1)',
                 '#b7b7b7',
                 '#0b5394',
-                '#0b5394',
                 '#f1c232',
                 '#f1894d',
                 '#00ffff',
@@ -667,6 +849,114 @@
                 'rgba(255, 99, 132, 1)',
                 '#b7b7b7',
                 '#0b5394',
+                '#f1c232',
+                '#f1894d',
+                '#00ffff',
+                '#ff9900',
+                'rgba(75, 192, 192, 1)',
+                '#ffff00',
+                '#6aa84f',
+                '#00ff00'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                datalabels: {
+                    color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 10, // Define o tamanho da fonte dos rótulos
+                        weight: 'bold' // Define o tamanho da fonte dos rótulos
+                    },
+                    formatter: function(value, context) {
+                        return value + '%'; // Adiciona o símbolo "%" ao lado do número
+                    }
+                },
+                title: {
+                display: true,
+                text: 'Disponibilidade por Setor', // Define o texto do título do gráfico
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                }
+            },
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+    
+    var eixo_y = {{ dados_disponibilidade_setor | safe }};
+    var eixo_x = {{ labels_disponibilidade_setor | safe }};
+    var ctx = document.getElementById('grafico7').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'pie', // Alterando o tipo de gráfico para pizza
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'Disponibilidade',
+                data: eixo_y,
+                backgroundColor: [
+                '#1155cc',
+                'rgba(255, 99, 132, 1)',
+                '#b7b7b7',
+                '#0b5394',
+                '#f1c232',
+                '#f1894d',
+                '#00ffff',
+                '#ff9900',
+                'rgba(75, 192, 192, 1)',
+                '#ffff00',
+                '#6aa84f',
+                '#00ff00'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                datalabels: {
+                    color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 10, // Define o tamanho da fonte dos rótulos
+                        weight: 'bold' // Define o tamanho da fonte dos rótulos
+                    },
+                    formatter: function(value, context) {
+                        return value + '%'; // Adiciona o símbolo "%" ao lado do número
+                    }
+                },
+                title: {
+                display: true,
+                text: 'Disponibilidade por Setor', // Define o texto do título do gráfico
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                }
+            },
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+    
+
+    var eixo_y = {{ dados_disponibilidade_setor | safe }};
+    var eixo_x = {{ labels_disponibilidade_setor | safe }};
+    var ctx = document.getElementById('grafico8').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'pie', // Alterando o tipo de gráfico para pizza
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'Disponibilidade',
+                data: eixo_y,
+                backgroundColor: [
+                '#1155cc',
+                'rgba(255, 99, 132, 1)',
+                '#b7b7b7',
                 '#0b5394',
                 '#f1c232',
                 '#f1894d',

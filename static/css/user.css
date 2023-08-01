@@ -1051,6 +1051,16 @@ input #file{
   width: 70%;
   grid-template-columns: 1fr 1fr;
   padding: 20px;
+  z-index: 0;
+}
+
+.graphBox .box2{
+  display: grid;
+  position: relative;
+  width: 50%;
+  grid-template-columns: 1fr 1fr;
+  padding: 20px;
+  z-index: 0;
 }
 
 .details{
@@ -1158,8 +1168,16 @@ input #file{
     width: 100%;
     grid-template-columns: 1fr ;
     padding: 20px;
+    z-index: 0;
   }
-
+  .graphBox .box2{
+    display: grid;
+    position: relative;
+    width: 100%;
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  
   .cardBox .card{
     position: relative;
     flex-direction: row;
@@ -1313,16 +1331,37 @@ input #file{
   display: none;
 }
 
-.form-control{
-  display: none;
-}
-
 #tabela_graficos1_filter{
   display: none;
 }
+
+#tabela_grafico1top10_filter{
+  display: none;
+}
+
 #tabela_graficos2_filter{
   display: none;
 }
 #tabela_graficos3_filter{
+  display: none;
+}
+
+#tabela_graficos4_filter{
+  display: none;
+}
+
+#tabela_graficos5_filter{
+  display: none;
+}
+
+#tabela_graficos6_filter{
+  display: none;
+}
+
+#tabela_graficos7_filter{
+  display: none;
+}
+
+#tabela_graficos8_filter{
   display: none;
 }
