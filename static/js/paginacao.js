@@ -5,6 +5,11 @@ $(document).ready(function() {
         "iDisplayLength": 10
     });
 
+    $('#tabela_grafico1top10').DataTable({
+        "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
+        "iDisplayLength": 5
+    });
+
     $('#tabela_graficos2').DataTable({
         "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
         "iDisplayLength": 6
@@ -26,6 +31,16 @@ $(document).ready(function() {
     });
 
     $('#tabela_graficos6').DataTable({
+        "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
+        "iDisplayLength": 6
+    });
+
+    $('#tabela_graficos7').DataTable({
+        "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
+        "iDisplayLength": 6
+    });
+
+    $('#tabela_graficos8').DataTable({
         "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
         "iDisplayLength": 6
     });
