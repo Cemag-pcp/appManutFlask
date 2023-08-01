@@ -1213,12 +1213,13 @@ input #file{
   }
   #form_filtros_graficos {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 20px;
-    width: 80%;
+    grid-template-columns: 0.5fr 1fr;
+    padding: 30px;
+    padding-left: 0;
+    width: 100%;
     height: auto;
-    margin: 60px auto;
-    border-radius: 20px;
+    margin-bottom: 30px;
+    margin-top: 60px;
     background-color: rgba(255, 255, 255, 0.5);
     box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
     align-content: center;
@@ -1303,12 +1304,25 @@ input #file{
 }
 
 .col-sm-12 {
-  display: flex;
-  justify-content: center;
+  display: grid;
   padding: 0;
+  justify-items: center;
 }
 
 .col-md-5 {
   display: none;
 }
 
+.form-control{
+  display: none;
+}
+
+#tabela_graficos1_filter{
+  display: none;
+}
+#tabela_graficos2_filter{
+  display: none;
+}
+#tabela_graficos3_filter{
+  display: none;
+}

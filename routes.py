@@ -101,7 +101,7 @@ def mtbf_maquina(query_mtbf):
     df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
     df_timeline['mes'] = df_timeline['dataabertura'].dt.month
 
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month - 1 
     df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     df_timeline = df_timeline.dropna()
@@ -161,7 +161,7 @@ def mtbf_setor(query_mtbf):
     df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
     df_timeline['mes'] = df_timeline['dataabertura'].dt.month
 
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month - 1 
     df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     df_timeline = df_timeline.dropna()
@@ -210,7 +210,7 @@ def mttr_maquina(query_mttr):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month - 1
     
     df_timeline = pd.read_sql_query(query_mttr, conn)
 
@@ -308,7 +308,7 @@ def mttr_setor(query_mttr):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month -1 
     
     df_timeline = pd.read_sql_query(query_mttr, conn)
 
@@ -475,7 +475,7 @@ def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month - 1
     
     df_timeline = pd.read_sql_query(query_disponibilidade, conn)
 
@@ -569,7 +569,7 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month - 1
     
     df_timeline = pd.read_sql_query(query_disponibilidade, conn)
 
@@ -652,7 +652,7 @@ def tempo_fechamento_os(query_mttr):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month - 1
     
     df_timeline = pd.read_sql_query(query_mttr, conn)
 
@@ -710,7 +710,7 @@ def tempo_fechamento_os(query_mttr):
 
 def cards():
     
-    mes_hoje = datetime.today().month
+    mes_hoje = datetime.today().month - 1
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1594,8 +1594,8 @@ def grafico(): # Dashboard
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
-        context_mtbf_maquina = mtbf_maquina(query)
-        context_mtbf_setor = mtbf_setor(query)
+        context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query)
+        context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query)
 
         """ Finalizando MTTR por máquina e setor"""
 
@@ -1617,8 +1617,8 @@ def grafico(): # Dashboard
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
-        context_mttr_maquina = mttr_maquina(query)
-        context_mttr_setor = mttr_setor(query)
+        context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query)
+        context_mttr_setor,lista_mttr_setor = mttr_setor(query)
         context_horas_por_setor = tempo_fechamento_os(query)
 
         """ Finalizando MTTR por máquina e setor"""
@@ -1638,14 +1638,16 @@ def grafico(): # Dashboard
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
-        context_disponiblidade_maquina = calculo_indicadores_disponibilidade_maquinas(query)
-        context_disponiblidade_setor = calculo_indicadores_disponibilidade_setor(query)
+        context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query)
+        context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query)
 
 
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,
                                setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context_mtbf_maquina,
                                 **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina,
-                                **context_disponiblidade_setor, **context_horas_por_setor, area_manutencao=area_manutencao)
+                                **context_disponiblidade_setor, **context_horas_por_setor, area_manutencao=area_manutencao,
+                                lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_disponibilidade_setor=lista_disponibilidade_setor,
+                                lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina)
     
     lista_qt = cards()
 
@@ -1706,7 +1708,8 @@ def grafico(): # Dashboard
                             **context_mtbf_maquina, **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor,
                             **context_disponiblidade_maquina, **context_disponiblidade_setor, **context_horas_por_setor,
                             lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,setor_selecionado='', 
-                            lista_disponibilidade_setor=lista_disponibilidade_setor,lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina,maquina_selecionado='', area_manutencao='')
+                            lista_disponibilidade_setor=lista_disponibilidade_setor,lista_disponibilidade_maquina=lista_disponibilidade_maquina,
+                            lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina,maquina_selecionado='', area_manutencao='')
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
