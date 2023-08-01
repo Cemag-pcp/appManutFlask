@@ -718,17 +718,15 @@ def horas_trabalhadas_cc(query_mttr):
 
     df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='setor')
 
-    df_combinado['diferenca'] = df_combinado['diferenca'] / 60
-    df_combinado['percentual'] = df_combinado['diferenca'] / df_combinado['diferenca'].sum()
-
-    df_horas_trabalhadas_cc = df_combinado[['setor','qtd_manutencao','diferenca']].values.tolist()
+    df_combinado['diferenca'] = (df_combinado['diferenca'] / 60).round(2)
+    df_combinado['percentual'] = (df_combinado['diferenca'] / df_combinado['diferenca'].sum()).round(2)
 
     lista_horas_trabalhadas = df_combinado.values.tolist()
     
     if len(df_combinado)> 0:
 
-        grafico1_maquina = df_horas_trabalhadas_cc['setor'].tolist() # eixo x
-        grafico2_diferenca = df_horas_trabalhadas_cc['diferenca'].tolist() # eixo y grafico 2
+        grafico1_maquina = df_combinado['setor'].tolist() # eixo x
+        grafico2_diferenca = df_combinado['diferenca'].tolist() # eixo y grafico 2
 
         sorted_tuples = sorted(zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
 

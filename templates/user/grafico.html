@@ -311,19 +311,15 @@
                     <table class="table" id="tabela_graficos7">
                         <thead>
                             <tr>
-                                <td>Setor</td>
-                                <td>MTBF</td>
-                                <td>MTTR</td>
-                                <td>Disponibilidade</td>
+                                <td>Tipo de manutenção</td>
+                                <td>Horas</td>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for disponibilidade_setor in lista_disponibilidade_setor %}
+                            {% for hora_tipo in lista_horas_trabalhadas_tipo %}
                             <tr>
-                                <td>{{disponibilidade_setor[0]}}</td>
-                                <td>{{disponibilidade_setor[1]}}</td>
-                                <td>{{disponibilidade_setor[2]}}</td>
-                                <td>{{disponibilidade_setor[3]}}</td>
+                                <td>{{hora_tipo [0]}}</td>
+                                <td>{{hora_tipo [1]}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -343,19 +339,15 @@
                     <table class="table" id="tabela_graficos8">
                         <thead>
                             <tr>
-                                <td>Setor</td>
-                                <td>MTBF</td>
-                                <td>MTTR</td>
-                                <td>Disponibilidade</td>
+                                <td>Área de manutenção</td>
+                                <td>Horas</td>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for disponibilidade_setor in lista_disponibilidade_setor %}
+                            {% for hora_area in lista_horas_trabalhadas_area %}
                             <tr>
-                                <td>{{disponibilidade_setor[0]}}</td>
-                                <td>{{disponibilidade_setor[1]}}</td>
-                                <td>{{disponibilidade_setor[2]}}</td>
-                                <td>{{disponibilidade_setor[3]}}</td>
+                                <td>{{hora_area[0]}}</td>
+                                <td>{{hora_area[1]}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -364,6 +356,70 @@
             </div>
         </div>
     </div> 
+    
+    <div class="graphBox2">
+        <div class="pie-chart">
+            <canvas id="grafico9"></canvas>
+        </div>
+        <div class="details">
+            <div class="recentOrders">
+                <div class="cardHeader">
+                    <h3>Disponibilidade Setor</h3>
+                </div>
+                <table class="table" id="tabela_graficos8">
+                    <thead>
+                        <tr>
+                            <td>Área de manutenção</td>
+                            <td>OS</td>
+                            <td>Horas</td>
+                            <td>Percentual</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for horas_cc in lista_horas_trabalhadas %}
+                        <tr>
+                            <td>{{horas_cc[0]}}</td>
+                            <td>{{horas_cc[1]}}</td>
+                            <td>{{horas_cc[2]}}</td>
+                            <td>{{horas_cc[3]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="pie-chart">
+            <canvas id="grafico9"></canvas>
+        </div>
+        <div class="details">
+            <div class="recentOrders">
+                <div class="cardHeader">
+                    <h3>Disponibilidade Setor</h3>
+                </div>
+                <table class="table" id="tabela_graficos8">
+                    <thead>
+                        <tr>
+                            <td>Área de manutenção</td>
+                            <td>OS</td>
+                            <td>Horas</td>
+                            <td>Percentual</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for horas_cc in lista_horas_trabalhadas %}
+                        <tr>
+                            <td>{{horas_cc[0]}}</td>
+                            <td>{{horas_cc[1]}}</td>
+                            <td>{{horas_cc[2]}}</td>
+                            <td>{{horas_cc[3]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>   
+     
 <script>
     // Gráfico MTBF por máquina
     // function setChartSize() {
@@ -887,8 +943,8 @@
         plugins: [ChartDataLabels]
     });
     
-    var eixo_y = {{ dados_disponibilidade_setor | safe }};
-    var eixo_x = {{ labels_disponibilidade_setor | safe }};
+    var eixo_y = {{ dados_horas_trabalhadas_tipo | safe }};
+    var eixo_x = {{ labels_horas_trabalhadas_tipo | safe }};
     var ctx = document.getElementById('grafico7').getContext('2d');
 
     var grafico = new Chart(ctx, {
@@ -942,9 +998,63 @@
     });
     
 
-    var eixo_y = {{ dados_disponibilidade_setor | safe }};
-    var eixo_x = {{ labels_disponibilidade_setor | safe }};
+    var eixo_y = {{ dados_horas_trabalhadas_area | safe }};
+    var eixo_x = {{ labels_horas_trabalhadas_area | safe }};
     var ctx = document.getElementById('grafico8').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'pie', // Alterando o tipo de gráfico para pizza
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                label: 'Disponibilidade',
+                data: eixo_y,
+                backgroundColor: [
+                '#1155cc',
+                'rgba(255, 99, 132, 1)',
+                '#b7b7b7',
+                '#0b5394',
+                '#f1c232',
+                '#f1894d',
+                '#00ffff',
+                '#ff9900',
+                'rgba(75, 192, 192, 1)',
+                '#ffff00',
+                '#6aa84f',
+                '#00ff00'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                datalabels: {
+                    color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 10, // Define o tamanho da fonte dos rótulos
+                        weight: 'bold' // Define o tamanho da fonte dos rótulos
+                    },
+                    formatter: function(value, context) {
+                        return value + '%'; // Adiciona o símbolo "%" ao lado do número
+                    }
+                },
+                title: {
+                display: true,
+                text: 'Disponibilidade por Setor', // Define o texto do título do gráfico
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                }
+            },
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+
+    var eixo_y = {{ dados_horas_trabalhadas | safe }};
+    var eixo_x = {{ labels_horas_trabalhadas | safe }};
+    var ctx = document.getElementById('grafico9').getContext('2d');
 
     var grafico = new Chart(ctx, {
         type: 'pie', // Alterando o tipo de gráfico para pizza
@@ -1003,5 +1113,5 @@
       $('.select2').select2();
     });
 </script>
-  
+
 {% endblock %}
