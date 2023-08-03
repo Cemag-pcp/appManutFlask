@@ -20,6 +20,8 @@ from openpyxl import load_workbook
 # import convertapi
 from werkzeug.utils import secure_filename
 import os
+import calendar
+import locale
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -39,22 +41,66 @@ DB_PASS = "15512332"
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
-def dias_uteis():
-    
-    # Obter a data atual
-    data_atual = pd.Timestamp.now()
-    
-    # Obter o primeiro dia do mês atual
-    primeiro_dia_mes = data_atual - pd.offsets.MonthBegin()
+def obter_nome_mes(numero_mes):
 
-    # Obter o último dia útil do mês atual
-    ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+    if not numero_mes:
+        numero_mes = ''
+        return ''
+    else:
+        locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')  # Pode ser necessário ajustar o locale conforme o sistema operacional
 
-    # Obter a sequência de datas úteis no mês atual
-    datas_uteis = pd.bdate_range(primeiro_dia_mes, data_atual)
+        # Obter o nome do mês em português
+        return calendar.month_name[numero_mes]
 
-    # Contar o número de dias úteis
-    qtd_dias_uteis = len(datas_uteis)
+def dias_uteis(mes):
+
+    # Verificar se o mês é válido (entre 1 e 12)
+    if not mes:
+        data_atual = pd.Timestamp.now()
+        mes = data_atual.month  # Mês atual
+        qtd_dias_uteis = 0
+
+        for m in range(7, mes + 1):
+            primeiro_dia_mes = pd.Timestamp(data_atual.year, m, 1)
+
+            if m == mes:
+                # Se for o mês atual, use o dia atual como o último dia útil
+                ultimo_dia_util_mes = data_atual
+            else:
+                # Se não for o mês atual, use o último dia útil do mês
+                ultimo_dia_util_mes = primeiro_dia_mes + pd.offsets.BMonthEnd()
+
+            datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
+            qtd_dias_uteis += len(datas_uteis)
+
+    elif mes == int(pd.Timestamp.now().month):
+        # Obter a data atual
+        data_atual = pd.Timestamp.now()
+        
+        # Obter o primeiro dia do mês atual
+        primeiro_dia_mes = data_atual - pd.offsets.MonthBegin()
+
+        # Obter o último dia útil do mês atual
+        ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+
+        # Obter a sequência de datas úteis no mês atual
+        datas_uteis = pd.bdate_range(primeiro_dia_mes, data_atual)
+
+        # Contar o número de dias úteis
+        qtd_dias_uteis = len(datas_uteis)
+
+    else:
+        data_atual = pd.Timestamp.now()
+        primeiro_dia_mes = pd.Timestamp(data_atual.year, mes, 1)
+
+        # Obter o último dia útil do mês especificado
+        ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+
+        # Obter a sequência de datas úteis no mês especificado
+        datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
+
+        # Contar o número de dias úteis
+        qtd_dias_uteis = len(datas_uteis)
 
     return qtd_dias_uteis
 
@@ -94,7 +140,7 @@ def tempo_os():
 
     return df_agrupado
 
-def mtbf_maquina(query_mtbf):
+def mtbf_maquina(query_mtbf, mes):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
@@ -122,14 +168,13 @@ def mtbf_maquina(query_mtbf):
     df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='maquina')
 
-    qtd_dias_uteis = dias_uteis()
+    qtd_dias_uteis = dias_uteis(mes)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
     
     df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
     
     df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
-
 
     if len(df_timeline)> 0:
 
@@ -154,7 +199,7 @@ def mtbf_maquina(query_mtbf):
 
     return context_mtbf_maquina,df_timeline_copia
 
-def mtbf_setor(query_mtbf):
+def mtbf_setor(query_mtbf, mes):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
@@ -179,7 +224,7 @@ def mtbf_setor(query_mtbf):
     df_timeline['qtd_manutencao'] = df_timeline['setor'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='setor')
 
-    qtd_dias_uteis = dias_uteis()
+    qtd_dias_uteis = dias_uteis(mes)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
     
@@ -210,7 +255,7 @@ def mtbf_setor(query_mtbf):
 
     return context_mtbf_setor,df_timeline_mtbf_setor
 
-def mttr_maquina(query_mttr):
+def mttr_maquina(query_mttr, mes):
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
@@ -272,7 +317,7 @@ def mttr_maquina(query_mttr):
     df_combinado = df_combinado.merge(df_maquinas, on='maquina')
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
-    qtd_dias_uteis = dias_uteis()
+    qtd_dias_uteis = dias_uteis(mes)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
     
@@ -297,18 +342,18 @@ def mttr_maquina(query_mttr):
         grafico1_maquina = list(grafico1_maquina)
         grafico2_mttr = list(grafico2_mttr)
 
-        context_mtbf_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr}
+        context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr}
         
     else:
 
         grafico1_maquina = []
         grafico2_mttr = []
 
-        context_mtbf_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr} 
+        context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr} 
 
-    return context_mtbf_maquina,df_combinado_mttr
+    return context_mttr_maquina,df_combinado_mttr
 
-def mttr_setor(query_mttr):
+def mttr_setor(query_mttr, mes):
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
@@ -355,7 +400,7 @@ def mttr_setor(query_mttr):
 
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
-    qtd_dias_uteis = dias_uteis()
+    qtd_dias_uteis = dias_uteis(mes)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
@@ -378,18 +423,18 @@ def mttr_setor(query_mttr):
         grafico1_maquina = list(grafico1_maquina)
         grafico2_mttr = list(grafico2_mttr)
 
-        context_mtbf_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr}
+        context_mttr_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr}
         
     else:
 
         grafico1_maquina = []
         grafico2_mttr = []
 
-        context_mtbf_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr} 
+        context_mttr_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr} 
 
-    return context_mtbf_setor,df_combinado_mttr_setor
+    return context_mttr_setor,df_combinado_mttr_setor
 
-def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
+def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade, mes):
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
@@ -447,7 +492,7 @@ def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
     df_combinado = df_combinado.merge(df_maquinas, on='maquina')
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
-    qtd_dias_uteis = dias_uteis()
+    qtd_dias_uteis = dias_uteis(mes)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
     
@@ -483,7 +528,7 @@ def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
 
     return context_disponibilidade,df_combinado_disponibilidade
 
-def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
+def calculo_indicadores_disponibilidade_setor(query_disponibilidade, mes):
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
@@ -531,7 +576,7 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
-    qtd_dias_uteis = dias_uteis()
+    qtd_dias_uteis = dias_uteis(mes)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 7
     
@@ -566,30 +611,25 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
     return context_disponibilidade_setor,df_disponibilidade_setor
 
-def cards():
+def cards(query):
     
-    # mes_hoje = datetime.today().month - 1
-
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur = conn.cursor()
 
-    query = "SELECT * FROM tb_ordens WHERE ordem_excluida IS NULL OR ordem_excluida = FALSE"
+    cur.execute(query)
+    results = cur.fetchall()
 
-    df_cards = pd.read_sql_query(query, conn)
+    # Crie um dicionário para armazenar os resultados
+    status_dict = {}
+    for row in results:
+        status, qt_os = row[0], row[1]
+        status_dict[status] = qt_os
 
-    df_cards['ultima_atualizacao'] = pd.to_datetime(df_cards['ultima_atualizacao'])
-    df_cards['mes'] = df_cards['ultima_atualizacao'].dt.month
-    # df_cards = df_cards[df_cards['mes'] == mes_hoje]
-    
-    df_cards = df_cards.drop_duplicates(subset='id_ordem', keep='last')
-    df_cards['status'] = df_cards['status'].apply(lambda x: x.split("  ")[0])
-
-    espera = df_cards[df_cards['status'] == 'Em espera'].shape[0]
-    material = df_cards[df_cards['status'] == 'Aguardando material'].shape[0]
-    finalizado = df_cards[df_cards['status'] == 'Finalizada'].shape[0]
-    execucao = df_cards[df_cards['status'] == 'Em execução'].shape[0]
-
-    lista_qt = [espera,material,finalizado,execucao]
+    # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
+    lista_qt = [status_dict.get('Em espera', 0),
+                status_dict.get('Aguardando material', 0),
+                status_dict.get('Finalizada', 0),
+                status_dict.get('Em execução', 0)]
 
     return lista_qt
 
@@ -613,9 +653,6 @@ def horas_trabalhadas_cc(query_mttr):
     df_timeline = df_timeline.dropna()
 
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
-    df_timeline['mes'] = df_timeline['datafim'].dt.month
-
-    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
@@ -754,6 +791,618 @@ def horas_trabalhadas_area(query):
 
 
     return context_horas_trabalhadas_area, lista_horas_trabalhadas_area
+
+def funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    # query_mtbf
+    # mtbf_maquina
+    # Obtém os dados da tabela
+    
+    df_timeline = pd.read_sql_query(query_mtbf, conn)
+
+    df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
+
+    df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
+    df_timeline['mes'] = df_timeline['dataabertura'].dt.month
+
+    # mes_hoje = datetime.today().month - 1 
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    df_timeline = df_timeline.dropna()
+            
+    df_timeline['maquina'] = df_timeline['maquina']
+    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
+    
+    df_timeline['maquina'].value_counts()
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_timeline['maquina'].value_counts()
+    df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
+    df_timeline = df_timeline.drop_duplicates(subset='maquina')
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
+    
+    df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
+    
+    df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+
+    if len(df_timeline)> 0:
+
+        grafico1_maquina = df_timeline['maquina'].tolist() # eixo x
+        grafico1_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico1_mtbf = list(grafico1_mtbf)
+
+        context_mtbf_maquina = {'labels_mtbf_maquina': grafico1_maquina, 'dados_mtbf_maquina': grafico1_mtbf}        
+    else:
+
+        grafico1_maquina = []
+        grafico1_mtbf = []
+
+        context_mtbf_maquina = {'labels_mtbf_maquina': grafico1_maquina, 'dados_mtbf_maquina': grafico1_mtbf}
+
+    # query_mtbf 
+    # mtbf_setor
+
+    df_timeline = pd.read_sql_query(query_mtbf, conn)
+
+    df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
+
+    df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
+    df_timeline['mes'] = df_timeline['dataabertura'].dt.month
+
+    # mes_hoje = datetime.today().month - 1 
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    df_timeline = df_timeline.dropna()
+    
+    df_timeline['setor'].value_counts()
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_timeline['setor'].value_counts()
+    df_timeline['qtd_manutencao'] = df_timeline['setor'].map(contagem)
+    df_timeline = df_timeline.drop_duplicates(subset='setor')
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
+    
+    df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
+
+    df_timeline_mtbf_setor = df_timeline[['maquina','setor','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+
+    if len(df_timeline)> 0:
+
+        grafico1_maquina = df_timeline['setor'].tolist() # eixo x
+        grafico1_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico1_mtbf = list(grafico1_mtbf)
+
+        context_mtbf_setor = {'labels_mtbf_setor': grafico1_maquina, 'dados_mtbf_setor': grafico1_mtbf}        
+    else:
+
+        grafico1_maquina = []
+        grafico1_mtbf = []
+
+        context_mtbf_setor = {'labels_mtbf_setor': grafico1_maquina, 'dados_mtbf_setor': grafico1_mtbf}
+
+    # query_mttr
+    # mttr_maquina
+    
+    df_timeline = pd.read_sql_query(query_mttr, conn)
+
+    df_timeline = df_timeline.sort_values(by='n_ordem')
+
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
+
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    # df_timeline = df_timeline[['datafim','diferenca']]
+    
+    df_timeline['maquina'] = df_timeline['maquina']
+    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
+    
+    df_agrupado_tempo = df_timeline.groupby(['maquina'])['diferenca'].sum().reset_index()
+    df_agrupado_tempo['maquina'] = df_agrupado_tempo['maquina'].str.split(' - ').str[0]
+
+    df_agrupado_qtd = df_timeline[['maquina']]
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_agrupado_qtd['maquina'].value_counts()
+    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['maquina'].map(contagem)
+    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+
+    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='maquina')
+
+    s = ("""
+    SELECT * FROM tb_maquinas
+    """)
+
+    df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
+    df_maquinas = df_maquinas[['codigo']]
+    df_maquinas = df_maquinas.rename(columns={'codigo':'maquina'})
+
+    df_combinado = df_combinado.merge(df_maquinas, on='maquina')
+    df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
+    
+    df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
+
+    df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
+
+    df_combinado['MTTR'] = df_combinado['MTTR'].round(2)
+
+    df_combinado_mttr = df_combinado[['maquina','qtd_manutencao','diferenca','MTTR']].values.tolist()
+
+    if len(df_combinado)> 0:
+
+        grafico1_maquina = df_combinado['maquina'].tolist() # eixo x
+        grafico2_mttr = df_combinado['MTTR'].tolist() # eixo y grafico 2
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico2_mttr), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico2_mttr = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico2_mttr = list(grafico2_mttr)
+
+        context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr}
+        
+    else:
+
+        grafico1_maquina = []
+        grafico2_mttr = []
+
+        context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr} 
+
+    # query_mttr
+    # horas_trabalhadas_cc
+
+    df_timeline = pd.read_sql_query(query_mttr, conn)
+
+    df_timeline = df_timeline.sort_values(by='n_ordem')
+
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
+
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    df_agrupado_tempo = df_timeline.groupby(['setor'])['diferenca'].sum().reset_index()
+    
+    df_agrupado_qtd = df_timeline[['setor']]
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_agrupado_qtd['setor'].value_counts()
+    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
+    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+
+    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='setor')
+
+    df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
+
+    df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
+    
+    df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
+
+    df_combinado_mttr_setor = df_combinado[['setor','qtd_manutencao','diferenca','MTTR']].values.tolist()
+
+    if len(df_combinado)> 0:
+
+        grafico1_maquina = df_combinado['setor'].tolist() # eixo x
+        grafico2_mttr = df_combinado['MTTR'].tolist() # eixo y grafico 2
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico2_mttr), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico2_mttr = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico2_mttr = list(grafico2_mttr)
+
+        context_mttr_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr}
+        
+    else:
+
+        grafico1_maquina = []
+        grafico2_mttr = []
+
+        context_mttr_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr} 
+
+    # query_mttr
+    # calculo_indicadores_disponibilidade_maquinas
+
+    df_timeline = pd.read_sql_query(query_mttr, conn)
+
+    df_timeline = df_timeline.sort_values(by='n_ordem')
+
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    df_agrupado_tempo = df_timeline.groupby(['setor'])['diferenca'].sum().reset_index()
+    
+    df_agrupado_qtd = df_timeline[['setor']]
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_agrupado_qtd['setor'].value_counts()
+    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
+    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+
+    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='setor')
+
+    df_combinado['diferenca'] = (df_combinado['diferenca'] / 60).round(2)
+    df_combinado['percentual'] = (df_combinado['diferenca'] / df_combinado['diferenca'].sum()).round(2)
+
+    df_combinado = df_combinado.dropna()
+
+    lista_horas_trabalhadas = df_combinado.values.tolist()
+    
+    if len(df_combinado)> 0:
+
+        grafico1_maquina = df_combinado['setor'].tolist() # eixo x
+        grafico2_diferenca = df_combinado['diferenca'].tolist() # eixo y grafico 2
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico2_diferenca = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico2_diferenca = list(grafico2_diferenca)
+
+        context_horas_trabalhadas = {'labels_horas_trabalhadas':grafico1_maquina, 'dados_horas_trabalhadas':grafico2_diferenca}
+        
+    else:
+
+        grafico1_maquina = []
+        grafico2_diferenca = []
+
+        context_horas_trabalhadas = {'labels_horas_trabalhadas':grafico1_maquina, 'dados_horas_trabalhadas':grafico2_diferenca} 
+
+    # query_disponibilidade
+    # calculo_indicadores_disponibilidade_maquinas
+    
+    df_timeline = pd.read_sql_query(query_disponibilidade, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
+
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    # df_timeline = df_timeline[['datafim','diferenca']]
+    
+    df_timeline['maquina'] = df_timeline['maquina']
+    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
+    
+    df_agrupado_tempo = df_timeline.groupby(['maquina'])['diferenca'].sum().reset_index()
+    df_agrupado_tempo['maquina'] = df_agrupado_tempo['maquina'].str.split(' - ').str[0]
+
+    df_agrupado_qtd = df_timeline[['maquina']]
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_agrupado_qtd['maquina'].value_counts()
+    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['maquina'].map(contagem)
+    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+
+    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='maquina')
+
+    s = ("""
+    SELECT * FROM tb_maquinas
+    """)
+
+    df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
+    df_maquinas = df_maquinas[['codigo']]
+    df_maquinas = df_maquinas.rename(columns={'codigo':'maquina'})
+
+    df_combinado = df_combinado.merge(df_maquinas, on='maquina')
+    df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
+    
+    df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
+    df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
+
+    df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+
+    df_combinado_disponibilidade = df_combinado[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
+
+    if len(df_combinado)> 0:
+
+        labels = df_combinado['maquina'].tolist() # eixo x
+        dados_disponibilidade = df_combinado['disponibilidade'].tolist() # eixo y gráfico 1
+
+        sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        labels, dados_disponibilidade = zip(*sorted_tuples)
+
+        labels = list(labels)
+        dados_disponibilidade = list(dados_disponibilidade)
+
+        context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}        
+    
+    else:
+
+        labels = []
+        dados_disponibilidade = []
+
+        context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}        
+
+    # query_mttr
+    # calculo_indicadores_disponibilidade_setor
+
+    df_timeline = pd.read_sql_query(query_mttr, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    df_timeline = df_timeline.dropna()
+
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+    
+    # df_timeline = df_timeline[['datafim','diferenca']]
+    
+    df_timeline['setor'] = df_timeline['setor']
+    df_timeline['setor'] = df_timeline['setor'].str.split(' - ').str[0]
+    
+    df_agrupado_tempo = df_timeline.groupby(['setor'])['diferenca'].sum().reset_index()
+    df_agrupado_tempo['setor'] = df_agrupado_tempo['setor'].str.split(' - ').str[0]
+
+    df_agrupado_qtd = df_timeline[['setor']]
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_agrupado_qtd['setor'].value_counts()
+    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
+    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+
+    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo,on='setor')
+
+    df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_combinado['carga_trabalhada'] = qtd_dias_uteis * 7
+    
+    df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
+    df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
+
+    df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+
+    df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].values.tolist()
+
+    if len(df_combinado)> 0:
+
+        labels = df_combinado['setor'].tolist() # eixo x
+        dados_disponibilidade = df_combinado['disponibilidade'].tolist() # eixo y gráfico 1
+
+        sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        labels, dados_disponibilidade = zip(*sorted_tuples)
+
+        labels = list(labels)
+        dados_disponibilidade = list(dados_disponibilidade)
+        
+        context_disponibilidade_setor = {'labels_disponibilidade_setor': labels, 'dados_disponibilidade_setor': dados_disponibilidade}
+
+    else:
+
+        labels = []
+        dados_disponibilidade = []
+
+        context_disponibilidade_setor = {'labels_disponibilidade_setor': labels, 'dados_disponibilidade_setor': dados_disponibilidade}
+
+    # query_horas_trabalhada_tipo
+    # horas_trabalhadas_tipo
+    
+    df_horas_tipo = pd.read_sql_query(query_horas_trabalhada_tipo, conn)
+    # Converter a coluna 'diferenca' para o tipo 'timedelta'
+    df_horas_tipo['diferenca'] = pd.to_timedelta(df_horas_tipo['diferenca'])
+
+    # Extrair o total de horas a partir do timedelta e armazenar em uma nova coluna 'diferenca_horas'
+    df_horas_tipo['diferenca_horas'] = (df_horas_tipo['diferenca'] / pd.Timedelta(hours=1)).round(2)
+
+    # Descartar a coluna 'diferenca' original, se necessário
+    df_horas_tipo.drop(columns=['diferenca'], inplace=True)    
+
+    df_horas_tipo = df_horas_tipo.dropna()
+
+    lista_horas_trabalhadas_tipo = df_horas_tipo.values.tolist()
+
+    if len(df_horas_tipo)> 0:
+
+        grafico1_maquina = df_horas_tipo['tipo_manutencao'].tolist() # eixo x
+        grafico2_diferenca = df_horas_tipo['diferenca_horas'].tolist() # eixo y grafico 2
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico2_diferenca = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico2_diferenca = list(grafico2_diferenca)
+
+        context_horas_trabalhadas_tipo = {'labels_horas_trabalhadas_tipo':grafico1_maquina, 'dados_horas_trabalhadas_tipo':grafico2_diferenca}
+        
+    else:
+
+        grafico1_maquina = []
+        grafico2_diferenca = []
+
+        context_horas_trabalhadas_tipo = {'labels_horas_trabalhadas_tipo':grafico1_maquina, 'dados_horas_trabalhadas_tipo':grafico2_diferenca} 
+
+    # query_horas_trabalhada_area
+
+    df_horas_area = pd.read_sql_query(query_horas_trabalhada_area, conn)
+    # Converter a coluna 'diferenca' para o tipo 'timedelta'
+    df_horas_area['diferenca'] = pd.to_timedelta(df_horas_area['diferenca'])
+
+    # Extrair o total de horas a partir do timedelta e armazenar em uma nova coluna 'diferenca_horas'
+    df_horas_area['diferenca_horas'] = (df_horas_area['diferenca'] / pd.Timedelta(hours=1)).round(2)
+
+    # Descartar a coluna 'diferenca' original, se necessário
+    df_horas_area.drop(columns=['diferenca'], inplace=True)    
+    
+    df_horas_area = df_horas_area.dropna()
+
+    lista_horas_trabalhadas_area = df_horas_area.values.tolist()
+
+    if len(df_horas_area)> 0:
+
+        grafico1_maquina = df_horas_area['area_manutencao'].tolist() # eixo x
+        grafico2_diferenca = df_horas_area['diferenca_horas'].tolist() # eixo y grafico 2
+
+        sorted_tuples = sorted(zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico2_diferenca = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico2_diferenca = list(grafico2_diferenca)
+
+        context_horas_trabalhadas_area = {'labels_horas_trabalhadas_area':grafico1_maquina, 'dados_horas_trabalhadas_area':grafico2_diferenca}
+        
+    else:
+
+        grafico1_maquina = []
+        grafico2_diferenca = []
+
+        context_horas_trabalhadas_area = {'labels_horas_trabalhadas_area':grafico1_maquina, 'dados_horas_trabalhadas_area':grafico2_diferenca} 
+
+    # Organize os resultados em um dicionário
+    resultado = {
+        'context_mtbf_maquina': context_mtbf_maquina,
+        'df_timeline_copia': df_timeline_copia,
+        
+        'context_mtbf_setor': context_mtbf_setor,
+        'df_timeline_mtbf_setor': df_timeline_mtbf_setor,
+        
+        'context_mttr_maquina': context_mttr_maquina,
+        'df_combinado_mttr': df_combinado_mttr,
+        
+        'context_mttr_setor': context_mttr_setor,
+        'df_combinado_mttr_setor': df_combinado_mttr_setor,
+        
+        'context_horas_trabalhadas': context_horas_trabalhadas,
+        'lista_horas_trabalhadas': lista_horas_trabalhadas,
+        
+        'context_disponibilidade': context_disponibilidade,
+        'df_combinado_disponibilidade': df_combinado_disponibilidade,
+        
+        'context_disponibilidade_setor': context_disponibilidade_setor,
+        'df_disponibilidade_setor': df_disponibilidade_setor,
+        
+        'context_horas_trabalhadas_tipo': context_horas_trabalhadas_tipo,
+        'lista_horas_trabalhadas_tipo': lista_horas_trabalhadas_tipo,
+        
+        'context_horas_trabalhadas_area': context_horas_trabalhadas_area,
+        'lista_horas_trabalhadas_area': lista_horas_trabalhadas_area,
+    }
+
+    return resultado
 
 # def calculo_media_os(query):
 
@@ -957,6 +1606,9 @@ def add_student(): # Criar ordem de serviço
         cod_equipamento = request.form.get('codigo_equip')
 
         print(equipamento_em_falha,setor_maquina_solda,qual_ferramenta)
+
+        if equipamento_em_falha != 'Maquina de solda':
+            setor_maquina_solda  = ''
 
         n_ordem = 0
         status = 'Em espera'
@@ -1584,6 +2236,11 @@ def grafico(): # Dashboard
         area_manutencao = request.form.get('area_manutencao')
         mes = request.form.get('data_filtro')
 
+        print(mes)
+
+        if mes:
+            mes = int(mes)
+
         """ Criando cards """
 
         if not setor_selecionado:
@@ -1592,7 +2249,9 @@ def grafico(): # Dashboard
             maquina_selecionado = ''
         if not area_manutencao:
             area_manutencao = ''
-
+        if not mes:
+            mes = ''
+        
         try:
             maquina_selecionado = maquina_selecionado.split(" - ")[0]
         except:
@@ -1609,7 +2268,7 @@ def grafico(): # Dashboard
         if mes:
             query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
-        query += 'AND ordem_excluida IS NULL OR ordem_excluida = FALSE;'
+        query += ' AND ordem_excluida IS NULL OR ordem_excluida = FALSE;'
         
         # Executa a query
         cur.execute(query)
@@ -1617,16 +2276,21 @@ def grafico(): # Dashboard
     
         # Criando cards
 
-        df_cards = pd.read_sql_query(query, conn)
-        df_cards = df_cards.drop_duplicates(subset='id_ordem', keep='last')
-        df_cards['status'] = df_cards['status'].apply(lambda x: x.split("  ")[0])
+        # Monta a query base
+        query = """
+                SELECT status, COUNT(DISTINCT id_ordem) AS qt_os
+                FROM tb_ordens
+                WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+               """
 
-        espera = df_cards[df_cards['status'] == 'Em espera'].shape[0]
-        material = df_cards[df_cards['status'] == 'Aguardando material'].shape[0]
-        finalizado = df_cards[df_cards['status'] == 'Finalizada'].shape[0]
-        execucao = df_cards[df_cards['status'] == 'Em execução'].shape[0]
+        if mes:
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+        if setor_selecionado:
+            query += f" AND setor = '{setor_selecionado}'"
 
-        lista_qt = [espera,material,finalizado,execucao]
+        query += " GROUP BY status;"
+
+        lista_qt = cards(query)
 
         """ Finalizando cards """
 
@@ -1648,8 +2312,8 @@ def grafico(): # Dashboard
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
-        context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query)
-        context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query)
+        context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query, mes)
+        context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query, mes)
 
         """ Finalizando MTTR por máquina e setor"""
 
@@ -1673,8 +2337,8 @@ def grafico(): # Dashboard
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
-        context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query)
-        context_mttr_setor,lista_mttr_setor = mttr_setor(query)
+        context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query, mes)
+        context_mttr_setor,lista_mttr_setor = mttr_setor(query, mes)
         context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query)
 
         """ Finalizando MTTR por máquina e setor"""
@@ -1696,8 +2360,8 @@ def grafico(): # Dashboard
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
-        context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query)
-        context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query)
+        context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query, mes)
+        context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query, mes)
         
         query = ("""
         SELECT
@@ -1729,22 +2393,30 @@ def grafico(): # Dashboard
         if mes:
             query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
             
-
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY tipo_manutencao;" 
 
         context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query)
 
-        if mes == 7:
-            mes = 'Julho'
+        mes_descrito = obter_nome_mes(mes).title()
 
-        return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,
+        return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,mes_descrito=mes_descrito,
                                setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context_mtbf_maquina,
                                 **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina,**context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
                                 **context_disponiblidade_setor, area_manutencao=area_manutencao,mes=mes,**context_horas_trabalhadas,lista_horas_trabalhadas=lista_horas_trabalhadas,
                                 lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo,lista_horas_trabalhadas_area=lista_horas_trabalhadas_area,lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_disponibilidade_setor=lista_disponibilidade_setor,
                                 lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina)
     
-    lista_qt = cards()
+    mes = None
+
+    # Monta a query base
+    query = """
+            SELECT status, COUNT(DISTINCT id_ordem) AS qt_os
+            FROM tb_ordens
+            WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+            GROUP BY status;
+            """
+
+    lista_qt = cards(query)
 
     query_mtbf = (
     """
@@ -1753,8 +2425,8 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf)
-    context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf)
+    context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf, mes)
+    context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf, mes)
 
     query_mttr = (
     """
@@ -1765,8 +2437,8 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query_mttr)
-    context_mttr_setor,lista_mttr_setor = mttr_setor(query_mttr)
+    context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query_mttr, mes)
+    context_mttr_setor,lista_mttr_setor = mttr_setor(query_mttr, mes)
     context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query_mttr)
     
     query_disponibilidade = ("""
@@ -1777,15 +2449,15 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade)
-    context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade)
+    context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade, mes)
+    context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade, mes)
 
     query_horas_trabalhada_tipo = """
         SELECT
             tipo_manutencao,
             TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
         FROM tb_ordens
-        WHERE EXTRACT(MONTH FROM datainicio) = 7 AND ordem_excluida ISNULL
+        WHERE ordem_excluida ISNULL
         GROUP BY tipo_manutencao;
         """
 
@@ -1796,11 +2468,35 @@ def grafico(): # Dashboard
             area_manutencao,
             TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
         FROM tb_ordens
-        WHERE EXTRACT(MONTH FROM datainicio) = 7 AND ordem_excluida ISNULL
+        WHERE ordem_excluida ISNULL
         GROUP BY area_manutencao;
         """
     
     context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query_horas_trabalhada_area)
+
+    # resultado = funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
+
+    # context_mtbf_maquina = resultado['context_mtbf_maquina']
+    # context_mttr_maquina = resultado['context_mttr_maquina']
+    # context_mttr_setor = resultado['context_mttr_setor']
+    # context_mtbf_setor = resultado['context_mtbf_setor']
+
+    # context_disponiblidade_maquina = resultado['context_disponibilidade']
+    # context_disponiblidade_setor = resultado['context_disponibilidade_setor']
+    
+    # context_horas_trabalhadas = resultado['context_horas_trabalhadas']
+    # context_horas_trabalhadas_tipo = resultado['context_horas_trabalhadas_tipo']
+    # context_horas_trabalhadas_area = resultado['context_horas_trabalhadas_area']
+    
+    # lista_horas_trabalhadas_area = resultado['lista_horas_trabalhadas_area']
+    # lista_horas_trabalhadas_tipo = resultado['lista_horas_trabalhadas_tipo']
+    # lista_mtbf_setor = resultado['df_timeline_mtbf_setor']
+    # lista_mtbf_maquina = resultado['df_timeline_copia']
+    # lista_horas_trabalhadas = resultado['lista_horas_trabalhadas']
+    # lista_disponibilidade_setor = resultado['df_disponibilidade_setor']
+    # lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
+    # lista_mttr_setor = resultado['df_combinado_mttr_setor']
+    # lista_mttr_maquina = resultado['df_combinado_mttr']
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1821,7 +2517,9 @@ def grafico(): # Dashboard
     cur.close()
     conn.close()
 
-    return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens,
+    mes_descrito = obter_nome_mes(mes).title()
+
+    return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens,mes_descrito=mes_descrito,
                             **context_mtbf_maquina, **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor,
                             **context_disponiblidade_maquina, **context_disponiblidade_setor, **context_horas_trabalhadas,**context_horas_trabalhadas_tipo,
                             **context_horas_trabalhadas_area,lista_horas_trabalhadas_area=lista_horas_trabalhadas_area,lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo,

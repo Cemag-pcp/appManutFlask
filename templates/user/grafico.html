@@ -6,22 +6,13 @@
     <label for="filtro_setor">Setor:</label>
     <select class="select2" id="filtro_setor" name="filtro_setor" value="{{ setor }}">
         <option value="">Todos</option>
-        <option value="{{setor_selecionado}}" selected disabled hidden>{{setor_selecionado}}</option>
+        <option value="{{setor_selecionado}}" selected hidden>{{setor_selecionado}}</option>
         {% for setor in setores %}
         <option>{{ setor[0] }}</option>
         {% endfor %}
         <option>Manutenção</option>
     </select>
     
-    <label for="filtro_maquinas">Máquina:</label>
-    <select class="select2"id="filtro_maquinas" name="filtro_maquinas">
-        <option value="">Todos</option>
-        <option value="{{maquina_selecionado}}" selected disabled hidden>{{maquina_selecionado}}</option>
-        {% for maquina in maquinas %}
-        <option>{{maquina[0]}}</option>
-        {% endfor %}
-    </select>
-
     <label for="area_manutencao">Área de Manutenção:</label>
     <select class="select2"id="area_manutencao" name="area_manutencao">
         <option value="">Todos</option>
@@ -34,7 +25,7 @@
     <label for="data_filtro">Mês:</label>
     <select class="select2"id="data_filtro" name="data_filtro">
         <option value="">Todos</option>
-        <option value="{{mes}}" selected disabled hidden>{{mes}}</option>
+        <option value="{{mes}}" selected hidden>{{mes_descrito}}</option>
         <option value="1" disabled>Janeiro</option>
         <option value="2" disabled>Fevereiro</option>
         <option value="3" disabled>Março</option>
