@@ -8,6 +8,9 @@
     overflow-y: auto; /* Adicione uma barra de rolagem vertical caso o conteúdo do modal seja maior do que o tamanho máximo definido */
 }
 
+#imagemModal2 .modal-body {
+    height: 100%;
+}
 /* Estilo para ajustar o tamanho do vídeo */
 #imagemModal video {
     width: 100%; /* O vídeo ocupará toda a largura disponível dentro do modal */

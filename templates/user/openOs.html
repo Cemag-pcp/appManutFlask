@@ -97,7 +97,7 @@
       
       <div class="form-group" id="ferramenta" style="display: none;">
         <label for="ferramenta">Qual é a ferramenta?</label>
-        <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramenta">
+        <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramentas">
           <option value="" selected disabled hidden></option>  
           <option value="Esmerilhadeira">Esmerilhadeira</option>
           <option value="Lixadeira">Lixadeira</option>
@@ -141,11 +141,11 @@
           <span class="file-upload__label">Nenhum Arquivo selecionado</span>
       </div>   
 
-      <div class="file-upload">
+      <div class="file-upload" style="margin-top: 20px;">
         <input class="file-upload__input" type="file" name="video" id="video" accept="video/*">
         <button class="file-upload__button" type="button">Escolha o vídeo</button>
         <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-    </div>
+      </div>
 
       <button id = 'salvar' class="btn btn-block">
         Save 
@@ -155,7 +155,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+<div class="modal fade" id="imagemModal2" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content2">
       <div class="modal-header">
@@ -174,7 +174,7 @@
   </div>
 </div>
 
-<!-- <script>
+<script>
 
   function showImageModalOS() {
           showLoading()
@@ -184,10 +184,10 @@
               var modalBody = '<img src="static/img/maquinas.png" alt="Foto"/>';
               
               // Preencha o conteúdo do modal com a imagem
-              $('#imagemModal .modal-body').html(modalBody);
+              $('#imagemModal2 .modal-body').html(modalBody);
               
               // Exiba o modal
-              $('#imagemModal').modal('show');
+              $('#imagemModal2').modal('show');
               
               // Oculta a tela de carregamento após um pequeno atraso (500 milissegundos)
               setTimeout(function() {
@@ -202,7 +202,7 @@
           });
       }
   
-</script> -->
+</script>
 
 <!-- <script>
   function getFalhas() {
@@ -271,12 +271,18 @@
 <script>
   function getMaquinasPorSetor() {
     var setorSelecionado = document.getElementById("setor").value;
+    var maquinaSelect = document.getElementById('maquina-select');
     var equipamentoEmFalha = document.getElementById("equipamento_em_falha");
     var falhaSelect = document.getElementById("falha");
+    var ferramentas = document.getElementById("ferramentas");
+    var ferramenta = document.getElementById("ferramenta");
+    var codigoequipamento = document.getElementById("codigo_equip");
+    var maquinaSolda = document.getElementById("maquina_de_solda");
+    var maquinaDeSoldaSelect = document.getElementById("solda_maquina");
     
     if (setorSelecionado === "Solda" || setorSelecionado === "Serralheria") {
       equipamentoEmFalha.style.display = "block";
-      
+
       if (setorSelecionado === "Serralheria") {
         var options = falhaSelect.options;
         for (var i = 0; i < options.length; i++) {
@@ -300,6 +306,15 @@
       }
     } else {
       equipamentoEmFalha.style.display = "none";
+      ferramenta.style.display = "none";
+      codigoequipamento.style.display = "none";
+      maquinaSolda.style.display = "none";
+      maquinaSelect.style.display = "block";
+      document.getElementById("maquina_de_solda").style.display = "none";
+      // Redefinir o valor selecionado do select de solda_maquina para vazio
+      maquinaDeSoldaSelect.value = 'None';
+      falhaSelect.value = 'None'
+      ferramentas.value = 'None'
     }
 
     var setorSelect = document.getElementById('setor');

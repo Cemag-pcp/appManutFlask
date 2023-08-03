@@ -591,12 +591,13 @@ body {
 #formulario_abertura{
   top: 50%;
   left: 50%;
-  transform: translate(-50%,20%);
+  transform: translate(-50%,-50%);
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   width: 450px;
   height: auto;
   border-radius: 20px;
+  position: fixed;
 }
 
 @media (max-width: 767px) { /* Tamanho da tela de celular */
@@ -607,6 +608,7 @@ body {
       top: 50%;
       left: 50%;
       transform: translate(-50%,5%);
+      position: relative;
   }
 }
 

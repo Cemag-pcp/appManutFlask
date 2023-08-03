@@ -12,15 +12,6 @@
         {% endfor %}
         <option>Manutenção</option>
     </select>
-    
-    <label for="filtro_maquinas">Máquina:</label>
-    <select class="select2"id="filtro_maquinas" name="filtro_maquinas">
-        <option value="">Todos</option>
-        <option value="{{maquina_selecionado}}" selected disabled hidden>{{maquina_selecionado}}</option>
-        {% for maquina in maquinas %}
-        <option>{{maquina[0]}}</option>
-        {% endfor %}
-    </select>
 
     <label for="area_manutencao">Área de Manutenção:</label>
     <select class="select2"id="area_manutencao" name="area_manutencao">
@@ -55,7 +46,7 @@
 <div class="cardBox">
     <div class='card'>
         <div>
-            <h5 class="card-title">Em andamento</h5> 
+            <h5 class="card-title">Em Execução</h5> 
             <p class="card-text">{{lista_qt[3]}}</p> 
         </div>  
         <div class="iconBx"> 

@@ -956,7 +956,12 @@ def add_student(): # Criar ordem de serviço
         qual_ferramenta = request.form.get('ferramenta')
         cod_equipamento = request.form.get('codigo_equip')
 
-        print(equipamento_em_falha,setor_maquina_solda,qual_ferramenta)
+        print(setor)
+        print(maquina)
+        print(qual_ferramenta)
+        print(equipamento_em_falha)
+        print(setor_maquina_solda)
+        print(cod_equipamento)
 
         n_ordem = 0
         status = 'Em espera'
@@ -999,6 +1004,8 @@ def add_student(): # Criar ordem de serviço
         
         imagens = request.files.getlist('imagens')
 
+        # print(len(imagens))
+
         if len(imagens) > 0:
             for imagem in imagens:
                 if imagem.filename != '':
@@ -1031,6 +1038,8 @@ def add_student(): # Criar ordem de serviço
             print('sem imagem')             
 
         videos = request.files.getlist('video')  # O input de tipo 'file' é chamado 'imagens', mas agora aceita vídeos também
+
+        # print(len(videos))
 
         for video in videos:
             if video.filename != '':

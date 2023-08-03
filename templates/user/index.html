@@ -155,7 +155,7 @@
                                         <!-- <a>
                                             <button type="button" class="btn btn-primary" onclick="showImageModal('{{ row[11] }}')">Exibir Imagem</button>
                                         </a>  -->
-                                        <a id="dropdown_os" class="dropdown-item" style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                        <a id="dropdown_os" class="dropdown-item" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                             <i class="fas fa-image"></i> 
                                         </a>
                                         <a id="dropdown_os" class="dropdown-item" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
@@ -164,8 +164,8 @@
                                         <a id="dropdown_os" class="dropdown-item" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
                                             <i class="fas fa-pencil"></i> 
                                         </a>
-                                        <a id="dropdown_os" class="dropdown-item" style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
-                                            <i class="fas fa-image"></i> 
+                                        <a id="dropdown_os" class="dropdown-item" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                            <i class="fa-solid fa-video"></i>
                                         </a>
                                     </div>
                                 </div>
@@ -193,7 +193,7 @@
     </div>
     
     <!-- Modal Imagem -->
-    <div class="modal fade" data-backdrop="static" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+    <div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -325,7 +325,6 @@
                     var base64Image = imagens[i];
                     modalBody += '<img src="data:image/png;base64,' + base64Image + '" alt="Imagem" /><br><br>';
                 }
-
 
                 // Preencher o conteúdo do modal com as imagens e vídeos
                 $('#imagemModal .modal-body').html(modalBody);
