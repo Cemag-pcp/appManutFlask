@@ -107,8 +107,8 @@ def mtbf_maquina(query_mtbf):
     df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
     df_timeline['mes'] = df_timeline['dataabertura'].dt.month
 
-    mes_hoje = datetime.today().month - 1 
-    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+    # mes_hoje = datetime.today().month - 1 
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     df_timeline = df_timeline.dropna()
             
@@ -167,8 +167,8 @@ def mtbf_setor(query_mtbf):
     df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
     df_timeline['mes'] = df_timeline['dataabertura'].dt.month
 
-    mes_hoje = datetime.today().month - 1 
-    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+    # mes_hoje = datetime.today().month - 1 
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     df_timeline = df_timeline.dropna()
     
@@ -216,7 +216,7 @@ def mttr_maquina(query_mttr):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month - 1
+    # mes_hoje = datetime.today().month - 1
     
     df_timeline = pd.read_sql_query(query_mttr, conn)
 
@@ -232,7 +232,7 @@ def mttr_maquina(query_mttr):
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
     df_timeline['mes'] = df_timeline['datafim'].dt.month
 
-    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
@@ -314,7 +314,7 @@ def mttr_setor(query_mttr):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month -1 
+    # mes_hoje = datetime.today().month -1 
     
     df_timeline = pd.read_sql_query(query_mttr, conn)
 
@@ -330,7 +330,7 @@ def mttr_setor(query_mttr):
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
     df_timeline['mes'] = df_timeline['datafim'].dt.month
 
-    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
@@ -395,7 +395,7 @@ def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month - 1
+    # mes_hoje = datetime.today().month - 1
     
     df_timeline = pd.read_sql_query(query_disponibilidade, conn)
 
@@ -407,7 +407,7 @@ def calculo_indicadores_disponibilidade_maquinas(query_disponibilidade):
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
     df_timeline['mes'] = df_timeline['datafim'].dt.month
 
-    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
@@ -489,7 +489,7 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month - 1
+    # mes_hoje = datetime.today().month - 1
     
     df_timeline = pd.read_sql_query(query_disponibilidade, conn)
 
@@ -500,7 +500,7 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
     df_timeline['mes'] = df_timeline['datafim'].dt.month
-    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
@@ -568,7 +568,7 @@ def calculo_indicadores_disponibilidade_setor(query_disponibilidade):
 
 def cards():
     
-    mes_hoje = datetime.today().month - 1
+    # mes_hoje = datetime.today().month - 1
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -579,7 +579,7 @@ def cards():
 
     df_cards['ultima_atualizacao'] = pd.to_datetime(df_cards['ultima_atualizacao'])
     df_cards['mes'] = df_cards['ultima_atualizacao'].dt.month
-    df_cards = df_cards[df_cards['mes'] == mes_hoje]
+    # df_cards = df_cards[df_cards['mes'] == mes_hoje]
     
     df_cards = df_cards.drop_duplicates(subset='id_ordem', keep='last')
     df_cards['status'] = df_cards['status'].apply(lambda x: x.split("  ")[0])
@@ -599,7 +599,7 @@ def horas_trabalhadas_cc(query_mttr):
 
     # Obtém os dados da tabela
     
-    mes_hoje = datetime.today().month -1 
+    # mes_hoje = datetime.today().month -1 
     
     df_timeline = pd.read_sql_query(query_mttr, conn)
 
@@ -615,7 +615,7 @@ def horas_trabalhadas_cc(query_mttr):
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
     df_timeline['mes'] = df_timeline['datafim'].dt.month
 
-    df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
@@ -640,6 +640,8 @@ def horas_trabalhadas_cc(query_mttr):
 
     df_combinado['diferenca'] = (df_combinado['diferenca'] / 60).round(2)
     df_combinado['percentual'] = (df_combinado['diferenca'] / df_combinado['diferenca'].sum()).round(2)
+
+    df_combinado = df_combinado.dropna()
 
     lista_horas_trabalhadas = df_combinado.values.tolist()
     
@@ -680,6 +682,8 @@ def horas_trabalhadas_tipo(query):
 
     # Descartar a coluna 'diferenca' original, se necessário
     df_horas_tipo.drop(columns=['diferenca'], inplace=True)    
+
+    df_horas_tipo = df_horas_tipo.dropna()
 
     lista_horas_trabalhadas_tipo = df_horas_tipo.values.tolist()
 
@@ -722,6 +726,8 @@ def horas_trabalhadas_area(query):
     # Descartar a coluna 'diferenca' original, se necessário
     df_horas_area.drop(columns=['diferenca'], inplace=True)    
     
+    df_horas_area = df_horas_area.dropna()
+
     lista_horas_trabalhadas_area = df_horas_area.values.tolist()
 
     if len(df_horas_area)> 0:
@@ -1576,6 +1582,7 @@ def grafico(): # Dashboard
         setor_selecionado = request.form.get('filtro_setor')
         maquina_selecionado = request.form.get('filtro_maquinas')
         area_manutencao = request.form.get('area_manutencao')
+        mes = request.form.get('data_filtro')
 
         """ Criando cards """
 
@@ -1585,7 +1592,7 @@ def grafico(): # Dashboard
             maquina_selecionado = ''
         if not area_manutencao:
             area_manutencao = ''
-    
+
         try:
             maquina_selecionado = maquina_selecionado.split(" - ")[0]
         except:
@@ -1599,6 +1606,8 @@ def grafico(): # Dashboard
             query += f" AND setor = '{setor_selecionado}'"
         if area_manutencao:
             query += f" AND area_manutencao = '{area_manutencao}'"
+        if mes:
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
         query += 'AND ordem_excluida IS NULL OR ordem_excluida = FALSE;'
         
@@ -1634,6 +1643,8 @@ def grafico(): # Dashboard
             query += f" AND setor = '{setor_selecionado}'"
         if area_manutencao:
             query += f" AND area_manutencao = '{area_manutencao}'"
+        if mes:
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -1646,7 +1657,7 @@ def grafico(): # Dashboard
 
         query = (
         """
-            SELECT datafim, maquina, n_ordem, setor,
+            SELECT datafim, maquina, n_ordem, setor, 
                 TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
                 TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
             FROM tb_ordens 
@@ -1657,12 +1668,14 @@ def grafico(): # Dashboard
             query += f" AND setor = '{setor_selecionado}'"
         if area_manutencao:
             query += f" AND area_manutencao = '{area_manutencao}'"
+        if mes:
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
         context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query)
         context_mttr_setor,lista_mttr_setor = mttr_setor(query)
-        context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query_mttr)
+        context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query)
 
         """ Finalizando MTTR por máquina e setor"""
 
@@ -1678,18 +1691,57 @@ def grafico(): # Dashboard
             query += f" AND setor = '{setor_selecionado}'"
         if area_manutencao:
             query += f" AND area_manutencao = '{area_manutencao}'"
+        if mes:
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
         query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
         context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query)
         context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query)
+        
+        query = ("""
+        SELECT
+            area_manutencao,
+            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+        FROM tb_ordens
+        WHERE 1=1 
+        """)
 
+        if setor_selecionado:
+            query += f" AND setor = '{setor_selecionado}'"
+        if mes:
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+
+        query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY area_manutencao;" 
+
+        context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query)
+
+        query = ("""
+        SELECT
+            tipo_manutencao,
+            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+        FROM tb_ordens
+        WHERE 1=1 
+        """)
+
+        if setor_selecionado:
+            query += f" AND setor = '{setor_selecionado}'"
+        if mes:
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            
+
+        query += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY tipo_manutencao;" 
+
+        context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query)
+
+        if mes == 7:
+            mes = 'Julho'
 
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,
                                setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context_mtbf_maquina,
-                                **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina,
-                                **context_disponiblidade_setor, area_manutencao=area_manutencao,
-                                lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_disponibilidade_setor=lista_disponibilidade_setor,
+                                **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina,**context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
+                                **context_disponiblidade_setor, area_manutencao=area_manutencao,mes=mes,**context_horas_trabalhadas,lista_horas_trabalhadas=lista_horas_trabalhadas,
+                                lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo,lista_horas_trabalhadas_area=lista_horas_trabalhadas_area,lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_disponibilidade_setor=lista_disponibilidade_setor,
                                 lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina)
     
     lista_qt = cards()

@@ -1054,15 +1054,6 @@ input #file{
   z-index: 0;
 }
 
-.graphBox .box2{
-  display: grid;
-  position: relative;
-  width: 50%;
-  grid-template-columns: 1fr 1fr;
-  padding: 20px;
-  z-index: 0;
-}
-
 .details{
   position: relative;
   width: 100%;
@@ -1149,7 +1140,7 @@ input #file{
 
   .graphBox{
     position: relative;
-    width: 50%;
+    width: 100%;
     padding: 0;
     margin-left: 0;
     margin-bottom: 20px;
@@ -1366,26 +1357,137 @@ input #file{
   display: none;
 }
 
-
-/* Estilos para os gráficos */
-.pie-chart {
-  width: 500px;
-  height: 500px;
+#tabela_graficos9_filter{
+  display: none;
 }
 
-.graphBox2{
+.graphBox .box2{
+    display: grid;
+    position: relative;
+    width: 22%;
+    grid-template-columns: 1fr 1fr 1fr 1fr ;
+    padding: 20px;
+    z-index: 0;
+}
+
+.graphBox .box3{
+  display: grid;
   position: relative;
-  width: 50%;
+  width: 40%;
+  grid-template-columns: 1fr 1fr;
   padding: 20px;
+  z-index: 0;
+}
+
+.details2{
+  position: relative;
+  width: 100%;
   padding: 20px;
-  margin-left: 5%;
-  margin-bottom: 20px;
-  display: flex;
+  display: grid;
   grid-template-columns: 1fr;
   gap: 30px;
-  min-height: 200px;
-  background: #fff;
-  width: 90%;
+  margin-top: 10px;
+}
+
+.details2 .recentOrders2{
+  position: relative;
+  display: flex;
+  background: var(--white);
+  padding: 30px;
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-  border-radius: 20px;
+  border: 1px solid rgb(167, 167, 167,0.2);
+  flex-direction: column;
+  font-size: 13px;
+  min-width: 45vh;
+}
+
+@media(max-width: 1550px){
+  .graphBox .box2{
+    display: grid;
+    position: relative;
+    width: 50%;
+    grid-template-columns: 1fr 1fr;
+    padding: 20px;
+    z-index: 0;
+  }
+
+  .graphBox .box3{
+    display: grid;
+    position: relative;
+    width: 50%;
+    grid-template-columns: 1fr 1fr;
+    padding: 20px;
+    z-index: 0;
+  }
+    
+  .details2{
+    position: relative;
+    width: 100%;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-top: 10px;
+  }
+
+  .details2 .recentOrders2{
+    position: relative;
+    display: flex;
+    background: var(--white);
+    padding: 20px;
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgb(167, 167, 167,0.2);
+    flex-direction: column;
+    font-size: 12px;
+    min-width: 35vh;
+  }
+}
+
+@media(max-width: 600px){
+  .graphBox .box2{
+    display: grid;
+    position: relative;
+    width: 100%;
+    grid-template-columns: 1fr;
+    padding: 20px;
+    z-index: 0;
+  }
+
+  .graphBox .box3{
+    display: grid;
+    position: relative;
+    width: 100%;
+    grid-template-columns: 1fr;
+    padding: 20px;
+    z-index: 0;
+  }
+
+  .graphBox{
+    position: relative;
+    width: 150%;
+    padding: 0;
+    margin-left: 0;
+    margin-bottom: 20px;
+    display: flex;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    min-height: 200px;
+    background: #fff;
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+  }
+    .graphBox .box{
+      display: grid;
+      position: relative;
+      width: 100%;
+      grid-template-columns: 1fr ;
+      padding: 20px;
+      padding-left: 0;
+      z-index: 0;
+    }
+    .col-sm-12 {
+      display: grid;
+      padding: 0;
+      justify-items: center;
+    }
 }
