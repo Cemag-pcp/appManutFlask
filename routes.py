@@ -1,5 +1,5 @@
 #app.py
-from flask import Flask, current_app, send_file,jsonify, render_template, request, redirect, url_for, flash,Blueprint, Response, send_from_directory, send_file,current_app
+from flask import Flask, current_app, send_file,jsonify, render_template, request, redirect, url_for, flash,Blueprint, Response, send_from_directory, send_file,current_app,make_response
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
 import datetime
@@ -18,10 +18,16 @@ from PIL import Image
 import io
 from openpyxl import load_workbook
 # import convertapi
+from werkzeug.utils import secure_filename
+import os
 
 routes_bp = Blueprint('routes', __name__)
 
 #routes_bp.config['UPLOAD_FOLDER'] = r'C:\Users\pcp2\projetoManutencao\appManutFlask-3\UPLOAD_FOLDER'
+
+# Configurar a pasta para salvar os vídeos
+routes_bp.config = {}
+routes_bp.config['UPLOAD_FOLDER'] = 'UPLOAD_FOLDER'
 
 warnings.filterwarnings("ignore")
 
@@ -855,6 +861,11 @@ def formulario_os(id_ordem):
     # Retorna o arquivo para download
     return send_file("modelo_os_new.xlsx", as_attachment=True)
 
+# Função para verificar a extensão do arquivo permitida
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}  # Lista de extensões permitidas para vídeos
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @routes_bp.route('/')
 @login_required
 def inicio(): # Redirecionar para a página de login
@@ -979,34 +990,58 @@ def add_student(): # Criar ordem de serviço
 
         cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                      (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento))
-
-        imagem = request.files['imagem']
         
-        if imagem.filename != '':             
-            
-            # Ler os dados da imagem
-            imagem_data = imagem.read()
+        imagens = request.files.getlist('imagens')
 
-            # Abrir a imagem usando a biblioteca Pillow
-            image = Image.open(io.BytesIO(imagem_data))
+        if len(imagens) > 0:
+            for imagem in imagens:
+                if imagem.filename != '':
+                    # Ler os dados da imagem
+                    imagem_data = imagem.read()
 
-            # Redimensionar a imagem para um tamanho desejado
-            max_size = (800, 600)
-            image.thumbnail(max_size)
+                    # Abrir a imagem usando a biblioteca Pillow
+                    image = Image.open(io.BytesIO(imagem_data))
 
-            # Salvar a imagem com uma qualidade reduzida
-            buffer = io.BytesIO()
-            image.save(buffer, format='JPEG', quality=80)
-            imagem_data_comprimida = buffer.getvalue()
+                    # Converter a imagem para o modo RGB, se necessário
+                    if image.mode != 'RGB':
+                        image = image.convert('RGB')
 
-            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data_comprimida))
-            conn.commit()
+                    # Redimensionar a imagem para um tamanho desejado
+                    max_size = (800, 600)
+                    image.thumbnail(max_size)
 
+                    # Salvar a imagem com uma qualidade reduzida
+                    buffer = io.BytesIO()
+                    image.save(buffer, format='JPEG', quality=80)
+                    imagem_data_comprimida = buffer.getvalue()
+
+                    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                    cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)", (ultima_os, imagem_data_comprimida))
+                    conn.commit()
+
+            flash('Imagens adicionadas com sucesso!')
+          
         else:
             print('sem imagem')             
-            conn.commit()
 
+        videos = request.files.getlist('video')  # O input de tipo 'file' é chamado 'imagens', mas agora aceita vídeos também
+
+        for video in videos:
+            if video.filename != '':
+                # Verificar a extensão do arquivo (opcional)
+                if allowed_file(video.filename):
+                    filename = secure_filename(video.filename)
+                    # video.save(os.path.join(routes_bp.config['UPLOAD_FOLDER'], filename))
+
+                     # Ler os dados do vídeo como um objeto bytes
+                    video_data = video.read()
+
+                    # Inserir os dados do vídeo no banco de dados
+                    cur.execute("INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (ultima_os, video_data))
+                    conn.commit()
+
+        print("passou aqui 3")
+        conn.commit()
         flash('OS de número {} aberta com sucesso!'.format(ultima_os))
         return redirect(url_for('routes.open_os'))
  
@@ -1957,18 +1992,35 @@ def cadastro_preventiva():
         
     return render_template('user/cadastrar52.html')
 
-@routes_bp.route('/visualizar_imagem/<id_ordem>', methods=['GET'])
+@routes_bp.route('/visualizar_midias/<id_ordem>', methods=['GET'])
 @login_required
-def visualizar_imagem(id_ordem):
+def visualizar_midias(id_ordem):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur = conn.cursor()
 
+    # Buscar as imagens associadas à ordem de serviço
     cur.execute("SELECT imagem FROM tb_imagens WHERE id_ordem = %s", (id_ordem,))
-    imagem_data = cur.fetchone()[0]
+    imagens_data = [base64.b64encode(row[0]).decode('utf-8') for row in cur.fetchall()]
 
-    imagem_base64 = base64.b64encode(imagem_data).decode('utf-8')
+    return jsonify(imagens_data=imagens_data, id_ordem=id_ordem)
 
-    return jsonify(imagem_data=imagem_base64, id_ordem=id_ordem)
+@routes_bp.route('/visualizar_video/<id_ordem>', methods=['GET'])
+@login_required
+def visualizar_video(id_ordem):
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor()
+
+    # Buscar os vídeos associados à ordem de serviço
+    cur.execute("SELECT video FROM tb_videos_ordem_servico WHERE id_ordem = %s", (id_ordem,))
+    videos_data = [base64.b64encode(row[0]).decode('utf-8') for row in cur.fetchall()]
+
+    # Convertendo os dados de vídeo em URLs
+    video_urls = []
+    for video_data in videos_data:
+        video_url = f"data:video/mp4;base64,{video_data}"
+        video_urls.append(video_url)
+
+    return jsonify(videos_data=video_urls)
 
 @routes_bp.route('/timeline-preventiva/<maquina>', methods=['POST', 'GET'])
 @login_required

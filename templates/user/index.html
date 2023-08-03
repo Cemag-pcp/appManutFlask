@@ -164,6 +164,9 @@
                                         <a id="dropdown_os" class="dropdown-item" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
                                             <i class="fas fa-pencil"></i> 
                                         </a>
+                                        <a id="dropdown_os" class="dropdown-item" style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                            <i class="fas fa-image"></i> 
+                                        </a>
                                     </div>
                                 </div>
                             </td>
@@ -188,27 +191,45 @@
             </form>
         </div>
     </div>
+    
+    <!-- Modal Imagem -->
+    <div class="modal fade" data-backdrop="static" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagemModalLabel">Fotos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aqui é onde a imagem será exibida -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Vídeo -->
+    <div class="modal fade" data-backdrop="static" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="videoModalLabel">Vídeos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aqui é onde o vídeo será exibido -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
-<!-- Modal Imagem -->
-<div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content2">
-        <div class="modal-header">
-          <h5 class="modal-title" id="imagemModalLabel">Foto</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <!-- Aqui é onde a imagem será exibida -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-        </div>
-      </div>
-    </div>
-</div>
+
 
 <script>
     function abrirModalExclusao(idLinha) {
@@ -288,36 +309,42 @@
 </script>
 
 <script>
-
     function showImageModal(id_ordem) {
-        showLoading()
+        showLoading();
         $.ajax({
-        url: '/visualizar_imagem/' + id_ordem,
-        type: 'GET',
-        success: function(response) {
-            
-            var imagemData = response.imagem_data;
-            var modalBody = '<img src="data:image/png;base64,' + imagemData + '" alt="Imagem" />';
-            
-            // Preencha o conteúdo do modal com a imagem
-            $('#imagemModal .modal-body').html(modalBody);
-            
-            // Exiba o modal
-            $('#imagemModal').modal('show');
-            
-            // Oculta a tela de carregamento após um pequeno atraso (500 milissegundos)
-            setTimeout(function() {
-                hideLoading(); // Esconde o indicador de carregamento
-            }, 10);
-        },
-        error: function(error) {
-            hideLoading();
-            alert('Essa Ordem de Serviço não contém imagem')
-            console.log(error);
-        }
+            url: '/visualizar_midias/' + id_ordem,
+            type: 'GET',
+            dataType: 'json', // Adicione esta linha para indicar que o retorno é JSON
+            success: function(response) {
+                var imagens = response.imagens_data;
+                var videos = response.videos_data;
+                var modalBody = '';
+
+                // Iterar sobre todas as imagens e adicionar ao modal
+                for (var i = 0; i < imagens.length; i++) {
+                    var base64Image = imagens[i];
+                    modalBody += '<img src="data:image/png;base64,' + base64Image + '" alt="Imagem" /><br><br>';
+                }
+
+
+                // Preencher o conteúdo do modal com as imagens e vídeos
+                $('#imagemModal .modal-body').html(modalBody);
+
+                // Exibir o modal
+                $('#imagemModal').modal('show');
+
+                // Ocultar a tela de carregamento após um pequeno atraso (500 milissegundos)
+                setTimeout(function() {
+                    hideLoading(); // Esconde o indicador de carregamento
+                }, 10);
+            },
+            error: function(error) {
+                hideLoading();
+                alert('Essa Ordem de Serviço não contém imagem ou vídeo');
+                console.log(error);
+            }
         });
     }
-  
 </script>
 
 <script>
@@ -419,6 +446,46 @@
     // Chama a função applyFilters inicialmente para exibir a tabela completa
     applyFilters();
 
+</script>
+
+<script>
+    function showVideoModal(id_ordem) {
+        showLoading();
+        $.ajax({
+            url: '/visualizar_video/' + id_ordem,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                var videos = response.videos_data;
+                var modalBody = '';
+
+                // Iterar sobre todos os vídeos e adicionar ao modal
+                for (var i = 0; i < videos.length; i++) {
+                    var videoURL = videos[i];
+                    modalBody += '<video controls>';
+                    modalBody += '<source src="' + videoURL + '" type="video/mp4">';
+                    modalBody += 'Seu navegador não suporta o elemento de vídeo.';
+                    modalBody += '</video><br><br>';
+                }
+
+                // Preencher o conteúdo do modal com os vídeos
+                $('#videoModal .modal-body').html(modalBody);
+
+                // Exibir o modal
+                $('#videoModal').modal('show');
+
+                // Ocultar a tela de carregamento após um pequeno atraso (500 milissegundos)
+                setTimeout(function() {
+                    hideLoading();
+                }, 10);
+            },
+            error: function(error) {
+                hideLoading();
+                alert('Ocorreu um erro ao buscar os vídeos');
+                console.log(error);
+            }
+        });
+    }
 </script>
 
 {% endblock %}
