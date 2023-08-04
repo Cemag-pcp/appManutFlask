@@ -20,8 +20,6 @@ from openpyxl import load_workbook
 # import convertapi
 from werkzeug.utils import secure_filename
 import os
-import calendar
-import locale
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -40,17 +38,24 @@ DB_USER = "postgres"
 DB_PASS = "15512332"
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-
+   
 def obter_nome_mes(numero_mes):
+    nomes_meses = {
+        1: 'Janeiro',
+        2: 'Fevereiro',
+        3: 'Março',
+        4: 'Abril',
+        5: 'Maio',
+        6: 'Junho',
+        7: 'Julho',
+        8: 'Agosto',
+        9: 'Setembro',
+        10: 'Outubro',
+        11: 'Novembro',
+        12: 'Dezembro'
+    }
 
-    if not numero_mes:
-        numero_mes = ''
-        return ''
-    else:
-        locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')  # Pode ser necessário ajustar o locale conforme o sistema operacional
-
-        # Obter o nome do mês em português
-        return calendar.month_name[numero_mes]
+    return nomes_meses.get(numero_mes, '')
 
 def dias_uteis(mes):
 
