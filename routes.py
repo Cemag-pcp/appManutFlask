@@ -199,6 +199,67 @@ def mtbf_maquina(query_mtbf, mes):
 
     return context_mtbf_maquina,df_timeline_copia
 
+def mtbf_maquina_top10(query_mtbf,mes):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    # Obtém os dados da tabela
+    
+    df_timeline = pd.read_sql_query(query_mtbf, conn)
+
+    df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
+
+    df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
+    df_timeline['mes'] = df_timeline['dataabertura'].dt.month
+
+    # mes_hoje = datetime.today().month - 1 
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    df_timeline = df_timeline.dropna()
+            
+    df_timeline['maquina'] = df_timeline['maquina']
+    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
+    
+    df_timeline['maquina'].value_counts()
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_timeline['maquina'].value_counts()
+    df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
+    df_timeline = df_timeline.drop_duplicates(subset='maquina')
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
+    
+    df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
+
+    top_10_maiores_MTBF = df_timeline.nlargest(10, 'MTBF')
+
+    top_10_maiores_MTBF_copia = top_10_maiores_MTBF[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+
+    if len(top_10_maiores_MTBF) > 0:
+
+        grafico1_top10_maquina = top_10_maiores_MTBF['maquina'].tolist() # eixo x
+        grafico1_top10_mtbf = top_10_maiores_MTBF['MTBF'].tolist() # eixo y gráfico 1
+
+        sorted_tuples = sorted(zip(grafico1_top10_maquina, grafico1_top10_mtbf), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_top10_maquina, grafico1_top10_mtbf = zip(*sorted_tuples)
+
+        grafico1_top10_maquina = list(grafico1_top10_maquina)
+        grafico1_top10_mtbf = list(grafico1_top10_mtbf)
+
+        context_mtbf_top10_maquina = {'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}        
+    else:
+
+        grafico1_top10_maquina = []
+        grafico1_top10_mtbf = []
+
+        context_mtbf_top10_maquina = {'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}
+
+    return context_mtbf_top10_maquina,top_10_maiores_MTBF_copia
+
 def mtbf_setor(query_mtbf, mes):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
@@ -1605,15 +1666,21 @@ def add_student(): # Criar ordem de serviço
         qual_ferramenta = request.form.get('ferramenta')
         cod_equipamento = request.form.get('codigo_equip')
 
+ 
+        if equipamento_em_falha != 'Maquina de solda':
+            setor_maquina_solda  = ''
+        if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
+            qual_ferramenta = ''
+            cod_equipamento = ''
+        if equipamento_em_falha != '':
+            maquina = ''
+
         print(setor)
         print(maquina)
         print(qual_ferramenta)
         print(equipamento_em_falha)
         print(setor_maquina_solda)
         print(cod_equipamento)
-
-        if equipamento_em_falha != 'Maquina de solda':
-            setor_maquina_solda  = ''
 
         n_ordem = 0
         status = 'Em espera'
@@ -1691,8 +1758,6 @@ def add_student(): # Criar ordem de serviço
 
         videos = request.files.getlist('video')  # O input de tipo 'file' é chamado 'imagens', mas agora aceita vídeos também
 
-        # print(len(videos))
-
         for video in videos:
             if video.filename != '':
                 # Verificar a extensão do arquivo (opcional)
@@ -1707,7 +1772,6 @@ def add_student(): # Criar ordem de serviço
                     cur.execute("INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (ultima_os, video_data))
                     conn.commit()
 
-        print("passou aqui 3")
         conn.commit()
         flash('OS de número {} aberta com sucesso!'.format(ultima_os))
         return redirect(url_for('routes.open_os'))
@@ -2323,6 +2387,7 @@ def grafico(): # Dashboard
 
         context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query, mes)
         context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query, mes)
+        context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query, mes)
 
         """ Finalizando MTTR por máquina e setor"""
 
@@ -2411,9 +2476,9 @@ def grafico(): # Dashboard
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,mes_descrito=mes_descrito,
                                setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context_mtbf_maquina,
                                 **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina,**context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
-                                **context_disponiblidade_setor, area_manutencao=area_manutencao,mes=mes,**context_horas_trabalhadas,lista_horas_trabalhadas=lista_horas_trabalhadas,
+                                **context_mtbf_top10_maquina,**context_disponiblidade_setor, area_manutencao=area_manutencao,mes=mes,**context_horas_trabalhadas,lista_horas_trabalhadas=lista_horas_trabalhadas,
                                 lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo,lista_horas_trabalhadas_area=lista_horas_trabalhadas_area,lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_disponibilidade_setor=lista_disponibilidade_setor,
-                                lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina)
+                                top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista,lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina)
     
     mes = None
 
@@ -2436,6 +2501,7 @@ def grafico(): # Dashboard
 
     context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf, mes)
     context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf, mes)
+    context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query_mtbf, mes)
 
     query_mttr = (
     """
@@ -2529,11 +2595,11 @@ def grafico(): # Dashboard
     mes_descrito = obter_nome_mes(mes).title()
 
     return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens,mes_descrito=mes_descrito,
-                            **context_mtbf_maquina, **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor,
+                            **context_mtbf_maquina, **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor,**context_mtbf_top10_maquina,
                             **context_disponiblidade_maquina, **context_disponiblidade_setor, **context_horas_trabalhadas,**context_horas_trabalhadas_tipo,
                             **context_horas_trabalhadas_area,lista_horas_trabalhadas_area=lista_horas_trabalhadas_area,lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo,
-                            lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_horas_trabalhadas=lista_horas_trabalhadas,setor_selecionado='', 
-                            lista_disponibilidade_setor=lista_disponibilidade_setor,lista_disponibilidade_maquina=lista_disponibilidade_maquina,
+                            top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista,lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_horas_trabalhadas=lista_horas_trabalhadas,
+                            setor_selecionado='', lista_disponibilidade_setor=lista_disponibilidade_setor,lista_disponibilidade_maquina=lista_disponibilidade_maquina,
                             lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina,maquina_selecionado='', area_manutencao='')
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
