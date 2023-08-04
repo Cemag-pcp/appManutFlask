@@ -1449,6 +1449,63 @@ def funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trab
 
         context_horas_trabalhadas_area = {'labels_horas_trabalhadas_area':grafico1_maquina, 'dados_horas_trabalhadas_area':grafico2_diferenca} 
 
+    # query mtbf
+    # top 10
+
+    df_timeline = pd.read_sql_query(query_mtbf, conn)
+
+    df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
+
+    df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
+    df_timeline['mes'] = df_timeline['dataabertura'].dt.month
+
+    # mes_hoje = datetime.today().month - 1 
+    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    df_timeline = df_timeline.dropna()
+            
+    df_timeline['maquina'] = df_timeline['maquina']
+    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
+    
+    df_timeline['maquina'].value_counts()
+    
+    # Contar a quantidade de manutenções por máquina
+    contagem = df_timeline['maquina'].value_counts()
+    df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
+    df_timeline = df_timeline.drop_duplicates(subset='maquina')
+
+    qtd_dias_uteis = dias_uteis(mes)
+
+    df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
+    
+    df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
+
+    top_10_maiores_MTBF = df_timeline.nlargest(10, 'MTBF')
+
+    top_10_maiores_MTBF_lista = top_10_maiores_MTBF[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+
+    if len(top_10_maiores_MTBF) > 0:
+
+        grafico1_top10_maquina = top_10_maiores_MTBF['maquina'].tolist() # eixo x
+        grafico1_top10_mtbf = top_10_maiores_MTBF['MTBF'].tolist() # eixo y gráfico 1
+
+        sorted_tuples = sorted(zip(grafico1_top10_maquina, grafico1_top10_mtbf), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_top10_maquina, grafico1_top10_mtbf = zip(*sorted_tuples)
+
+        grafico1_top10_maquina = list(grafico1_top10_maquina)
+        grafico1_top10_mtbf = list(grafico1_top10_mtbf)
+
+        context_mtbf_top10_maquina = {'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}        
+    else:
+
+        grafico1_top10_maquina = []
+        grafico1_top10_mtbf = []
+
+        context_mtbf_top10_maquina = {'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}
+
+
     # Organize os resultados em um dicionário
     resultado = {
         'context_mtbf_maquina': context_mtbf_maquina,
@@ -1477,6 +1534,10 @@ def funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trab
         
         'context_horas_trabalhadas_area': context_horas_trabalhadas_area,
         'lista_horas_trabalhadas_area': lista_horas_trabalhadas_area,
+
+        'context_mtbf_top10_maquina': context_mtbf_top10_maquina,
+        'top_10_maiores_MTBF_lista': top_10_maiores_MTBF_lista,
+
     }
 
     return resultado
@@ -2401,7 +2462,7 @@ def grafico(): # Dashboard
 
         # context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query, mes)
         # context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query, mes)
-        context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query, mes)
+        # context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query, mes)
 
         """ Finalizando MTTR por máquina e setor"""
 
@@ -2498,7 +2559,8 @@ def grafico(): # Dashboard
         context_horas_trabalhadas = resultado['context_horas_trabalhadas']
         context_horas_trabalhadas_tipo = resultado['context_horas_trabalhadas_tipo']
         context_horas_trabalhadas_area = resultado['context_horas_trabalhadas_area']
-        
+        context_mtbf_top10_maquina = resultado['context_mtbf_top10_maquina']
+
         lista_horas_trabalhadas_area = resultado['lista_horas_trabalhadas_area']
         lista_horas_trabalhadas_tipo = resultado['lista_horas_trabalhadas_tipo']
         lista_mtbf_setor = resultado['df_timeline_mtbf_setor']
@@ -2508,7 +2570,8 @@ def grafico(): # Dashboard
         lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
         lista_mttr_setor = resultado['df_combinado_mttr_setor']
         lista_mttr_maquina = resultado['df_combinado_mttr']
-
+        top_10_maiores_MTBF_lista = resultado['top_10_maiores_MTBF_lista']
+        
         mes_descrito = obter_nome_mes(mes).title()
 
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,mes_descrito=mes_descrito,
@@ -2539,7 +2602,7 @@ def grafico(): # Dashboard
 
     # context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf, mes)
     # context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf, mes)
-    context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query_mtbf, mes)
+    # context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query_mtbf, mes)
 
     query_mttr = (
     """
@@ -2600,6 +2663,7 @@ def grafico(): # Dashboard
     context_horas_trabalhadas = resultado['context_horas_trabalhadas']
     context_horas_trabalhadas_tipo = resultado['context_horas_trabalhadas_tipo']
     context_horas_trabalhadas_area = resultado['context_horas_trabalhadas_area']
+    context_mtbf_top10_maquina = resultado['context_mtbf_top10_maquina']
     
     lista_horas_trabalhadas_area = resultado['lista_horas_trabalhadas_area']
     lista_horas_trabalhadas_tipo = resultado['lista_horas_trabalhadas_tipo']
@@ -2610,6 +2674,7 @@ def grafico(): # Dashboard
     lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
     lista_mttr_setor = resultado['df_combinado_mttr_setor']
     lista_mttr_maquina = resultado['df_combinado_mttr']
+    top_10_maiores_MTBF_lista = resultado['top_10_maiores_MTBF_lista']
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
