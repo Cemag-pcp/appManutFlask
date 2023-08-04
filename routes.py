@@ -2434,8 +2434,8 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf, mes)
-    context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf, mes)
+    # context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf, mes)
+    # context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf, mes)
 
     query_mttr = (
     """
@@ -2446,9 +2446,9 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query_mttr, mes)
-    context_mttr_setor,lista_mttr_setor = mttr_setor(query_mttr, mes)
-    context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query_mttr)
+    # context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query_mttr, mes)
+    # context_mttr_setor,lista_mttr_setor = mttr_setor(query_mttr, mes)
+    # context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query_mttr)
     
     query_disponibilidade = ("""
         SELECT datafim, maquina, n_ordem, setor,
@@ -2458,8 +2458,8 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade, mes)
-    context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade, mes)
+    # context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade, mes)
+    # context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade, mes)
 
     query_horas_trabalhada_tipo = """
         SELECT
@@ -2470,7 +2470,7 @@ def grafico(): # Dashboard
         GROUP BY tipo_manutencao;
         """
 
-    context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query_horas_trabalhada_tipo)
+    # context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query_horas_trabalhada_tipo)
 
     query_horas_trabalhada_area = """
         SELECT
@@ -2481,31 +2481,31 @@ def grafico(): # Dashboard
         GROUP BY area_manutencao;
         """
     
-    context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query_horas_trabalhada_area)
+    # context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query_horas_trabalhada_area)
 
-    # resultado = funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
+    resultado = funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
 
-    # context_mtbf_maquina = resultado['context_mtbf_maquina']
-    # context_mttr_maquina = resultado['context_mttr_maquina']
-    # context_mttr_setor = resultado['context_mttr_setor']
-    # context_mtbf_setor = resultado['context_mtbf_setor']
+    context_mtbf_maquina = resultado['context_mtbf_maquina']
+    context_mttr_maquina = resultado['context_mttr_maquina']
+    context_mttr_setor = resultado['context_mttr_setor']
+    context_mtbf_setor = resultado['context_mtbf_setor']
 
-    # context_disponiblidade_maquina = resultado['context_disponibilidade']
-    # context_disponiblidade_setor = resultado['context_disponibilidade_setor']
+    context_disponiblidade_maquina = resultado['context_disponibilidade']
+    context_disponiblidade_setor = resultado['context_disponibilidade_setor']
     
-    # context_horas_trabalhadas = resultado['context_horas_trabalhadas']
-    # context_horas_trabalhadas_tipo = resultado['context_horas_trabalhadas_tipo']
-    # context_horas_trabalhadas_area = resultado['context_horas_trabalhadas_area']
+    context_horas_trabalhadas = resultado['context_horas_trabalhadas']
+    context_horas_trabalhadas_tipo = resultado['context_horas_trabalhadas_tipo']
+    context_horas_trabalhadas_area = resultado['context_horas_trabalhadas_area']
     
-    # lista_horas_trabalhadas_area = resultado['lista_horas_trabalhadas_area']
-    # lista_horas_trabalhadas_tipo = resultado['lista_horas_trabalhadas_tipo']
-    # lista_mtbf_setor = resultado['df_timeline_mtbf_setor']
-    # lista_mtbf_maquina = resultado['df_timeline_copia']
-    # lista_horas_trabalhadas = resultado['lista_horas_trabalhadas']
-    # lista_disponibilidade_setor = resultado['df_disponibilidade_setor']
-    # lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
-    # lista_mttr_setor = resultado['df_combinado_mttr_setor']
-    # lista_mttr_maquina = resultado['df_combinado_mttr']
+    lista_horas_trabalhadas_area = resultado['lista_horas_trabalhadas_area']
+    lista_horas_trabalhadas_tipo = resultado['lista_horas_trabalhadas_tipo']
+    lista_mtbf_setor = resultado['df_timeline_mtbf_setor']
+    lista_mtbf_maquina = resultado['df_timeline_copia']
+    lista_horas_trabalhadas = resultado['lista_horas_trabalhadas']
+    lista_disponibilidade_setor = resultado['df_disponibilidade_setor']
+    lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
+    lista_mttr_setor = resultado['df_combinado_mttr_setor']
+    lista_mttr_maquina = resultado['df_combinado_mttr']
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
