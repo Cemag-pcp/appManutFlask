@@ -133,12 +133,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for mtbf_maquina in lista_mtbf_maquina %}
+                            {% for mtbf_maquina_top10 in top_10_maiores_MTBF_lista %}
                             <tr>
-                                <td>{{mtbf_maquina[0]}}</td>
-                                <td>{{mtbf_maquina[1]}}</td>
-                                <td>{{mtbf_maquina[2]}}</td>
-                                <td>{{mtbf_maquina[3]}}</td>
+                                <td>{{mtbf_maquina_top10[0]}}</td>
+                                <td>{{mtbf_maquina_top10[1]}}</td>
+                                <td>{{mtbf_maquina_top10[2]}}</td>
+                                <td>{{mtbf_maquina_top10[3]}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -543,8 +543,8 @@
         }
     });
 
-    var eixo_y = {{ dados_mtbf_maquina | safe }};
-    var eixo_x = {{ labels_mtbf_maquina | safe }};
+    var eixo_y = {{ dados_mtbf_top10_maquina | safe }};
+    var eixo_x = {{ labels_mtbf_top10_maquina | safe }};
     var ctx = document.getElementById('grafico1top10').getContext('2d');
 
     var grafico = new Chart(ctx, {
