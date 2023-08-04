@@ -1749,7 +1749,7 @@ def add_student(): # Criar ordem de serviço
         if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
             qual_ferramenta = ''
             cod_equipamento = ''
-        if equipamento_em_falha != '':
+        if equipamento_em_falha != 'SO-RB-01 - ROBÔ - KUKA':
             maquina = ''
 
         print(setor)
