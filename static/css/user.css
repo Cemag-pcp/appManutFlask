@@ -559,6 +559,8 @@ body {
 }
 
 .form-group #abertura_titulo{
+  display: flex;
+  justify-content: space-between;
   left: 5%;
   transform: translate(38%);
   margin: 10px;

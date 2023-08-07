@@ -13,14 +13,14 @@
         <option>Manutenção</option>
     </select>
     
-    <label for="area_manutencao">Área de Manutenção:</label>
+    <!-- <label for="area_manutencao">Área de Manutenção:</label>
     <select class="select2"id="area_manutencao" name="area_manutencao">
         <option value="">Todos</option>
         <option value="{{area_manutencao}}" selected disabled hidden>{{area_manutencao}}</option>
         <option value="Predial" >Predial</option>
         <option value="Mecânica" >Mecânica</option>
         <option value="Elétrica" >Elétrica</option>
-    </select>
+    </select> -->
 
     <label for="data_filtro">Mês:</label>
     <select class="select2"id="data_filtro" name="data_filtro">
@@ -121,7 +121,7 @@
             <div class="details">
                 <div class="recentOrders">
                     <div class="cardHeader">
-                        <h3>Top 10 MTBF por máquina</h3>
+                        <h3>Top 10 menores - MTBF por máquina</h3>
                     </div>
                     <table class="table" id="tabela_grafico1top10">
                         <thead>
@@ -595,7 +595,7 @@
             plugins: {
             title: {
                 display: true,
-                text: 'MTBF por máquina (top 10)',
+                text: 'MTBF por máquina (top 10 - Menores)',
                 font: {
                     size: 18, // Define o tamanho da fonte do título
                     weight: 'bold' // Define o peso (negrito) da fonte do título

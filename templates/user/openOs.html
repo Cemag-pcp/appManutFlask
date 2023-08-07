@@ -17,10 +17,19 @@
   {% endwith %}
 </div>
 
+<div id="modalEnviar" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span> <!-- Botão de fechar -->
+    <h4>Observação</h4>
+    <p>Caso a máquina seja <strong>Paleteiras elétricas</strong>, <strong>Empilhadeiras</strong> ou <strong>Pontes Rolantes</strong>, 
+    a abertura de O.S deve ser feita em "Equipamentos de Movimentação".</p>
+  </div>
+</div>
+
 <div class="col-md-4 offset-md-4">
   <div id ="formulario_abertura" class="card card-body">
     <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
-      <h3>Abrir OS</h3>
+      <h3 style="margin-right: 30px;">Abrir OS</h3><i class="fa-solid fa-circle-info" id="infoIcon" style="margin-top: -7px; cursor: pointer;"></i>
     </div>  
     <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
 
@@ -267,6 +276,39 @@
     }
   }
 </script> -->
+
+<script>
+  // Selecionar o elemento do botão de fechar
+  var closeButton = document.querySelector(".modal .close");
+
+  // Selecionar o elemento do modal
+  var modal = document.getElementById("modalEnviar");
+
+  // Função para fechar o modal
+  function fecharModal() {
+    modal.style.display = "none";
+  }
+
+  // Configurar evento de clique para fechar o modal quando o botão de fechar for clicado
+  closeButton.addEventListener("click", fecharModal);
+
+  $(document).ready(function() {
+    // Ao abrir a página, exibir o modal
+    $('#modalEnviar').show();
+
+    // Ao clicar no botão "Fechar" do modal
+    $('#modalEnviar').on('click', '.close', function() {
+      // Esconder o modal
+      $('#modalEnviar').hide();
+    });
+
+    // Ao clicar no ícone, exibir o modal novamente
+    $('#infoIcon').on('click', function() {
+      $('#modalEnviar').show();
+    });
+  });
+
+</script>
 
 <script>
   function getMaquinasPorSetor() {
