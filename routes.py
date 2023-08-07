@@ -1186,9 +1186,10 @@ def funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trab
     
     if len(df_combinado)> 0:
 
-        df_combinado['diferenca'] = (df_combinado['diferenca'] / 60).round(2)
-        df_combinado['percentual'] = (df_combinado['diferenca'] / df_combinado['diferenca'].sum()).round(2)
-
+        df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
+        df_combinado['percentual'] = df_combinado['percentual'].round(2)
+        lista_horas_trabalhadas = df_combinado.values.tolist()
+        
         grafico1_maquina = df_combinado['setor'].tolist() # eixo x
         grafico2_diferenca = df_combinado['diferenca'].tolist() # eixo y grafico 2
 
