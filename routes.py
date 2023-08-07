@@ -1742,18 +1742,17 @@ def add_student(): # Criar ordem de serviço
         setor_maquina_solda = request.form.get('solda_maquina')
         qual_ferramenta = request.form.get('ferramenta')
         cod_equipamento = request.form.get('codigo_equip')
-
  
-        if equipamento_em_falha != 'Maquina de solda':
-            setor_maquina_solda  = ''
-        if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
-            qual_ferramenta = ''
-            cod_equipamento = ''
-        if equipamento_em_falha != 'SO-RB-01 - ROBÔ - KUKA' and setor == 'Solda' :
-            maquina = ''
+        # if equipamento_em_falha != 'Maquina de solda':
+        #     setor_maquina_solda  = ''
+        # if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
+        #     qual_ferramenta = ''
+        #     cod_equipamento = ''
+        # if equipamento_em_falha == 'SO-RB-01 - ROBÔ - KUKA' :
+        #     maquina = ''
 
         print(setor)
-        print(maquina)
+        # print(maquina)
         print(qual_ferramenta)
         print(equipamento_em_falha)
         print(setor_maquina_solda)
@@ -1794,6 +1793,8 @@ def add_student(): # Criar ordem de serviço
             ultima_os = ultima_os+1
         except:
             ultima_os = 0
+
+        print(maquina)
 
         cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                      (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento))
