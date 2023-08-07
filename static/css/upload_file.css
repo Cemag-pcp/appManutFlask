@@ -74,7 +74,7 @@
 @media(max-width:600px){
   
   .file-upload__label {
-    max-width: 150px;
+    max-width: 130px;
     font-size: 0.95em;
     text-overflow: ellipsis;
     overflow: hidden;
