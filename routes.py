@@ -1048,16 +1048,18 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
         df_combinado['MTTR'] = df_combinado['MTTR'].round(2)
 
+        df_combinado.sort_values("MTTR", inplace=True)
+
         grafico1_maquina = df_combinado['maquina'].tolist() # eixo x
         grafico2_mttr = df_combinado['MTTR'].tolist() # eixo y grafico 2
 
-        sorted_tuples = sorted(zip(grafico1_maquina, grafico2_mttr), key=lambda x: x[0])
+        # sorted_tuples = sorted(zip(grafico1_maquina, grafico2_mttr), key=lambda x: x[0])
 
-        # Desempacotar as tuplas classificadas em duas listas separadas
-        grafico1_maquina, grafico2_mttr = zip(*sorted_tuples)
+        # # Desempacotar as tuplas classificadas em duas listas separadas
+        # grafico1_maquina, grafico2_mttr = zip(*sorted_tuples)
 
-        grafico1_maquina = list(grafico1_maquina)
-        grafico2_mttr = list(grafico2_mttr)
+        # grafico1_maquina = list(grafico1_maquina)
+        # grafico2_mttr = list(grafico2_mttr)
 
         context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr}
         
@@ -1069,7 +1071,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr} 
 
     # query_mttr
-    # horas_trabalhadas_cc
+    # mttr_setor
 
     df_timeline = pd.read_sql_query(query_mttr, conn)
 
@@ -1124,16 +1126,18 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
         df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
 
+        df_combinado.sort_values("MTTR", inplace=True)
+
         grafico1_maquina = df_combinado['setor'].tolist() # eixo x
         grafico2_mttr = df_combinado['MTTR'].tolist() # eixo y grafico 2
 
-        sorted_tuples = sorted(zip(grafico1_maquina, grafico2_mttr), key=lambda x: x[0])
+        # sorted_tuples = sorted(zip(grafico1_maquina, grafico2_mttr), key=lambda x: x[0])
 
-        # Desempacotar as tuplas classificadas em duas listas separadas
-        grafico1_maquina, grafico2_mttr = zip(*sorted_tuples)
+        # # Desempacotar as tuplas classificadas em duas listas separadas
+        # grafico1_maquina, grafico2_mttr = zip(*sorted_tuples)
 
-        grafico1_maquina = list(grafico1_maquina)
-        grafico2_mttr = list(grafico2_mttr)
+        # grafico1_maquina = list(grafico1_maquina)
+        # grafico2_mttr = list(grafico2_mttr)
 
         context_mttr_setor = {'labels_mttr_setor':grafico1_maquina, 'dados_mttr_setor':grafico2_mttr}
         
@@ -1276,7 +1280,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
         df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
         df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
-        df_combinado.sort_values(by='disponibilidade', inplace=True)
     
         if boleano_historico:
             """
@@ -1284,17 +1287,17 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             """
             historico_csv = pd.read_csv("disponibilidade_historico.csv", sep=';')
            
-            try:
+            if setor_selecionado:
                 historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
-            except:
-                pass
-
+            
             historico_csv['maquina'] = historico_csv['maquina'].str.split(' - ').str[0]
             historico_csv['disponibilidade_historico_media'] = historico_csv['disponibilidade_historico_media'].str.replace(',', '.').str.replace("%","").astype(float)
             df_combinado_disponibilidade = df_combinado.merge(historico_csv,how='outer', on='maquina').fillna(100)
             df_combinado_disponibilidade["disponibilidade_media"] = (df_combinado_disponibilidade["disponibilidade"] + df_combinado_disponibilidade["disponibilidade_historico_media"]) / 2
             df_combinado_disponibilidade = df_combinado_disponibilidade.drop(columns={"disponibilidade"})
             df_combinado_disponibilidade = df_combinado_disponibilidade.rename(columns={"disponibilidade_media":'disponibilidade'})
+
+            df_combinado_disponibilidade.sort_values(by='disponibilidade', inplace=True)
 
             labels = df_combinado_disponibilidade['maquina'].tolist() # eixo x
             dados_disponibilidade = df_combinado_disponibilidade['disponibilidade'].tolist() # eixo y gráfico 1
@@ -2617,6 +2620,7 @@ def grafico(): # Dashboard
     
     mes = None
     boleano_historico = True
+    setor_selecionado = None
 
     # Monta a query base
     query = """
