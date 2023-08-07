@@ -390,7 +390,6 @@ def mttr_maquina(query_mttr, mes):
     df_combinado['MTTR'] = df_combinado['diferenca'] / df_combinado['qtd_manutencao']
 
     df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
-
     df_combinado['MTTR'] = df_combinado['MTTR'].round(2)
 
     df_combinado_mttr = df_combinado[['maquina','qtd_manutencao','diferenca','MTTR']].values.tolist()
@@ -408,8 +407,7 @@ def mttr_maquina(query_mttr, mes):
         grafico1_maquina = list(grafico1_maquina)
         grafico2_mttr = list(grafico2_mttr)
 
-        context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr}
-        
+        context_mttr_maquina = {'labels_mttr_maquina':grafico1_maquina, 'dados_mttr_maquina':grafico2_mttr}        
     else:
 
         grafico1_maquina = []
@@ -2697,6 +2695,8 @@ def grafico(): # Dashboard
     conn.close()
 
     mes_descrito = obter_nome_mes(mes).title()
+
+    print(lista_mttr_setor)
 
     return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, maquinas=maquinas, itens=itens,mes_descrito=mes_descrito,
                             **context_mtbf_maquina, **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor,**context_mtbf_top10_maquina,
