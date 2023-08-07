@@ -860,7 +860,7 @@ def horas_trabalhadas_area(query):
 
     return context_horas_trabalhadas_area, lista_horas_trabalhadas_area
 
-def funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes):
+def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
@@ -1272,10 +1272,35 @@ def funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trab
         df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
         df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
         df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
-        df_combinado_disponibilidade = df_combinado[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
+    
+        if boleano_historico:
+            """
+            Se for GET pega todo o histórico e adiciona no atual
+            """
+            historico_csv = pd.read_csv("disponibilidade_historico.csv", sep=';')
+           
+            try:
+                historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
+            except:
+                pass
 
-        labels = df_combinado['maquina'].tolist() # eixo x
-        dados_disponibilidade = df_combinado['disponibilidade'].tolist() # eixo y gráfico 1
+            historico_csv['maquina'] = historico_csv['maquina'].str.split(' - ').str[0]
+            historico_csv['disponibilidade_historico_media'] = historico_csv['disponibilidade_historico_media'].str.replace(',', '.').str.replace("%","").astype(float)
+            df_combinado_disponibilidade = df_combinado.merge(historico_csv,how='outer', on='maquina').fillna(100)
+            df_combinado_disponibilidade["disponibilidade_media"] = (df_combinado_disponibilidade["disponibilidade"] + df_combinado_disponibilidade["disponibilidade_historico_media"]) / 2
+            df_combinado_disponibilidade = df_combinado_disponibilidade.drop(columns={"disponibilidade"})
+            df_combinado_disponibilidade = df_combinado_disponibilidade.rename(columns={"disponibilidade_media":'disponibilidade'})
+
+            labels = df_combinado_disponibilidade['maquina'].tolist() # eixo x
+            dados_disponibilidade = df_combinado_disponibilidade['disponibilidade'].tolist() # eixo y gráfico 1
+
+            df_combinado_disponibilidade = df_combinado_disponibilidade[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
+        else:
+
+            labels = df_combinado['maquina'].tolist() # eixo x
+            dados_disponibilidade = df_combinado['disponibilidade'].tolist() # eixo y gráfico 1
+
+            df_combinado_disponibilidade = df_combinado[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
 
         sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
 
@@ -1285,8 +1310,7 @@ def funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trab
         labels = list(labels)
         dados_disponibilidade = list(dados_disponibilidade)
 
-        context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}        
-    
+        context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}            
     else:
 
         labels = []
@@ -2368,7 +2392,9 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 def grafico(): # Dashboard
     
     if request.method == 'POST':
-      
+        
+        boleano_historico = False
+
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -2546,7 +2572,7 @@ def grafico(): # Dashboard
 
         # context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query)
 
-        resultado = funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
+        resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
 
         context_mtbf_maquina = resultado['context_mtbf_maquina']
         context_mttr_maquina = resultado['context_mttr_maquina']
@@ -2583,6 +2609,7 @@ def grafico(): # Dashboard
                                 top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista,lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina)
     
     mes = None
+    boleano_historico = True
 
     # Monta a query base
     query = """
@@ -2650,7 +2677,7 @@ def grafico(): # Dashboard
     
     # context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query_horas_trabalhada_area)
 
-    resultado = funcao_geral(query_mtbf, query_mttr, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
+    resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
 
     context_mtbf_maquina = resultado['context_mtbf_maquina']
     context_mttr_maquina = resultado['context_mttr_maquina']
