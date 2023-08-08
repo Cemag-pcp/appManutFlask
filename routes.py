@@ -879,8 +879,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             df_timeline['MTBF_final'] = df_timeline['historico_mtbf_decimal'] + df_timeline['MTBF']
             df_timeline =  df_timeline.drop(columns={'MTBF'})
             df_timeline = df_timeline.rename(columns={"MTBF_final":'MTBF'}).round(2)            
-            df_timeline.sort_values("MTBF",inplace=True)
             df_timeline = df_timeline.iloc[:10]
+            df_timeline.sort_values("MTBF",inplace=True)
 
             grafico1_top10_maquina = df_timeline['maquina'].tolist() # eixo x
             grafico1_top10_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
@@ -890,6 +890,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         else:
             
             df_timeline = df_timeline.iloc[:10]
+            df_timeline.sort_values("MTBF",inplace=True)
             top_10_maiores_MTBF_lista = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
             grafico1_top10_maquina = df_timeline['maquina'].tolist() # eixo x
