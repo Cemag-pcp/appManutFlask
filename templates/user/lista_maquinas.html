@@ -74,6 +74,9 @@
                                         <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalExclusao('{{ row[0] }}')">
                                             <i class="fas fa-trash" title="Excluir máquina" id="meu-botao"></i>
                                         </a>
+                                        <a id="dropdown_os" class="dropdown-item">
+                                            <i class="fa-solid fa-file-lines docIcon" title="Documentos" style="cursor: pointer;"></i>
+                                        </a>
                                         <!-- Parar a preventiva da máquina -->
                                         {% if row[3] == 'Y' %}
                                         <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalPreventiva('{{ row[0] }}')">
@@ -82,6 +85,9 @@
                                         {% else %}
                                         <a></a>
                                         {% endif %}
+                                        <a id="dropdown_os" class="dropdown-item" href="/mostrar_pdf/{{row[0]}}">
+                                            <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
+                                        </a>
                                     </div>
                                 </div>
                             </td>
@@ -94,6 +100,39 @@
         </div>
     </div>
 </div>
+
+<form action="{{url_for('routes.testes_envio_pdf')}}" method="POST" enctype="multipart/form-data">
+    <div class="tela" style="display: none;">
+        <div class="modal-content2">
+        <span class="close">&times;</span> <!-- Botão de fechar -->
+        <h4>Downloads</h4>
+        <div class="file-upload" style="margin-top: 20px;">
+            <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple>
+            <button class="file-upload__button" type="button" name="pdf" id="pdf" style="margin-bottom: 20px;">Checklist em pdf</button>
+            <span class="file-upload__label" style="margin-bottom: 20px;">Nenhum Arquivo selecionado</span>
+        </div>
+        <table class="table table-bordered " id="table2">
+            <thead>
+                <tr>
+                    <th>Checklist</th>
+                    <th>Imagem</th>
+                    <th>Documento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for pdf in pdf_data %}
+                    <td>{{pdf}}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+        <button id ='atualizar_pdf' class="btn btn-block" onclick="modalPdf()">
+            Atualizar 
+        </button>
+        </div>
+    </div>
+</form>
 
 <!-- Modal para excluir maquina -->
 <div class="modal fade" id="modalExclusao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
@@ -126,7 +165,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="TituloModalCentralizado">
-                    <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                    <i class="fas fa-exclamation-triangle text-warning"></i> 
                     Atenção
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
@@ -175,6 +214,7 @@
                     // Caso ocorra algum erro na requisição, você pode tratar aqui
                     console.log('Erro na requisição:', error);
                     hideLoading();
+                    location.reload();
                 }
                 
             });
@@ -182,7 +222,31 @@
         });
     }
 </script>
+  
+<script>
+     // Selecionar o elemento do botão de fechar
+     var closeButton = document.querySelector(".tela .close");
+     var modal = document.querySelector(".tela");
+    // Função para fechar o modal
+    function fecharModal() {
+        modal.style.display = "none";
+    }
 
+    // Configurar evento de clique para fechar o modal quando o botão de fechar for clicado
+    closeButton.addEventListener("click", fecharModal);
+
+    $(document).ready(function() {
+    // Ao clicar no botão "Fechar" do modal
+        $('.tela').on('click', '.close', function() {
+            // Esconder o modal
+            $('.tela').hide();
+    });
+        $('.docIcon').on('click', function() {
+            $('.tela').show();
+    });
+});
+      // Ao clicar no ícone, exibir o modal novamente
+</script>
 <!-- Script para modal de exclusão de preventiva de máquina -->
 <script>
     function modalPreventiva(codigo_maquina) {

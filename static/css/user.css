@@ -1495,3 +1495,8 @@ input #file{
       justify-items: center;
     }
 }
+
+.downloads{
+  display: grid;
+
+}

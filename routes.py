@@ -1087,13 +1087,13 @@ def add_student(): # Criar ordem de serviço
         qual_ferramenta = request.form.get('ferramenta')
         cod_equipamento = request.form.get('codigo_equip')
  
-        # if equipamento_em_falha != 'Maquina de solda':
-        #     setor_maquina_solda  = ''
-        # if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
-        #     qual_ferramenta = ''
-        #     cod_equipamento = ''
-        # if equipamento_em_falha == 'SO-RB-01 - ROBÔ - KUKA' :
-        #     maquina = ''
+        if equipamento_em_falha != 'Maquina de solda':
+            setor_maquina_solda  = ''
+        if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
+            qual_ferramenta = ''
+            cod_equipamento = ''
+        if equipamento_em_falha == 'SO-RB-01 - ROBÔ - KUKA' :
+            maquina = ''
 
         print(setor)
         # print(maquina)
@@ -2271,20 +2271,27 @@ def cadastro_preventiva():
         
     return render_template('user/cadastrar52.html')
 
-@routes_bp.route('/teste_envio_pdf', methods=['POST'])
+@routes_bp.route('/testes_envio_pdf', methods=['POST'])
 @login_required
 def testes_envio_pdf():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    codigo = 'codigo_teste'
+    codigo = 'testando'
+    
+    pdfs= request.files.getlist('pdf')
 
-    pdf = request.files['pdf']
-    pdf_data = pdf.read()
+    if len(pdfs) > 0:
+        for pdf in pdfs:
+            if pdf.filename != '':
 
-    cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist) VALUES (%s,%s)", (codigo, pdf_data))
-    conn.commit()
+                pdf_data = pdf.read()
+
+                cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist) VALUES (%s,%s)", (codigo, pdf_data))
+                conn.commit()
+
+    return render_template('user/lista_maquinas.html', )
 
 @routes_bp.route('/visualizar_midias/<id_ordem>', methods=['GET'])
 @login_required
@@ -2370,17 +2377,23 @@ def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela m
 @routes_bp.route('/mostrar_pdf/<codigo_maquina>', methods=['GET'])
 @login_required
 def mostrar_pdf(codigo_maquina):
+    
     try:
+        print(codigo_maquina)
+        codigo_maquina = 'testando'
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute("SELECT checklist FROM tb_anexos WHERE codigo_maquina = %s", (codigo_maquina,))
-        pdf_data = cur.fetchone()
+        pdf_data = [row[0] for row in cur.fetchall()]
+
+        # pdf_data = cur.fetchone()
+        # print(pdf_data)
 
         if pdf_data:
             # Configurar o cabeçalho da resposta para indicar que é um arquivo PDF
             headers = {'Content-Type': 'application/pdf',
                        'Content-Disposition': 'inline; filename=arquivo.pdf'}
 
-            return Response(pdf_data['checklist'], headers=headers)
+            return Response(pdf_data=pdf_data, headers=headers)
         else:
             raise Exception('Arquivo PDF não encontrado.')
     except Exception as e:
