@@ -107,29 +107,18 @@
         <span class="close">&times;</span> <!-- Botão de fechar -->
         <h4>Downloads</h4>
         <div class="file-upload" style="margin-top: 20px;">
-            <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple>
-            <button class="file-upload__button" type="button" name="pdf" id="pdf" style="margin-bottom: 20px;">Checklist em pdf</button>
-            <span class="file-upload__label" style="margin-bottom: 20px;">Nenhum Arquivo selecionado</span>
+            <input type="file" id="pdfInput" accept=".pdf" style="margin-bottom: 30px;">
         </div>
-        <table class="table table-bordered " id="table2">
+        <table class="table table-striped" id="pdfTable">
             <thead>
-                <tr>
-                    <th>Checklist</th>
-                    <th>Imagem</th>
-                    <th>Documento</th>
+                <tr class="cabeçalho">
+                    <th>PDF</th>
+                    <th>Download</th>
+                    <th>Remover</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    {% for pdf in pdf_data %}
-                    <td>{{pdf}}</td>
-                    {% endfor %}
-                </tr>
-            </tbody>
+            <tbody id="pdfTableBody"></tbody>
         </table>
-        <button id ='atualizar_pdf' class="btn btn-block" onclick="modalPdf()">
-            Atualizar 
-        </button>
         </div>
     </div>
 </form>

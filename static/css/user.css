@@ -1500,3 +1500,13 @@ input #file{
   display: grid;
 
 }
+
+.remove-link {
+  position: relative;
+  left: 50px; /* Adicione margem esquerda para separar o ícone do link */
+}
+
+.link-download{
+  position: relative;
+  left: 50px;
+}
