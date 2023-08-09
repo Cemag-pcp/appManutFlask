@@ -1028,9 +1028,9 @@ input #file{
     background-color: #a7a7a7;
 }
 
-#filtro_setor{
+/* #filtro_setor{
   width: 160px;
-}
+} */
 
 .graphBox{
   position: relative;
@@ -1494,4 +1494,8 @@ input #file{
       padding: 0;
       justify-items: center;
     }
+}
+
+.select{
+  width: 50%;
 }

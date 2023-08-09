@@ -175,7 +175,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     if setor_selecionado == '':
         setor_selecionado = None
-
+    
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     # query_mtbf
@@ -254,6 +254,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         grafico1_maquina = []
         grafico1_mtbf = []
+        df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_maquina = {'labels_mtbf_maquina': grafico1_maquina, 'dados_mtbf_maquina': grafico1_mtbf}
 
@@ -327,6 +328,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         grafico1_maquina = []
         grafico1_mtbf = []
+        df_timeline_mtbf_setor = df_timeline[['setor','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_setor = {'labels_mtbf_setor': grafico1_maquina, 'dados_mtbf_setor': grafico1_mtbf}
 
@@ -632,7 +634,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
     if len(df_combinado)> 0:
-
+        print('Entrou')
         df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
         df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
         df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
@@ -641,6 +643,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             """
             Se for GET pega todo o histórico e adiciona no atual
             """
+            print('Entrou no Boleano')
             historico_csv = pd.read_csv("disponibilidade_historico.csv", sep=';')
            
             if setor_selecionado:
@@ -661,7 +664,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             df_combinado_disponibilidade = df_combinado_disponibilidade[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
             
         else:
-
+            print('Não Entrou no Boleano')
             labels = df_combinado['maquina'].tolist() # eixo x
             dados_disponibilidade = df_combinado['disponibilidade'].tolist() # eixo y gráfico 1
 
@@ -670,7 +673,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}            
     
     else:
-
+        print('Não Entrou')
         labels = []
         dados_disponibilidade = []
         df_combinado_disponibilidade = []
@@ -751,7 +754,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         labels = []
         dados_disponibilidade = []
         df_disponibilidade_setor = []
-        
+        df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].values.tolist()
+
         context_disponibilidade_setor = {'labels_disponibilidade_setor': labels, 'dados_disponibilidade_setor': dados_disponibilidade}
 
     # query_horas_trabalhada_tipo
@@ -904,6 +908,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         grafico1_top10_maquina = []
         grafico1_top10_mtbf = []
+        top_10_maiores_MTBF_lista = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_top10_maquina = {'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}
 

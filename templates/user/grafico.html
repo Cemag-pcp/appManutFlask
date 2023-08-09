@@ -4,7 +4,7 @@
 
 <form id = 'form_filtros_graficos' action="{{ url_for('routes.grafico') }}" method="POST">
     <label for="filtro_setor">Setor:</label>
-    <select class="select2" id="filtro_setor" name="filtro_setor" value="{{ setor }}" multiple>
+    <select id="filtro_setor" name="filtro_setor" value="{{ setor }}" multiple>
         <option value="">Todos</option>
         <option value="">{{setor_selecionado}}</option>
         {% for setor in setores %}
