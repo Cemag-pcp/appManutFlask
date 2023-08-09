@@ -173,6 +173,9 @@ def cards(query):
 
 def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes):
 
+    if setor_selecionado == '':
+        setor_selecionado = None
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     # query_mtbf
@@ -1783,17 +1786,21 @@ def grafico(): # Dashboard
         df_maquinas = df_maquinas.rename(columns=dict(zip(df_maquinas.columns, name_cols)))
         maquinas = df_maquinas.values.tolist()
 
-        setor_selecionado = request.form.get('filtro_setor')
+        setor_selecionado = request.form.getlist('filtro_setor')
         maquina_selecionado = request.form.get('filtro_maquinas')
         # area_manutencao = request.form.get('area_manutencao')
         mes = request.form.get('data_filtro')
-        
+
+        setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
+
+        print(setor_selecionado)
+
         if mes:
             mes = int(mes)
 
         """ Criando cards """
 
-        if not setor_selecionado:
+        if not setor_selecionado or setor_selecionado == '':
             setor_selecionado = ''
         if not maquina_selecionado:
             maquina_selecionado = ''
@@ -1812,9 +1819,7 @@ def grafico(): # Dashboard
 
         # Adiciona as condições de filtro se os campos não estiverem vazios
         if setor_selecionado:
-            query += f" AND setor = '{setor_selecionado}'"
-        # if area_manutencao:
-        #     query += f" AND area_manutencao = '{area_manutencao}'"
+            query += f" AND setor in ({setor_selecionado})"
         if mes:
             query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
@@ -1823,7 +1828,7 @@ def grafico(): # Dashboard
         # Executa a query
         cur.execute(query)
         itens_filtrados = cur.fetchall()
-    
+        
         # Criando cards
 
         # Monta a query base
@@ -1836,7 +1841,7 @@ def grafico(): # Dashboard
         if mes:
             query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
         if setor_selecionado:
-            query += f" AND setor = '{setor_selecionado}'"
+            query += f" AND setor in ({setor_selecionado})"
 
         lista_qt = cards(query)
 
@@ -1852,7 +1857,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_mtbf += f" AND setor = '{setor_selecionado}'"
+            query_mtbf += f" AND setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
@@ -1878,7 +1883,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_mttr += f" AND setor = '{setor_selecionado}'"
+            query_mttr += f" AND setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
@@ -1901,7 +1906,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_disponibilidade += f" AND setor = '{setor_selecionado}'"
+            query_disponibilidade += f" AND setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
@@ -1921,7 +1926,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_horas_trabalhada_area += f" AND setor = '{setor_selecionado}'"
+            query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes:
             query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
@@ -1938,7 +1943,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_horas_trabalhada_tipo += f" AND setor = '{setor_selecionado}'"
+            query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
             query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
             
