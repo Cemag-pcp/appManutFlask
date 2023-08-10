@@ -2549,6 +2549,55 @@ def editar_maquina(codigo):
     return render_template('user/editar_maquina.html', codigo=codigo,
                            setor=setor,descricao=descricao,tombamento=tombamento)
 
+@routes_bp.route('/editar-maquina-preventiva/<codigo>', methods=['POST','GET'])
+@login_required
+def editar_maquina_preventiva(codigo):
+
+    if request.method == 'POST':
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        codigo_inicial = codigo
+        codigo_novo = request.form['codigo']
+        tombamento = request.form['tombamento']
+        descricao = request.form['descricao']
+        setor = request.form['setor']
+        criticidade = request.form['criticidade']
+        # periodicidade = request.form['periodicidade']
+        
+        cur.execute("""
+            UPDATE tb_maquinas_preventivas
+            SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,classificacao=%s
+            WHERE codigo = %s
+            """, (codigo_novo, tombamento, setor, descricao, criticidade, codigo_inicial))
+
+        conn.commit()
+        conn.close()
+
+        return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
+                                setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_maquinas_preventivas WHERE codigo = '{}'""".format(codigo)
+
+    cur.execute(query)
+    data = cur.fetchall()
+
+    codigo = codigo
+    setor = data[0][2]
+    descricao = data[0][3]
+    tombamento = data[0][1]
+    criticidade = data[0][4]
+
+    if not tombamento:
+        tombamento = ''
+        
+    return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
+                        setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
+
 @routes_bp.route('/editar-maquina-bd/<codigo>', methods=['POST'])
 @login_required
 def salvar_edicao_maquina(codigo):

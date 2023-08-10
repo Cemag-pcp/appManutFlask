@@ -61,15 +61,17 @@
                                     </button>
                                     <div class="dropdown-menu" class="dropdown-item" aria-labelledby="dropdownMenu2">
                                         {% if row[3] == 'Y' %}
-                                        <a></a>
+                                        <a id="dropdown_os" class="dropdown-item" href="/editar-maquina-preventiva/{{row[0]}}">
+                                            <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina preventiva" class="icon-tamanho-padrao"> 
+                                        </a>
                                         {% else %}
                                         <a id="dropdown_os" class="dropdown-item" href="/maquina-52-semanas/{{row[0]}}">
                                             <img src="static/icons/manutencao.png" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao"> 
                                         </a>
-                                        {% endif %}
                                         <a id="dropdown_os" class="dropdown-item" href="/editar-maquina/{{row[0]}}">
                                             <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
                                         </a>
+                                        {% endif %}
                                         <!-- Exluir máquina -->
                                         <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalExclusao('{{ row[0] }}')">
                                             <i class="fas fa-trash" title="Excluir máquina" id="meu-botao"></i>

@@ -614,10 +614,11 @@ body {
   }
 }
 
-#formulario_preventiva{
+#formulario_preventiva {
+  position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,12%);
+  transform: translate(-50%,20%);
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   width: 450px;
@@ -625,14 +626,15 @@ body {
   border-radius: 20px;
 }
 
-@media (max-width: 767px) { /* Tamanho da tela de celular */
+@media (max-width: 767px){
   #formulario_preventiva {
       width: 100%;
       top: 50%;
       left: 50%;
-      transform: translate(-50%,3%);/* Ocupar toda a largura disponível */
-      max-width: 450px; /* Limitar a largura máxima */
+      transform: translate(-50%,20%);
+      max-width: 450px;
       margin-bottom: 21 0px;
+      position: relative;
   }
 }
 
@@ -725,21 +727,33 @@ body {
   align-items: center;
 }
 
-#linha_tempo{
-  width: 70%;
-  height: 76.5vh;
+#linha_tempo {
+  position: absolute;
+  width: 80%;
   z-index: 0;
   top: 50%;
-  left: 5%;
-  transform: translate(15%,10%);
-  align-items: center;
+  left: 50%;
+  transform: translate(-50%,50%);
   border-radius: 20px;
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   margin: 0;
-  overflow-x: hidden;
 }
-
+@media(max-width:1050px){
+  #linha_tempo {
+    position: absolute;
+    width: 100%;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,30%);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255,0.5);
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    margin: 0;
+    overflow-x: scroll;
+  }
+}
 #linha_tempo h3{
   padding: 20px;
 }
