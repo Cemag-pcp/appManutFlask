@@ -40,19 +40,13 @@ h2{
 
 .input-box label{
     position: absolute;
-    top: 16%;
+    top: -25%;
     left: 5px;
     transform: translate(-50%);
     color: #fff;
 }
-
-.input-box input:focus~label,
-.input-box input:valid~label{
-    top: -13px;
-    transition: .5s;
-}
-
 .input-box input{
+    position: relative;
     width: 100%;
     height: 50px;
     background: transparent;
@@ -62,6 +56,12 @@ h2{
     color: white;
     padding: 0 35px 0 5px;
 }
+
+/* .input-box input:focus~label,
+.input-box input:valid~label{
+    top: -13px;
+    transition: .5s;
+} */
 
 .input-box .icon{
     position: absolute;
@@ -105,7 +105,7 @@ h2{
 
     .input-box label{
         position: absolute;
-        top: 40%;
+        top: -20%;
         left: 5px;
         transform: translate(-30%);
         color: #000000;
@@ -188,5 +188,55 @@ h2{
 ul li {
     padding-right: 20px;
   }
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        visibility: visible;
+    }
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+#alerta_login{
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 20px;
+    justify-content: center;
+    background-color: #fc8383;
+    color: #b12121;
+    border-radius: 10px;
+    margin: 0;
+    padding: 10px;
+    z-index: 9999;
+    width: 30%;
+    left: 50%;
+    top: 15%;
+    transform: translate(-50%,100%);
+    animation: fadeOut 6s forwards;
+    opacity: 0;
+    position: absolute;
+}
+@media (max-width:600px){
 
-  
+    #alerta_login{
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        justify-content: center;
+        background-color: #fc8383;
+        color: #b12121;
+        border-radius: 10px;
+        margin: 0;
+        padding: 10px;
+        z-index: 9999;
+        width: 80%;
+        left: 50%;
+        top: 10%;
+        transform: translate(-50%,100%);
+        animation: fadeOut 6s forwards;
+        opacity: 0;
+        position: absolute;
+    }
+}
