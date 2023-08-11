@@ -1080,33 +1080,60 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     #s = "SELECT * FROM tb_ordens"
-    s = (""" 
-        SELECT DISTINCT t1.total, t2.* 
-        FROM (
-            SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
-            FROM tb_carrinho
-            JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
-            GROUP BY tb_carrinho.id_ordem
-        ) t1
-        RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem;
-    """)
+    # s = (""" 
+    #     SELECT DISTINCT t1.total, t2.* 
+    #     FROM (
+    #         SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+    #         FROM tb_carrinho
+    #         JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+    #         GROUP BY tb_carrinho.id_ordem
+    #     ) t1
+    #     RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem;
+    # """)
+
+    s = (""" select t3.*, t4.parada1,t4.parada2,t4.parada3
+            from(
+                SELECT DISTINCT t1.total, t2.* 
+                FROM (
+                    SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+                    FROM tb_carrinho
+                    JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+                    GROUP BY tb_carrinho.id_ordem
+                    ) t1
+                RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
+            -- 	WHERE ordem_excluida isnull
+            ) t3
+            LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
+            ORDER BY t3.id_ordem;
+         """)
 
     df = pd.read_sql_query(s, conn)
     df = df.sort_values(by='id_ordem').reset_index(drop=True)
     
-    for i in range(len(df)):
-        try:
-            if df['id_ordem'][i] == df['id_ordem'][i-1]:
-                df['maquina_parada'][i] = df['maquina_parada'][i-1]
-        except:
-            pass
-        
+    df = df[df['ordem_excluida'] != True].reset_index(drop=True)
+
+    df.fillna('',inplace=True)
+
+    df_antigo = df.copy()
+
+    for i in range(len(df)-1,0,-1):
+        if df['id_ordem'][i] == df['id_ordem'][i-1]:
+            if df['maquina_parada'][i-1] == '':
+                df['maquina_parada'][i-1] = df['maquina_parada'][i]
+
+    for i in range(1,len(df)):
+        if df['id_ordem'][i-1] == df['id_ordem'][i]:
+            if df['maquina_parada'][i-1] == '':
+                df['maquina_parada'][i-1] = df['maquina_parada'][i]
+
+    df[['maquina_parada','id_ordem']].head(20)
+    df_antigo[['maquina_parada','id_ordem']].head(20)
+
+
     df = df.sort_values(by='n_ordem')
 
     df.reset_index(drop=True, inplace=True)
     df.replace(np.nan, '', inplace=True)
-
-    df = df[df['ordem_excluida'] != True]
 
     df['dataabertura'] = df['dataabertura'].fillna(method='ffill')
     df['dataabertura'] = df['dataabertura'].replace('', method='ffill')
@@ -1126,6 +1153,17 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     df['ultima_atualizacao'] = pd.to_datetime(df['ultima_atualizacao'])
     df['ultima_atualizacao'] = df['ultima_atualizacao'] - timedelta(hours=3)
     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df.reset_index(drop=True,inplace=True)
+
+    df.iloc[:,11:]
+    # for i in range(len(df)):
+    #     try:
+    #         if df['maquina_parada'][i] == '':
+    #             pass
+    #         else:
+
+    #     except:
+    #         pass
 
     list_users = df.values.tolist()
 

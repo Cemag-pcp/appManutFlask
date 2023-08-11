@@ -728,31 +728,35 @@ body {
 }
 
 #linha_tempo {
-  position: absolute;
+  position: fixed;
   width: 80%;
+  height: 70%;
   z-index: 0;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,50%);
+  transform: translate(-50%,-60%);
   border-radius: 20px;
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   margin: 0;
+  overflow-x: scroll;
 }
+
 @media(max-width:1050px){
   #linha_tempo {
-    position: absolute;
+    position: fixed;
     width: 100%;
+    height: 60%;
     z-index: 0;
     top: 50%;
     left: 50%;
-    transform: translate(-50%,30%);
+    transform: translate(-50%,-60%);
     border-radius: 20px;
     background-color: rgba(255, 255, 255,0.5);
     box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
     margin: 0;
     overflow-x: scroll;
-  }
+}
 }
 #linha_tempo h3{
   padding: 20px;
@@ -1512,4 +1516,29 @@ input #file{
 
 .select{
   width: 50%;
+}
+
+#baixar_csv {
+  background: rgb(255, 161, 113);
+  border: 2px solid rgb(255, 142, 85);
+  border-radius: 4px;
+  outline: none;
+  padding: 0.5em 0.8em;
+  width: 160px;
+  color: #ffffff;
+  font-size: 1em;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+}
+
+#baixar_csv:hover {
+  background: rgb(255, 142, 85);;
+  outline: none;
+}
+
+#baixar_csv:active {
+  background: rgb(255, 142, 85);;
+  outline: none;
 }
