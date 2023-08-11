@@ -20,6 +20,8 @@ from openpyxl import load_workbook
 # import convertapi
 from werkzeug.utils import secure_filename
 import os
+import zipfile
+from io import BytesIO
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -38,6 +40,8 @@ DB_USER = "postgres"
 DB_PASS = "15512332"
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+
    
 def obter_nome_mes(numero_mes):
     nomes_meses = {
@@ -2271,27 +2275,29 @@ def cadastro_preventiva():
         
     return render_template('user/cadastrar52.html')
 
-@routes_bp.route('/testes_envio_pdf', methods=['POST'])
+@routes_bp.route('/testes_envio_pdf/<codigo_maquina>', methods=['POST'])
 @login_required
-def testes_envio_pdf():
+def testes_envio_pdf(codigo_maquina):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur = conn.cursor()
 
-    codigo = 'testando'
-    
-    pdfs= request.files.getlist('pdf')
+    pdfs = request.files.getlist('pdfFile')  # Certifique-se de usar 'pdfFile' para corresponder ao nome do campo no FormData
 
     if len(pdfs) > 0:
         for pdf in pdfs:
             if pdf.filename != '':
-
                 pdf_data = pdf.read()
+                pdf_filename = pdf.filename  # Obtém o nome do arquivo
 
-                cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist) VALUES (%s,%s)", (codigo, pdf_data))
+                cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist, nome_arquivo) VALUES (%s,%s,%s)",
+                            (codigo_maquina, pdf_data, pdf_filename))
                 conn.commit()
 
-    return render_template('user/lista_maquinas.html', )
+    cur.close()
+    conn.close()
+
+    return jsonify({"message": "Upload bem-sucedido"})  # Você pode personalizar a mensagem de retorno conforme necessário
 
 @routes_bp.route('/visualizar_midias/<id_ordem>', methods=['GET'])
 @login_required
@@ -2378,28 +2384,79 @@ def timeline_preventiva(maquina): # Mostrar o histórico de preventiva daquela m
 @login_required
 def mostrar_pdf(codigo_maquina):
     
-    try:
-        print(codigo_maquina)
-        codigo_maquina = 'testando'
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT checklist FROM tb_anexos WHERE codigo_maquina = %s", (codigo_maquina,))
-        pdf_data = [row[0] for row in cur.fetchall()]
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor()
 
-        # pdf_data = cur.fetchone()
-        # print(pdf_data)
+    cur.execute("SELECT checklist, nome_arquivo FROM tb_anexos WHERE codigo_maquina = %s", (codigo_maquina,))
+    pdf_records = cur.fetchall()
 
-        if pdf_data:
-            # Configurar o cabeçalho da resposta para indicar que é um arquivo PDF
-            headers = {'Content-Type': 'application/pdf',
-                       'Content-Disposition': 'inline; filename=arquivo.pdf'}
+    pdf_urls = []
+    nome_arquivos = []
 
-            return Response(pdf_data=pdf_data, headers=headers)
-        else:
-            raise Exception('Arquivo PDF não encontrado.')
-    except Exception as e:
-        flash(str(e))
-        return redirect(url_for('routes.plan_52semanas'))
-    
+    for pdf_record in pdf_records:
+        pdf_data, nome_arquivo = pdf_record
+        pdf_stream = BytesIO(pdf_data)
+        
+        # Gere o URL do download incluindo o nome do arquivo
+        pdf_url = f'/download_pdf/{codigo_maquina}/{len(pdf_urls) + 1}'
+        pdf_urls.append(pdf_url)
+        nome_arquivos.append(nome_arquivo)
+
+    cur.close()
+    conn.close()
+
+    return jsonify({'pdfUrls': pdf_urls, 'nome_arquivo':nome_arquivos})
+
+@routes_bp.route('/download_pdf/<codigo_maquina>/<int:pdf_index>', methods=['GET'])
+@login_required
+def download_pdf(codigo_maquina, pdf_index):
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor()
+
+    print(pdf_index)
+
+    cur.execute("SELECT checklist FROM tb_anexos WHERE codigo_maquina = %s", (codigo_maquina,))
+    pdf_records = cur.fetchall()
+
+    if 0 <= pdf_index - 1 < len(pdf_records):
+        pdf_data = pdf_records[pdf_index - 1][0]
+        pdf_stream = BytesIO(pdf_data)
+
+        cur.close()
+        conn.close()
+
+        response = make_response(pdf_stream.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=pdf_{pdf_index}.pdf'
+        return response
+    else:
+        cur.close()
+        conn.close()
+        return jsonify({'error': 'PDF não encontrado'}), 404
+
+@routes_bp.route('/remover_pdf/<codigo_maquina>/<nome_arquivo>', methods=['DELETE'])
+@login_required
+def remover_pdf(codigo_maquina, nome_arquivo):
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor()
+
+    cur.execute("SELECT id FROM tb_anexos WHERE codigo_maquina = %s AND nome_arquivo = %s", (codigo_maquina, nome_arquivo))
+    pdf_id = cur.fetchone()
+
+    if pdf_id:
+        cur.execute("DELETE FROM tb_anexos WHERE id = %s", (pdf_id[0],))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({"message": "PDF removido com sucesso"})
+    else:
+        cur.close()
+        conn.close()
+        return jsonify({'error': 'PDF não encontrado'}), 404
+
+
 @routes_bp.route('/lista_maquinas', methods=['GET'])
 @login_required
 def lista_maquinas():
@@ -2504,6 +2561,9 @@ def editar_maquina(codigo):
 def salvar_edicao_maquina(codigo):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+
+
 
     codigo_inicial = codigo
     codigo_novo = request.form['codigo']

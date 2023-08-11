@@ -75,7 +75,7 @@
                                             <i class="fas fa-trash" title="Excluir máquina" id="meu-botao"></i>
                                         </a>
                                         <a id="dropdown_os" class="dropdown-item">
-                                            <i class="fa-solid fa-file-lines docIcon" title="Documentos" style="cursor: pointer;"></i>
+                                            <i class="fa-solid fa-file-lines docIcon" title="Documentos" onclick="modalDocumento('{{ row[0] }}')" style="cursor: pointer;"></i>
                                         </a>
                                         <!-- Parar a preventiva da máquina -->
                                         {% if row[3] == 'Y' %}
@@ -85,9 +85,6 @@
                                         {% else %}
                                         <a></a>
                                         {% endif %}
-                                        <a id="dropdown_os" class="dropdown-item" href="/mostrar_pdf/{{row[0]}}">
-                                            <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
-                                        </a>
                                     </div>
                                 </div>
                             </td>
@@ -101,14 +98,16 @@
     </div>
 </div>
 
-<form action="{{url_for('routes.testes_envio_pdf')}}" method="POST" enctype="multipart/form-data">
-    <div class="tela" style="display: none;">
-        <div class="modal-content2">
-        <span class="close">&times;</span> <!-- Botão de fechar -->
-        <h4>Downloads</h4>
-        <div class="file-upload" style="margin-top: 20px;">
-            <input type="file" id="pdfInput" accept=".pdf" style="margin-bottom: 30px;">
-        </div>
+<!-- Modal para listar e inserir documentos -->
+<div id="modalDocumento" class="tela" style="display: none;">
+    <div class="modal-content2">
+        <span class="close" onclick="closeModal()">&times;</span> <!-- Botão de fechar -->
+    <h4>Downloads</h4>
+    <div class="file-upload" style="margin-top: 20px;">
+        <!-- Adicione o elemento input com o ID pdfInput1 -->
+        <input type="file" id="pdfInput1" accept=".pdf" style="margin-bottom: 30px;">
+        <button onclick="uploadPdf(codigo_maquina)">Enviar</button>
+    </div>
         <table class="table table-striped" id="pdfTable">
             <thead>
                 <tr class="cabeçalho">
@@ -119,9 +118,9 @@
             </thead>
             <tbody id="pdfTableBody"></tbody>
         </table>
-        </div>
     </div>
-</form>
+</div>
+
 
 <!-- Modal para excluir maquina -->
 <div class="modal fade" id="modalExclusao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
@@ -173,6 +172,44 @@
     </div>
 </div>
 
+<script>
+    function modalExclusao(codigo_maquina) {
+        // Exibir o modal
+        $('#modalExclusao').modal('show');
+
+        // Armazenar o código da máquina em uma variável
+        var codigoMaquina = codigo_maquina;
+
+        // Adicionar um evento de clique ao botão "Excluir" do modal
+        $('#btnExcluir').click(function() {
+            showLoading();
+            // Realizar a requisição AJAX para o backend
+            $.ajax({
+                type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+                url: '/excluir-maquina',  // URL do backend onde irá processar a exclusão da máquina
+                data: { codigo_maquina: codigoMaquina },  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+                success: function(response) {
+                    // Aqui você pode tratar a resposta do servidor, caso necessário
+                    console.log(response);
+                    // Fechar o modal após a requisição ser enviada
+                    $('#modalExclusao').modal('hide');
+                    hideLoading();
+                    // Recarregar a página após a exclusão ser concluída
+                    location.reload();
+                },
+                error: function(error) {
+                    // Caso ocorra algum erro na requisição, você pode tratar aqui
+                    console.log('Erro na requisição:', error);
+                    hideLoading();
+                    location.reload();
+                }
+                
+            });
+            
+        });
+    }
+</script>
+
 <!-- Script para modal de exclusão de máquina -->
 <script>
     function modalExclusao(codigo_maquina) {
@@ -211,8 +248,168 @@
         });
     }
 </script>
-  
+
 <script>
+    
+    function modalDocumento(codigo_maquina) {        
+        var modal = document.getElementById("modalDocumento");
+        modal.style.display = "block";
+
+        window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
+        
+        listarPdf(); // Chama a função para listar os PDFs associados   
+    }
+
+    function closeModal() {
+        var modal = document.getElementById("modalDocumento");
+        modal.style.display = "none";
+    }
+
+    function uploadPdf() {
+    var fileInput = document.getElementById("pdfInput1");
+    var file = fileInput.files[0];
+
+        if (file) {
+            var formData = new FormData();
+            formData.append('pdfFile', file); // 'pdfFile' é o nome do campo que o backend espera receber
+
+            $.ajax({
+                url: 'testes_envio_pdf/' + window.codigo_maquina, // Adicione a barra antes de 'codigo_maquina'
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    
+                    // Aqui você pode lidar com a resposta do backend, se necessário
+                    var pdfTableBody = document.getElementById("pdfTableBody");
+                    var newRow = pdfTableBody.insertRow();
+                    
+                    // Após o envio bem-sucedido, você pode adicionar uma nova linha à tabela com o link para download e botão de remoção.
+                    var pdfTableBody = document.getElementById("pdfTableBody");
+                    var newRow = pdfTableBody.insertRow();
+                    
+                    // Coluna para o nome do arquivo
+                    var fileNameCell = newRow.insertCell(0);
+                    fileNameCell.textContent = file.name;
+
+                    // Coluna para o link de download
+                    var downloadCell = newRow.insertCell(1);
+                    var downloadLink = document.createElement("a");
+                    downloadLink.href = "link_para_o_arquivo_no_backend"; // Defina o link apropriado
+                    downloadLink.textContent = "Download";
+                    downloadCell.appendChild(downloadLink);
+
+                    // Coluna para o botão de remoção
+                    var removeCell = newRow.insertCell(2);
+                    var removeButton = document.createElement("button");
+                    removeButton.textContent = "Remover";
+                    removeButton.onclick = function() {
+                        pdfTableBody.removeChild(newRow);
+                        // Aqui você deve implementar a lógica para remover o arquivo do backend.
+                    };
+                    removeCell.appendChild(removeButton);
+                },
+                error: function(error) {
+                    console.error('Erro ao fazer o upload do arquivo: ', error);
+                }
+            });
+        }
+    }
+
+    function listarPdf() {
+        var pdfTableBody = document.getElementById("pdfTableBody");
+        pdfTableBody.innerHTML = "";
+
+        // Fazer uma requisição ao backend para obter os URLs dos PDFs associados à máquina
+        var requestUrl = `/mostrar_pdf/${window.codigo_maquina}`;
+        
+        // Fazer uma requisição AJAX
+        showLoading();
+        $.ajax({
+            url: requestUrl,            
+            type: 'GET',
+            cache: false, // Adicione essa linha
+
+            success: function(response) {
+                
+                var nome_arquivo = response.nome_arquivo;
+                var pdfUrls = response.pdfUrls;
+
+                pdfUrls.forEach(function(pdfUrl) {
+                    var newRow = pdfTableBody.insertRow();
+
+                    var fileNameCell = newRow.insertCell(0);
+                    fileNameCell.textContent = extractFileNameFromUrl(pdfUrl);
+                    fileNameCell.style.display = 'none';
+
+                    var nomeArquivo = newRow.insertCell(1);
+                    nomeArquivo.textContent = nome_arquivo;
+
+                    var downloadCell = newRow.insertCell(2);
+                    var downloadLink = document.createElement("a");
+                    downloadLink.href = pdfUrl;
+                    downloadLink.textContent = "Download";
+                    downloadCell.appendChild(downloadLink);
+
+                    var removeCell = newRow.insertCell(3);
+                    var removeButton = document.createElement("button");
+                    removeButton.textContent = "Remover";
+                    removeButton.onclick = function () {
+                    removerPdf(nomeArquivo); // Chamar a função de remoção passando o nome do arquivo
+                
+                };
+                
+                removeCell.appendChild(removeButton);
+
+                });
+                
+                hideLoading(); // Mova a chamada para dentro da função success
+            },
+            
+            error: function(error) {
+                hideLoading();
+                console.error('Erro ao obter os URLs dos PDFs: ', error);
+            }
+        });
+    }
+
+    // Função para extrair o nome do arquivo a partir do URL
+    function extractFileNameFromUrl(url) {
+        var segments = url.split("/");
+        return segments[segments.length - 1];
+    }
+
+    function removerPdf(nomeArquivo) {
+        var requestUrl = `/remover_pdf/${window.codigo_maquina}/${nomeArquivo}`;
+
+        $.ajax({
+            url: requestUrl,
+            type: 'DELETE',
+            success: function(response) {
+                // Remover a linha da tabela com base no nome do arquivo
+                var pdfTableBody = document.getElementById("pdfTableBody");
+                var rows = pdfTableBody.getElementsByTagName("tr");
+
+                for (var i = 0; i < rows.length; i++) {
+                    var cells = rows[i].getElementsByTagName("td");
+                    if (cells.length >= 1 && cells[0].textContent === nomeArquivo) {
+                        pdfTableBody.removeChild(rows[i]);
+                        break;
+                    }
+                }
+
+                console.log(response.message);
+            },
+            error: function(error) {
+                console.error('Erro ao remover o PDF: ', error);
+            }
+        });
+    }
+
+</script>
+
+<!-- <script>
      // Selecionar o elemento do botão de fechar
      var closeButton = document.querySelector(".tela .close");
      var modal = document.querySelector(".tela");
@@ -233,9 +430,9 @@
         $('.docIcon').on('click', function() {
             $('.tela').show();
     });
-});
-      // Ao clicar no ícone, exibir o modal novamente
-</script>
+    }); 
+</script> -->
+
 <!-- Script para modal de exclusão de preventiva de máquina -->
 <script>
     function modalPreventiva(codigo_maquina) {
