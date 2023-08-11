@@ -1114,8 +1114,6 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 
     df.fillna('',inplace=True)
 
-    df_antigo = df.copy()
-
     for i in range(len(df)-1,0,-1):
         if df['id_ordem'][i] == df['id_ordem'][i-1]:
             if df['maquina_parada'][i-1] == '':
@@ -1123,12 +1121,7 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
 
     for i in range(1,len(df)):
         if df['id_ordem'][i-1] == df['id_ordem'][i]:
-            if df['maquina_parada'][i-1] == '':
-                df['maquina_parada'][i-1] = df['maquina_parada'][i]
-
-    df[['maquina_parada','id_ordem']].head(20)
-    df_antigo[['maquina_parada','id_ordem']].head(20)
-
+            df['maquina_parada'][i] = df['maquina_parada'][i-1]
 
     df = df.sort_values(by='n_ordem')
 
@@ -1155,15 +1148,8 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime("%Y-%m-%d %H:%M:%S")
     df.reset_index(drop=True,inplace=True)
 
-    df.iloc[:,11:]
-    # for i in range(len(df)):
-    #     try:
-    #         if df['maquina_parada'][i] == '':
-    #             pass
-    #         else:
+    df[['id_ordem','maquina_parada','parada1']]
 
-    #     except:
-    #         pass
 
     list_users = df.values.tolist()
 
