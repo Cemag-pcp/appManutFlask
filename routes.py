@@ -177,6 +177,9 @@ def cards(query):
 
 def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes):
 
+    if setor_selecionado == '':
+        setor_selecionado = None
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     # query_mtbf
@@ -198,8 +201,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['maquina'] = df_timeline['maquina']
     df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
     
-    df_timeline['maquina'].value_counts()
-    
     # Contar a quantidade de manutenções por máquina
     contagem = df_timeline['maquina'].value_counts()
     df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
@@ -213,22 +214,46 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     
     df_timeline.sort_values(by='MTBF', inplace=True)
 
-    df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+    df_timeline = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']]
+
+    def convert_time_to_decimal(time_str):
+        hours, minutes, seconds = map(int, time_str.split(":"))
+        return hours + minutes / 60 + seconds / 3600
 
     if len(df_timeline)> 0:
 
-        grafico1_maquina = df_timeline['maquina'].tolist() # eixo x
-        grafico1_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+        if boleano_historico and not mes:
+            """
+            Se for GET pega todo o histórico e adiciona no atual
+            """
+            historico_csv = pd.read_csv("mtbf_historico.csv", sep=';')
+            historico_csv["historico_mtbf_decimal"] = historico_csv["historico_mtbf"].apply(convert_time_to_decimal)
+            
+            if setor_selecionado:
+                historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
 
-        # sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
+            historico_csv['maquina'] = historico_csv['maquina'].str.split(' - ').str[0]
+            
+            df_timeline = df_timeline.merge(historico_csv,how='outer', on='maquina').fillna(0)
+            df_timeline['MTBF_final'] = df_timeline['historico_mtbf_decimal'] + df_timeline['MTBF']
+            df_timeline =  df_timeline.drop(columns={'MTBF'})
+            df_timeline = df_timeline.rename(columns={"MTBF_final":'MTBF'}).round(2)            
+            df_timeline.sort_values("MTBF",inplace=True)
 
-        # # Desempacotar as tuplas classificadas em duas listas separadas
-        # grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
+            grafico1_maquina = df_timeline['maquina'].tolist() # eixo x
+            grafico1_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+            
+            df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
-        # grafico1_maquina = list(grafico1_maquina)
-        # grafico1_mtbf = list(grafico1_mtbf)
+        else:
+
+            grafico1_maquina = df_timeline['maquina'].tolist() # eixo x
+            grafico1_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+
+            df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_maquina = {'labels_mtbf_maquina': grafico1_maquina, 'dados_mtbf_maquina': grafico1_mtbf}        
+    
     else:
 
         grafico1_maquina = []
@@ -265,23 +290,43 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
 
     df_timeline.sort_values(by='MTBF', inplace=True)
-
-    df_timeline_mtbf_setor = df_timeline[['maquina','setor','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+    
+    df_timeline_mtbf_setor = df_timeline[['setor','qtd_manutencao','carga_trabalhada','MTBF']]
 
     if len(df_timeline)> 0:
 
-        grafico1_maquina = df_timeline['setor'].tolist() # eixo x
-        grafico1_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+        if boleano_historico and not mes:
+            """
+            Se for GET pega todo o histórico e adiciona no atual
+            """
 
-        # sorted_tuples = sorted(zip(grafico1_maquina, grafico1_mtbf), key=lambda x: x[0])
+            historico_csv = pd.read_csv("mtbf_historico.csv", sep=';')
+            historico_csv["historico_mtbf_decimal"] = historico_csv["historico_mtbf"].apply(convert_time_to_decimal)
+            historico_csv = historico_csv.groupby(['setor']).sum().reset_index()
 
-        # # Desempacotar as tuplas classificadas em duas listas separadas
-        # grafico1_maquina, grafico1_mtbf = zip(*sorted_tuples)
+            if setor_selecionado:
+                historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
+            
+            df_timeline_mtbf_setor = df_timeline_mtbf_setor.merge(historico_csv,how='outer', on='setor').fillna(0)
+            df_timeline_mtbf_setor['MTBF_final'] = df_timeline_mtbf_setor['historico_mtbf_decimal'] + df_timeline_mtbf_setor['MTBF']
+            df_timeline_mtbf_setor =  df_timeline_mtbf_setor.drop(columns={'MTBF'})
+            df_timeline_mtbf_setor = df_timeline_mtbf_setor.rename(columns={"MTBF_final":'MTBF'}).round(2)            
+            df_timeline_mtbf_setor.sort_values("MTBF",inplace=True)
 
-        # grafico1_maquina = list(grafico1_maquina)
-        # grafico1_mtbf = list(grafico1_mtbf)
+            grafico1_maquina = df_timeline_mtbf_setor['setor'].tolist() # eixo x
+            grafico1_mtbf = df_timeline_mtbf_setor['MTBF'].tolist() # eixo y gráfico 1
+            
+            df_timeline_mtbf_setor = df_timeline_mtbf_setor[['setor','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+        
+        else:
+
+            grafico1_maquina = df_timeline['setor'].tolist() # eixo x
+            grafico1_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+
+            df_timeline_mtbf_setor = df_timeline[['setor','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_setor = {'labels_mtbf_setor': grafico1_maquina, 'dados_mtbf_setor': grafico1_mtbf}        
+      
     else:
 
         grafico1_maquina = []
@@ -596,7 +641,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
         df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
     
-        if boleano_historico:
+        if boleano_historico and not mes:
             """
             Se for GET pega todo o histórico e adiciona no atual
             """
@@ -626,15 +671,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
             df_combinado_disponibilidade = df_combinado[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
 
-        # sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
-
-        # # Desempacotar as tuplas classificadas em duas listas separadas
-        # labels, dados_disponibilidade = zip(*sorted_tuples)
-
-        # labels = list(labels)
-        # dados_disponibilidade = list(dados_disponibilidade)
-
         context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}            
+    
     else:
 
         labels = []
@@ -828,22 +866,42 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     
     df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) / df_timeline['qtd_manutencao']).round(2)
 
-    top_10_maiores_MTBF = df_timeline.nsmallest(10, 'MTBF')
+    # top_10_maiores_MTBF_lista = top_10_maiores_MTBF[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
-    top_10_maiores_MTBF_lista = top_10_maiores_MTBF[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
+    if len(df_timeline) > 0:
+        
+        if boleano_historico and not mes:
+            """
+            Se for GET pega todo o histórico e adiciona no atual
+            """
+            historico_csv = pd.read_csv("mtbf_historico.csv", sep=';')
+            historico_csv["historico_mtbf_decimal"] = historico_csv["historico_mtbf"].apply(convert_time_to_decimal)
+            
+            if setor_selecionado:
+                historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
 
-    if len(top_10_maiores_MTBF) > 0:
+            historico_csv['maquina'] = historico_csv['maquina'].str.split(' - ').str[0]
+            
+            df_timeline = df_timeline.merge(historico_csv,how='outer', on='maquina').fillna(0)
+            df_timeline['MTBF_final'] = df_timeline['historico_mtbf_decimal'] + df_timeline['MTBF']
+            df_timeline =  df_timeline.drop(columns={'MTBF'})
+            df_timeline = df_timeline.rename(columns={"MTBF_final":'MTBF'}).round(2)            
+            df_timeline = df_timeline.iloc[:10]
+            df_timeline.sort_values("MTBF",inplace=True)
 
-        grafico1_top10_maquina = top_10_maiores_MTBF['maquina'].tolist() # eixo x
-        grafico1_top10_mtbf = top_10_maiores_MTBF['MTBF'].tolist() # eixo y gráfico 1
+            grafico1_top10_maquina = df_timeline['maquina'].tolist() # eixo x
+            grafico1_top10_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
+            
+            top_10_maiores_MTBF_lista = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
-        # sorted_tuples = sorted(zip(grafico1_top10_maquina, grafico1_top10_mtbf), key=lambda x: x[0])
+        else:
+            
+            df_timeline = df_timeline.iloc[:10]
+            df_timeline.sort_values("MTBF",inplace=True)
+            top_10_maiores_MTBF_lista = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
-        # # Desempacotar as tuplas classificadas em duas listas separadas
-        # grafico1_top10_maquina, grafico1_top10_mtbf = zip(*sorted_tuples)
-
-        # grafico1_top10_maquina = list(grafico1_top10_maquina)
-        # grafico1_top10_mtbf = list(grafico1_top10_mtbf)
+            grafico1_top10_maquina = df_timeline['maquina'].tolist() # eixo x
+            grafico1_top10_mtbf = df_timeline['MTBF'].tolist() # eixo y gráfico 1
 
         context_mtbf_top10_maquina = {'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}        
     else:
@@ -1718,7 +1776,7 @@ def grafico(): # Dashboard
     
     if request.method == 'POST':
         
-        boleano_historico = False
+        boleano_historico = True
 
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1732,19 +1790,21 @@ def grafico(): # Dashboard
         df_maquinas = df_maquinas.rename(columns=dict(zip(df_maquinas.columns, name_cols)))
         maquinas = df_maquinas.values.tolist()
 
-        setor_selecionado = request.form.get('filtro_setor')
+        setor_selecionado = request.form.getlist('filtro_setor')
         maquina_selecionado = request.form.get('filtro_maquinas')
         # area_manutencao = request.form.get('area_manutencao')
         mes = request.form.get('data_filtro')
 
-        print(mes)
+        setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
+
+        print(setor_selecionado)
 
         if mes:
             mes = int(mes)
 
         """ Criando cards """
 
-        if not setor_selecionado:
+        if not setor_selecionado or setor_selecionado == '':
             setor_selecionado = ''
         if not maquina_selecionado:
             maquina_selecionado = ''
@@ -1763,9 +1823,7 @@ def grafico(): # Dashboard
 
         # Adiciona as condições de filtro se os campos não estiverem vazios
         if setor_selecionado:
-            query += f" AND setor = '{setor_selecionado}'"
-        # if area_manutencao:
-        #     query += f" AND area_manutencao = '{area_manutencao}'"
+            query += f" AND setor in ({setor_selecionado})"
         if mes:
             query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
@@ -1774,7 +1832,7 @@ def grafico(): # Dashboard
         # Executa a query
         cur.execute(query)
         itens_filtrados = cur.fetchall()
-    
+        
         # Criando cards
 
         # Monta a query base
@@ -1787,7 +1845,7 @@ def grafico(): # Dashboard
         if mes:
             query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
         if setor_selecionado:
-            query += f" AND setor = '{setor_selecionado}'"
+            query += f" AND setor in ({setor_selecionado})"
 
         lista_qt = cards(query)
 
@@ -1803,7 +1861,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_mtbf += f" AND setor = '{setor_selecionado}'"
+            query_mtbf += f" AND setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
@@ -1829,7 +1887,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_mttr += f" AND setor = '{setor_selecionado}'"
+            query_mttr += f" AND setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
@@ -1852,7 +1910,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_disponibilidade += f" AND setor = '{setor_selecionado}'"
+            query_disponibilidade += f" AND setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
@@ -1872,7 +1930,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_horas_trabalhada_area += f" AND setor = '{setor_selecionado}'"
+            query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes:
             query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
 
@@ -1889,7 +1947,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_horas_trabalhada_tipo += f" AND setor = '{setor_selecionado}'"
+            query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
             query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
             
