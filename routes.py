@@ -1160,8 +1160,6 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
         if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
             df['maquina_parada'][i] = False
             
-    df[['id_ordem','maquina_parada','parada1','status']].head(50)
-
     list_users = df.values.tolist()
 
     return render_template('user/index.html', list_users=list_users)
