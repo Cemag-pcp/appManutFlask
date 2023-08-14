@@ -13,13 +13,15 @@
       <table id="example" class="table table-striped table-bordered">
         <thead>
           <tr>
-            <td>N° execução</td>
-            <td>Status</td>
-            <td>Data Inicio</td>
-            <td>Data Fim</td>
-            <td>Operadores</td>
-            <td>Duração (minutos)</td>
-            <td>Comentários</td>
+            <th>N° execução</th>
+            <th>Status</th>
+            <th>Data Inicio</th>
+            <th>Data Fim</th>
+            <th>Operadores</th>
+            <th>Duração (minutos)</th>
+            <th>Comentários</th>
+            <th>Custo</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -42,6 +44,11 @@
             <td>{{data[4]}}</td>
             <td>{{data[8]}}</td>
             <td>{{data[5]}}</td>
+            {% if data[0] > 0 %}
+            <td>Custo</td>
+            {% else %}
+              <td>-</td>
+            {% endif %}
             {% if data[0] != 0 %}
             <td>
               <a id="dropdown_os" class="dropdown-item" href="/editar_ordem/{{id_ordem}}/{{data[0]}}"> 
@@ -49,7 +56,7 @@
               </a>
             </td>
             {% else %}
-              <td></td>
+              <td>-</td>
             {% endif %}
         </tr>
         {% endfor %}

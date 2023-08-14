@@ -12,6 +12,7 @@
         <div class = "board" style="overflow-x: auto;">
             <div id = "titulo" class="row">
                 <h1 class="visao">Ordem de serviço</h1>
+                <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
             </div>
 
             <table class="table">
@@ -19,6 +20,14 @@
                   <tr class="filters">
                     <th>OS
                         <input class="form-control form-control" id="os-filter" style='padding: .375rem .25rem;' name="os-filter">
+                    </th>
+                    <th>Execução
+                        <select class="form-control" id="execucao-filter" name="execucao-filter">
+                            <option value="">Todos</option>  
+                            {% for row in list_users %}
+                            <option value="{{row[12]}}">{{row[12]}}</option>
+                            {% endfor %}
+                        </select>
                     </th>
                     <th>Setor
                         <select class="form-control" id="setor-filter" name="setor-filter">
@@ -87,6 +96,7 @@
                     <thead>
                         <tr>
                             <th style="width: 30px;">OS</th>
+                            <th style="width: 40px;">Execução</th>
                             <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
                             <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. ou Local</th>
                             <th>Risco</th>
@@ -101,7 +111,8 @@
                     <tbody>
                         {% for row in list_users %}
                         <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <td style="max-width: 90px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[11]}}</td>
+                            <td style="max-width: 90px; padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[11]}}</td>
+                            <td style="max-width: 90px; padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[12]}}</td>
                             <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
                             <td style="max-width: 80px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
                             <td style="padding-bottom: 0px;">{{row[4]}}</td>
@@ -226,7 +237,142 @@
 
 </div>
 
+<script>
 
+function downloadFilteredCSV(filteredData) {
+    // Adicione uma linha de cabeçalho com os nomes das colunas
+    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Últ. atualização', 'Máq. Parada?', 'Menu'];
+    filteredData.unshift(headerRow);
+
+    var csvContent = "data:text/csv;charset=utf-8,";
+
+    // Concatena todas as linhas em uma única string
+    for (var i = 0; i < filteredData.length; i++) {
+        var cleanedRow = filteredData[i].map(cleanCSVValue).join(",");
+        csvContent += cleanedRow + "\r\n"; // Usamos "\r\n" para forçar a quebra de linha no formato CSV
+    }
+
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "dados_filtrados.csv");
+    document.body.appendChild(link);
+    link.click();
+}
+
+function cleanCSVValue(value) {
+    // Limpa o valor removendo quebras de linha e espaços extras
+    return value.replace(/[\r\n]+/g, '').trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function downloadFilteredData() {
+    var filteredData = applyFilters(); // Aplica os filtros e obtém os dados filtrados
+    downloadFilteredCSV(filteredData); // Realiza o download do CSV
+}
+
+// Função para aplicar os filtros na tabela
+function applyFilters() {
+    // Obtém os valores dos filtros
+    var osFilterValue = osFilter.value.toLowerCase();
+    var execucaoFilterValue = execucaoFilter.value.toLowerCase();
+    var setorFilterValue = setorFilter.value.toLowerCase();
+    var riscoFilterValue = riscoFilter.value.toLowerCase();
+    var maquinaFilterValue = maquinaFilter.value.toLowerCase();
+    var statusFilterValue = statusFilter.value.toLowerCase();
+    var naturezaFilterValue = naturezaFilter.value.toLowerCase();
+    var maquinaParadaFilterValue = maquinaParadaFilter.value.toLowerCase();
+
+    // Obtém as linhas da tabela
+    var table = document.getElementById('table1');
+    var rows = table.getElementsByTagName('tr');
+
+    var filteredData = [];
+
+    // Itera pelas linhas da tabela (começando em 1 para ignorar o cabeçalho)
+    for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var osValue = row.cells[0].textContent.toLowerCase();
+        var execucaoValue = row.cells[1].textContent.toLowerCase();
+        var setorValue = row.cells[2].textContent.toLowerCase();
+        var maquinaValue = row.cells[3].textContent.toLowerCase();
+        var riscoValue = row.cells[4].textContent.toLowerCase();
+        var statusValue = row.cells[5].textContent.toLowerCase();
+        var naturezaValue = row.cells[6].textContent.toLowerCase();
+        var maquinaParadaValue = row.cells[9].querySelector('i');
+
+        // Verifica se a linha corresponde aos filtros
+        var shouldDisplay =
+            osValue.includes(osFilterValue) &&
+            execucaoValue.includes(execucaoFilterValue) &&
+            setorValue.includes(setorFilterValue) &&
+            maquinaValue.includes(maquinaFilterValue) &&
+            riscoValue.includes(riscoFilterValue) &&
+            statusValue.includes(statusFilterValue) &&
+            naturezaValue.includes(naturezaFilterValue);
+
+        if (maquinaParadaFilterValue === 'true') {
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check-circle');
+        } else if (maquinaParadaFilterValue === 'false') {
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-times-circle');
+        }
+
+        // Se a linha corresponder aos filtros, adiciona os valores ao array de dados filtrados
+        if (shouldDisplay) {
+            var rowData = [];
+            for (var j = 0; j < row.cells.length; j++) {
+                rowData.push(row.cells[j].textContent);
+            }
+            filteredData.push(rowData);
+        }
+
+        // Atualiza a exibição da linha conforme necessário
+        row.style.display = shouldDisplay ? '' : 'none';
+    }
+
+    return filteredData;
+}
+// Obtém os elementos de filtro por seus IDs
+var osFilter = document.getElementById('os-filter');
+var execucaoFilter = document.getElementById('execucao-filter');
+var setorFilter = document.getElementById('setor-filter');
+var riscoFilter = document.getElementById('risco-filter');
+var maquinaFilter = document.getElementById('maquina-filter');
+var statusFilter = document.getElementById('status-filter');
+var naturezaFilter = document.getElementById('natureza-filter');
+var maquinaParadaFilter = document.getElementById('maquina-parada-filter');
+
+// Função para preencher o filtro de execução com valores únicos
+function populateExecucaoFilter() {
+    var options = Array.from(new Set(Array.from(document.querySelectorAll('#execucao-filter option')).map(option => option.value)));
+    var sortedValues = sortUniqueValues(options);
+
+    execucaoFilter.innerHTML = '<option value="">Todos</option>';
+    sortedValues.forEach(value => {
+        execucaoFilter.innerHTML += `<option value="${value}">${value}</option>`;
+    });
+}
+
+// Adiciona event listeners para detectar mudanças nos filtros
+osFilter.addEventListener('input', applyFilters);
+execucaoFilter.addEventListener('change', applyFilters);
+setorFilter.addEventListener('change', applyFilters);
+riscoFilter.addEventListener('change', applyFilters);
+maquinaFilter.addEventListener('input', applyFilters);
+statusFilter.addEventListener('change', applyFilters);
+naturezaFilter.addEventListener('change', applyFilters);
+maquinaParadaFilter.addEventListener('change', applyFilters);
+
+// Chama a função applyFilters inicialmente para exibir a tabela completa
+applyFilters();
+populateExecucaoFilter(); // Preenche o filtro de execução com valores únicos
+
+function sortUniqueValues(values) {
+    return values.sort(function(a, b) {
+        return a.localeCompare(b, 'pt', { sensitivity: 'base' });
+    });
+}
+
+</script>
 
 <script>
     function abrirModalExclusao(idLinha) {
@@ -371,76 +517,6 @@
         colunaValores[i].textContent = formatoMoeda;
     }
     }
-</script>
-
-<script>
-    // Função para aplicar os filtros na tabela
-    function applyFilters() {
-        // Obtém os valores dos filtros
-        var osFilterValue = document.getElementById('os-filter').value.toLowerCase();
-        var setorFilterValue = document.getElementById('setor-filter').value.toLowerCase();
-        var riscoFilterValue = document.getElementById('risco-filter').value.toLowerCase();
-        var maquinaFilterValue = document.getElementById('maquina-filter').value.toLowerCase();
-        var statusFilterValue = document.getElementById('status-filter').value.toLowerCase();
-        var naturezaFilterValue = document.getElementById('natureza-filter').value.toLowerCase();
-        var maquinaParadaFilterValue = document.getElementById('maquina-parada-filter').value.toLowerCase();
-
-        // Obtém as linhas da tabela
-        var table = document.getElementById('table1');
-        var rows = table.getElementsByTagName('tr');
-
-        // Itera pelas linhas da tabela (começando em 1 para ignorar o cabeçalho)
-        for (var i = 1; i < rows.length; i++) {
-            var row = rows[i];
-            var osValue = row.cells[0].textContent.toLowerCase();
-            var setorValue = row.cells[1].textContent.toLowerCase();
-            var maquinaValue = row.cells[2].textContent.toLowerCase();
-            var riscoValue = row.cells[3].textContent.toLowerCase();
-            var statusValue = row.cells[4].textContent.toLowerCase();
-            var naturezaValue = row.cells[5].textContent.toLowerCase();
-            var maquinaParadaValue = row.cells[8].querySelector('i');
-
-            // Verifica se a linha corresponde aos filtros e exibe/oculta conforme necessário
-            var shouldDisplay =
-                osValue.includes(osFilterValue) &&
-                setorValue.includes(setorFilterValue) &&
-                maquinaValue.includes(maquinaFilterValue) &&
-                riscoValue.includes(riscoFilterValue) &&
-                statusValue.includes(statusFilterValue) &&
-                naturezaValue.includes(naturezaFilterValue);
-
-
-            if (maquinaParadaFilterValue === 'true') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check-circle');
-            } else if (maquinaParadaFilterValue === 'false') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-times-circle');
-            }
-
-            row.style.display = shouldDisplay ? '' : 'none';
-        }
-    }
-
-    // Obtém os elementos de filtro por seus IDs
-    var osFilter = document.getElementById('os-filter');
-    var setorFilter = document.getElementById('setor-filter');
-    var riscoFilter = document.getElementById('risco-filter');
-    var maquinaFilter = document.getElementById('maquina-filter');
-    var statusFilter = document.getElementById('status-filter');
-    var naturezaFilter = document.getElementById('natureza-filter');
-    var maquinaParadaFilter = document.getElementById('maquina-parada-filter');
-
-    // Adiciona event listeners para detectar mudanças nos filtros
-    osFilter.addEventListener('input', applyFilters);
-    setorFilter.addEventListener('change', applyFilters);
-    riscoFilter.addEventListener('change', applyFilters);
-    maquinaFilter.addEventListener('input', applyFilters);
-    statusFilter.addEventListener('change', applyFilters);
-    naturezaFilter.addEventListener('change', applyFilters);
-    maquinaParadaFilter.addEventListener('change', applyFilters);
-
-    // Chama a função applyFilters inicialmente para exibir a tabela completa
-    applyFilters();
-
 </script>
 
 <script>

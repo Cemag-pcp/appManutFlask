@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, url_for, session
+from flask import Flask, render_template, url_for, request, redirect, url_for, session,flash
 #from forms import FormLogin, FormCriarConta
 from flask import Blueprint
 import psycopg2.extras
@@ -51,10 +51,9 @@ def login(): # Lógica de login
                 session['loggedin'] = True
                 session['id'] = account['id']
                 session['username'] = account['email']
-                msg = 'Logged in successfully !'
                 return redirect(url_for('routes.Index'))
             else:           
-                msg = 'Incorrect username / password !'
+                flash('Usuário ou Senha inválida')
 
         return render_template('login/login.html', msg = msg)
 

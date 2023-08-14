@@ -1,0 +1,113 @@
+{% extends "user/layout.html" %}
+{% block body %}
+
+  {% with messages = get_flashed_messages()  %}
+  {% if messages %}
+  {% for message in messages %}
+  {% if message == 'Máquina cadastrada com sucesso' %}
+  <div class="alert-success alert-dismissible fade show" id="alert_cadast_52" role="alert">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  {% else %}
+  <div class="alert alert-danger">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+</div>
+
+<div class="col-md-4 offset-md-4">
+  <div id ="formulario_preventiva" class="card card-body">
+    
+    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3 p-3">
+      <h3>Edição de máquinas preventivas</h3>
+    </div> 
+
+    <form action="/editar-maquina-preventiva/{{codigo}}" method="POST" enctype="multipart/form-data">
+
+      <div class="form-row">
+          <div class="form-group">
+            <label for="codigo">Codigo</label>
+            <input type="text" class="form-control" style="height: 38px;" name="codigo" value="{{codigo}}" required>
+          </div>
+
+        <div class="form-group">
+          <label for="tombamento">Tombamento</label>
+          <input type="text" class="form-control" style="height: 38px;" name="tombamento" value="{{tombamento}}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descricao">Descrição</label>
+        <input type="text" class="form-control" style="height: 38px;" name="descricao" value="{{descricao}}" required>
+      </div>
+      
+          
+      <div class="form-group">         
+        <label for="setor-label">Setor</label>
+        <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
+          <option value="{{setor}}" >{{setor}}</option> 
+          <option value="Administrativo">Administrativo</option>
+          <option value="Almoxarifado">Almoxarifado</option>
+          <option value="Corte e estamparia">Corte e estamparia</option>
+          <option value="Expedição">Expedição</option>
+          <option value="Equipamentos de Movimentacao">Equipamentos de Movimentação</option>
+          <option value="Solda">Solda</option>
+          <option value="Montagem">Montagem</option>
+          <option value="Pintura">Pintura</option>
+          <option value="Carpintaria">Carpintaria</option>
+          <option value="Usinagem">Usinagem</option>  
+          <option value="Serra">Serra</option>
+          <option value="Serralheria">Serralheria</option>
+          <option value="Manutenção">Manutenção</option>
+          <option value="Forjaria">Forjaria</option>
+          <option value="Utilidades">Utilidades</option> 
+        </select>
+      </div>
+
+        <div class="form-group">  
+            <label for="criticidade-label">Criticidade</label>              
+            <select style = 'height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
+            <option value="{{criticidade}}"></option>  
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            </select>
+        </div>
+      <button id = 'salvar' class="btn btn-primary btn-block">
+        Inserir 
+      </button>
+
+    </div>
+
+      <!-- <div class="file-upload" style="margin-top: 20px;">
+          <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple disabled hidden>
+          <button class="file-upload__button" type="button" name="pdf" id="pdf" disabled>Checklist em pdf</button>
+          <span class="file-upload__label">Nenhum Arquivo selecionado</span>
+      </div>
+
+      <div class="file-upload" style="margin-top: 20px;">
+        <input class="file-upload__input" type="file" name="imagem" id="imagem" multiple disabled>
+        <button class="file-upload__button" type="button" name="imagem" id="imagem" disabled>Imagem</button>
+        <span class="file-upload__label">Nenhum Arquivo selecionado</span>
+      </div>
+    
+      <div class="file-upload" style="margin-top: 20px;">
+        <input class="file-upload__input" type="file" name="pdf2" id="pdf2" multiple disabled>
+        <button class="file-upload__button" type="button" name="pdf" id="pdf" disabled>Documento</button>
+        <span class="file-upload__label">Nenhum Arquivo selecionado</span>
+      </div> -->
+    </form>
+  </div>
+</div>
+</div>
+
+{% endblock %}

@@ -614,10 +614,11 @@ body {
   }
 }
 
-#formulario_preventiva{
+#formulario_preventiva {
+  position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,12%);
+  transform: translate(-50%,20%);
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   width: 450px;
@@ -625,14 +626,15 @@ body {
   border-radius: 20px;
 }
 
-@media (max-width: 767px) { /* Tamanho da tela de celular */
+@media (max-width: 767px){
   #formulario_preventiva {
       width: 100%;
       top: 50%;
       left: 50%;
-      transform: translate(-50%,3%);/* Ocupar toda a largura disponível */
-      max-width: 450px; /* Limitar a largura máxima */
+      transform: translate(-50%,20%);
+      max-width: 450px;
       margin-bottom: 21 0px;
+      position: relative;
   }
 }
 
@@ -725,21 +727,37 @@ body {
   align-items: center;
 }
 
-#linha_tempo{
-  width: 70%;
-  height: 76.5vh;
+#linha_tempo {
+  position: fixed;
+  width: 80%;
+  height: 70%;
   z-index: 0;
   top: 50%;
-  left: 5%;
-  transform: translate(15%,10%);
-  align-items: center;
+  left: 50%;
+  transform: translate(-50%,-60%);
   border-radius: 20px;
   background-color: rgba(255, 255, 255,0.5);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: scroll;
 }
 
+@media(max-width:1050px){
+  #linha_tempo {
+    position: fixed;
+    width: 100%;
+    height: 60%;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-60%);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255,0.5);
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    margin: 0;
+    overflow-x: scroll;
+}
+}
 #linha_tempo h3{
   padding: 20px;
 }
@@ -1028,9 +1046,9 @@ input #file{
     background-color: #a7a7a7;
 }
 
-#filtro_setor{
+/* #filtro_setor{
   width: 160px;
-}
+} */
 
 .graphBox{
   position: relative;
@@ -1496,17 +1514,31 @@ input #file{
     }
 }
 
-.downloads{
-  display: grid;
-
+.select{
+  width: 50%;
 }
 
-.remove-link {
-  position: relative;
-  left: 50px; /* Adicione margem esquerda para separar o ícone do link */
+#baixar_csv {
+  background: rgb(255, 161, 113);
+  border: 2px solid rgb(255, 142, 85);
+  border-radius: 4px;
+  outline: none;
+  padding: 0.5em 0.8em;
+  width: 160px;
+  color: #ffffff;
+  font-size: 1em;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
 }
 
-.link-download{
-  position: relative;
-  left: 50px;
+#baixar_csv:hover {
+  background: rgb(255, 142, 85);;
+  outline: none;
+}
+
+#baixar_csv:active {
+  background: rgb(255, 142, 85);;
+  outline: none;
 }

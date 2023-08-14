@@ -179,7 +179,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     if setor_selecionado == '':
         setor_selecionado = None
-
+    
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     # query_mtbf
@@ -258,6 +258,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         grafico1_maquina = []
         grafico1_mtbf = []
+        df_timeline_copia = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_maquina = {'labels_mtbf_maquina': grafico1_maquina, 'dados_mtbf_maquina': grafico1_mtbf}
 
@@ -331,6 +332,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         grafico1_maquina = []
         grafico1_mtbf = []
+        df_timeline_mtbf_setor = df_timeline[['setor','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_setor = {'labels_mtbf_setor': grafico1_maquina, 'dados_mtbf_setor': grafico1_mtbf}
 
@@ -636,7 +638,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
     if len(df_combinado)> 0:
-
+        print('Entrou')
         df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] - df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
         df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
         df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
@@ -645,6 +647,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             """
             Se for GET pega todo o histórico e adiciona no atual
             """
+            print('Entrou no Boleano')
             historico_csv = pd.read_csv("disponibilidade_historico.csv", sep=';')
            
             if setor_selecionado:
@@ -665,7 +668,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             df_combinado_disponibilidade = df_combinado_disponibilidade[['maquina','MTBF','MTTR','disponibilidade']].values.tolist()
             
         else:
-
+            print('Não Entrou no Boleano')
             labels = df_combinado['maquina'].tolist() # eixo x
             dados_disponibilidade = df_combinado['disponibilidade'].tolist() # eixo y gráfico 1
 
@@ -674,7 +677,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_disponibilidade = {'labels_disponibilidade_maquina': labels, 'dados_disponibilidade_maquina': dados_disponibilidade}            
     
     else:
-
+        print('Não Entrou')
         labels = []
         dados_disponibilidade = []
         df_combinado_disponibilidade = []
@@ -755,7 +758,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         labels = []
         dados_disponibilidade = []
         df_disponibilidade_setor = []
-        
+        df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].values.tolist()
+
         context_disponibilidade_setor = {'labels_disponibilidade_setor': labels, 'dados_disponibilidade_setor': dados_disponibilidade}
 
     # query_horas_trabalhada_tipo
@@ -908,6 +912,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         grafico1_top10_maquina = []
         grafico1_top10_mtbf = []
+        top_10_maiores_MTBF_lista = df_timeline[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
         context_mtbf_top10_maquina = {'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}
 
@@ -1079,33 +1084,53 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     #s = "SELECT * FROM tb_ordens"
-    s = (""" 
-        SELECT DISTINCT t1.total, t2.* 
-        FROM (
-            SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
-            FROM tb_carrinho
-            JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
-            GROUP BY tb_carrinho.id_ordem
-        ) t1
-        RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem;
-    """)
+    # s = (""" 
+    #     SELECT DISTINCT t1.total, t2.* 
+    #     FROM (
+    #         SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+    #         FROM tb_carrinho
+    #         JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+    #         GROUP BY tb_carrinho.id_ordem
+    #     ) t1
+    #     RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem;
+    # """)
+
+    s = (""" select t3.*, t4.parada1,t4.parada2,t4.parada3
+            from(
+                SELECT DISTINCT t1.total, t2.* 
+                FROM (
+                    SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+                    FROM tb_carrinho
+                    JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+                    GROUP BY tb_carrinho.id_ordem
+                    ) t1
+                RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
+            -- 	WHERE ordem_excluida isnull
+            ) t3
+            LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
+            ORDER BY t3.id_ordem;
+         """)
 
     df = pd.read_sql_query(s, conn)
     df = df.sort_values(by='id_ordem').reset_index(drop=True)
     
-    for i in range(len(df)):
-        try:
-            if df['id_ordem'][i] == df['id_ordem'][i-1]:
-                df['maquina_parada'][i] = df['maquina_parada'][i-1]
-        except:
-            pass
-        
+    df = df[df['ordem_excluida'] != True].reset_index(drop=True)
+
+    df.fillna('',inplace=True)
+
+    for i in range(len(df)-1,0,-1):
+        if df['id_ordem'][i] == df['id_ordem'][i-1]:
+            if df['maquina_parada'][i-1] == '':
+                df['maquina_parada'][i-1] = df['maquina_parada'][i]
+
+    for i in range(1,len(df)):
+        if df['id_ordem'][i-1] == df['id_ordem'][i]:
+            df['maquina_parada'][i] = df['maquina_parada'][i-1]
+
     df = df.sort_values(by='n_ordem')
 
     df.reset_index(drop=True, inplace=True)
     df.replace(np.nan, '', inplace=True)
-
-    df = df[df['ordem_excluida'] != True]
 
     df['dataabertura'] = df['dataabertura'].fillna(method='ffill')
     df['dataabertura'] = df['dataabertura'].replace('', method='ffill')
@@ -1125,6 +1150,17 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     df['ultima_atualizacao'] = pd.to_datetime(df['ultima_atualizacao'])
     df['ultima_atualizacao'] = df['ultima_atualizacao'] - timedelta(hours=3)
     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df.reset_index(drop=True,inplace=True)
+
+    for i in range(len(df)):
+        if df['maquina_parada'][i] == '':
+            df['maquina_parada'][i] = False
+
+    for i in range(len(df)):
+        if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
+            df['maquina_parada'][i] = False
+            
+    df[['id_ordem','maquina_parada','parada1','status']].head(50)
 
     list_users = df.values.tolist()
 
@@ -2616,6 +2652,55 @@ def editar_maquina(codigo):
 
     return render_template('user/editar_maquina.html', codigo=codigo,
                            setor=setor,descricao=descricao,tombamento=tombamento)
+
+@routes_bp.route('/editar-maquina-preventiva/<codigo>', methods=['POST','GET'])
+@login_required
+def editar_maquina_preventiva(codigo):
+
+    if request.method == 'POST':
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        codigo_inicial = codigo
+        codigo_novo = request.form['codigo']
+        tombamento = request.form['tombamento']
+        descricao = request.form['descricao']
+        setor = request.form['setor']
+        criticidade = request.form['criticidade']
+        # periodicidade = request.form['periodicidade']
+        
+        cur.execute("""
+            UPDATE tb_maquinas_preventivas
+            SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,classificacao=%s
+            WHERE codigo = %s
+            """, (codigo_novo, tombamento, setor, descricao, criticidade, codigo_inicial))
+
+        conn.commit()
+        conn.close()
+
+        return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
+                                setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_maquinas_preventivas WHERE codigo = '{}'""".format(codigo)
+
+    cur.execute(query)
+    data = cur.fetchall()
+
+    codigo = codigo
+    setor = data[0][2]
+    descricao = data[0][3]
+    tombamento = data[0][1]
+    criticidade = data[0][4]
+
+    if not tombamento:
+        tombamento = ''
+        
+    return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
+                        setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
 
 @routes_bp.route('/editar-maquina-bd/<codigo>', methods=['POST'])
 @login_required
