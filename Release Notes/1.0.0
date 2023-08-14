@@ -1,0 +1,20 @@
+Notas de Lançamento - Aplicativo para manutenção dentro da empresa CEMAG, desenvolvido em Flask.
+1.0.0 - 14/08/2023
+
+*Novidades*
+
+1. Filtro por número de execução
+2. Fazer download da tabela principal, podendo ser filtrada antes de baixar.
+3. Adicionar documentos dentro de cada máquina registrada.
+4. Editar informações de máquinas que estão com a função de preventiva ativada.
+
+*Correções*
+
+1. Flag de máquina parada não estava levando em consideração a pergunta "Execução feita c/ a máquina parada?".
+2. Ao alterar o status da ordem para "Finalizada" automaticamente a flag de "Máquina parada" será alterada para falso (Máquina não parada).
+
+Como Atualizar
+
+*Feedback e Suporte*
+
+Se você tiver algum feedback, sugestão ou encontrar algum problema, entre em contato com a Ti.
