@@ -105,7 +105,7 @@
     <h4>Downloads</h4>
     <div class="file-upload" style="margin-top: 20px;">
         <!-- Adicione o elemento input com o ID pdfInput1 -->
-        <input type="file" id="pdfInput1" accept=".pdf" style="margin-bottom: 30px;">
+        <input type="file" id="pdfInput1" accept=".pdf" style="margin-bottom: 30px;" enctype="multipart/form-data" multiple>
         <button onclick="uploadPdf(codigo_maquina)">Enviar</button>
     </div>
         <table class="table table-striped" id="pdfTable">
@@ -120,7 +120,6 @@
         </table>
     </div>
 </div>
-
 
 <!-- Modal para excluir maquina -->
 <div class="modal fade" id="modalExclusao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
@@ -336,15 +335,15 @@
                 var nome_arquivo = response.nome_arquivo;
                 var pdfUrls = response.pdfUrls;
 
-                pdfUrls.forEach(function(pdfUrl) {
+                pdfUrls.forEach(function(pdfUrl, index) {
                     var newRow = pdfTableBody.insertRow();
 
                     var fileNameCell = newRow.insertCell(0);
                     fileNameCell.textContent = extractFileNameFromUrl(pdfUrl);
                     fileNameCell.style.display = 'none';
 
-                    var nomeArquivo = newRow.insertCell(1);
-                    nomeArquivo.textContent = nome_arquivo;
+                    var nomeArquivoCell = newRow.insertCell(1);
+                    nomeArquivoCell.textContent = response.nome_arquivo[index]; // Use o índice para acessar o nome correto
 
                     var downloadCell = newRow.insertCell(2);
                     var downloadLink = document.createElement("a");
@@ -355,13 +354,10 @@
                     var removeCell = newRow.insertCell(3);
                     var removeButton = document.createElement("button");
                     removeButton.textContent = "Remover";
-                    removeButton.onclick = function () {
-                    removerPdf(nomeArquivo); // Chamar a função de remoção passando o nome do arquivo
-                
-                };
-                
-                removeCell.appendChild(removeButton);
-
+                    removeButton.onclick = function() {
+                        removerPdf(response.nome_arquivo[index]); // Chamar a função de remoção passando o nome do arquivo
+                    };
+                    removeCell.appendChild(removeButton);
                 });
                 
                 hideLoading(); // Mova a chamada para dentro da função success
@@ -381,8 +377,8 @@
     }
 
     function removerPdf(nomeArquivo) {
-        var requestUrl = `/remover_pdf/${window.codigo_maquina}/${nomeArquivo}`;
-
+        var requestUrl = `/remover_pdf/${window.codigo_maquina}/${encodeURIComponent(nomeArquivo)}`;
+        showLoading();
         $.ajax({
             url: requestUrl,
             type: 'DELETE',
@@ -400,9 +396,14 @@
                 }
 
                 console.log(response.message);
+                hideLoading();
+                // Após remover o PDF, atualize a lista no modal
+                listarPdf();
             },
             error: function(error) {
                 console.error('Erro ao remover o PDF: ', error);
+                hideLoading();
+
             }
         });
     }

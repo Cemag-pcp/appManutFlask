@@ -2284,6 +2284,8 @@ def testes_envio_pdf(codigo_maquina):
 
     pdfs = request.files.getlist('pdfFile')  # Certifique-se de usar 'pdfFile' para corresponder ao nome do campo no FormData
 
+    print(pdfs)
+
     if len(pdfs) > 0:
         for pdf in pdfs:
             if pdf.filename != '':
@@ -2440,6 +2442,8 @@ def remover_pdf(codigo_maquina, nome_arquivo):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor()
 
+    print(nome_arquivo)
+
     cur.execute("SELECT id FROM tb_anexos WHERE codigo_maquina = %s AND nome_arquivo = %s", (codigo_maquina, nome_arquivo))
     pdf_id = cur.fetchone()
 
@@ -2455,7 +2459,6 @@ def remover_pdf(codigo_maquina, nome_arquivo):
         cur.close()
         conn.close()
         return jsonify({'error': 'PDF não encontrado'}), 404
-
 
 @routes_bp.route('/lista_maquinas', methods=['GET'])
 @login_required
