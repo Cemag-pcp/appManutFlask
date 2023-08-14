@@ -1542,3 +1542,54 @@ input #file{
   background: rgb(255, 142, 85);;
   outline: none;
 }
+
+#enviar_pdf {
+  background: #007bff;
+  border: 2px solid #0171e9;
+  border-radius: 4px;
+  outline: none;
+  padding: 0.5em 0.5em;
+  width: 100px;
+  margin-bottom: 25px;
+  color: #ffffff;
+  font-size: 1em;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+}
+
+#enviar_pdf:hover {
+  background: #0171e9;
+  outline: none;
+}
+
+#enviar_pdf:active {
+  background: #0171e9;
+  outline: none;
+}
+
+.remove-button {
+  background: #ff0040;
+  border: 2px solid #ec003b;
+  border-radius: 4px;
+  outline: none;
+  padding: 0.5em 0.5em;
+  width: 100px;
+  color: #ffffff;
+  font-size: 0.7em;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+}
+
+.remove-button:hover {
+  background: #ec003b;
+  outline: none;
+}
+
+.remove-button:active {
+  background: #ec003b;
+  outline: none;
+}

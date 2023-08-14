@@ -102,13 +102,13 @@
 
 <!-- Modal para listar e inserir documentos -->
 <div id="modalDocumento" class="tela" style="display: none;">
-    <div class="modal-content2">
+    <div class="modal-content3">
         <span class="close" onclick="closeModal()">&times;</span> <!-- Botão de fechar -->
     <h4>Downloads</h4>
-    <div class="file-upload" style="margin-top: 20px;">
+    <div class="file-upload-lista" style="margin-top: 20px;">
         <!-- Adicione o elemento input com o ID pdfInput1 -->
         <input type="file" id="pdfInput1" accept=".pdf" style="margin-bottom: 30px;" enctype="multipart/form-data" multiple>
-        <button onclick="uploadPdf(codigo_maquina)">Enviar</button>
+        <button id="enviar_pdf" onclick="uploadPdf(codigo_maquina)">Enviar</button>
     </div>
         <table class="table table-striped" id="pdfTable">
             <thead>
@@ -298,7 +298,11 @@
                     var downloadCell = newRow.insertCell(1);
                     var downloadLink = document.createElement("a");
                     downloadLink.href = "link_para_o_arquivo_no_backend"; // Defina o link apropriado
-                    downloadLink.textContent = "Download";
+                    var downloadIcon = document.createElement("i");
+                    downloadIcon.className = "fas fa-download"; // Classe do ícone de download do Font Awesome
+                    downloadCell.classList.add("nome-download-cell");
+                    downloadLink.appendChild(downloadIcon);
+
                     downloadCell.appendChild(downloadLink);
 
                     // Coluna para o botão de remoção
@@ -309,6 +313,8 @@
                         pdfTableBody.removeChild(newRow);
                         // Aqui você deve implementar a lógica para remover o arquivo do backend.
                     };
+                    removeCell.classList.add("remove-cell");
+                    removeButton.classList.add("remove-button");
                     removeCell.appendChild(removeButton);
                 },
                 error: function(error) {
@@ -347,18 +353,29 @@
                     var nomeArquivoCell = newRow.insertCell(1);
                     nomeArquivoCell.textContent = response.nome_arquivo[index]; // Use o índice para acessar o nome correto
 
+                    nomeArquivoCell.classList.add("nome-arquivo-cell");
+
                     var downloadCell = newRow.insertCell(2);
                     var downloadLink = document.createElement("a");
                     downloadLink.href = pdfUrl;
-                    downloadLink.textContent = "Download";
+                    
+                    var downloadIcon = document.createElement("i");
+                    downloadIcon.className = "fas fa-download"; // Classe do ícone de download do Font Awesome
+
+                    downloadCell.classList.add("nome-download-cell");
+                    downloadLink.appendChild(downloadIcon);
+
                     downloadCell.appendChild(downloadLink);
 
                     var removeCell = newRow.insertCell(3);
                     var removeButton = document.createElement("button");
+                    
                     removeButton.textContent = "Remover";
                     removeButton.onclick = function() {
                         removerPdf(response.nome_arquivo[index]); // Chamar a função de remoção passando o nome do arquivo
                     };
+                    removeCell.classList.add("remove-cell");
+                    removeButton.classList.add("remove-button");
                     removeCell.appendChild(removeButton);
                 });
                 
