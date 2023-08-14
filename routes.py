@@ -1148,8 +1148,15 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime("%Y-%m-%d %H:%M:%S")
     df.reset_index(drop=True,inplace=True)
 
-    df[['id_ordem','maquina_parada','parada1']]
+    for i in range(len(df)):
+        if df['maquina_parada'][i] == '':
+            df['maquina_parada'][i] = False
 
+    for i in range(len(df)):
+        if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
+            df['maquina_parada'][i] = False
+            
+    df[['id_ordem','maquina_parada','parada1','status']].head(50)
 
     list_users = df.values.tolist()
 
