@@ -2667,16 +2667,28 @@ def editar_maquina_preventiva(codigo):
         descricao = request.form['descricao']
         setor = request.form['setor']
         criticidade = request.form['criticidade']
-        # periodicidade = request.form['periodicidade']
-        
-        cur.execute("""
-            UPDATE tb_maquinas_preventivas
-            SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,classificacao=%s
-            WHERE codigo = %s
-            """, (codigo_novo, tombamento, setor, descricao, criticidade, codigo_inicial))
+        periodicidade = request.form['periodicidade']
+        manutencao_inicial = request.form['manutencao_inicial']
+        apelido = request.form['periodicidade']
 
-        conn.commit()
-        conn.close()
+        df = gerador_de_semanas_informar_manutencao(setor,codigo_novo,descricao,tombamento,criticidade,manutencao_inicial,periodicidade)
+
+        print(df)
+
+        # cur.execute("""
+        #     UPDATE tb_maquinas_preventivas
+        #     SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,classificacao=%s
+        #     WHERE codigo = %s
+        #     """, (codigo_novo, tombamento, setor, descricao, criticidade, codigo_inicial))
+
+        # cur.execute("""
+        #     UPDATE tb_maquinas
+        #     SET setor=%s,codigo=%s,descricao=%s,tombamento=%s,apelido=%s
+        #     WHERE codigo = %s
+        #     """, (setor, codigo_novo, descricao, tombamento, apelido, codigo_inicial))
+
+        # conn.commit()
+        # conn.close()
 
         return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
                                 setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
@@ -2694,12 +2706,20 @@ def editar_maquina_preventiva(codigo):
     descricao = data[0][3]
     tombamento = data[0][1]
     criticidade = data[0][4]
+    periodicidade = data[0][5]
+    manutencao_inicial = data[0][6]
+    manutencao_inicial = datetime.strptime(manutencao_inicial, "%d/%m/%Y").strftime("%Y-%m-%d")
 
+    df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manutencao_inicial,periodicidade)
+
+    print(df)
+    
     if not tombamento:
         tombamento = ''
         
     return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
-                        setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
+                        setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade,
+                        periodicidade=periodicidade, manutencao_inicial=manutencao_inicial)
 
 @routes_bp.route('/editar-maquina-bd/<codigo>', methods=['POST'])
 @login_required

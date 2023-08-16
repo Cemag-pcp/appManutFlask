@@ -50,28 +50,28 @@
         <input type="text" class="form-control" style="height: 38px;" name="descricao" value="{{descricao}}" required>
       </div>
       
-          
-      <div class="form-group">         
-        <label for="setor-label">Setor</label>
-        <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
-          <option value="{{setor}}" >{{setor}}</option> 
-          <option value="Administrativo">Administrativo</option>
-          <option value="Almoxarifado">Almoxarifado</option>
-          <option value="Corte e estamparia">Corte e estamparia</option>
-          <option value="Expedição">Expedição</option>
-          <option value="Equipamentos de Movimentacao">Equipamentos de Movimentação</option>
-          <option value="Solda">Solda</option>
-          <option value="Montagem">Montagem</option>
-          <option value="Pintura">Pintura</option>
-          <option value="Carpintaria">Carpintaria</option>
-          <option value="Usinagem">Usinagem</option>  
-          <option value="Serra">Serra</option>
-          <option value="Serralheria">Serralheria</option>
-          <option value="Manutenção">Manutenção</option>
-          <option value="Forjaria">Forjaria</option>
-          <option value="Utilidades">Utilidades</option> 
-        </select>
-      </div>
+      <div class="form-row">
+        <div class="form-group">         
+          <label for="setor-label">Setor</label>
+          <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
+            <option value="{{setor}}" >{{setor}}</option> 
+            <option value="Administrativo">Administrativo</option>
+            <option value="Almoxarifado">Almoxarifado</option>
+            <option value="Corte e estamparia">Corte e estamparia</option>
+            <option value="Expedição">Expedição</option>
+            <option value="Equipamentos de Movimentacao">Equipamentos de Movimentação</option>
+            <option value="Solda">Solda</option>
+            <option value="Montagem">Montagem</option>
+            <option value="Pintura">Pintura</option>
+            <option value="Carpintaria">Carpintaria</option>
+            <option value="Usinagem">Usinagem</option>  
+            <option value="Serra">Serra</option>
+            <option value="Serralheria">Serralheria</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Forjaria">Forjaria</option>
+            <option value="Utilidades">Utilidades</option> 
+          </select>
+        </div>
 
         <div class="form-group">  
             <label for="criticidade-label">Criticidade</label>              
@@ -82,6 +82,30 @@
             <option value="C">C</option>
             </select>
         </div>
+
+      </div>
+
+      <div class="form-row">
+
+        <div class="form-group">  
+          <label for="periodicidade-label">Periodicidade</label>              
+          <select style = 'height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
+            <option>Semanal</option>
+            <option>Quinzenal</option>
+            <option>Mensal</option>
+            <option>Bimestral</option>
+            <option>Semestral</option> 
+          </select>
+        </div>
+
+        <div class="form-group">  
+          <label for="manut_inicial">Manutenção Inicial</label>
+          <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" value="{{ manutencao_inicial }}" required>
+        </div>
+
+      </div>
+
+
       <button id = 'salvar' class="btn btn-primary btn-block">
         Inserir 
       </button>
