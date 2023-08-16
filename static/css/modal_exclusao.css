@@ -42,6 +42,15 @@
         z-index: 5000;
     }
 
+    .modal-content3 {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+        z-index: 5000;
+    }
+
     .close {
         color: #aaa;
         float: right;
@@ -83,4 +92,49 @@
     
     .enviarModal:hover {
         background-color: #45a049;
+    }
+
+    .file-name {
+        max-width: 120px; 
+        overflow: hidden; 
+        text-overflow: ellipsis; 
+        white-space: nowrap;
+    }
+    .table .nome-arquivo-cell{
+        max-width: 120px;
+        overflow: hidden; 
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .table .nome-download-cell{
+        max-width: 60px;
+        overflow: hidden; 
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .table .remove-cell {
+        padding-right: 0px;
+    }
+
+    .file-upload-lista {
+        display: flex;
+        align-items: flex-start;
+        font-size: 15px;
+        outline: none;
+        flex-direction: column
+      }
+
+    @media (max-width:1265px){
+        .modal-content3 {
+            width: 50%;
+        }
+    }
+
+    @media (max-width:768px){
+        .modal-content3 {
+            width: 100%;
+            padding-right: 0;
+        }
     }
