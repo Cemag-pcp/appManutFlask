@@ -5,15 +5,14 @@ Notas de Lançamento - Aplicativo para manutenção dentro da empresa CEMAG, des
 
 1. Filtro por número de execução
 2. Fazer download da tabela principal, podendo ser filtrada antes de baixar.
-3. Adicionar documentos dentro de cada máquina registrada.
+3. Adicionar documentos dentro de cada máquina CADASTRADA.
 4. Editar informações de máquinas que estão com a função de preventiva ativada.
+5. Filtrar mais de um setor no dashboard.
 
 *Correções*
 
 1. Flag de máquina parada não estava levando em consideração a pergunta "Execução feita c/ a máquina parada?".
 2. Ao alterar o status da ordem para "Finalizada" automaticamente a flag de "Máquina parada" será alterada para falso (Máquina não parada).
-
-Como Atualizar
 
 *Feedback e Suporte*
 
