@@ -114,6 +114,10 @@
         white-space: nowrap;
     }
     
+    .table .remove-cell {
+        padding-right: 0px;
+    }
+
     .file-upload-lista {
         display: flex;
         align-items: flex-start;

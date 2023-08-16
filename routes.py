@@ -2558,24 +2558,27 @@ def lista_maquinas():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute(""" SELECT codigo,setor, descricao 
+    cur.execute(""" SELECT codigo,setor, descricao, tombamento 
                 FROM tb_maquinas_preventivas """)
     
-    df_c_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao'])
+    df_c_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao','tombamento'])
     df_c_preventivas['setor'] = df_c_preventivas['setor'].str.title() 
     df_c_preventivas['preventiva'] = 'Y'
 
-    cur.execute(""" SELECT codigo, setor, descricao 
+    cur.execute(""" SELECT codigo, setor, descricao, tombamento
                 FROM tb_maquinas """)
     
-    df_s_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao'])
+    df_s_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao','tombamento'])
     df_s_preventivas['setor'] = df_s_preventivas['setor'].str.title() 
     df_s_preventivas['preventiva'] = 'N'
 
     df_final = pd.concat([df_c_preventivas,df_s_preventivas]).drop_duplicates(subset='codigo',keep='first').reset_index(drop=True)
-    data = df_final.values.tolist()
 
-    df_final[df_final['setor'] == 'Pintura']
+    for i in range(len(df_final)):
+        if df_final['tombamento'][i] == None:
+            df_final['tombamento'][i] = ''
+
+    data = df_final.values.tolist()
 
     return render_template('user/lista_maquinas.html', data=data)
 
@@ -2706,42 +2709,48 @@ def salvar_edicao_maquina(codigo):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-
-
-
     codigo_inicial = codigo
     codigo_novo = request.form['codigo']
     tombamento = request.form['tombamento']
     descricao = request.form['descricao']
     setor = request.form['setor']
     
-    print(setor, codigo_novo, descricao, tombamento)
+    print(codigo_inicial,setor, codigo_novo, descricao, tombamento)
    
     if codigo_novo != codigo_inicial:
         query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo_novo)
         data = pd.read_sql_query(query, conn)
+        print('Primeiro IF')
 
         if len(data) > 0:
             flash("Código já cadastrado.",category='error')
             codigo = codigo_novo
             conn.close()
+            print('Segundo IF')
+
         else:
             """Query para editar a linha do codigo escolhido"""
+
             cur.execute("""
                 UPDATE tb_maquinas
                 SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
                 WHERE codigo = %s
                 """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
             
-            cur.execute("""
-                UPDATE tb_maquinas_preventivas
-                SET codigo=%s,tombamento=%s,setor=%s,codigo=%s
-                WHERE codigo = %s
-                """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
-            
+            try:
+                cur.execute("""
+                    UPDATE tb_maquinas_preventivas
+                    SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
+                    WHERE codigo = %s
+                    """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
+            except:
+                pass
+
             conn.commit()
             conn.close()
             codigo = codigo_novo
+            print('Primeiro Else')
+
             """Enviar mensagem de sucesso"""
             flash("Código editado com sucesso", category='success')
     
@@ -2761,7 +2770,8 @@ def salvar_edicao_maquina(codigo):
 
         conn.commit()
         conn.close()
-        
+        print('Segundo Else')
+
         """Enviar mensagem de sucesso"""
         flash("Código editado com sucesso", category='success')
 
