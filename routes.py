@@ -2671,17 +2671,66 @@ def editar_maquina_preventiva(codigo):
         criticidade = request.form['criticidade']
         # periodicidade = request.form['periodicidade']
         
-        cur.execute("""
-            UPDATE tb_maquinas_preventivas
-            SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,classificacao=%s
-            WHERE codigo = %s
-            """, (codigo_novo, tombamento, setor, descricao, criticidade, codigo_inicial))
+        if codigo_novo != codigo_inicial:
+            query = """SELECT * FROM tb_maquinas_preventivas WHERE codigo = '{}'""".format(codigo_novo)
+            data = pd.read_sql_query(query, conn)
+            print('Primeiro IF')
 
-        conn.commit()
-        conn.close()
+            if len(data) > 0:
+                flash("Código já cadastrado.",category='error')
+                codigo = codigo_novo
+                conn.close()
+                print('Segundo IF')
+
+            else:
+                """Query para editar a linha do codigo escolhido"""
+
+                cur.execute("""
+                    UPDATE tb_maquinas_preventivas
+                    SET setor=%s,codigo=%s,descricao=%s,tombamento=%s,classificacao=%s
+                    WHERE codigo = %s
+                    """, (setor, codigo_novo, descricao, tombamento, criticidade, codigo_inicial))
+                
+                try:
+                    cur.execute("""
+                        UPDATE tb_maquinas
+                        SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
+                        WHERE codigo = %s
+                        """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
+                except:
+                    pass
+
+                conn.commit()
+                conn.close()
+                codigo = codigo_novo
+                print('Primeiro Else')
+
+                """Enviar mensagem de sucesso"""
+                flash("Código editado com sucesso", category='success')
+    
+        else:
+            """Query para editar a linha do codigo escolhido"""
+            cur.execute("""
+                UPDATE tb_maquinas_preventivas
+                SET setor=%s,codigo=%s,descricao=%s,tombamento=%s,classificacao=%s
+                WHERE codigo = %s
+                """, (setor, codigo_novo, descricao, tombamento, criticidade, codigo_inicial))
+
+            cur.execute("""
+                UPDATE tb_maquinas
+                SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
+                WHERE codigo = %s
+                """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
+
+            conn.commit()
+            conn.close()
+            print('Segundo Else')
+
+            """Enviar mensagem de sucesso"""
+            flash("Código editado com sucesso", category='success')
 
         return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
-                                setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
+                                    setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
