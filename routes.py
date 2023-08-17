@@ -1152,19 +1152,15 @@ def custo_MO():
     df_groupby = df_timeline[['id_ordem','proporcional']].groupby(['id_ordem']).sum().reset_index().round(2)
     
     df_timeline = df_timeline.drop(columns=['mesExecucao', 'anoExecucao', 'dias_uteis', 'horasTotalMes', 'proporcional','nome','matricula','salario'])
-    df_timeline = df_timeline.drop_duplicates(subset=['n_ordem'])
+    df_timeline = df_timeline.drop_duplicates(subset=['id_ordem'])
 
-    df_final = pd.merge(df_timeline, df_groupby, how='left', on='n_ordem')
+    df_final = pd.merge(df_timeline, df_groupby, how='left', on='id_ordem')
 
     df_final['diferenca'] = df_final['diferenca'].astype(int)
     
-    totalMinutos = df_final['diferenca'].sum()
-    totalCusto = df_final['proporcional'].sum().round(2)
+    df_final = df_final[['id_ordem','proporcional']]
 
-    df_final = df_final.iloc[:,1:]
-
-    # df_final = df_final.values.tolist()
-
+    return df_final
 
 # Função para verificar a extensão do arquivo permitida
 def allowed_file(filename):
@@ -1260,7 +1256,11 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     for i in range(len(df)):
         if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
             df['maquina_parada'][i] = False
-            
+
+    df_custos = custo_MO()
+
+    df = pd.merge(df,df_custos,how='left',on='id_ordem')
+
     list_users = df.values.tolist()
 
     return render_template('user/index.html', list_users=list_users)
