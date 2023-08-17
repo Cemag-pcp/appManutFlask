@@ -2667,68 +2667,87 @@ def editar_maquina_preventiva(codigo):
         descricao = request.form['descricao']
         setor = request.form['setor']
         criticidade = request.form['criticidade']
-        # periodicidade = request.form['periodicidade']
-        
-        if codigo_novo != codigo_inicial:
+        periodicidade = request.form['periodicidade']
+        manutencao_inicial = request.form['manut_inicial']
+        data_formatada = datetime.strptime(manutencao_inicial, "%Y-%m-%d").strftime("%d/%m/%Y")
+
+        print(codigo_inicial, codigo_novo, tombamento, descricao, setor, criticidade, periodicidade,data_formatada)
+
+        df = gerador_de_semanas_informar_manutencao(setor,codigo_novo,descricao,tombamento,criticidade,data_formatada,periodicidade)
+
+        lista = df.values.tolist()
+        lista  = lista[0]
+
+        print(lista)
+
+        if codigo_novo != codigo_inicial:            
+
             query = """SELECT * FROM tb_maquinas_preventivas WHERE codigo = '{}'""".format(codigo_novo)
             data = pd.read_sql_query(query, conn)
-            print('Primeiro IF')
 
             if len(data) > 0:
                 flash("Código já cadastrado.",category='error')
                 codigo = codigo_novo
                 conn.close()
-                print('Segundo IF')
+                
+                return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+                        setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade,
+                        manutencao_inicial=manutencao_inicial)
 
             else:
                 """Query para editar a linha do codigo escolhido"""
 
                 cur.execute("""
-                    UPDATE tb_maquinas_preventivas
-                    SET setor=%s,codigo=%s,descricao=%s,tombamento=%s,classificacao=%s
-                    WHERE codigo = %s
-                    """, (setor, codigo_novo, descricao, tombamento, criticidade, codigo_inicial))
-                
+                    DELETE FROM tb_maquinas_preventivas
+                    WHERE codigo = '{}'
+                    """.format(codigo_inicial))
+
+                sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(','.join(['%s'] * len(lista)))
+                cur.execute(sql_insert, lista)
+
                 try:
                     cur.execute("""
                         UPDATE tb_maquinas
                         SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
                         WHERE codigo = %s
-                        """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
+                        """, (codigo_inicial, tombamento, setor, descricao, codigo_inicial))
                 except:
                     pass
 
                 conn.commit()
                 conn.close()
-                codigo = codigo_novo
-                print('Primeiro Else')
+                
+            return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+                        setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade,
+                        manutencao_inicial=manutencao_inicial)
 
-                """Enviar mensagem de sucesso"""
-                flash("Código editado com sucesso", category='success')
-    
         else:
+            
             """Query para editar a linha do codigo escolhido"""
+            
             cur.execute("""
-                UPDATE tb_maquinas_preventivas
-                SET setor=%s,codigo=%s,descricao=%s,tombamento=%s,classificacao=%s
-                WHERE codigo = %s
-                """, (setor, codigo_novo, descricao, tombamento, criticidade, codigo_inicial))
+                DELETE FROM tb_maquinas_preventivas
+                WHERE codigo = '{}'
+                """.format(codigo_inicial))
+            
+            sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(','.join(['%s'] * len(lista)))
+            cur.execute(sql_insert, lista)
 
-            cur.execute("""
-                UPDATE tb_maquinas
-                SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
-                WHERE codigo = %s
-                """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
+            try:
+                cur.execute("""
+                    UPDATE tb_maquinas
+                    SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
+                    WHERE codigo = %s
+                    """, (codigo_inicial, tombamento, setor, descricao, codigo_inicial))
+            except:
+                pass
+        
+        conn.commit()
+        conn.close()
 
-            conn.commit()
-            conn.close()
-            print('Segundo Else')
-
-            """Enviar mensagem de sucesso"""
-            flash("Código editado com sucesso", category='success')
-
-        return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
-                                    setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade)
+        return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+                                    setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade, 
+                                    manutencao_inicial=manutencao_inicial)
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2746,10 +2765,6 @@ def editar_maquina_preventiva(codigo):
     periodicidade = data[0][5]
     manutencao_inicial = data[0][6]
     manutencao_inicial = datetime.strptime(manutencao_inicial, "%d/%m/%Y").strftime("%Y-%m-%d")
-
-    df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manutencao_inicial,periodicidade)
-
-    print(df)
     
     if not tombamento:
         tombamento = ''
