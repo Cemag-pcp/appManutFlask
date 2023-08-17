@@ -1402,7 +1402,7 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    s = ('SELECT * FROM tb_ordens WHERE id_ordem = {}'.format(int(id_ordem)))
+    s = ('SELECT tb_ordens.*, tb_maquinas.tombamento FROM tb_ordens LEFT JOIN tb_maquinas ON tb_ordens.maquina = tb_maquinas.codigo WHERE tb_ordens.id_ordem = {};'.format(int(id_ordem)))
     cur.execute(s)
     data1 = pd.read_sql_query(s, conn)
 
@@ -1464,7 +1464,9 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
     else:
         maquinas = maquinas[0]
 
-    return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios, opcoes=opcoes, tipo_manutencao=tipo_manutencao, area_manutencao=area_manutencao, maquinas=maquinas)
+    return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios,
+                            opcoes=opcoes, tipo_manutencao=tipo_manutencao,
+                            area_manutencao=area_manutencao, maquinas=maquinas)
 
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
@@ -1532,8 +1534,6 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
 
         if status == 'Finalizada':
             botao3 = 'true'
-
-
 
         print(botao1)
         print(botao2)
@@ -1641,7 +1641,10 @@ def editar_ordem_inicial(id_ordem,n_ordem):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    s = ('SELECT * FROM tb_ordens WHERE id_ordem = {} AND n_ordem = {}'.format(int(id_ordem), int(n_ordem)))
+    s = ("""SELECT tb_ordens.*, tb_maquinas.tombamento 
+        FROM tb_ordens LEFT JOIN tb_maquinas ON tb_ordens.maquina = tb_maquinas.codigo
+        WHERE tb_ordens.id_ordem = {} AND tb_ordens.n_ordem = {};""".format(int(id_ordem), int(n_ordem)))
+    
     cur.execute(s)
     data1 = pd.read_sql_query(s, conn)
 
