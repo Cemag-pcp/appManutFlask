@@ -1179,18 +1179,6 @@ def Index(): # Página inicial (Página com a lista de ordens de serviço)
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    #s = "SELECT * FROM tb_ordens"
-    # s = (""" 
-    #     SELECT DISTINCT t1.total, t2.* 
-    #     FROM (
-    #         SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
-    #         FROM tb_carrinho
-    #         JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
-    #         GROUP BY tb_carrinho.id_ordem
-    #     ) t1
-    #     RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem;
-    # """)
 
     s = (""" select t3.*, t4.parada1,t4.parada2,t4.parada3
             from(
@@ -1831,8 +1819,14 @@ def filtro_maquinas(setor):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """
-        SELECT * FROM tb_maquinas WHERE setor = {}
-    """.format("'" + setor + "'")
+        SELECT *
+        FROM (
+            SELECT codigo, descricao, setor FROM tb_maquinas
+            UNION
+            SELECT codigo, descricao, setor FROM tb_maquinas_preventivas
+            ) as t1
+        WHERE t1.setor = {}
+        """.format("'" + setor + "'")
 
     lista_maquinas = pd.read_sql_query(query, conn)
     
