@@ -2392,6 +2392,7 @@ def cadastro_preventiva():
             criticidade = request.form['criticidade']
             manut_inicial = request.form['manut_inicial']
             periodicidade = request.form['periodicidade']
+            apelido = request.form['apelido']
 
             df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manut_inicial,periodicidade)
         
@@ -2409,51 +2410,35 @@ def cadastro_preventiva():
             
             else:
 
-                if 'pdf' in request.files:
-                    pdf = request.files['pdf']
-                    # Ler os dados do arquivo PDF
-                    pdf_data = pdf.read()
-
-                    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                    cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist) VALUES (%s,%s)", (codigo, pdf_data))
-                    conn.commit()
-                else:
-                    pass
-
-                if 'imagem' in request.files:
-                    imagem = request.files['imagem']
-                    # Ler os dados do arquivo PDF
-                    imagem_data = imagem.read()
-
-                    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                    cur.execute("INSERT INTO tb_anexos (codigo_maquina, imagem) VALUES (%s,%s)", (codigo, imagem_data))
-                    conn.commit()
-                else:
-                    pass
-
                 try:
                     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-                    
+                    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
                     # Consulta SQL para inserir os dados na tabela
                     sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(','.join(['%s'] * len(lista)))
 
-                    # Criar o cursor para executar a consulta SQL
-                    cursor = conn.cursor()
-
                     # Executar a consulta SQL com a lista de dados
-                    cursor.execute(sql_insert, lista)
-
+                    cur.execute(sql_insert, lista)
+            
+                    query_max = ("""SELECT max(id) FROM tb_maquinas""")
+                    cur.execute(query_max)
+                    id = cur.fetchall()
+                    id = id[0][0] + 1
+                      
+                    cur.execute("INSERT INTO tb_maquinas (id, setor, codigo, descricao, tombamento,apelido) VALUES (%s,%s, %s, %s, %s,%s)",
+                                (id, setor, codigo, descricao, tombamento,apelido))
+                    
                     # Confirmar a transação
                     conn.commit()
 
-                    print("Dados inseridos com sucesso na tabela.")
+                    flash("Máquina cadastrada com sucesso", category='sucess')
 
                 except Error as e:
                     print(f"Ocorreu um erro ao conectar ou executar a consulta no PostgreSQL: {e}")
 
                 finally:
                     # Fechar o cursor e a conexão com o banco de dados
-                    cursor.close()
+                    cur.close()
                     conn.close()
 
                 flash("Máquina cadastrada com sucesso", category='sucess')
@@ -2461,12 +2446,12 @@ def cadastro_preventiva():
             return render_template('user/cadastrar52.html')
 
         except:
-            togglePreventiva = 'false'
             codigo = request.form['codigo']
             tombamento = request.form['tombamento']
             descricao = request.form['descricao']
             setor = request.form['setor']
-            
+            apelido = request.form['apelido']
+
             s = ("""
                 SELECT * FROM tb_maquinas
                 """)
@@ -2483,34 +2468,10 @@ def cadastro_preventiva():
 
             else:
 
-                if 'pdf' in request.files:
-                    pdf = request.files['pdf']
-                    # Ler os dados do arquivo PDF
-                    pdf_data = pdf.read()
-                else:
-                    pdf_data = None
-
-                if 'imagem' in request.files:
-                    imagem = request.files['imagem']
-                    # Ler os dados do arquivo de imagem
-                    imagem_data = imagem.read()
-                else:
-                    imagem_data = None
-
-                if 'documento' in request.files:
-                    documento = request.files['documento']
-                    # Ler os dados do arquivo de imagem
-                    documento_data = documento.read()
-                else:
-                    documento_data = None
-
                 cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                
-                cur.execute("INSERT INTO tb_anexos (codigo_maquina, checklist, imagem, documento) VALUES (%s, %s, %s, %s)",
-                             (codigo, pdf_data, imagem_data, documento_data))
 
-                cur.execute("INSERT INTO tb_maquinas (id, setor, codigo, descricao, tombamento) VALUES (%s,%s, %s, %s, %s)",
-                            (id, setor, codigo, descricao, tombamento))
+                cur.execute("INSERT INTO tb_maquinas (id, setor, codigo, descricao, tombamento,apelido) VALUES (%s,%s, %s, %s, %s,%s)",
+                            (id, setor, codigo, descricao, tombamento,apelido))
                 
                 conn.commit()
 
@@ -2791,21 +2752,32 @@ def editar_maquina(codigo):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo)
-
+    query = """SELECT 
+                    tb_maquinas.codigo,
+                    tb_maquinas.setor,
+                    tb_maquinas.apelido,
+                    tb_maquinas.descricao,
+                    tb_maquinas.tombamento
+                FROM tb_maquinas
+                WHERE tb_maquinas.codigo = '{}';""".format(codigo)
+    
     cur.execute(query)
     data = cur.fetchall()
 
     codigo = codigo
     setor = data[0][1]
+    apelido = data[0][2]
     descricao = data[0][3]
     tombamento = data[0][4]
 
     if not tombamento:
         tombamento = ''
 
+    if not apelido:
+        apelido = ''
+
     return render_template('user/editar_maquina.html', codigo=codigo,
-                           setor=setor,descricao=descricao,tombamento=tombamento)
+                           setor=setor,apelido=apelido, descricao=descricao,tombamento=tombamento)
 
 @routes_bp.route('/editar-maquina-preventiva/<codigo>', methods=['POST','GET'])
 @login_required
@@ -2825,6 +2797,7 @@ def editar_maquina_preventiva(codigo):
         periodicidade = request.form['periodicidade']
         manutencao_inicial = request.form['manut_inicial']
         data_formatada = datetime.strptime(manutencao_inicial, "%Y-%m-%d").strftime("%d/%m/%Y")
+        apelido = request.form['apelido']
 
         print(codigo_inicial, codigo_novo, tombamento, descricao, setor, criticidade, periodicidade,data_formatada)
 
@@ -2863,9 +2836,9 @@ def editar_maquina_preventiva(codigo):
                 try:
                     cur.execute("""
                         UPDATE tb_maquinas
-                        SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
+                        SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
                         WHERE codigo = %s
-                        """, (codigo_inicial, tombamento, setor, descricao, codigo_inicial))
+                        """, (codigo_inicial, tombamento, setor, descricao,apelido, codigo_inicial))
                 except:
                     pass
 
@@ -2874,7 +2847,7 @@ def editar_maquina_preventiva(codigo):
                 
             return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
                         setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade,
-                        manutencao_inicial=manutencao_inicial)
+                        manutencao_inicial=manutencao_inicial,apelido=apelido)
 
         else:
             
@@ -2891,9 +2864,9 @@ def editar_maquina_preventiva(codigo):
             try:
                 cur.execute("""
                     UPDATE tb_maquinas
-                    SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
+                    SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
                     WHERE codigo = %s
-                    """, (codigo_inicial, tombamento, setor, descricao, codigo_inicial))
+                    """, (codigo_inicial, tombamento, setor, descricao, apelido, codigo_inicial))
             except:
                 pass
         
@@ -2902,35 +2875,50 @@ def editar_maquina_preventiva(codigo):
 
         return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
                                     setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade, 
-                                    manutencao_inicial=manutencao_inicial)
+                                    manutencao_inicial=manutencao_inicial,apelido=apelido)
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """SELECT * FROM tb_maquinas_preventivas WHERE codigo = '{}'""".format(codigo)
+    query = """SELECT 
+                tb_maquinas_preventivas.codigo,
+                tb_maquinas_preventivas.tombamento,
+                tb_maquinas_preventivas.setor,
+                tb_maquinas_preventivas.descricao,
+                tb_maquinas_preventivas.classificacao,
+                tb_maquinas_preventivas.periodicidade,
+                tb_maquinas_preventivas.ultima_manutencao,
+                tb_maquinas.apelido
+            FROM tb_maquinas_preventivas
+            JOIN tb_maquinas ON tb_maquinas_preventivas.codigo = tb_maquinas.codigo
+            WHERE tb_maquinas_preventivas.codigo = '{}';""".format(codigo)
 
     cur.execute(query)
     data = cur.fetchall()
 
     codigo = codigo
+    tombamento = data[0][1]
     setor = data[0][2]
     descricao = data[0][3]
-    tombamento = data[0][1]
     criticidade = data[0][4]
     periodicidade = data[0][5]
     manutencao_inicial = data[0][6]
+    apelido = data[0][7]
     manutencao_inicial = datetime.strptime(manutencao_inicial, "%d/%m/%Y").strftime("%Y-%m-%d")
     
     if not tombamento:
         tombamento = ''
+    if not apelido:
+        apelido = ''
         
     return render_template('user/editar_maquina_preventiva.html', codigo=codigo,
                         setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade,
-                        periodicidade=periodicidade, manutencao_inicial=manutencao_inicial)
+                        periodicidade=periodicidade, manutencao_inicial=manutencao_inicial, apelido=apelido)
 
 @routes_bp.route('/editar-maquina-bd/<codigo>', methods=['POST'])
 @login_required
 def salvar_edicao_maquina(codigo):
+    
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -2939,8 +2927,10 @@ def salvar_edicao_maquina(codigo):
     tombamento = request.form['tombamento']
     descricao = request.form['descricao']
     setor = request.form['setor']
-    
-    print(codigo_inicial,setor, codigo_novo, descricao, tombamento)
+    apelido = request.form['apelido']
+
+
+    print(codigo_inicial,setor, codigo_novo, descricao, tombamento,apelido)
    
     if codigo_novo != codigo_inicial:
         query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo_novo)
@@ -2958,9 +2948,9 @@ def salvar_edicao_maquina(codigo):
 
             cur.execute("""
                 UPDATE tb_maquinas
-                SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
+                SET setor=%s,codigo=%s,descricao=%s,tombamento=%s,apelido=%s
                 WHERE codigo = %s
-                """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
+                """, (setor, codigo_novo, descricao, tombamento,apelido, codigo_inicial))
             
             try:
                 cur.execute("""
@@ -2983,9 +2973,9 @@ def salvar_edicao_maquina(codigo):
         """Query para editar a linha do codigo escolhido"""
         cur.execute("""
             UPDATE tb_maquinas
-            SET setor=%s,codigo=%s,descricao=%s,tombamento=%s
+            SET setor=%s,codigo=%s,descricao=%s,tombamento=%s,apelido=%s
             WHERE codigo = %s
-            """, (setor, codigo_novo, descricao, tombamento, codigo_inicial))
+            """, (setor, codigo_novo, descricao, tombamento,apelido, codigo_inicial))
 
         cur.execute("""
             UPDATE tb_maquinas_preventivas
@@ -3000,7 +2990,7 @@ def salvar_edicao_maquina(codigo):
         """Enviar mensagem de sucesso"""
         flash("Código editado com sucesso", category='success')
 
-    return render_template('user/editar_maquina.html', codigo=codigo, tombamento=tombamento, descricao=descricao, setor=setor)
+    return render_template('user/editar_maquina.html', codigo=codigo, tombamento=tombamento, descricao=descricao, setor=setor,apelido=apelido)
 
 @routes_bp.route('/excluir-maquina', methods=['POST'])
 @login_required

@@ -1,9 +1,9 @@
 Notas de Lançamento - Aplicativo para manutenção dentro da empresa CEMAG, desenvolvido em Flask.
-1.1.0 - /08/2023
+1.1.0 - 17/08/2023
 
 *Novidades*
 
-1. 
+1. O campo de entrada 'Apelido' foi adicionado na edição de maquinas preventivas e edição de máquinas
 
 *Correções*
 
