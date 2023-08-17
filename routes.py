@@ -1083,6 +1083,89 @@ def calcular_dias_uteis(ano, mes):
 
     return dias_uteis
 
+def custo_MO():
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    s = ("""
+        SELECT
+            o.id_ordem,
+            o.dataabertura,
+            o.n_ordem,
+            o.status,
+            o.datainicio,
+            o.datafim,
+            o.operador,
+            o.descmanutencao,
+            TO_TIMESTAMP(o.datainicio || ' ' || o.horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(o.datafim || ' ' || o.horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim,
+            func.nome,
+            func.matricula,
+            func.salario
+        FROM tb_ordens as o
+        LEFT JOIN tb_funcionario as func ON o.operador LIKE '%' || func.matricula || ' - ' || func.nome || '%'
+        WHERE (o.ordem_excluida IS NULL OR o.ordem_excluida = FALSE);
+        """)
+
+    df_timeline = pd.read_sql_query(s, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    
+    for i in range(len(df_timeline)):
+        if df_timeline['fim'][i] == 'NaT':
+            df_timeline['fim'][i] = 0
+            df_timeline['inicio'][i] = 0
+        else:
+            pass
+
+    df_timeline = df_timeline.replace(np.nan,'-')
+
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        #df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+        for i in range(len(df_timeline)):
+            df_timeline['operador'][i] = df_timeline['operador'][i].replace("{","").replace("[","").replace("\\","").replace('"', '').replace("]}","")
+    except:
+        df_timeline['diferenca'] = 0
+    
+    df_timeline = df_timeline.sort_values(by='n_ordem', ascending=True)
+
+    if df_timeline['datainicio'][0] == '-':
+        df_timeline['datainicio'][0] = df_timeline['dataabertura'][0]
+
+    df_final = df_timeline 
+
+    df_timeline['mesExecucao'] = df_timeline['fim'].dt.month
+    df_timeline['anoExecucao'] = df_timeline['fim'].dt.year
+    df_timeline['dias_uteis'] = df_timeline.apply(lambda row: calcular_dias_uteis(row['anoExecucao'], row['mesExecucao']), axis=1)
+    df_timeline['horasTotalMes'] = df_timeline['dias_uteis'] * (9*60)
+    df_timeline['salario'] = df_timeline['salario'].replace("-",0)
+    df_timeline['salario'] = df_timeline['salario'].astype(float)
+    df_timeline['proporcional'] = (df_timeline['salario'] *  df_timeline['diferenca']) / df_timeline['horasTotalMes']
+    
+    df_groupby = df_timeline[['id_ordem','proporcional']].groupby(['id_ordem']).sum().reset_index().round(2)
+    
+    df_timeline = df_timeline.drop(columns=['mesExecucao', 'anoExecucao', 'dias_uteis', 'horasTotalMes', 'proporcional','nome','matricula','salario'])
+    df_timeline = df_timeline.drop_duplicates(subset=['n_ordem'])
+
+    df_final = pd.merge(df_timeline, df_groupby, how='left', on='n_ordem')
+
+    df_final['diferenca'] = df_final['diferenca'].astype(int)
+    
+    totalMinutos = df_final['diferenca'].sum()
+    totalCusto = df_final['proporcional'].sum().round(2)
+
+    df_final = df_final.iloc[:,1:]
+
+    # df_final = df_final.values.tolist()
+
+
 # Função para verificar a extensão do arquivo permitida
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}  # Lista de extensões permitidas para vídeos

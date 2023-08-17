@@ -87,7 +87,6 @@
 
                   </tr>
 
-
                 </thead>
             </table>
 
@@ -103,8 +102,8 @@
                             <th>Status</th>
                             <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Abertura</th>
-                            <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Últ. atualização</th>
                             <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
+                            <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo MO</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
                         </tr>
                     </thead>
@@ -138,13 +137,12 @@
                             <td style="padding-bottom: 0px;">{{row[16]}}</td>
                             <td style="padding-bottom: 0px;">{{row[13]}}</td>
                             
-                            <!-- <td style="max-width: 60px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" class="coluna-valores">R${{row[0]}}</td> -->
-                            <td style="max-width: 180px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[20]}}</td>  
                             {% if row[19] == True %}
                             <td style="padding-bottom: 0px;"><i class="fas fa-check-circle habilitado"></i></td>
                             {% else %}
                             <td style="padding-bottom: 0px;"><i class="fas fa-times-circle desabilitado"></i></td>
-                            {% endif %}                  
+                            {% endif %}
+                            <td style="padding-bottom: 0px;">Custo MO</td>                  
                             <td style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
                                 <div class="dropdown">
                                     <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
