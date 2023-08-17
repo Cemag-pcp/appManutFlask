@@ -346,8 +346,10 @@ function populateExecucaoFilter() {
     var options = Array.from(new Set(Array.from(document.querySelectorAll('#execucao-filter option')).map(option => option.value)));
     var sortedValues = sortUniqueValues(options);
 
+    var nonEmptyValues = sortedValues.filter(value => value !== "");
+
     execucaoFilter.innerHTML = '<option value="">Todos</option>';
-    sortedValues.forEach(value => {
+    nonEmptyValues.forEach(value => {
         execucaoFilter.innerHTML += `<option value="${value}">${value}</option>`;
     });
 }
