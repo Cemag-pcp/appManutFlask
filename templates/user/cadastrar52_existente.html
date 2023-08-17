@@ -43,42 +43,52 @@
           <label for="tombamento">Tombamento</label>
           <input type="text" class="form-control" style="height: 38px;" name="tombamento" value="{{tombamento}}">
         </div>
-      </div>
-
-      <div class="form-group">
-        <label for="descricao">Descrição</label>
-        <input type="text" class="form-control" style="height: 38px;" name="descricao" value="{{descricao}}" required>
-      </div>
       
-        <div class="form-row">
-          
-          <div class="form-group" style="width: 160px; margin-right: 5px;">         
-            <label for="setor-label">Setor</label>
-            <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
-              <option value="{{setor}}" >{{setor}}</option>  
-            </select>
-          </div>
+      </div>
 
-          <div class="form-row" style="margin-left: 20px;">
-            <div class="form-group">
-              <label for="cadastrar-preventiva">Preventiva</label>
-              <label class="switch">
-                <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()" checked>
-                <span class="slider round"></span>
-              </label>
-            </div>
+      <div class="form-row">
+
+        <div class="form-group">
+          <label for="descricao">Descrição</label>
+          <input type="text" class="form-control" style="height: 38px;" name="descricao" value="{{descricao}}" required>
+        </div>
+
+        <div class="form-group">
+          <label for="apelido">Apelido</label>
+          <input type="text" class="form-control" style="height: 38px;" id="apelido" name="apelido" value="{{apelido}}">
+        </div>
+
+      </div>
+
+      <div class="form-row">
+        
+        <div class="form-group" style="width: 160px; margin-right: 5px;">         
+          <label for="setor-label">Setor</label>
+          <select class="form-control form-control" style="height: 38px;" id="setor" name="setor" required>
+            <option value="{{setor}}" >{{setor}}</option>  
+          </select>
+        </div>
+
+        <div class="form-row" style="margin-left: 20px;">
+          <div class="form-group">
+            <label for="cadastrar-preventiva">Preventiva</label>
+            <label class="switch">
+              <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()" checked>
+              <span class="slider round"></span>
+            </label>
           </div>
+        </div>
     
-          <div class="form-group" style="width: 30px; margin-right: 50px;">  
-            <label for="criticidade-label">Criticidade</label>              
-            <select style = 'width: 60px; height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
-              <option value="" selected disabled hidden></option>  
-              <option>A</option>
-              <option>B</option>
-              <option>C</option>
-            </select>
-          </div>
-          
+        <div class="form-group" style="width: 30px; margin-right: 50px;">  
+          <label for="criticidade-label">Criticidade</label>              
+          <select style = 'width: 60px; height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
+            <option value="" selected disabled hidden></option>  
+            <option>A</option>
+            <option>B</option>
+            <option>C</option>
+          </select>
+        </div>
+        
         </div>
 
       <div class="form-row">
@@ -100,7 +110,7 @@
         </div>
       </div>
 
-      <div class="file-upload" style="margin-top: 20px;">
+      <!-- <div class="file-upload" style="margin-top: 20px;">
           <input class="file-upload__input" type="file" name="pdf" id="pdf" multiple disabled hidden>
           <button class="file-upload__button" type="button" name="pdf" id="pdf" disabled>Checklist em pdf</button>
           <span class="file-upload__label">Nenhum Arquivo selecionado</span>
@@ -116,7 +126,7 @@
         <input class="file-upload__input" type="file" name="pdf2" id="pdf2" multiple disabled>
         <button class="file-upload__button" type="button" name="pdf" id="pdf" disabled>Documento</button>
         <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-      </div>
+      </div> -->
 
       <button id = 'salvar' class="btn btn-primary btn-block">
         Inserir 

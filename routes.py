@@ -2792,6 +2792,7 @@ def editar_maquina_preventiva(codigo):
         manutencao_inicial = request.form['manut_inicial']
         data_formatada = datetime.strptime(manutencao_inicial, "%Y-%m-%d").strftime("%d/%m/%Y")
         apelido = request.form['apelido']
+        
 
         print(codigo_inicial, codigo_novo, tombamento, descricao, setor, criticidade, periodicidade,data_formatada)
 
@@ -2832,7 +2833,7 @@ def editar_maquina_preventiva(codigo):
                         UPDATE tb_maquinas
                         SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
                         WHERE codigo = %s
-                        """, (codigo_inicial, tombamento, setor, descricao,apelido, codigo_inicial))
+                        """, (codigo_novo, tombamento, setor, descricao,apelido, codigo_inicial))
                 except:
                     pass
 
@@ -2860,7 +2861,7 @@ def editar_maquina_preventiva(codigo):
                     UPDATE tb_maquinas
                     SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
                     WHERE codigo = %s
-                    """, (codigo_inicial, tombamento, setor, descricao, apelido, codigo_inicial))
+                    """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
             except:
                 pass
         

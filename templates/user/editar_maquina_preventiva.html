@@ -53,10 +53,31 @@
 
         <div class="form-group">
           <label for="apelido">Apelido</label>
-          <input type="text" class="form-control" style="height: 38px;" name="apelido" value="{{apelido}}">
+          <input type="text" class="form-control" style="height: 38px;" id="apelido" name="apelido" value="{{apelido}}">
         </div>
       </div>
+     
+      <div class="form-row">
 
+          <div class="form-group">  
+
+            <label for="periodicidade">Periodicidade</label>              
+            <select style = 'height: 38px;' class="form-control form-control" id="periodicidade" name="periodicidade" required>
+              <option>Semanal</option>
+              <option>Quinzenal</option>
+              <option>Mensal</option>
+              <option>Bimestral</option>
+              <option>Semestral</option> 
+            </select>
+            
+          </div>
+          
+          <div class="form-group">  
+            <label for="manut_inicial">Manutenção Inicial</label>
+            <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" value="{{ manutencao_inicial }}" required>
+          </div>
+
+      </div>
           
       <div class="form-group">         
         <label for="setor-label">Setor</label>
