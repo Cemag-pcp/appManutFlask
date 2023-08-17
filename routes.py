@@ -1063,6 +1063,26 @@ def formulario_os(id_ordem):
     # Retorna o arquivo para download
     return send_file("modelo_os_new.xlsx", as_attachment=True)
 
+def mes_atual():
+    
+    mesAtual = datetime.now().month
+
+    return mesAtual
+
+def calcular_dias_uteis(ano, mes):
+    dias_uteis = []
+
+    start_date = pd.Timestamp(year=ano, month=mes, day=1)
+    end_date = pd.Timestamp(year=ano, month=mes, day=1) + pd.DateOffset(months=1) - pd.DateOffset(days=1)
+
+    for day in pd.date_range(start_date, end_date):
+        if day.weekday() < 5:  # 0 a 4 representam os dias da semana de segunda a sexta-feira
+            dias_uteis.append(day)
+
+    dias_uteis = len(dias_uteis)
+
+    return dias_uteis
+
 # Função para verificar a extensão do arquivo permitida
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}  # Lista de extensões permitidas para vídeos
@@ -2155,17 +2175,35 @@ def grafico(): # Dashboard
 def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Obtém os dados da tabela
+    # s = ("""
+    #     SELECT dataabertura, n_ordem, status, datainicio, datafim, operador, descmanutencao,
+    #         TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+    #         TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+    #     FROM tb_ordens
+    #     WHERE id_ordem = {} AND ordem_excluida IS NULL OR ordem_excluida = FALSE
+    # """).format(int(id_ordem))
+
     s = ("""
-        SELECT dataabertura, n_ordem, status, datainicio, datafim, operador, descmanutencao,
-            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-        FROM tb_ordens
-        WHERE id_ordem = {} AND ordem_excluida IS NULL OR ordem_excluida = FALSE
-    """).format(int(id_ordem))
+        SELECT
+            o.dataabertura,
+            o.n_ordem,
+            o.status,
+            o.datainicio,
+            o.datafim,
+            o.operador,
+            o.descmanutencao,
+            TO_TIMESTAMP(o.datainicio || ' ' || o.horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+            TO_TIMESTAMP(o.datafim || ' ' || o.horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim,
+            func.nome,
+            func.matricula,
+            func.salario
+        FROM tb_ordens as o
+        LEFT JOIN tb_funcionario as func ON o.operador LIKE '%' || func.matricula || ' - ' || func.nome || '%'
+        WHERE o.id_ordem = {} AND (o.ordem_excluida IS NULL OR o.ordem_excluida = FALSE);
+        """).format(int(id_ordem))
 
     df_timeline = pd.read_sql_query(s, conn)
 
@@ -2198,11 +2236,42 @@ def timeline_os(id_ordem): # Mostrar o histórico daquela ordem de serviço
     if df_timeline['datainicio'][0] == '-':
         df_timeline['datainicio'][0] = df_timeline['dataabertura'][0]
 
-    df_timeline = df_timeline.iloc[:,1:]
+    df_final = df_timeline 
 
-    df_timeline = df_timeline.values.tolist()
+    if len(df_timeline) > 1:
 
-    return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_timeline)
+        df_timeline['mesExecucao'] = df_timeline['fim'].dt.month
+        df_timeline['anoExecucao'] = df_timeline['fim'].dt.year
+        df_timeline['dias_uteis'] = df_timeline.apply(lambda row: calcular_dias_uteis(row['anoExecucao'], row['mesExecucao']), axis=1)
+        df_timeline['horasTotalMes'] = df_timeline['dias_uteis'] * (9*60)
+        df_timeline['salario'] = df_timeline['salario'].replace("-",0)
+        df_timeline['salario'] = df_timeline['salario'].astype(float)
+        df_timeline['proporcional'] = (df_timeline['salario'] *  df_timeline['diferenca']) / df_timeline['horasTotalMes']
+        
+        df_groupby = df_timeline[['n_ordem','proporcional']].groupby(['n_ordem']).sum().reset_index().round(2)
+        
+        df_timeline = df_timeline.drop(columns=['mesExecucao', 'anoExecucao', 'dias_uteis', 'horasTotalMes', 'proporcional','nome','matricula','salario'])
+        df_timeline = df_timeline.drop_duplicates(subset=['n_ordem'])
+
+        df_final = pd.merge(df_timeline, df_groupby, how='left', on='n_ordem')
+
+        df_final['diferenca'] = df_final['diferenca'].astype(int)
+        
+        totalMinutos = df_final['diferenca'].sum()
+        totalCusto = df_final['proporcional'].sum().round(2)
+
+        df_final = df_final.iloc[:,1:]
+
+        df_final = df_final.values.tolist()
+
+        return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_final,
+                        totalMinutos=totalMinutos, totalCusto=totalCusto)
+    else:
+        df_final = df_final.iloc[:,1:]
+
+        df_final = df_final.values.tolist()
+
+        return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_final)
 
 @routes_bp.route('/52semanas', methods=['GET'])
 @login_required
@@ -2899,3 +2968,8 @@ def excluir_preventiva():
         flash("Máquina excluída com sucesso", category='sucess')
 
         return 'Dados recebidos com sucesso!'
+
+# @routes_bp.route('/calculo-custo-mo')
+# @login_required
+# def calculo_custo_mo():
+

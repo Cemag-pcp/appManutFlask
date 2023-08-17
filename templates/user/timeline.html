@@ -45,7 +45,7 @@
             <td>{{data[8]}}</td>
             <td>{{data[5]}}</td>
             {% if data[0] > 0 %}
-            <td>Custo</td>
+            <td>R$ {{data[9]}}</td>
             {% else %}
               <td>-</td>
             {% endif %}
@@ -56,11 +56,21 @@
               </a>
             </td>
             {% else %}
-              <td>-</td>
+              <td></td>
             {% endif %}
         </tr>
         {% endfor %}
         </tbody>
+        <tfoot>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th>{{totalMinutos}}</th>
+          <th></th>
+          <th>R$ {{totalCusto}}</th>
+        </tfoot>
       </table>
   </div>
 </div>
