@@ -3048,8 +3048,3 @@ def excluir_preventiva():
         flash("Máquina excluída com sucesso", category='sucess')
 
         return 'Dados recebidos com sucesso!'
-
-# @routes_bp.route('/calculo-custo-mo')
-# @login_required
-# def calculo_custo_mo():
-
