@@ -61,6 +61,10 @@ def obter_nome_mes(numero_mes):
 
 def dias_uteis(mes):
 
+    lista_mes = [mes]
+
+    print(lista_mes[0])
+
     # Verificar se o mês é válido (entre 1 e 12)
     if not mes:
         data_atual = pd.Timestamp.now()
@@ -1925,14 +1929,17 @@ def grafico(): # Dashboard
         setor_selecionado = request.form.getlist('filtro_setor')
         maquina_selecionado = request.form.get('filtro_maquinas')
         # area_manutencao = request.form.get('area_manutencao')
-        mes = request.form.get('data_filtro')
-
+        mes = request.form.getlist('data_filtro')
+        
         setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
-
+        mes = ",".join([f"{numero}" for numero in mes])
+        
+        print(type(mes))
         print(setor_selecionado)
+        print(mes)
 
-        if mes:
-            mes = int(mes)
+        # if mes:
+        #     mes = int(mes)
 
         """ Criando cards """
 
@@ -1957,7 +1964,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if mes:
-            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query += ' AND ordem_excluida IS NULL OR ordem_excluida = FALSE;'
         
@@ -1975,7 +1982,7 @@ def grafico(): # Dashboard
                """
 
         if mes:
-            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
 
@@ -1997,7 +2004,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mtbf += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            query_mtbf += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query_mtbf += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2023,7 +2030,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mttr += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            query_mttr += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query_mttr += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2046,7 +2053,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_disponibilidade += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            query_disponibilidade += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query_disponibilidade += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2064,7 +2071,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query_horas_trabalhada_area += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY area_manutencao;" 
 
@@ -2081,7 +2088,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) = {mes}"
+            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
             
         query_horas_trabalhada_tipo += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY tipo_manutencao;" 
 
@@ -2666,17 +2673,23 @@ def lista_maquinas():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute(""" SELECT codigo,setor, descricao, tombamento 
-                FROM tb_maquinas_preventivas """)
-    
-    df_c_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao','tombamento'])
+    cur.execute(""" SELECT 
+                        tb_maquinas_preventivas.codigo,
+                        tb_maquinas_preventivas.setor,
+                        tb_maquinas_preventivas.descricao,
+                        tb_maquinas_preventivas.tombamento,
+                        tb_maquinas.apelido
+                    FROM tb_maquinas_preventivas
+                    JOIN tb_maquinas ON tb_maquinas_preventivas.codigo = tb_maquinas.codigo; """)
+        
+    df_c_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao','tombamento','apelido'])
     df_c_preventivas['setor'] = df_c_preventivas['setor'].str.title() 
     df_c_preventivas['preventiva'] = 'Y'
 
-    cur.execute(""" SELECT codigo, setor, descricao, tombamento
-                FROM tb_maquinas """)
+    cur.execute(""" SELECT codigo, setor, descricao, tombamento, apelido
+                    FROM tb_maquinas; """)
     
-    df_s_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao','tombamento'])
+    df_s_preventivas = pd.DataFrame(cur.fetchall(), columns=['codigo','setor','descricao','tombamento','apelido'])
     df_s_preventivas['setor'] = df_s_preventivas['setor'].str.title() 
     df_s_preventivas['preventiva'] = 'N'
 
@@ -2685,6 +2698,8 @@ def lista_maquinas():
     for i in range(len(df_final)):
         if df_final['tombamento'][i] == None:
             df_final['tombamento'][i] = ''
+        if df_final['apelido'][i] == None:
+            df_final['apelido'][i] = ''
 
     data = df_final.values.tolist()
 

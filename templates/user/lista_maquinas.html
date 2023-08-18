@@ -44,12 +44,12 @@
                         {% for row in data %}
                         <tr>
                             <td>{{row[0]}}</td>
-                            <td> - </td>
+                            <td>{{row[4]}}</td>
                             <td>{{row[3]}}</td>
                             <td>{{row[1]}}</td>
                             <td>{{row[2]}}</td>
                             <td>
-                                {% if  row[4] == 'Y' %}
+                                {% if  row[5] == 'Y' %}
                                     <i class="fas fa-check-circle habilitado"></i>
                                 {% else %}
                                     <i class="fas fa-times-circle desabilitado"></i>
@@ -64,7 +64,7 @@
                                         <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
                                     </button>
                                     <div class="dropdown-menu" class="dropdown-item" aria-labelledby="dropdownMenu2">
-                                        {% if row[4] == 'Y' %}
+                                        {% if row[5] == 'Y' %}
                                         <a id="dropdown_os" class="dropdown-item" href="/editar-maquina-preventiva/{{row[0]}}">
                                             <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina preventiva" class="icon-tamanho-padrao"> 
                                         </a>
@@ -84,7 +84,7 @@
                                             <i class="fa-solid fa-file-lines docIcon" title="Documentos" onclick="modalDocumento('{{ row[0] }}')" style="cursor: pointer;"></i>
                                         </a>
                                         <!-- Parar a preventiva da máquina -->
-                                        {% if row[4] == 'Y' %}
+                                        {% if row[5] == 'Y' %}
                                         <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalPreventiva('{{ row[0] }}')">
                                             <img src="static/icons/stop-preventiva.png" alt="Ícone de Manutenção" title="Remover do planejamento anual" class="icon-tamanho-padrao"> 
                                         </a>
