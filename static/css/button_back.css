@@ -1,64 +1,43 @@
 .botao-voltar {
     position: fixed;
     top: 10px;
-    left: 10px;
     display: inline-flex;
-    align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #f2f2f2;
     color: #333;
-    text-decoration: none;
-    border: none;
-    font-size: 20px;
-    margin-top: 140px;
     z-index: 4;
-    position: fixed;
-    background-color: #e5e7eb00;
+    background-color: #fff;
     place-items: center;
     left: 5%;
     transform: translate(0%,50%);
-    padding: 0.5em;
-    box-shadow: 2px 2px 2px rgba(0, 0, 0, rgba(0,0,0,0.2));
-    font-size: 24px; /* Ajuste o tamanho desejado */
-    border: none; /* Remove a borda */
+    padding: 12px;
+    font-size: 24px;
+    border: solid 1px black;
     cursor: pointer;
     outline: none;
-    text-decoration: none; /* Remover decoração de texto */
+    text-decoration: none;
     }
     
     @media(max-width:600px){
     
         .botao-voltar {
-            position: absolute;
-            top: 120px;
-            left: 360px;
+            position: fixed;
+            top: 10px;
             display: inline-flex;
-            align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #f2f2f2;
             color: #333;
-            text-decoration: none;
-            border: none;
-            font-size: 20px;
-            margin-top: 0px;
             z-index: 4;
-            background-color: #f2f3f5;
+            background-color: #fff;
             place-items: center;
-            padding: 0.5em;
-            box-shadow: 2px 2px 2px rgba(0, 0, 0, rgba(0,0,0,0.2));
-            font-size: 24px; /* Ajuste o tamanho desejado */
-            border: none; /* Remove a borda */
+            left: 5%;
+            transform: translate(0%,25%);
+            padding: 9px;
+            font-size: 24px;
+            border: solid 1px black;
             cursor: pointer;
             outline: none;
-            text-decoration: none; /* Remover decoração de texto */
+            text-decoration: none;
+            }
         }
-    }
     
     .botao-voltar:hover {
     background-color: #e6e6e6;
