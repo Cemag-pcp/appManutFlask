@@ -31,10 +31,14 @@ th, td {
   <div class="row justify-content-md-center">
     <div class = "board2" style="overflow-x: auto;">
       <div id = "titulo" class="row">
+        <a href="#" onclick="window.history.back();" class="botao-voltar">
+          <i class="fas fa-arrow-left"></i>
+        </a>
         <h1 class="visao">Planejamento</h1>
+        <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
       </div>
-      <table id="table2" class="table table-striped">
-        <thead>
+      <table id="table3" class="table table-striped">
+        <thead class="hide-thead">
           <tr>
             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
             {% for coluna in colunas %}

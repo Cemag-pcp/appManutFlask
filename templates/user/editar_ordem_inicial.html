@@ -17,6 +17,13 @@
 <div id = 'edicao' class = 'card card-body'>
     <div class="row">
         <div class = 'col offset'>
+            <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+                <a href="#" onclick="window.history.back();" class="botao-voltar">
+                  <i class="fas fa-arrow-left"></i>
+                </a>
+              <h3 style="font-size: 20px;margin-left: 25%;margin-right: 10%;">Editar ordem inicial</h3>
+              <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+            </div> 
             <form action="/guardar_ordem_editada/{{ordem[10]}}/{{n_ordem}}" method="POST">
                 <div class="form-group">
                     <label for="solicitante">Solicitante:</label>
@@ -128,7 +135,7 @@
 
                     <div class="form-group">
                         <label for="n_ordem">Número da execução:</label>
-                        <input style ="width: 245px;" type="text" name="n_ordem" value="{{ordem[11]}}" class="form-control" readonly>
+                        <input style ="width: 100%;" type="text" name="n_ordem" value="{{ordem[11]}}" class="form-control" readonly>
                     </div>
 
                 </div>

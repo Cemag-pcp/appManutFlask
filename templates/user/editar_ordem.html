@@ -17,6 +17,10 @@
 <div id = 'edicao' class = 'card card-body'>
 <div class="row">
     <div class = 'col offset'>
+        <a href="#" onclick="window.history.back();" class="botao-voltar">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
         <form action="/update_ordem/{{ordem[10]}}/{{ordem[11]}}" method="POST">
             <div class="form-group">
                 <label for="setor">Setor:</label>

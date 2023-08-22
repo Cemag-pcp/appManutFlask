@@ -25,11 +25,17 @@
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
             <div id = "titulo" class="row">
-                <h1 class="visao2">Máquinas cadastradas</h1>
+                <div>
+                    <a href="#" onclick="window.history.back();" class="botao-voltar">
+                      <i class="fas fa-arrow-left"></i>
+                    </a>
+                  </div>
+                <h1 class="visao">Máquinas Cadastradas</h1>
+                <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
             </div>
             <div class="table-responsive">
                 <table id="table2" class="table table-striped">
-                    <thead>
+                    <thead class="hide-thead">
                         <tr>
                             <th>Código</th>
                             <th>Apelido</th>
@@ -43,12 +49,12 @@
                     <tbody>
                         {% for row in data %}
                         <tr>
-                            <td>{{row[0]}}</td>
-                            <td>{{row[4]}}</td>
-                            <td>{{row[3]}}</td>
-                            <td>{{row[1]}}</td>
-                            <td>{{row[2]}}</td>
-                            <td>
+                            <td data-title="Código">{{row[0]}}</td>
+                            <td data-title="Apelido">{{row[4]}}</td>
+                            <td data-title="Tombamento">{{row[3]}}</td>
+                            <td data-title="Setor">{{row[1]}}</td>
+                            <td data-title="Descrição">{{row[2]}}</td>
+                            <td data-title="Preventiva">
                                 {% if  row[5] == 'Y' %}
                                     <i class="fas fa-check-circle habilitado"></i>
                                 {% else %}
@@ -58,8 +64,8 @@
                             <!-- <td>
                                 <button type="button" class="btn btn-primary" onclick="abrirModal('{{ row[0] }}')">Docs</button>
                             </td> -->                           
-                            <td style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
-                                <div class="dropdown">
+                            <td data-title="Menu" style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
+                                <div class="dropup">
                                     <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
                                     </button>

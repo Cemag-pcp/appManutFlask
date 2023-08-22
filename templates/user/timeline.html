@@ -8,10 +8,16 @@
 </style>
 
 <div id = 'linha_tempo'class="card card-body">
-  <div class="row justify-content-md-center">
-    <div class="row"><h3>Linha do tempo #OS{{id_ordem}}</h3></div>
-      <table id="example" class="table table-striped table-bordered">
-        <thead>
+    <div class = "board" style="overflow-x: auto;">
+    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3" style="width: 100%;"> 
+        <a href="#" onclick="window.history.back();" class="botao-voltar">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+      <h5 style="margin-left: 55px; margin-right: 15px;">Linha do tempo #OS{{id_ordem}}</h5>
+      <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+    </div> 
+      <table id="example" class="table custom-table table-striped table-bordered">
+        <thead class="hide-thead">
           <tr>
             <th>N° execução</th>
             <th>Status</th>
@@ -27,27 +33,35 @@
         <tbody>
         {% for data in df_timeline %}
         <tr>
-            <td>{{data[0]}}</td>
+            <td data-title="N° execução">{{data[0]}}</td>
             
             {% if data[1].strip() == 'Finalizada' %}
-            <td id="status_os_finalizadas_timeline">{{ data[1] }}</td>
+            <td data-title="Status" class="colunaStatus" style="overflow: hidden; white-space: nowrap;">
+              <span class="flag-finalizado">{{data[1]}}</span>
+            </td>
             {% elif data[1].strip() == 'Em espera' %}
-            <td id="status_os_espera_timeline">{{ data[1] }}</td>
+            <td data-title="Status" class="colunaStatus" style="overflow: hidden; white-space: nowrap;">
+              <span class="flag-em-espera">{{ data[1] }}</span>
+            </td>   
             {% elif data[1].strip() == 'Em execução' %}
-            <td id="status_os_execução_timeline">{{ data[1] }}</td>
+            <td data-title="Status" class="colunaStatus" style="overflow: hidden; white-space: nowrap;">
+              <span class="flag-em-execucao">{{ data[1] }}</span>
+            </td>
             {% else %}
-            <td id="status_os_aguardando_timeline">{{ data[1] }}</td>
+            <td data-title="Status" class="colunaStatus" style="overflow: hidden; white-space: nowrap;">
+              <span class="flag-aguardando">{{ data[1] }}</span>
+            </td>
             {% endif %}
 
-            <td>{{data[2]}}</td>
-            <td>{{data[3]}}</td>
-            <td>{{data[4]}}</td>
-            <td>{{data[8]}}</td>
-            <td>{{data[5]}}</td>
+            <td data-title="Data Inicio">{{data[2]}}</td>
+            <td data-title="Data Fim">{{data[3]}}</td>
+            <td data-title="Operadores">{{data[4]}}</td>
+            <td data-title="Duração (minutos)">{{data[8]}}</td>
+            <td data-title="Comentários">{{data[5]}}</td>
             {% if data[0] > 0 %}
-            <td>R$ {{data[9]}}</td>
+            <td data-title="Custo">R$ {{data[9]}}</td>
             {% else %}
-              <td>-</td>
+              <td data-title="Custo">-</td>
             {% endif %}
             {% if data[0] != 0 %}
             <td>
@@ -61,18 +75,18 @@
         </tr>
         {% endfor %}
         </tbody>
-        <tfoot>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th>{{totalMinutos}}</th>
-          <th></th>
-          <th>R$ {{totalCusto}}</th>
-        </tfoot>
+        <tbody>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td data-title="Duração Total (minutos)">{{totalMinutos}}</td>
+          <td></td>
+          <td data-title="Custo Total">R$ {{totalCusto}}</td>
+        </tbody>
       </table>
-  </div>
+    </div>
 </div>
 
 {% endblock %}

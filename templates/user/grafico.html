@@ -2,6 +2,15 @@
 {% block body %}
 
 
+<div id = "titulo" class="row">
+    <div>
+        <a href="#" onclick="window.history.back();" class="botao-voltar">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+      </div>
+    <h4 class="visao" style="width: 95%;">Gráficos</h4>
+    <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+</div>
 <form id = 'form_filtros_graficos' action="{{ url_for('routes.grafico') }}" method="POST">
     <label for="filtro_setor">Setor:</label>
     <select id="filtro_setor" name="filtro_setor" value="{{ setor }}" multiple>
