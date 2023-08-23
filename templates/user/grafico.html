@@ -29,19 +29,18 @@
     <label for="data_filtro">Mês:</label>
     <select id="data_filtro" name="data_filtro" multiple>
         <option value="">Todos</option>
-        <option value="" selected hidden>{{mes_descrito}}</option>
-        <option value="1" disabled>Janeiro</option>
-        <option value="2" disabled>Fevereiro</option>
-        <option value="3" disabled>Março</option>
-        <option value="4" disabled>Abril</option>
-        <option value="5" disabled>Maio</option>
-        <option value="6" >Junho</option>
-        <option value="7" >Julho</option>
-        <option value="8" >Agosto</option>
-        <option value="9" disabled>Setembro</option>
-        <option value="10" disabled>Outubro</option>
-        <option value="11" disabled>Novembro</option>
-        <option value="12" disabled>Dezembro</option>
+        <option value="1" {% if 1 in mes %}selected{% endif %} disabled>Janeiro</option>
+        <option value="2" {% if 2 in mes %}selected{% endif %} disabled>Fevereiro</option>
+        <option value="3" {% if 3 in mes %}selected{% endif %} disabled>Março</option>
+        <option value="4" {% if 4 in mes %}selected{% endif %} disabled>Abril</option>
+        <option value="5" {% if 5 in mes %}selected{% endif %} disabled>Maio</option>
+        <option value="6" {% if 6 in mes %}selected{% endif %}>Junho</option>
+        <option value="7" {% if 7 in mes %}selected{% endif %}>Julho</option>
+        <option value="8" {% if 8 in mes %}selected{% endif %}>Agosto</option>
+        <option value="9" {% if 9 in mes %}selected{% endif %} disabled>Setembro</option>
+        <option value="10" {% if 10 in mes %}selected{% endif %} disabled>Outubro</option>
+        <option value="11" {% if 11 in mes %}selected{% endif %} disabled>Novembro</option>
+        <option value="12" {% if 12 in mes %}selected{% endif %} disabled>Dezembro</option>
     </select>
 
     <button id="filtra_grafico" type="submit">Filtrar</button>

@@ -41,7 +41,10 @@ DB_PASS = "15512332"
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
    
-def obter_nome_mes(numero_mes):
+def obter_nome_mes(numeros_meses):
+    
+    numeros_meses = list(map(int, numeros_meses))
+
     nomes_meses = {
         1: 'Janeiro',
         2: 'Fevereiro',
@@ -57,63 +60,66 @@ def obter_nome_mes(numero_mes):
         12: 'Dezembro'
     }
 
-    return nomes_meses.get(numero_mes, '')
+    nomes = [nomes_meses.get(numero_mes, '') for numero_mes in numeros_meses]
+    
+    return nomes
 
-def dias_uteis(mes):
+def dias_uteis(meses):
 
-    lista_mes = [mes]
+    qtd_dias_uteis_total = 0
 
-    print(lista_mes[0])
+    for mes in meses:
+        # Verificar se o mês é válido (entre 1 e 12)
+        if not mes:
+            data_atual = pd.Timestamp.now()
+            mes = data_atual.month  # Mês atual
+            qtd_dias_uteis = 0
 
-    # Verificar se o mês é válido (entre 1 e 12)
-    if not mes:
-        data_atual = pd.Timestamp.now()
-        mes = data_atual.month  # Mês atual
-        qtd_dias_uteis = 0
+            for m in range(7, mes + 1):
+                primeiro_dia_mes = pd.Timestamp(data_atual.year, m, 1)
 
-        for m in range(7, mes + 1):
-            primeiro_dia_mes = pd.Timestamp(data_atual.year, m, 1)
+                if m == mes:
+                    # Se for o mês atual, use o dia atual como o último dia útil
+                    ultimo_dia_util_mes = data_atual
+                else:
+                    # Se não for o mês atual, use o último dia útil do mês
+                    ultimo_dia_util_mes = primeiro_dia_mes + pd.offsets.BMonthEnd()
 
-            if m == mes:
-                # Se for o mês atual, use o dia atual como o último dia útil
-                ultimo_dia_util_mes = data_atual
-            else:
-                # Se não for o mês atual, use o último dia útil do mês
-                ultimo_dia_util_mes = primeiro_dia_mes + pd.offsets.BMonthEnd()
+                datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
+                qtd_dias_uteis += len(datas_uteis)
 
+        elif mes == int(pd.Timestamp.now().month):
+            # Obter a data atual
+            data_atual = pd.Timestamp.now()
+
+            # Obter o primeiro dia do mês atual
+            primeiro_dia_mes = data_atual - pd.offsets.MonthBegin()
+
+            # Obter o último dia útil do mês atual
+            ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+
+            # Obter a sequência de datas úteis no mês atual
+            datas_uteis = pd.bdate_range(primeiro_dia_mes, data_atual)
+
+            # Contar o número de dias úteis
+            qtd_dias_uteis = len(datas_uteis)
+
+        else:
+            data_atual = pd.Timestamp.now()
+            primeiro_dia_mes = pd.Timestamp(data_atual.year, mes, 1)
+
+            # Obter o último dia útil do mês especificado
+            ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+
+            # Obter a sequência de datas úteis no mês especificado
             datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
-            qtd_dias_uteis += len(datas_uteis)
 
-    elif mes == int(pd.Timestamp.now().month):
-        # Obter a data atual
-        data_atual = pd.Timestamp.now()
-        
-        # Obter o primeiro dia do mês atual
-        primeiro_dia_mes = data_atual - pd.offsets.MonthBegin()
+            # Contar o número de dias úteis
+            qtd_dias_uteis = len(datas_uteis)
 
-        # Obter o último dia útil do mês atual
-        ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+        qtd_dias_uteis_total += qtd_dias_uteis
 
-        # Obter a sequência de datas úteis no mês atual
-        datas_uteis = pd.bdate_range(primeiro_dia_mes, data_atual)
-
-        # Contar o número de dias úteis
-        qtd_dias_uteis = len(datas_uteis)
-
-    else:
-        data_atual = pd.Timestamp.now()
-        primeiro_dia_mes = pd.Timestamp(data_atual.year, mes, 1)
-
-        # Obter o último dia útil do mês especificado
-        ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
-
-        # Obter a sequência de datas úteis no mês especificado
-        datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
-
-        # Contar o número de dias úteis
-        qtd_dias_uteis = len(datas_uteis)
-
-    return qtd_dias_uteis
+    return qtd_dias_uteis_total
 
 def tempo_os():
     
@@ -1911,7 +1917,7 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 def grafico(): # Dashboard
     
     if request.method == 'POST':
-        
+    
         boleano_historico = True
 
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
@@ -1930,16 +1936,10 @@ def grafico(): # Dashboard
         maquina_selecionado = request.form.get('filtro_maquinas')
         # area_manutencao = request.form.get('area_manutencao')
         mes = request.form.getlist('data_filtro')
-        
-        setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
-        mes = ",".join([f"{numero}" for numero in mes])
-        
-        print(type(mes))
-        print(setor_selecionado)
-        print(mes)
+        mes = list(map(int, mes))
 
-        # if mes:
-        #     mes = int(mes)
+        setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
+        mes_selecionado = ",".join([f"{mes_}" for mes_ in mes])
 
         """ Criando cards """
 
@@ -1964,7 +1964,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if mes:
-            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
 
         query += ' AND ordem_excluida IS NULL OR ordem_excluida = FALSE;'
         
@@ -1982,7 +1982,7 @@ def grafico(): # Dashboard
                """
 
         if mes:
-            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
 
@@ -2004,7 +2004,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mtbf += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            query_mtbf += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
 
         query_mtbf += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2030,7 +2030,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mttr += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            query_mttr += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
 
         query_mttr += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2053,7 +2053,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_disponibilidade += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            query_disponibilidade += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
 
         query_disponibilidade += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2071,7 +2071,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
 
         query_horas_trabalhada_area += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY area_manutencao;" 
 
@@ -2088,7 +2088,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
             
         query_horas_trabalhada_tipo += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY tipo_manutencao;" 
 
@@ -2120,7 +2120,9 @@ def grafico(): # Dashboard
         lista_mttr_maquina = resultado['df_combinado_mttr']
         top_10_maiores_MTBF_lista = resultado['top_10_maiores_MTBF_lista']
         
-        mes_descrito = obter_nome_mes(mes).title()
+        mes_descrito = obter_nome_mes(mes)
+
+        print(mes)
 
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,mes_descrito=mes_descrito,
                                setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context_mtbf_maquina,
@@ -2245,7 +2247,7 @@ def grafico(): # Dashboard
     cur.close()
     conn.close()
 
-    mes_descrito = obter_nome_mes(mes).title()
+    mes_descrito = obter_nome_mes(mes)
 
     print(lista_mttr_setor)
 
