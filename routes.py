@@ -1276,7 +1276,7 @@ def add_student(): # Criar ordem de serviço
         qual_ferramenta = request.form.get('ferramenta')
         cod_equipamento = request.form.get('codigo_equip')
  
-        if equipamento_em_falha != 'Maquina de solda':
+        if equipamento_em_falha != 'Máquina de Solda':
             setor_maquina_solda  = ''
         if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
             qual_ferramenta = ''

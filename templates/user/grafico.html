@@ -1,17 +1,12 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-
-<div id = "titulo" class="row">
-    <div>
-        <a href="#" onclick="window.history.back();" class="botao-voltar">
-          <i class="fas fa-arrow-left"></i>
-        </a>
-      </div>
-    <h4 class="titulo_materiais_utilizados" style="width:100%;">Gráficos</h4>
-    <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
-</div>
-<form id = 'form_filtros_graficos' action="{{ url_for('routes.grafico') }}" method="POST">
+<div id ='form_filtros_graficos'>
+<a href="#" onclick="window.history.back();" class="botao-voltar">
+    <i class="fas fa-arrow-left"></i>
+</a>
+<h4>Gráficos</h4>
+<form id="formulario" action="{{ url_for('routes.grafico') }}" method="POST">
     <label for="filtro_setor">Setor:</label>
     <select id="filtro_setor" name="filtro_setor" value="{{ setor }}" multiple>
         <option value="">Todos</option>
@@ -49,9 +44,10 @@
         <option value="12" disabled>Dezembro</option>
     </select>
 
-    <button type="submit">Filtrar</button>
+    <button id="filtra_grafico" type="submit">Filtrar</button>
 </form>
-
+<button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+</div>
 <div class="cardBox">
     <div class='card'>
         <div>

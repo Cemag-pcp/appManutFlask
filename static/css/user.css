@@ -1001,16 +1001,16 @@ input #file{
   padding-right: 7%;
   display: flex;
   flex-wrap: wrap;
-  justify-content: end;
+  justify-content: space-evenly;
   width: 100%;
   height: 100px;
   align-items: center;
-  margin-bottom: 80px; /* "auto" centraliza horizontalmente e 60px define o espaçamento superior */
+  margin-bottom: 80px;
   background-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
 }
 
-#form_filtros_graficos button{
+#form_filtros_graficos #filtra_grafico{
   background: rgb(255, 161, 113);
   border: 2px solid rgb(255, 142, 85);
   border-radius: 4px;
@@ -1029,12 +1029,12 @@ input #file{
   justify-content: center;
 }
 
-#form_filtros_graficos button:hover {
+#form_filtros_graficos #filtra_grafico:hover {
   background: rgb(255, 142, 85);;
   outline: none;
 }
 
-#form_filtros_graficos button:active {
+#form_filtros_graficos #filtra_grafico:active {
   background: rgb(255, 142, 85);;
   outline: none;
 }
@@ -1158,6 +1158,11 @@ input #file{
   font-size: 13px;
 }
 
+#formulario{
+  display: flex; 
+  align-items: center;
+}
+
 @media(max-width: 1550px){
 
   .details .recentOrders table tr td{
@@ -1214,7 +1219,7 @@ input #file{
     width: 100%;
     padding: 30px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
     border-radius: 0;
   }
@@ -1252,6 +1257,13 @@ input #file{
 }
 
 @media(max-width:991px){
+  #formulario {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    margin-right: 30px;
+  }
   .graphBox{
     grid-template-columns: 1fr;
   }
@@ -1259,8 +1271,7 @@ input #file{
     grid-template-columns: repeat(2,1fr);
   }
   #form_filtros_graficos {
-    display: grid;
-    grid-template-columns: 0.5fr 1fr;
+    display: inline-flex;
     padding: 30px;
     padding-left: 0;
     width: 100%;
@@ -1269,9 +1280,11 @@ input #file{
     margin-top: 60px;
     background-color: rgba(255, 255, 255, 0.5);
     box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-    align-content: center;
-  }
-  #form_filtros_graficos button {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+}
+  #form_filtros_graficos #filtra_grafico {
     background: rgb(255, 161, 113);
     border: 2px solid rgb(255, 142, 85);
     border-radius: 4px;
@@ -1285,10 +1298,12 @@ input #file{
     font-size: 0.8em;
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
+    margin-top: 20px;
     cursor: pointer;
     align-items: center;
     justify-content: center;
   }
+
   .select2{
     width: 100%;
   }
