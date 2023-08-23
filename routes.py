@@ -2857,7 +2857,7 @@ def editar_maquina_preventiva(codigo):
                 
             return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
                         setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade,
-                        manutencao_inicial=manutencao_inicial,apelido=apelido)
+                        manutencao_inicial=manutencao_inicial,apelido=apelido, periodicidade=periodicidade)
 
         else:
             
@@ -2885,7 +2885,7 @@ def editar_maquina_preventiva(codigo):
 
         return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
                                     setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade, 
-                                    manutencao_inicial=manutencao_inicial,apelido=apelido)
+                                    manutencao_inicial=manutencao_inicial,apelido=apelido, periodicidade=periodicidade)
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
