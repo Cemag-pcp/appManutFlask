@@ -1,8 +1,12 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
-
-<form id = 'form_filtros_graficos' action="{{ url_for('routes.grafico') }}" method="POST">
+<div id ='form_filtros_graficos'>
+<a href="#" onclick="window.history.back();" class="botao-voltar">
+    <i class="fas fa-arrow-left"></i>
+</a>
+<h4>Gráficos</h4>
+<form id="formulario" action="{{ url_for('routes.grafico') }}" method="POST">
     <label for="filtro_setor">Setor:</label>
     <select id="filtro_setor" name="filtro_setor" value="{{ setor }}" multiple>
         <option value="">Todos</option>
@@ -23,9 +27,9 @@
     </select> -->
 
     <label for="data_filtro">Mês:</label>
-    <select class="select2"id="data_filtro" name="data_filtro">
+    <select id="data_filtro" name="data_filtro" multiple>
         <option value="">Todos</option>
-        <option value="{{mes}}" selected hidden>{{mes_descrito}}</option>
+        <option value="" selected hidden>{{mes_descrito}}</option>
         <option value="1" disabled>Janeiro</option>
         <option value="2" disabled>Fevereiro</option>
         <option value="3" disabled>Março</option>
@@ -40,9 +44,10 @@
         <option value="12" disabled>Dezembro</option>
     </select>
 
-    <button type="submit">Filtrar</button>
+    <button id="filtra_grafico" type="submit">Filtrar</button>
 </form>
-
+<button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+</div>
 <div class="cardBox">
     <div class='card'>
         <div>

@@ -27,8 +27,13 @@
 <div class="col-md-4 offset-md-4">
   <div id ="formulario_preventiva" class="card card-body">
     
+    
     <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
-      <h3>Edição de máquinas</h3>
+      <a href="#" onclick="window.history.back();" class="botao-voltar">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h4 style="margin-right: 15px; margin-left: 55px; font-size: 20px;">Edição de máquinas</h4>
+      <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
     </div> 
 
     <form action="/editar-maquina-bd/{{codigo}}" method="POST" enctype="multipart/form-data">

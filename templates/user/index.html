@@ -1,3 +1,4 @@
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/button.css') }}">
 {% extends "user/layout.html" %}
 {% block body %}
 
@@ -11,13 +12,19 @@
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
             <div id = "titulo" class="row">
+                <div>
+                    <a href="#" onclick="window.history.back();" class="botao-voltar">
+                      <i class="fas fa-arrow-left"></i>
+                    </a>
+                  </div>
                 <h1 class="visao">Ordem de serviço</h1>
-                <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
+                <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
             </div>
+            <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
 
-            <table class="table">
+            <table class="table" >
                 <thead>
-                  <tr class="filters" s>
+                  <tr class="container filter-wrapper2 filters">
                     <th>OS
                         <input class="form-control form-control" id="os-filter" style='padding: .375rem .25rem;' name="os-filter">
                     </th>
@@ -91,8 +98,8 @@
             </table>
 
             <div class="table">
-                <table id="table1" class="table table-striped">
-                    <thead>
+                <table id="table1" class="table custom-table table-striped">
+                    <thead class="hide-thead">
                         <tr>
                             <th style="width: 30px;">OS</th>
                             <th style="width: 40px;">Execução</th>
@@ -109,42 +116,42 @@
                     </thead>
                     <tbody>
                         {% for row in list_users %}
-                        <tr style = "max-width:200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <td style="max-width: 90px; padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[11]}}</td>
-                            <td style="max-width: 90px; padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[12]}}</td>
-                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
-                            <td style="max-width: 80px; padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
-                            <td style="padding-bottom: 0px;">{{row[4]}}</td>
+                        <tr>
+                            <td data-title="OS" class="colunaOs" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[11]}}</td>
+                            <td data-title="Execução" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[12]}}</td>
+                            <td data-title="Setor" class="colunaSetor" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
+                            <td data-title="Maquina" class="colunaMaquina" style="padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
+                            <td data-title="Risco" style="padding-bottom: 0px;">{{row[4]}}</td>
 
                             {% if row[5] == 'Finalizada' %}
-                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <span class="flag-finalizado">Finalizada</span>
                             </td>
                             {% elif row[5] == 'Em execução' %}
-                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <span class="flag-em-execucao">Em execução</span>
                             </td>
                             {% elif row[5] == 'Aguardando material' %}
-                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <span class="flag-aguardando">Aguardando material</span>
                             </td>
                             {% else %}
-                            <td style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <span class="flag-em-espera">Em espera</span>
                             </td>    
                             {% endif %}
 
-                            <td style="padding-bottom: 0px;">{{row[16]}}</td>
-                            <td style="padding-bottom: 0px;">{{row[13]}}</td>
+                            <td data-title="Natureza" style="padding-bottom: 0px;">{{row[16]}}</td>
+                            <td data-title="Abertura" style="padding-bottom: 0px;">{{row[20]}}</td>
                             
                             {% if row[19] == True %}
-                            <td style="padding-bottom: 0px;"><i class="fas fa-check-circle habilitado"></i></td>
+                            <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-check-circle habilitado"></i></td>
                             {% else %}
-                            <td style="padding-bottom: 0px;"><i class="fas fa-times-circle desabilitado"></i></td>
+                            <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-times-circle desabilitado"></i></td>
                             {% endif %}
-                            <td style="padding-bottom: 0px;">R$ {{row[31]}}</td>                  
-                            <td style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
-                                <div class="dropdown">
+                            <td data-title="Custo MO" style="padding-bottom: 0px;">R$ {{row[31]}}</td>                  
+                            <td data-title="Menu" style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
+                                <div class="dropup">
                                     <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
                                     </button>
@@ -239,9 +246,8 @@
 
 function downloadFilteredCSV(filteredData) {
     // Adicione uma linha de cabeçalho com os nomes das colunas
-    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Últ. atualização', 'Máq. Parada?', 'Menu'];
+    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Menu'];
     filteredData.unshift(headerRow);
-
     var csvContent = "data:text/csv;charset=utf-8,";
 
     // Concatena todas as linhas em uma única string

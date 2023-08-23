@@ -14,7 +14,16 @@
 {% endif %}
 {% endwith %}
 
+
+<div class="col-md-4 offset-md-4">
 <div id = 'edicao' class = 'card card-body'>
+  <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+      <a href="#" onclick="window.history.back();" class="botao-voltar">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+    <h5 style="margin-right: 30%; margin-left: 30%;">Execução</h5>
+    <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+  </div> 
 <div class="row">
     <div class = 'col offset'>
         <form action="/update/{{ordem[10]}}" method="POST">

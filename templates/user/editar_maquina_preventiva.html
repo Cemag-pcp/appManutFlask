@@ -27,8 +27,13 @@
 <div class="col-md-4 offset-md-4">
   <div id ="formulario_preventiva" class="card card-body">
     
-    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3 p-3">
-      <h3>Edição de máquinas preventivas</h3>
+    
+    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+      <a href="#" onclick="window.history.back();" class="botao-voltar">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h4 id="titulo_maq_prev">Edit. de máquinas preventivas</h4>
+      <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
     </div> 
 
     <form action="/editar-maquina-preventiva/{{codigo}}" method="POST" enctype="multipart/form-data">
