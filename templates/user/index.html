@@ -246,9 +246,8 @@
 
 function downloadFilteredCSV(filteredData) {
     // Adicione uma linha de cabeçalho com os nomes das colunas
-    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Últ. atualização', 'Máq. Parada?', 'Menu'];
+    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Menu'];
     filteredData.unshift(headerRow);
-
     var csvContent = "data:text/csv;charset=utf-8,";
 
     // Concatena todas as linhas em uma única string
