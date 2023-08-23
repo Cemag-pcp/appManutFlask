@@ -296,23 +296,23 @@ def trigger_ordem_planejada():
     data_atual = datetime.date.today()
 
     # Obtendo o número da semana atual
-    numero_semana = str(data_atual.isocalendar()[1] + 1)    
+    numero_semana = str(data_atual.isocalendar()[1])    
     
-    df_final = df_final[['Código da máquina','Grupo', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção',numero_semana]]
+    df_final = df_final[['codigo','tombamento', 'setor','descricao', 'classificacao','periodicidade','ultima_manutencao',numero_semana]]
     df_final = df_final[df_final[numero_semana] != '-'].reset_index(drop=True)
     df_final[numero_semana] = pd.to_datetime(df_final[numero_semana])
     df_final = df_final.dropna().reset_index(drop=True)
 
     for i in range(len(df_final)):
         
-        if df_final['Classificação'][i] == 'A':
-           df_final['Classificação'][i] = 'Alto'
-        elif df_final['Classificação'][i] == 'B':
-            df_final['Classificação'][i] = 'Médio'
-        elif df_final['Classificação'][i] == 'C':
-            df_final['Classificação'][i] = 'Baixo'
+        if df_final['classificacao'][i] == 'A':
+           df_final['classificacao'][i] = 'Alto'
+        elif df_final['classificacao'][i] == 'B':
+            df_final['classificacao'][i] = 'Médio'
+        elif df_final['classificacao'][i] == 'C':
+            df_final['classificacao'][i] = 'Baixo'
     
-    df_final['Grupo'] = df_final['Grupo'].str.title()
+    df_final['setor'] = df_final['setor'].str.title()
 
     n_ordem = 0
     problemaaparente = 'Manutenção Planejada'
@@ -332,7 +332,7 @@ def trigger_ordem_planejada():
         df_final = df_final.dropna().reset_index(drop=True)
         df_final[numero_semana][i] = pd.to_datetime(df_final[numero_semana][i], format='%d-%m-%Y').strftime("%Y-%m-%d")
 
-        values = (max_id, df_final['Grupo'][i], df_final['Código da máquina'][i], df_final['Classificação'][i], status, problemaaparente,max_ordem,n_ordem, df_final[numero_semana][i] , natureza)
+        values = (max_id, df_final['setor'][i], df_final['codigo'][i], df_final['classificacao'][i], status, problemaaparente,max_ordem,n_ordem, df_final[numero_semana][i] , natureza)
         
         max_ordem = max_ordem + 1
         max_id = max_id + 1

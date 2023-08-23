@@ -114,7 +114,6 @@
             </div>
         </div>
     </div>
-
     <div class="graphBox">
         <div class="box">
             <canvas id="grafico1top10"></canvas>
@@ -147,7 +146,6 @@
             </div>
         </div>
     </div>
-
     <div class="graphBox">
         <div class="box">
             <canvas id="grafico2"></canvas>
@@ -384,6 +382,41 @@
                                 <td>{{horas_cc[1]}}</td>
                                 <td>{{horas_cc[2]|round(2)}}</td>
                                 <td>{{horas_cc[3]|round(2)}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico de custo -->
+    
+    <div class="graphBox">
+        <div class="box">
+            <canvas id="grafico10"></canvas>
+            <div class="details">
+                <div class="recentOrders">
+                    <div class="cardHeader">
+                        <h3>MTBF por máquina</h3>
+                    </div>
+                    <table class="table" id="tabela_graficos1">
+                        <thead>
+                            <tr>
+                                <td>Máquina</td>
+                                <td>Quantidade</td>
+                                <td>Carga</td>
+                                <td>MTBF</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mtbf_maquina in lista_mtbf_maquina %}
+                            <tr>
+                                <td>{{mtbf_maquina[0]}}</td>
+                                <td>{{mtbf_maquina[1]}}</td>
+                                <td>{{mtbf_maquina[2]}}</td>
+                                <td>{{mtbf_maquina[3]}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -969,7 +1002,6 @@
         plugins: [ChartDataLabels]
     });
     
-
     var eixo_y = {{ dados_horas_trabalhadas_area | safe }};
     var eixo_x = {{ labels_horas_trabalhadas_area | safe }};
     var ctx = document.getElementById('grafico8').getContext('2d');
@@ -1070,6 +1102,71 @@
             }
         },
         plugins: [ChartDataLabels]
+    });
+
+    var eixo_y = {{ dados_mtbf_maquina | safe }};
+    var eixo_x = {{ labels_mtbf_maquina | safe }};
+    var ctx = document.getElementById('grafico10').getContext('2d');
+
+    var grafico = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: eixo_x,
+            datasets: [{
+                color: 'black', // Define a cor dos rótulos para branco
+                    font: {
+                        size: 14 // Define o tamanho da fonte dos rótulos
+                    },
+                label: 'MTBF',
+                data: eixo_y,
+                fill: false,
+                tension: 0.1,
+                backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 205, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(201, 203, 207, 1)'
+                ],
+                borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(255, 159, 64)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)',
+                'rgb(54, 162, 235)',
+                'rgb(153, 102, 255)',
+                'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                display: true, // Defina como false para remover as grades do eixo x
+            },
+                y: {
+                display: true, // Defina como false para remover as grades do eixo y
+            }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'MTBF por máquina',
+                font: {
+                    size: 18, // Define o tamanho da fonte do título
+                    weight: 'bold' // Define o peso (negrito) da fonte do título
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
+            }
+        }
+        }
     });
 
 </script>
