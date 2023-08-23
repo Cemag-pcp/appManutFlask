@@ -3,10 +3,19 @@ Notas de Lançamento - Aplicativo para manutenção dentro da empresa CEMAG, des
 
 *Novidades*
 
-1. Custos de MO na tabela inicial
+1. Custos de MO na tabela inicial (Aguardando Salário real do RH)
 2. Custos de MO na timeline
 3. Editar data e periodicidade das maquinas preventivas
-4. 
+4. Coluna de tombamento na lista de máquina
+5. Adicionada as 3 perguntas a partir da 1° execução 
+6. Campo de tombamento dentro da execução 
+7. Adicionado coluna de apelido para máquinas e para cadastro de máquinas 
+
+*Correção de Bugs*
+
+1. Drop-down de "Execução" tem um valor vazio.
+
+*Andamento*
 
 *Feedback e Suporte*
 
