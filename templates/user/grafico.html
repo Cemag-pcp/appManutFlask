@@ -1,20 +1,38 @@
 {% extends "user/layout.html" %}
 {% block body %}
 
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning" role="alert" style="width: 45%;">
+                <strong>Aviso!</strong> {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+
 <div id ='form_filtros_graficos'>
 <a href="#" onclick="window.history.back();" class="botao-voltar">
     <i class="fas fa-arrow-left"></i>
 </a>
 <h4>Gráficos</h4>
 <form id="formulario" action="{{ url_for('routes.grafico') }}" method="POST">
+    
     <label for="filtro_setor">Setor:</label>
-    <select id="filtro_setor" name="filtro_setor" value="{{ setor }}" multiple>
-        <option value="">Todos</option>
-        <option value="">{{setor_selecionado}}</option>
+    <select id="filtro_setor" name="filtro_setor" multiple>
+        
         {% for setor in setores %}
-        <option>{{ setor[0] }}</option>
+            {% if setor[0] in lista_setore_selecionado %}
+                <option value="{{ setor[0] }}" selected>{{ setor[0] }}</option>
+            {% else %}
+                <option value="{{ setor[0] }}">{{ setor[0] }}</option>
+            {% endif %}
         {% endfor %}
-        <option>Manutenção</option>
+        
     </select>
     
     <!-- <label for="area_manutencao">Área de Manutenção:</label>
@@ -28,20 +46,25 @@
 
     <label for="data_filtro">Mês:</label>
     <select id="data_filtro" name="data_filtro" multiple>
-        <option value="">Todos</option>
-        <option value="1" {% if 1 in mes %}selected{% endif %} disabled>Janeiro</option>
-        <option value="2" {% if 2 in mes %}selected{% endif %} disabled>Fevereiro</option>
-        <option value="3" {% if 3 in mes %}selected{% endif %} disabled>Março</option>
-        <option value="4" {% if 4 in mes %}selected{% endif %} disabled>Abril</option>
-        <option value="5" {% if 5 in mes %}selected{% endif %} disabled>Maio</option>
-        <option value="6" {% if 6 in mes %}selected{% endif %}>Junho</option>
-        <option value="7" {% if 7 in mes %}selected{% endif %}>Julho</option>
-        <option value="8" {% if 8 in mes %}selected{% endif %}>Agosto</option>
-        <option value="9" {% if 9 in mes %}selected{% endif %} disabled>Setembro</option>
-        <option value="10" {% if 10 in mes %}selected{% endif %} disabled>Outubro</option>
-        <option value="11" {% if 11 in mes %}selected{% endif %} disabled>Novembro</option>
-        <option value="12" {% if 12 in mes %}selected{% endif %} disabled>Dezembro</option>
-    </select>
+        <option value="1" {% if not todos_meses and 1 in mes %}selected{% endif %} >Janeiro</option>
+        <option value="2" {% if not todos_meses and 2 in mes %}selected{% endif %} >Fevereiro</option>
+        <option value="3" {% if not todos_meses and 3 in mes %}selected{% endif %} >Março</option>
+        <option value="4" {% if not todos_meses and 4 in mes %}selected{% endif %} >Abril</option>
+        <option value="5" {% if not todos_meses and 5 in mes %}selected{% endif %} >Maio</option>
+        <option value="6" {% if not todos_meses and 6 in mes %}selected{% endif %}>Junho</option>
+        <option value="7" {% if not todos_meses and 7 in mes %}selected{% endif %}>Julho</option>
+        <option value="8" {% if not todos_meses and 8 in mes %}selected{% endif %}>Agosto</option>
+        <option value="9" {% if not todos_meses and 9 in mes %}selected{% endif %} >Setembro</option>
+        <option value="10" {% if not todos_meses and 10 in mes %}selected{% endif %} >Outubro</option>
+        <option value="11" {% if not todos_meses and 11 in mes %}selected{% endif %} >Novembro</option>
+        <option value="12" {% if not todos_meses and 12 in mes %}selected{% endif %} >Dezembro</option>
+    </select> 
+
+    <label for="maquinas-favoritas">Máquinas importantes</label>
+    <label class="switch">
+      <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas">
+      <span class="slider round"></span>
+    </label>
 
     <button id="filtra_grafico" type="submit">Filtrar</button>
 </form>
@@ -393,127 +416,10 @@
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Gráfico de custo -->
-    
-    <div class="graphBox">
-        <div class="box">
-            <canvas id="grafico10"></canvas>
-            <div class="details">
-                <div class="recentOrders">
-                    <div class="cardHeader">
-                        <h3>MTBF por máquina</h3>
-                    </div>
-                    <table class="table" id="tabela_graficos1">
-                        <thead>
-                            <tr>
-                                <td>Máquina</td>
-                                <td>Quantidade</td>
-                                <td>Carga</td>
-                                <td>MTBF</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for mtbf_maquina in lista_mtbf_maquina %}
-                            <tr>
-                                <td>{{mtbf_maquina[0]}}</td>
-                                <td>{{mtbf_maquina[1]}}</td>
-                                <td>{{mtbf_maquina[2]}}</td>
-                                <td>{{mtbf_maquina[3]}}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+    </div> 
     
      
 <script>
-    // Gráfico MTBF por máquina
-    // function setChartSize() {
-    //     const canvas = document.getElementById('grafico1');
-    //     if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //         canvas.width = 400;
-    //         canvas.height = 600;
-    //     } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //         canvas.width = 500;
-    //         canvas.height = 300;
-    //     }
-    //     const canvastop10 = document.getElementById('grafico1top10');
-    //     if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //         canvastop10.width = 400;
-    //         canvastop10.height = 600;
-    //     } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //         canvastop10.width = 500;
-    //         canvastop10.height = 300;
-    //     }
-    //     const canvas2 = document.getElementById('grafico2');
-    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //             canvas2.width = 400;
-    //             canvas2.height = 600;
-    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //             canvas2.width = 500;
-    //             canvas2.height = 300;
-    //         }
-    //     const canvas3 = document.getElementById('grafico3');
-    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //             canvas3.width = 400;
-    //             canvas3.height = 600;
-    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //             canvas3.width = 500;
-    //             canvas3.height = 300;
-    //         }
-        
-    //     const canvas4 = document.getElementById('grafico4');
-    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //             canvas4.width = 400;
-    //             canvas4.height = 600;
-    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //             canvas4.width = 500;
-    //             canvas4.height = 300;
-    //         }
-        
-    //     const canvas5 = document.getElementById('grafico5');
-    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //             canvas5.width = 400;
-    //             canvas5.height = 600;
-    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //             canvas5.width = 500;
-    //             canvas5.height = 300;
-    //         }
-        
-    //     const canvas6 = document.getElementById('grafico6');
-    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //             canvas6.width = 400;
-    //             canvas6.height = 600;
-    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //             canvas6.width = 500;
-    //             canvas6.height = 300;
-    //         }
-    //     const canvas7 = document.getElementById('grafico7');
-    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //             canvas7.width = 300;
-    //             canvas7.height = 300;
-    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //             canvas7.width = 400;
-    //             canvas7.height = 400;
-    //         }
-    //     const canvas8 = document.getElementById('grafico8');
-    //         if (window.innerWidth < 768) { // Para telas menores que 768 pixels (celulares)
-    //             canvas8.width = 300;
-    //             canvas8.height = 300;
-    //         } else { // Para telas maiores ou iguais a 768 pixels (PC)
-    //             canvas8.width = 400;
-    //             canvas8.height = 400;
-    //         }
-    //     }
-    // Chame a função para definir o tamanho do gráfico inicialmente e também adicione um ouvinte de evento para atualizar o tamanho quando a janela for redimensionada.
-    // setChartSize();
-    // window.addEventListener('resize', setChartSize);
 
     var eixo_y = {{ dados_mtbf_maquina | safe }};
     var eixo_x = {{ labels_mtbf_maquina | safe }};
@@ -1106,71 +1012,6 @@
             }
         },
         plugins: [ChartDataLabels]
-    });
-
-    var eixo_y = {{ dados_mtbf_maquina | safe }};
-    var eixo_x = {{ labels_mtbf_maquina | safe }};
-    var ctx = document.getElementById('grafico10').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                color: 'black', // Define a cor dos rótulos para branco
-                    font: {
-                        size: 14 // Define o tamanho da fonte dos rótulos
-                    },
-                label: 'MTBF',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1,
-                backgroundColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 205, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(201, 203, 207, 1)'
-                ],
-                borderColor: [
-                'rgb(255, 99, 132)',
-                'rgb(255, 159, 64)',
-                'rgb(255, 205, 86)',
-                'rgb(75, 192, 192)',
-                'rgb(54, 162, 235)',
-                'rgb(153, 102, 255)',
-                'rgb(201, 203, 207)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                display: true, // Defina como false para remover as grades do eixo x
-            },
-                y: {
-                display: true, // Defina como false para remover as grades do eixo y
-            }
-            },
-            plugins: {
-            title: {
-                display: true,
-                text: 'MTBF por máquina',
-                font: {
-                    size: 18, // Define o tamanho da fonte do título
-                    weight: 'bold' // Define o peso (negrito) da fonte do título
-                },
-                padding: {
-                    top: 10,
-                    bottom: 30
-                }
-            }
-        }
-        }
     });
 
 </script>
