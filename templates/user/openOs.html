@@ -65,7 +65,6 @@
             {% endfor %}
           </select>
       </div>
-      
       <!-- Se o setor for solda -->
       <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
         <label for="Equipamento em falha">Equipamento em falha:</label>
@@ -322,6 +321,13 @@
     var codigoequipamento = document.getElementById("codigo_equip");
     var maquinaSolda = document.getElementById("maquina_de_solda");
     var maquinaDeSoldaSelect = document.getElementById("solda_maquina");
+    var horaInicial = document.getElementById("hora-inicial");
+    var horaFinal = document.getElementById("hora-final");
+    var dataEte = document.getElementById("data-ete");
+    var pvlye = document.getElementById("pvlye");
+    var paPlus = document.getElementById("pa-plus");
+    var tratamento = document.getElementById("tratamento");
+    var phgua = document.getElementById("tratamento");
     
     if (setorSelecionado === "Solda" || setorSelecionado === "Serralheria") {
       equipamentoEmFalha.style.display = "block";

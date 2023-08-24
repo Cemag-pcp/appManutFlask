@@ -30,7 +30,7 @@
           <div class="form-row">
             <div class="form-group">
                 <label for="setor">Setor:</label>
-                <input type="text" name="setor" value="{{ordem[1]}}" class="form-control" readonly="readonly">
+                <input type="text" name="setor" id="setor" value="{{ordem[1]}}" class="form-control" readonly="readonly">
             </div>
             <div class="form-group">
               <label for="setor">Solicitante:</label>
@@ -40,37 +40,33 @@
           <div class="form-row">
             <div class="form-group">
                 <label for="maquina">Máquina ou Local:</label>
-                <input type="text" name="maquina" value="{{ordem[2]}}" class="form-control" readonly="readonly">
-            </div>
-            <div class="form-group">
-              <label>Equipamento em falha:</label>
-              <input type="text" name="maquina" value="{{ordem[23]}}" class="form-control" readonly="readonly">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-                <label>Setor da máquina de solda:</label>
-                <input type="text" name="maquina" value="{{ordem[24]}}" class="form-control" readonly="readonly">
-            </div>
-            <div class="form-group">
-              <label>Qual ferramenta:</label>
-              <input type="text" name="maquina" value="{{ordem[25]}}" class="form-control" readonly="readonly">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Código do Equipamento:</label>
-              <input type="text" name="maquina" value="{{ordem[26]}}" class="form-control" readonly="readonly">
+                <input type="text" name="maquina" id="maquina"  value="{{ordem[2]}}" class="form-control" readonly="readonly">
             </div>
             <div class="form-group">
               <label for="tombamento">Tombamento</label>
               <input type="text" name="tombamento" value="{{ordem[27]}}" class="form-control" readonly="readonly" >
             </div>
           </div>
-            <div class="form-group">
-                <label for="problema">Descrição do usuário:</label>
-                <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
+          <div class="form-row">
+            <div class="form-group" id="equipamento_em_falha" style="display: none;">
+              <label>Equipamento em falha:</label>
+              <input type="text" name="maquina" value="{{ordem[23]}}" class="form-control" readonly="readonly">
             </div>
+            <div class="form-group" id="codigo_equipamento" style="display: none;">
+              <label>Código do Equipamento:</label>
+              <input type="text" name="maquina" value="{{ordem[26]}}" class="form-control" readonly="readonly">
+            </div>
+          </div>
+          <div class="form-row"  id="setor_maquina_solda" style="display: none;">
+            <div class="form-group">
+                <label>Setor da máquina de solda:</label>
+                <input type="text" name="maquina" value="{{ordem[24]}}" class="form-control" readonly="readonly">
+            </div>
+            <div class="form-group" id="ferramenta">
+              <label>Qual ferramenta:</label>
+              <input type="text" name="maquina" value="{{ordem[25]}}" class="form-control" readonly="readonly">
+            </div>
+          </div>
             <div class="form-row">
                 <div class="form-group">
                     <label for="risco">Risco</label>    
@@ -81,9 +77,41 @@
                     <input style ="width: 100%;" type="text" id="n_ordem" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
                 </div>
             </div>
+            <div class="form-group">
+              <label for="problema">Descrição do usuário:</label>
+              <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly">{{ordem[5]}}</textarea >
+            </div>
+    
+            <div class="form-row" id="pvlye" style="display: none;">
+              <div class="form-group">
+                <label for="pvlye">PVLYE (L)</label>
+                <input type="text" name="pvlye">
+              </div>
+              <div class="form-group" id="pa-plus">
+                <label for="pa-plus">PA PLUS (L)</label>
+                <input type="text" name="pa-plus">
+              </div>
+            </div>
+
+            <div class="form-row" id="tratamento" style="display: none;">
+              <div class="form-group">        
+                <label for="tratamento">Tratamento Eficaz?</label>
+                <select style = 'height: 50px;' class="form-control" name="tratamento" id = "tratamento">
+                  <option value="" selected disabled hidden></option>
+                  <option>Sim</option>
+                  <option>Não</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="ph-agua">PH Água</label>
+                <input type="text" name="ph-agua" id="ph-agua">
+              </div>
+            </div>
+            <!-- E.T.E -->
+
             <div class="form-row">
                 {% if tipo_manutencao == '' %}
-                <div class="form-group" style="width: 100%;"> 
+                <div class="form-group" style="width: 48%;"> 
                     <label for="operador">Tipo de manutenção</label>
                     <select style = 'height: 50px;' class="form-control form-control" name="tipo_manutencao">
                         <option value="" selected disabled hidden></option>  
@@ -96,7 +124,6 @@
                     </select>               
                 </div>
                 {% else %}
-
                 <div class="form-group">
                     <label for="operador">Tipo de manutenção</label>
                     <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control" readonly="readonly">
@@ -105,7 +132,7 @@
                 {% endif %}
 
                 {% if area_manutencao == '' %}
-                <div class="form-group" style="width: 100%;"> 
+                <div class="form-group" style="width: 48%;"> 
                     <label for="operador">Área de manutenção</label>
                     <select style = 'height: 50px;' class="form-control form-control" name="area_manutencao">
                         <option value="" selected disabled hidden></option>  
@@ -115,13 +142,12 @@
                     </select>               
                 </div>
                 {% else %}
-
                 <div class="form-group">
                     <label for="area">Área de manutenção</label>
                     <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control" readonly="readonly">
                 </div>
                 {% endif %}
-            </div>
+              </div>
             <div class="form-group">
                 <label for="statusLista">Data e hora</label>
                 <input id="data_edit" type="text" name="datetimes" />
@@ -209,19 +235,26 @@ $(function() {
   $(document).ready(function() {
   // Event handler for status dropdown change
   $('#statusLista').on('change', function() {
-    var selectedStatus = $(this).val();
-    var nOrdem = parseInt($('#n_ordem').val());
+      var selectedStatus = $(this).val();
+      var nOrdem = parseInt($('#n_ordem').val());
+      var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
 
-    updateToggleVisibility(selectedStatus, nOrdem);
+      updateToggleVisibility(selectedStatus, nOrdem, maquinaValue);
+    });
+
+    // Update toggle visibility on page load
+    var selectedStatus = $('#statusLista').val();
+    var nOrdem = parseInt($('#n_ordem').val());
+    var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
+    updateToggleVisibility(selectedStatus, nOrdem, maquinaValue);
   });
 
-  // Update toggle visibility on page load
-  var selectedStatus = $('#statusLista').val();
-  var nOrdem = parseInt($('#n_ordem').val());
-  updateToggleVisibility(selectedStatus, nOrdem);
-
-  function updateToggleVisibility(status, nOrdem) {
-    if (nOrdem === 1 && status === 'Finalizada') {
+  function updateToggleVisibility(status, nOrdem, maquinaValue) {
+    if (maquinaValue === 'ETE') {
+      $('#maquina-parada-toggle').hide();
+      $('#execucao-maquina-toggle').hide();
+      $('#apos-execucao-toggle').hide();
+    }else if (nOrdem === 1 && status === 'Finalizada') {
       $('#maquina-parada-toggle').hide();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').hide();
@@ -237,7 +270,7 @@ $(function() {
       $('#maquina-parada-toggle').show();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').show();
-    }else if (nOrdem === 2) {
+    } else if (nOrdem === 2) {
       $('#maquina-parada-toggle').show();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').show();
@@ -247,7 +280,6 @@ $(function() {
       $('#apos-execucao-toggle').show();
     }
   }
-});
 
 </script>
 
@@ -281,6 +313,40 @@ $(function() {
       } else {
         maquinaParadaHiddenInputThree.value = "false";
       }
+    });
+  </script>
+
+  <script>
+    function getMaquinas() {
+      var maquina_parada_toggle = document.getElementById('maquina-parada-toggle')
+      var execucao_maquina_toggle = document.getElementById('execucao-maquina-toggle')
+      var apos_execucao_toggle = document.getElementById('apos-execucao-toggle')
+      var setorSelecionado = document.getElementById("setor").value;
+      var maquina = document.getElementById("maquina").value;
+      var equipamentoFalha = document.getElementById("equipamento_em_falha");
+      var setorSolda = document.getElementById("setor_maquina_solda");
+      var codigoEquipamento = document.getElementById("codigo_equipamento");
+      var pvlye = document.getElementById("pvlye");
+      var tratamento = document.getElementById("tratamento");
+      
+      if (maquina === "ETE") {
+
+        pvlye.style.display = "flex";
+        tratamento.style.display = "flex";
+        maquina_parada_toggle.style.display = "none";
+        execucao_maquina_toggle.style.display = "none";
+        apos_execucao_toggle.style.display = "none";
+
+      } else {
+        pvlye.style.display = "none";
+        tratamento.style.display = "none";
+        codigoEquipamento.style.display = "block";
+        equipamentoFalha.style.display = "block";
+        setorSolda.style.display = "flex";
+      }
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        getMaquinas();
     });
   </script>
 {% endblock %}
