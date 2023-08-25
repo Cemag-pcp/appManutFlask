@@ -1422,12 +1422,25 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
             data1['qual_ferramenta'][i] = data1['qual_ferramenta'][i-1]
         if data1['cod_equipamento'][i] == '':
             data1['cod_equipamento'][i] = data1['cod_equipamento'][i-1]
+        if data1['pvlye'][i] == '':
+            data1['pvlye'][i] = data1['pvlye'][i-1]
+        if data1['pa_plus'][i] == '':
+            data1['pa_plus'][i] = data1['pa_plus'][i-1]
+        if data1['tratamento'][i] == '':
+            data1['tratamento'][i] = data1['tratamento'][i-1]
+        if data1['ph_agua'][i] == '':
+            data1['ph_agua'][i] = data1['ph_agua'][i-1]
     
     data1 = data1.drop_duplicates(subset=['id_ordem'], keep='last')
     data1 = data1.sort_values(by='id_ordem')
     
     tipo_manutencao = data1['tipo_manutencao'].values.tolist()[0]
     area_manutencao = data1['area_manutencao'].values.tolist()[0]
+
+    pvlye = data1['pvlye'].values.tolist()[0]
+    pa_plus = data1['pa_plus'].values.tolist()[0]
+    tratamento = data1['tratamento'].values.tolist()[0]
+    ph_agua = data1['ph_agua'].values.tolist()[0]
 
     data1 = data1.values.tolist()
     opcaoAtual = data1[0][4]
@@ -1464,7 +1477,8 @@ def get_employee(id_ordem): # Página para edição da ordem de serviço (Inform
 
     return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios,
                             opcoes=opcoes, tipo_manutencao=tipo_manutencao,
-                            area_manutencao=area_manutencao, maquinas=maquinas)
+                            area_manutencao=area_manutencao, maquinas=maquinas,pvlye=pvlye,pa_plus=pa_plus,
+                            tratamento=tratamento,ph_agua=ph_agua)
 
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
@@ -1513,6 +1527,10 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         tipo_manutencao = request.form['tipo_manutencao']
         datetimes = request.form['datetimes']
         area_manutencao = request.form['area_manutencao']
+        pvlye = request.form['pvlye']
+        pa_plus = request.form['pa-plus']
+        tratamento = request.form['tratamento']
+        ph_agua = request.form['ph-agua']
         natureza = natureza
 
         try:
@@ -1559,10 +1577,11 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         cur.execute("""
             INSERT INTO tb_ordens ( id, setor,maquina,risco,status,problemaaparente,
                                     datainicio,horainicio,datafim,horafim,id_ordem,n_ordem,
-                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao) 
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua) 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
-               datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao))
+               datafim, horafim, id_ordem, n_ordem, descmanutencao, [operador], natureza, tipo_manutencao, area_manutencao,
+               pvlye,pa_plus,tratamento,ph_agua))
 
         cur.execute("""
             INSERT INTO tb_paradas (id_ordem,n_ordem, parada1, parada2, parada3) 
