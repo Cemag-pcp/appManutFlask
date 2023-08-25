@@ -57,9 +57,9 @@
               <input type="text" name="maquina" value="{{ordem[26]}}" class="form-control" readonly="readonly">
             </div>
           </div>
-          <div class="form-row"  id="setor_maquina_solda" style="display: none;">
+          <div class="form-row"  id="setor_maquina_solda" style="display: none; align-items: flex-end;">
             <div class="form-group">
-                <label>Setor da máquina de solda:</label>
+                <label>Setor da máq. de solda:</label>
                 <input type="text" name="maquina" value="{{ordem[24]}}" class="form-control" readonly="readonly">
             </div>
             <div class="form-group" id="ferramenta">
@@ -73,7 +73,7 @@
                     <input style="width: 100%;" type="text" name="risco" value="{{ordem[3]}}" class="form-control" readonly="readonly"> 
                 </div>
                 <div class="form-group">
-                    <label for="n_ordem">Número da execução:</label>
+                    <label for="n_ordem">Núm. da execução:</label>
                     <input style ="width: 100%;" type="text" id="n_ordem" name="n_ordem" value="{{ordem[11] + 1}}" class="form-control" readonly="readonly">
                 </div>
             </div>
@@ -85,18 +85,18 @@
             <div class="form-row" id="pvlye" style="display: none;">
               <div class="form-group">
                 <label for="pvlye">PVLYE (L)</label>
-                <input type="text" name="pvlye">
+                <input class="form-control" type="text" name="pvlye" value="{{pvlye}}">
               </div>
               <div class="form-group" id="pa-plus">
                 <label for="pa-plus">PA PLUS (L)</label>
-                <input type="text" name="pa-plus">
+                <input class="form-control" type="text" name="pa-plus" value="{{pa_plus}}">
               </div>
             </div>
 
             <div class="form-row" id="tratamento" style="display: none;">
               <div class="form-group">        
                 <label for="tratamento">Tratamento Eficaz?</label>
-                <select style = 'height: 50px;' class="form-control" name="tratamento" id = "tratamento">
+                <select style = 'height: 50px;' class="form-control" name="tratamento" id = "tratamento" value="{{tratamento}}">
                   <option value="" selected disabled hidden></option>
                   <option>Sim</option>
                   <option>Não</option>
@@ -104,7 +104,7 @@
               </div>
               <div class="form-group">
                 <label for="ph-agua">PH Água</label>
-                <input type="text" name="ph-agua" id="ph-agua">
+                <input class="form-control" type="text" name="ph-agua" id="ph-agua" value="{{ph_agua}}">
               </div>
             </div>
             <!-- E.T.E -->
