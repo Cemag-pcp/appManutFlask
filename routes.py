@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 import numpy as np
 import json
-from funcoes import gerador_de_semanas_informar_manutencao, login_required,gerador_de_semanas_informar_manutencao_diario
+from funcoes import gerador_de_semanas_informar_manutencao, login_required
 import warnings
 from flask import session
 import base64
@@ -41,10 +41,7 @@ DB_PASS = "15512332"
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
    
-def obter_nome_mes(numeros_meses):
-    
-    numeros_meses = list(map(int, numeros_meses))
-
+def obter_nome_mes(numero_mes):
     nomes_meses = {
         1: 'Janeiro',
         2: 'Fevereiro',
@@ -60,66 +57,63 @@ def obter_nome_mes(numeros_meses):
         12: 'Dezembro'
     }
 
-    nomes = [nomes_meses.get(numero_mes, '') for numero_mes in numeros_meses]
-    
-    return nomes
+    return nomes_meses.get(numero_mes, '')
 
-def dias_uteis(meses):
+def dias_uteis(mes):
 
-    qtd_dias_uteis_total = 0
+    lista_mes = [mes]
 
-    for mes in meses:
-        # Verificar se o mês é válido (entre 1 e 12)
-        if not mes:
-            data_atual = pd.Timestamp.now()
-            mes = data_atual.month  # Mês atual
-            qtd_dias_uteis = 0
+    print(lista_mes[0])
 
-            for m in range(7, mes + 1):
-                primeiro_dia_mes = pd.Timestamp(data_atual.year, m, 1)
+    # Verificar se o mês é válido (entre 1 e 12)
+    if not mes:
+        data_atual = pd.Timestamp.now()
+        mes = data_atual.month  # Mês atual
+        qtd_dias_uteis = 0
 
-                if m == mes:
-                    # Se for o mês atual, use o dia atual como o último dia útil
-                    ultimo_dia_util_mes = data_atual
-                else:
-                    # Se não for o mês atual, use o último dia útil do mês
-                    ultimo_dia_util_mes = primeiro_dia_mes + pd.offsets.BMonthEnd()
+        for m in range(7, mes + 1):
+            primeiro_dia_mes = pd.Timestamp(data_atual.year, m, 1)
 
-                datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
-                qtd_dias_uteis += len(datas_uteis)
+            if m == mes:
+                # Se for o mês atual, use o dia atual como o último dia útil
+                ultimo_dia_util_mes = data_atual
+            else:
+                # Se não for o mês atual, use o último dia útil do mês
+                ultimo_dia_util_mes = primeiro_dia_mes + pd.offsets.BMonthEnd()
 
-        elif mes == int(pd.Timestamp.now().month):
-            # Obter a data atual
-            data_atual = pd.Timestamp.now()
-
-            # Obter o primeiro dia do mês atual
-            primeiro_dia_mes = data_atual - pd.offsets.MonthBegin()
-
-            # Obter o último dia útil do mês atual
-            ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
-
-            # Obter a sequência de datas úteis no mês atual
-            datas_uteis = pd.bdate_range(primeiro_dia_mes, data_atual)
-
-            # Contar o número de dias úteis
-            qtd_dias_uteis = len(datas_uteis)
-
-        else:
-            data_atual = pd.Timestamp.now()
-            primeiro_dia_mes = pd.Timestamp(data_atual.year, mes, 1)
-
-            # Obter o último dia útil do mês especificado
-            ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
-
-            # Obter a sequência de datas úteis no mês especificado
             datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
+            qtd_dias_uteis += len(datas_uteis)
 
-            # Contar o número de dias úteis
-            qtd_dias_uteis = len(datas_uteis)
+    elif mes == int(pd.Timestamp.now().month):
+        # Obter a data atual
+        data_atual = pd.Timestamp.now()
+        
+        # Obter o primeiro dia do mês atual
+        primeiro_dia_mes = data_atual - pd.offsets.MonthBegin()
 
-        qtd_dias_uteis_total += qtd_dias_uteis
+        # Obter o último dia útil do mês atual
+        ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
 
-    return qtd_dias_uteis_total
+        # Obter a sequência de datas úteis no mês atual
+        datas_uteis = pd.bdate_range(primeiro_dia_mes, data_atual)
+
+        # Contar o número de dias úteis
+        qtd_dias_uteis = len(datas_uteis)
+
+    else:
+        data_atual = pd.Timestamp.now()
+        primeiro_dia_mes = pd.Timestamp(data_atual.year, mes, 1)
+
+        # Obter o último dia útil do mês especificado
+        ultimo_dia_util_mes = primeiro_dia_mes + BMonthEnd()
+
+        # Obter a sequência de datas úteis no mês especificado
+        datas_uteis = pd.bdate_range(primeiro_dia_mes, ultimo_dia_util_mes)
+
+        # Contar o número de dias úteis
+        qtd_dias_uteis = len(datas_uteis)
+
+    return qtd_dias_uteis
 
 def tempo_os():
     
@@ -1936,10 +1930,9 @@ def get_material(id_ordem): # Informar material que foi utilizado na ordem de se
 def grafico(): # Dashboard
     
     if request.method == 'POST':
-
-        boleano_historico = True
-        todos_meses = None
         
+        boleano_historico = True
+
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -1953,49 +1946,36 @@ def grafico(): # Dashboard
         maquinas = df_maquinas.values.tolist()
 
         setor_selecionado = request.form.getlist('filtro_setor')
-        # maquina_selecionado = request.form.get('filtro_maquinas')
+        maquina_selecionado = request.form.get('filtro_maquinas')
+        # area_manutencao = request.form.get('area_manutencao')
         mes = request.form.getlist('data_filtro')
-        maquinas_importantes = request.form.getlist('maquinas-favoritas')
-
-        if maquinas_importantes or len(maquinas) != 0:
-            cur.execute('SELECT DISTINCT (codigo) FROM tb_maquinas_preventivas')
-            maquinas_preventivas = cur.fetchall()
-            maquinas_preventivas = [valor[0] for valor in maquinas_preventivas]
-            maquinas_selecionadas = ",".join([f"'{maquinas}'" for maquinas in maquinas_preventivas])
-
-        if len(mes) == 0 or mes[0] == '':
-            
-            mes = datetime.now().month
-            mes = list(range(1, mes + 1))
-            todos_meses = 'Todos'
-
-        mes = list(map(int, mes))
-
-        cur.execute('SELECT DISTINCT EXTRACT(MONTH FROM ultima_atualizacao) AS numero_mes FROM tb_ordens;')
-
-        meses_validos = cur.fetchall()
-        meses_validos = [int(row[0]) for row in meses_validos]
-
-        lista_setore_selecionado = setor_selecionado
-
+        
         setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
-        mes_selecionado = ",".join([f"{mes_}" for mes_ in mes])
-
+        mes = ",".join([f"{numero}" for numero in mes])
+        
+        print(type(mes))
+        print(setor_selecionado)
         print(mes)
-        print(meses_validos)
-        todos_presentes = all(elemento in meses_validos for elemento in mes)
 
-        if not todos_presentes:
-            flash("Escolha um mês válido")
-            return redirect(request.url)  # Redirecionar de volta para a página para exibir a mensagem flash
+        # if mes:
+        #     mes = int(mes)
 
         """ Criando cards """
 
         if not setor_selecionado or setor_selecionado == '':
             setor_selecionado = ''
+        if not maquina_selecionado:
+            maquina_selecionado = ''
+        # if not area_manutencao:
+        #     area_manutencao = ''
         if not mes:
             mes = ''
         
+        try:
+            maquina_selecionado = maquina_selecionado.split(" - ")[0]
+        except:
+            pass
+
         # Monta a query base
         query = "SELECT * FROM tb_ordens WHERE 1=1"
 
@@ -2003,9 +1983,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if mes:
-            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
-        if maquinas_importantes:
-            query += f" AND maquina in ({maquinas_selecionadas})"
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query += ' AND ordem_excluida IS NULL OR ordem_excluida = FALSE;'
         
@@ -2023,11 +2001,9 @@ def grafico(): # Dashboard
                """
 
         if mes:
-            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
+            query += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
-        if maquinas_importantes:
-            query += f" AND maquina in ({maquinas_selecionadas})"
 
         lista_qt = cards(query)
 
@@ -2047,9 +2023,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mtbf += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
-        if maquinas_importantes:
-            query_mtbf += f" AND maquina in ({maquinas_selecionadas})"
+            query_mtbf += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query_mtbf += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2075,9 +2049,7 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mttr += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
-        if maquinas_importantes:
-            query_mttr += f" AND maquina in ({maquinas_selecionadas})"
+            query_mttr += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query_mttr += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
@@ -2100,10 +2072,8 @@ def grafico(): # Dashboard
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_disponibilidade += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
-        if maquinas_importantes:
-            query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
-            
+            query_disponibilidade += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+
         query_disponibilidade += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
 
         # context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query, mes)
@@ -2120,9 +2090,7 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
-        if maquinas_importantes:
-            query_horas_trabalhada_area += f" AND maquina in ({maquinas_selecionadas})"
+            query_horas_trabalhada_area += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
 
         query_horas_trabalhada_area += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY area_manutencao;" 
 
@@ -2139,14 +2107,14 @@ def grafico(): # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
-        if maquinas_importantes:
-            query_horas_trabalhada_tipo += f" AND maquina in ({maquinas_selecionadas})"   
-
+            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes})"
+            
         query_horas_trabalhada_tipo += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY tipo_manutencao;" 
 
         # context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query)
+
         resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
+
         context_mtbf_maquina = resultado['context_mtbf_maquina']
         context_mttr_maquina = resultado['context_mttr_maquina']
         context_mttr_setor = resultado['context_mttr_setor']
@@ -2171,21 +2139,17 @@ def grafico(): # Dashboard
         lista_mttr_maquina = resultado['df_combinado_mttr']
         top_10_maiores_MTBF_lista = resultado['top_10_maiores_MTBF_lista']
         
-        mes_descrito = obter_nome_mes(mes)
+        mes_descrito = obter_nome_mes(mes).title()
 
-        return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados, mes_descrito=mes_descrito,
-                            lista_setore_selecionado=lista_setore_selecionado, **context_mtbf_maquina,
-                            **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina, **context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
-                            **context_mtbf_top10_maquina, **context_disponiblidade_setor, mes=mes, **context_horas_trabalhadas, lista_horas_trabalhadas=lista_horas_trabalhadas,
-                            lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo, lista_horas_trabalhadas_area=lista_horas_trabalhadas_area, lista_mtbf_setor=lista_mtbf_setor,
-                            lista_mtbf_maquina=lista_mtbf_maquina, lista_disponibilidade_setor=lista_disponibilidade_setor,
-                            top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista, lista_disponibilidade_maquina=lista_disponibilidade_maquina,
-                            lista_mttr_setor=lista_mttr_setor, lista_mttr_maquina=lista_mttr_maquina,
-                            todos_meses=todos_meses)
-        
-    mes = datetime.now().month
-    mes = list(range(1, mes + 1))
-
+        return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,mes_descrito=mes_descrito,
+                               setor_selecionado=setor_selecionado, maquina_selecionado=maquina_selecionado, **context_mtbf_maquina,
+                                **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina,**context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
+                                **context_mtbf_top10_maquina,**context_disponiblidade_setor,mes=mes,**context_horas_trabalhadas,lista_horas_trabalhadas=lista_horas_trabalhadas,
+                                lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo,lista_horas_trabalhadas_area=lista_horas_trabalhadas_area,lista_mtbf_setor=lista_mtbf_setor,
+                                lista_mtbf_maquina=lista_mtbf_maquina,lista_disponibilidade_setor=lista_disponibilidade_setor,
+                                top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista,lista_disponibilidade_maquina=lista_disponibilidade_maquina,lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina)
+    
+    mes = None
     boleano_historico = True
     setor_selecionado = None
 
@@ -2205,6 +2169,10 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
+    # context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf, mes)
+    # context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf, mes)
+    # context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query_mtbf, mes)
+
     query_mttr = (
     """
         SELECT datafim, maquina, n_ordem, setor,
@@ -2213,6 +2181,10 @@ def grafico(): # Dashboard
         FROM tb_ordens 
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
+
+    # context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query_mttr, mes)
+    # context_mttr_setor,lista_mttr_setor = mttr_setor(query_mttr, mes)
+    # context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query_mttr)
     
     query_disponibilidade = ("""
         SELECT datafim, maquina, n_ordem, setor,
@@ -2221,6 +2193,9 @@ def grafico(): # Dashboard
         FROM tb_ordens
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
+
+    # context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade, mes)
+    # context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade, mes)
 
     query_horas_trabalhada_tipo = """
         SELECT
@@ -2231,6 +2206,8 @@ def grafico(): # Dashboard
         GROUP BY tipo_manutencao;
         """
 
+    # context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query_horas_trabalhada_tipo)
+
     query_horas_trabalhada_area = """
         SELECT
             area_manutencao,
@@ -2240,6 +2217,8 @@ def grafico(): # Dashboard
         GROUP BY area_manutencao;
         """
     
+    # context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query_horas_trabalhada_area)
+
     resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
 
     context_mtbf_maquina = resultado['context_mtbf_maquina']
@@ -2285,7 +2264,7 @@ def grafico(): # Dashboard
     cur.close()
     conn.close()
 
-    mes_descrito = obter_nome_mes(mes)
+    mes_descrito = obter_nome_mes(mes).title()
 
     print(lista_mttr_setor)
 
@@ -2295,7 +2274,7 @@ def grafico(): # Dashboard
                             **context_horas_trabalhadas_area,lista_horas_trabalhadas_area=lista_horas_trabalhadas_area,lista_horas_trabalhadas_tipo=lista_horas_trabalhadas_tipo,
                             top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista,lista_mtbf_setor=lista_mtbf_setor,lista_mtbf_maquina=lista_mtbf_maquina,lista_horas_trabalhadas=lista_horas_trabalhadas,
                             setor_selecionado='', lista_disponibilidade_setor=lista_disponibilidade_setor,lista_disponibilidade_maquina=lista_disponibilidade_maquina,
-                            lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina, area_manutencao='')
+                            lista_mttr_setor=lista_mttr_setor,lista_mttr_maquina=lista_mttr_maquina,maquina_selecionado='', area_manutencao='')
 
 @routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
 @login_required
@@ -2434,13 +2413,9 @@ def cadastro_preventiva():
             manut_inicial = request.form['manut_inicial']
             periodicidade = request.form['periodicidade']
             apelido = request.form['apelido']
-            
-            print(periodicidade)
 
             df = gerador_de_semanas_informar_manutencao(setor,codigo,descricao,tombamento,criticidade,manut_inicial,periodicidade)
-
-            print(df)
-
+        
             lista = df.values.tolist()
             lista = lista[0]
 
@@ -2901,7 +2876,7 @@ def editar_maquina_preventiva(codigo):
                 
             return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
                         setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade,
-                        manutencao_inicial=manutencao_inicial,apelido=apelido, periodicidade=periodicidade)
+                        manutencao_inicial=manutencao_inicial,apelido=apelido)
 
         else:
             
@@ -2929,7 +2904,7 @@ def editar_maquina_preventiva(codigo):
 
         return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
                                     setor=setor,descricao=descricao,tombamento=tombamento,criticidade=criticidade, 
-                                    manutencao_inicial=manutencao_inicial,apelido=apelido, periodicidade=periodicidade)
+                                    manutencao_inicial=manutencao_inicial,apelido=apelido)
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)

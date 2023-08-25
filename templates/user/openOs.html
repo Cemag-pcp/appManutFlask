@@ -109,14 +109,13 @@
         <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramentas">
           <option value="" selected disabled hidden></option>  
           <option value="Esmerilhadeira">Esmerilhadeira</option>
-          <option value="Lixadeira">Lixadeira</option>
           <option value="Tocha">Tocha</option>
         </select>
       </div>
       
       <div class="form-group" id="codigo_equip" style="display: none;">
         <label for="codigo_equip">Qual o código que apresenta no equipamento?</label>
-        <textarea id="codigo_equip" class="form-control" name="codigo_equip" rows="5" cols="39" placeholder="Digite o código..."></textarea>
+        <textarea id="codigo_equipa" class="form-control" name="codigo_equip" rows="5" cols="39" placeholder="Digite o código..."></textarea>
       </div>
       
       <div class="form-group" id = "descricao">
@@ -397,6 +396,28 @@
   }
 </script>
 
+<script>
+  function verificarCampos() {
+      var setor = document.getElementById("setor").value;
+      var falha = document.getElementById("falha").value;
+      var ferramenta = document.getElementById("ferramentas").value;
+      var codigoEquip = document.getElementById("codigo_equipa");
+  
+      if ((setor === "Solda" || setor === "Serralheria") &&
+          falha === "Ferramentas(esmerilhadeiras; lixadeiras e tochas)" &&
+          ferramenta === "Esmerilhadeira") {
+          codigoEquip.required = true;
+      } else {
+          codigoEquip.required = false;
+      }
+  }
+  
+  document.getElementById("setor").addEventListener("change", verificarCampos);
+  document.getElementById("falha").addEventListener("change", verificarCampos);
+  document.getElementById("ferramentas").addEventListener("change", verificarCampos);
+  </script>
+  
+  
 <!-- Inicialize o Bootstrap Select -->
 <script>
   $(document).ready(function() {
