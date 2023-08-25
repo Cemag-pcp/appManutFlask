@@ -1957,8 +1957,6 @@ def grafico(): # Dashboard
         mes = request.form.getlist('data_filtro')
         maquinas_importantes = request.form.getlist('maquinas-favoritas')
 
-        print(maquinas_importantes)
-
         if maquinas_importantes or len(maquinas) != 0:
             cur.execute('SELECT DISTINCT (codigo) FROM tb_maquinas_preventivas')
             maquinas_preventivas = cur.fetchall()
@@ -1983,7 +1981,9 @@ def grafico(): # Dashboard
         setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
         mes_selecionado = ",".join([f"{mes_}" for mes_ in mes])
 
-        todos_presentes = all(elemento in mes for elemento in meses_validos)
+        print(mes)
+        print(meses_validos)
+        todos_presentes = all(elemento in meses_validos for elemento in mes)
 
         if not todos_presentes:
             flash("Escolha um mês válido")
@@ -2182,10 +2182,7 @@ def grafico(): # Dashboard
                             top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista, lista_disponibilidade_maquina=lista_disponibilidade_maquina,
                             lista_mttr_setor=lista_mttr_setor, lista_mttr_maquina=lista_mttr_maquina,
                             todos_meses=todos_meses)
-    
-    # conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+        
     mes = datetime.now().month
     mes = list(range(1, mes + 1))
 
@@ -2208,10 +2205,6 @@ def grafico(): # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    # context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query_mtbf, mes)
-    # context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query_mtbf, mes)
-    # context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query_mtbf, mes)
-
     query_mttr = (
     """
         SELECT datafim, maquina, n_ordem, setor,
@@ -2220,10 +2213,6 @@ def grafico(): # Dashboard
         FROM tb_ordens 
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
-
-    # context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query_mttr, mes)
-    # context_mttr_setor,lista_mttr_setor = mttr_setor(query_mttr, mes)
-    # context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query_mttr)
     
     query_disponibilidade = ("""
         SELECT datafim, maquina, n_ordem, setor,
@@ -2232,9 +2221,6 @@ def grafico(): # Dashboard
         FROM tb_ordens
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
-
-    # context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query_disponibilidade, mes)
-    # context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query_disponibilidade, mes)
 
     query_horas_trabalhada_tipo = """
         SELECT
@@ -2245,8 +2231,6 @@ def grafico(): # Dashboard
         GROUP BY tipo_manutencao;
         """
 
-    # context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query_horas_trabalhada_tipo)
-
     query_horas_trabalhada_area = """
         SELECT
             area_manutencao,
@@ -2256,8 +2240,6 @@ def grafico(): # Dashboard
         GROUP BY area_manutencao;
         """
     
-    # context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query_horas_trabalhada_area)
-
     resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
 
     context_mtbf_maquina = resultado['context_mtbf_maquina']
