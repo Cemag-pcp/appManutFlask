@@ -1527,10 +1527,20 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         tipo_manutencao = request.form['tipo_manutencao']
         datetimes = request.form['datetimes']
         area_manutencao = request.form['area_manutencao']
-        pvlye = request.form['pvlye']
-        pa_plus = request.form['pa-plus']
-        tratamento = request.form['tratamento']
-        ph_agua = request.form['ph-agua']
+        
+        if maquina == 'ETE':
+
+            pvlye = request.form['pvlye']
+            pa_plus = request.form['pa-plus']
+            tratamento = request.form['tratamento']
+            ph_agua = request.form['ph-agua']
+        
+        else:
+            pvlye = ''
+            pa_plus = ''
+            tratamento = ''
+            ph_agua = ''
+            
         natureza = natureza
 
         try:
