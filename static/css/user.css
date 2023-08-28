@@ -1738,10 +1738,6 @@ input #file{
     margin-right: 10px;
 }
 
-.table thead .filters th{
-  width: 50%;
-}
-
 @media (max-width: 1000px) {
     .filter-wrapper2 {
       display: grid;
@@ -1757,10 +1753,6 @@ input #file{
     .filter-wrapper2 div {
       width: 100%;
     }
-
-    .table thead .filters th{
-      width: 100%;
-    }
 }
 
 #titulo_maq_prev{
@@ -1774,4 +1766,3 @@ input #file{
     font-size:14px;
   }
 }
-
