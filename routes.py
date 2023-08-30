@@ -1973,6 +1973,11 @@ def grafico(): # Dashboard
             maquinas_preventivas = [valor[0] for valor in maquinas_preventivas]
             maquinas_selecionadas = ",".join([f"'{maquinas}'" for maquinas in maquinas_preventivas])
 
+        cur.execute('SELECT DISTINCT EXTRACT(MONTH FROM ultima_atualizacao) AS numero_mes FROM tb_ordens;')
+
+        meses_validos = cur.fetchall()
+        meses_validos = [int(row[0]) for row in meses_validos]
+
         if len(mes) == 0 or mes[0] == '':
             
             mes = datetime.now().month
@@ -1981,11 +1986,6 @@ def grafico(): # Dashboard
 
         mes = list(map(int, mes))
 
-        cur.execute('SELECT DISTINCT EXTRACT(MONTH FROM ultima_atualizacao) AS numero_mes FROM tb_ordens;')
-
-        meses_validos = cur.fetchall()
-        meses_validos = [int(row[0]) for row in meses_validos]
-
         lista_setore_selecionado = setor_selecionado
 
         setor_selecionado = ",".join([f"'{palavra}'" for palavra in setor_selecionado])
@@ -1993,11 +1993,11 @@ def grafico(): # Dashboard
 
         print(mes)
         print(meses_validos)
-        todos_presentes = all(elemento in meses_validos for elemento in mes)
+        # todos_presentes = all(elemento in meses_validos for elemento in mes)
 
-        if not todos_presentes:
-            flash("Escolha um mês válido")
-            return redirect(request.url)  # Redirecionar de volta para a página para exibir a mensagem flash
+        # if not todos_presentes:
+        #     flash("Escolha um mês válido")
+        #     return redirect(request.url)  # Redirecionar de volta para a página para exibir a mensagem flash
 
         """ Criando cards """
 
@@ -2047,9 +2047,19 @@ def grafico(): # Dashboard
 
         query_mtbf = (
         """
-            SELECT maquina, n_ordem, id_ordem, dataabertura, setor
-            FROM tb_ordens
-            WHERE 1=1
+            SELECT 
+                CASE 
+                    WHEN t2.apelido IS NOT NULL AND t2.apelido <> '' THEN t2.apelido
+                    ELSE t1.maquina
+                END as maquina,
+                t1.n_ordem,
+                t1.id_ordem,
+                t1.dataabertura,
+                t1.setor
+            FROM tb_ordens as t1
+            LEFT JOIN tb_maquinas as t2 
+                ON t1.maquina = t2.codigo
+            WHERE 1=1 
         """)
 
         if setor_selecionado:
@@ -2061,11 +2071,7 @@ def grafico(): # Dashboard
         if maquinas_importantes:
             query_mtbf += f" AND maquina in ({maquinas_selecionadas})"
 
-        query_mtbf += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
-
-        # context_mtbf_maquina,lista_mtbf_maquina = mtbf_maquina(query, mes)
-        # context_mtbf_setor,lista_mtbf_setor = mtbf_setor(query, mes)
-        # context_mtbf_top10_maquina, top_10_maiores_MTBF_lista = mtbf_maquina_top10(query, mes)
+        query_mtbf += " AND (t1.ordem_excluida IS NULL OR t1.ordem_excluida = FALSE) AND t1.natureza = 'OS';" 
 
         """ Finalizando MTTR por máquina e setor"""
 
@@ -2073,10 +2079,19 @@ def grafico(): # Dashboard
 
         query_mttr = (
         """
-            SELECT datafim, maquina, n_ordem, setor, 
+            SELECT 
+                datafim,
+                CASE 
+                    WHEN t2.apelido IS NOT NULL AND t2.apelido <> '' THEN t2.apelido
+                    ELSE t1.maquina
+                END as maquina,
+                n_ordem,
+                t1.setor, 
                 TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
                 TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-            FROM tb_ordens 
+            FROM tb_ordens as t1
+            LEFT JOIN tb_maquinas as t2 
+                ON t1.maquina = t2.codigo
             WHERE 1=1
         """)
 
@@ -2089,11 +2104,7 @@ def grafico(): # Dashboard
         if maquinas_importantes:
             query_mttr += f" AND maquina in ({maquinas_selecionadas})"
 
-        query_mttr += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
-
-        # context_mttr_maquina,lista_mttr_maquina = mttr_maquina(query, mes)
-        # context_mttr_setor,lista_mttr_setor = mttr_setor(query, mes)
-        # context_horas_trabalhadas,lista_horas_trabalhadas = horas_trabalhadas_cc(query)
+        query_mttr += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS'" 
 
         """ Finalizando MTTR por máquina e setor"""
 
@@ -2114,10 +2125,7 @@ def grafico(): # Dashboard
         if maquinas_importantes:
             query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
             
-        query_disponibilidade += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'" 
-
-        # context_disponiblidade_maquina,lista_disponibilidade_maquina = calculo_indicadores_disponibilidade_maquinas(query, mes)
-        # context_disponiblidade_setor,lista_disponibilidade_setor = calculo_indicadores_disponibilidade_setor(query, mes)
+        query_disponibilidade += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS'" 
         
         query_horas_trabalhada_area = ("""
         SELECT
@@ -2134,9 +2142,7 @@ def grafico(): # Dashboard
         if maquinas_importantes:
             query_horas_trabalhada_area += f" AND maquina in ({maquinas_selecionadas})"
 
-        query_horas_trabalhada_area += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY area_manutencao;" 
-
-        # context_horas_trabalhadas_area, lista_horas_trabalhadas_area = horas_trabalhadas_area(query)
+        query_horas_trabalhada_area += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY area_manutencao;" 
 
         query_horas_trabalhada_tipo = ("""
         SELECT
@@ -2153,9 +2159,8 @@ def grafico(): # Dashboard
         if maquinas_importantes:
             query_horas_trabalhada_tipo += f" AND maquina in ({maquinas_selecionadas})"   
 
-        query_horas_trabalhada_tipo += " AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS' GROUP BY tipo_manutencao;" 
+        query_horas_trabalhada_tipo += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY tipo_manutencao;" 
 
-        # context_horas_trabalhadas_tipo, lista_horas_trabalhadas_tipo = horas_trabalhadas_tipo(query)
         resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
         context_mtbf_maquina = resultado['context_mtbf_maquina']
         context_mttr_maquina = resultado['context_mttr_maquina']
