@@ -60,10 +60,16 @@
         <option value="12" {% if not todos_meses and 12 in mes %}selected{% endif %} >Dezembro</option>
     </select> 
 
-    <label for="maquinas-favoritas">Máquinas importantes</label>
+    <label for="maquinas-favoritas">Máquinas importantes</label>    
+    
+    
     <label class="switch">
-      <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas">
-      <span class="slider round"></span>
+    {% if maquinas_importantes %}
+        <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas" checked>
+    {% else %}
+        <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas">
+    {% endif %}
+        <span class="slider round"></span>
     </label>
 
     <button id="filtra_grafico" type="submit">Filtrar</button>

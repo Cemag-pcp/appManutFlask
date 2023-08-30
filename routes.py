@@ -1527,20 +1527,11 @@ def update_student(id_ordem): # Inserir as edições no banco de dados
         tipo_manutencao = request.form['tipo_manutencao']
         datetimes = request.form['datetimes']
         area_manutencao = request.form['area_manutencao']
-        
-        if maquina == 'ETE':
-
-            pvlye = request.form['pvlye']
-            pa_plus = request.form['pa-plus']
-            tratamento = request.form['tratamento']
-            ph_agua = request.form['ph-agua']
-        
-        else:
-            pvlye = ''
-            pa_plus = ''
-            tratamento = ''
-            ph_agua = ''
-            
+        pvlye = request.form.get('pvlye')
+        pa_plus = request.form.get('pa-plus')
+        tratamento = request.form.get('tratamento')
+        ph_agua = request.form.get('ph-agua')
+                    
         natureza = natureza
 
         try:
@@ -2188,6 +2179,8 @@ def grafico(): # Dashboard
         
         mes_descrito = obter_nome_mes(mes)
 
+        print(maquinas_importantes)
+
         return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados, mes_descrito=mes_descrito,
                             lista_setore_selecionado=lista_setore_selecionado, **context_mtbf_maquina,
                             **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina, **context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
@@ -2196,7 +2189,7 @@ def grafico(): # Dashboard
                             lista_mtbf_maquina=lista_mtbf_maquina, lista_disponibilidade_setor=lista_disponibilidade_setor,
                             top_10_maiores_MTBF_lista=top_10_maiores_MTBF_lista, lista_disponibilidade_maquina=lista_disponibilidade_maquina,
                             lista_mttr_setor=lista_mttr_setor, lista_mttr_maquina=lista_mttr_maquina,
-                            todos_meses=todos_meses)
+                            todos_meses=todos_meses, maquinas_importantes=maquinas_importantes)
         
     mes = datetime.now().month
     mes = list(range(1, mes + 1))
