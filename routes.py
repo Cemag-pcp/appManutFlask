@@ -2775,6 +2775,8 @@ def excluir_ordem():
 
     print(id_linha,texto)
 
+    flash("Ordem de serviço excluída com sucesso", category='sucess')
+
     return 'Dados recebidos com sucesso!'
 
 @routes_bp.route('/visualizar_pdf/<id_ordem>')
@@ -2888,10 +2890,16 @@ def editar_maquina_preventiva(codigo):
                 """Query para editar a linha do codigo escolhido"""
 
                 cur.execute("""
+                    UPDATE tb_ordens
+                    SET maquina=%s, setor=%s
+                    WHERE maquina = %s
+                    """, (codigo_novo, setor, codigo_inicial))
+
+                cur.execute("""
                     DELETE FROM tb_maquinas_preventivas
                     WHERE codigo = '{}'
                     """.format(codigo_inicial))
-
+                
                 sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(','.join(['%s'] * len(lista)))
                 cur.execute(sql_insert, lista)
 
@@ -2901,6 +2909,13 @@ def editar_maquina_preventiva(codigo):
                         SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
                         WHERE codigo = %s
                         """, (codigo_novo, tombamento, setor, descricao,apelido, codigo_inicial))
+                    
+                    cur.execute("""
+                        UPDATE tb_ordens
+                        SET maquina=%s, setor=%s
+                        WHERE maquina = %s
+                        """, (codigo_novo, setor, codigo_inicial))
+                    
                 except:
                     pass
 
@@ -2929,6 +2944,13 @@ def editar_maquina_preventiva(codigo):
                     SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
                     WHERE codigo = %s
                     """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
+
+                cur.execute("""
+                    UPDATE tb_ordens
+                    SET maquina=%s, setor=%s
+                    WHERE maquina = %s
+                    """, (codigo_novo, setor, codigo_inicial))
+
             except:
                 pass
         
@@ -2991,13 +3013,11 @@ def salvar_edicao_maquina(codigo):
     setor = request.form['setor']
     apelido = request.form['apelido']
 
-
     print(codigo_inicial,setor, codigo_novo, descricao, tombamento,apelido)
    
     if codigo_novo != codigo_inicial:
         query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo_novo)
         data = pd.read_sql_query(query, conn)
-        print('Primeiro IF')
 
         if len(data) > 0:
             flash("Código já cadastrado.",category='error')
@@ -3014,6 +3034,14 @@ def salvar_edicao_maquina(codigo):
                 WHERE codigo = %s
                 """, (setor, codigo_novo, descricao, tombamento,apelido, codigo_inicial))
             
+            cur.execute("""
+                UPDATE tb_ordens
+                SET maquina=%s, setor=%s
+                WHERE maquina = %s
+                """, (codigo_novo, setor, codigo_inicial))
+
+            print('fez')
+            
             try:
                 cur.execute("""
                     UPDATE tb_maquinas_preventivas
@@ -3026,7 +3054,6 @@ def salvar_edicao_maquina(codigo):
             conn.commit()
             conn.close()
             codigo = codigo_novo
-            print('Primeiro Else')
 
             """Enviar mensagem de sucesso"""
             flash("Código editado com sucesso", category='success')
@@ -3044,6 +3071,12 @@ def salvar_edicao_maquina(codigo):
             SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
             WHERE codigo = %s
             """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
+
+        cur.execute("""
+            UPDATE tb_ordens
+            SET maquina=%s, setor=%s
+            WHERE maquina = %s
+            """, (codigo_novo, setor, codigo_inicial))
 
         conn.commit()
         conn.close()
@@ -3106,3 +3139,29 @@ def excluir_preventiva():
         flash("Máquina excluída com sucesso", category='sucess')
 
         return 'Dados recebidos com sucesso!'
+    
+@routes_bp.route('/excluir-execucao', methods=['POST'])
+@login_required
+def excluir_execucao():
+
+    id_ordem = int(request.form.get('id_ordem'))
+    n_ordem = int(request.form.get('n_execucao'))
+
+    print(id_ordem, n_ordem)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    query = """
+            DELETE FROM tb_ordens
+            WHERE id_ordem=%s and n_ordem=%s;
+            """
+
+    cur.execute(query, [id_ordem,n_ordem])    
+    
+    conn.commit()
+    conn.close()
+    
+    flash("Execução excluída com sucesso", category='sucess')
+
+    return 'Execução excluída com sucesso'
