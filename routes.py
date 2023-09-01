@@ -3165,3 +3165,9 @@ def excluir_execucao():
     flash("Execução excluída com sucesso", category='sucess')
 
     return 'Execução excluída com sucesso'
+
+@routes_bp.route("/funcionarios")
+@login_required
+def funcionarios():
+
+    return render_template('user/funcionarios.html') 
