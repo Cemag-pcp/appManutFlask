@@ -3166,8 +3166,39 @@ def excluir_execucao():
 
     return 'Execução excluída com sucesso'
 
-@routes_bp.route("/funcionarios")
+@routes_bp.route("/funcionarios", methods=['POST','GET'])
 @login_required
 def funcionarios():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    if request.method == 'POST':
+        nome = request.form['nome']
+        matricula = request.form['matricula']
+        ativo = request.form['ativo']
+        salario = request.form['salario']
+        funcao = request.form['funcao']
+
+        print(nome,matricula,ativo,salario,funcao)
+
+        s = (""" SELECT * FROM tb_funcionario""")
+
+        funcionario_cadastrado = pd.read_sql_query(s,conn)
+
+        if len(funcionario_cadastrado[funcionario_cadastrado['nome'] == nome]) > 0 or len(funcionario_cadastrado[funcionario_cadastrado['matricula'] == matricula]) > 0:
+                flash("Funcionário ja cadastrado", category='danger')  
+                print("Funcionário ja cadastrado")
+        else:
+
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+            cur.execute("INSERT INTO tb_funcionario (nome, matricula, ativo, salario, funcao) VALUES (%s, %s, %s, %s,%s)",
+                        (nome, matricula, ativo, salario,funcao))
+            print("Funcionário cadastrado com sucesso")
+            
+            conn.commit()
+            conn.close()
+
+            flash("Funcionário cadastrado com sucesso", category='sucess')
+    
     return render_template('user/funcionarios.html') 

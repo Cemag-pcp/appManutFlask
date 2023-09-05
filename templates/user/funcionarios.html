@@ -1,0 +1,103 @@
+{% extends "user/layout.html" %}
+{% block body %}
+
+  {% with messages = get_flashed_messages()  %}
+  {% if messages %}
+  {% for message in messages %}
+  {% if message == 'Funcionário cadastrado com sucesso' %}
+  <div class="alert-success alert-dismissible fade show" id="alert_cadast_52" role="alert">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  {% else %}
+  <div class="alert alert-danger">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+</div>
+
+<div class="col-md-4 offset-md-4">
+  <div id ="formulario_preventiva" class="card card-body">
+    
+    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+        <a href="#" onclick="window.history.back();" class="botao-voltar">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+      <h5 style="font-size: 20px; margin-left: 50px; margin-right: 10px;">Cadastro de Funcionários</h5>
+      <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+    </div> 
+
+    <form action="{{ url_for('routes.funcionarios') }}" method="POST" enctype="multipart/form-data">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nome">Nome</label>
+          <input type="text" class="form-control" style="height: 38px;" name="nome" required>
+        </div>
+
+        <div class="form-group">
+          <label for="matricula">Matrícula</label>
+          <input type="text" class="form-control" style="height: 38px;" name="matricula" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">  
+          <label for="ativo">Em atividade?</label>              
+          <select class="form-control form-control" id="ativo" name="ativo" required>
+            <option value="" selected disabled hidden></option>  
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+        </div>
+      
+        <div class="form-group">
+          <label for="salario">Salário</label>
+          <input type="number" class="form-control" style="height: 38px;" name="salario" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="funcao">Função</label>
+        <input type="text" class="form-control" style="height: 38px;" name="funcao" required>
+      </div>
+
+      <button id = 'salvar' class="btn btn-primary btn-block">
+        Inserir 
+      </button>
+      
+      <div id="modalFuncionario" class="tela" style="display: none;">
+        <div class="modal-content3">
+            <span class="close" onclick="closeModal()">&times;</span> <!-- Botão de fechar -->
+        <h4>Downloads</h4>
+        <div class="file-upload-lista" style="margin-top: 20px;">
+            <!-- Adicione o elemento input com o ID pdfInput1 -->
+            <input type="file" id="pdfInput1" accept=".pdf" style="margin-bottom: 30px;" enctype="multipart/form-data" multiple>
+            <button id="enviar_pdf" onclick="uploadPdf(codigo_maquina)">Enviar</button>
+        </div>
+            <table class="table table-striped" id="pdfTable">
+                <thead>
+                    <tr class="cabeçalho">
+                        <th>PDF</th>
+                        <th>Download</th>
+                        <th>Remover</th>
+                    </tr>
+                </thead>
+                <tbody id="pdfTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}

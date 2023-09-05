@@ -948,7 +948,7 @@ body {
   width: 50%;
   left: 5%;
   top:5%;
-  transform: translate(50%,-30%);
+  transform: translate(50%,50%);
   animation: fadeOut 5s forwards;
   opacity: 0;
   position: absolute;
