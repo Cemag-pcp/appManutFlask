@@ -3201,4 +3201,44 @@ def funcionarios():
 
             flash("Funcionário cadastrado com sucesso", category='sucess')
     
-    return render_template('user/funcionarios.html') 
+            return render_template('user/funcionarios.html') 
+        
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """SELECT * FROM tb_funcionario"""
+
+    cur.execute(query)
+    data = cur.fetchall()
+    df_data = pd.DataFrame(data)
+    funci = df_data.values.tolist()
+
+    return render_template("user/funcionarios.html", funci=funci)
+
+@routes_bp.route("/editar_funcionarios", methods=['POST', 'GET'])
+@login_required
+def editar_funcionarios():
+   
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'POST':
+        nome_antigo = request.form.get('nome_antigo')
+        nome_novo = request.form.get('nome')
+        matricula = request.form.get('matricula')
+        ativo = request.form.get('ativo')
+        salario = request.form.get('salario')
+        funcao = request.form.get('funcao')
+
+        print(nome_antigo,nome_novo,matricula,ativo,salario,funcao)
+
+
+    query = """SELECT * FROM tb_funcionario WHERE nome ={}""".format(nome_antigo)
+
+    cur.execute(query)
+    data = cur.fetchall()
+    df_data = pd.DataFrame(data)
+    funci = df_data.values.tolist()
+
+
+    return render_template("user/funcionarios.html")
