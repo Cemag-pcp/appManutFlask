@@ -167,17 +167,67 @@
 <script>
 
 function getFuncionario() {
-  var funcionarioSelecionado = $('#funcionario').val();
-  var nome = $('#editar_nome').val();
-  var matricula = $('#editar_matricula').val();
-  var ativo = $('#editar_ativo').val();
-  var salario = $('#editar_salario').val();
-  var funcao = $('#editar_funcao').val();
-  
-  var nome_antigo = funcionarioSelecionado;
-  $.ajax({
+    var funcionarioSelecionado = $('#funcionario').val();
+    var nome = $('#editar_nome').val();
+    var matricula = $('#editar_matricula').val();
+    var ativo = $('#editar_ativo').val();
+    var salario = $('#editar_salario').val();
+    var funcao = $('#editar_funcao').val();
+    
+    var nome_antigo = funcionarioSelecionado;
+    $.ajax({
+        url: '/editar_funcionarios',
+        method: 'POST',
+        data: {
+          nome_antigo: nome_antigo,
+          nome: nome,
+          matricula: matricula,
+          ativo: ativo,
+          salario: salario,
+          funcao:funcao,
+          // inclua outros dropdowns aqui
+        },
+        success: function(response) {
+          // atualizar o DataFrame com os dados retornados
+          var nomeAntigo = response.nome_antigo;
+          var nomeAtualizado = response.nome;
+          var matriculaAtualizada = response.matricula;
+          var atividadeAtualizada = response.ativo;
+          var salarioAtualizado = response.salario;
+          var funcaoAtualizada = response.funcao;
+
+          window.location.reload();
+          // faça o processamento necessário para atualizar o DataFrame na página
+
+          $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
+        },
+        error: function(error) {
+          console.log(error);
+          $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
+        }
+      });
+}
+
+function selectFuncionario() {
+    var nome = $('#editar_nome').val();
+    var matricula = $('#editar_matricula').val();
+    var ativo = $('#editar_ativo').val();
+    var salario = $('#editar_salario').val();
+    var funcao = $('#editar_funcao').val();
+    var funcionarioSelecionado = $('#funcionario').val();
+    var campos = $('.form-modal');
+
+    for (var i = 0; i < campos.length; i++) {
+      if (funcionarioSelecionado === "") {
+        campos[i].style.display = "none";
+      } else {
+        campos[i].style.display = "block"; 
+      }
+    }
+
+    $.ajax({
       url: '/editar_funcionarios',
-      method: 'POST',
+      method: 'GET',
       data: {
         nome_antigo: nome_antigo,
         nome: nome,
@@ -206,19 +256,6 @@ function getFuncionario() {
         $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
       }
     });
-}
-
-function selectFuncionario() {
-    var funcionarioSelecionado = $('#funcionario').val();
-    var campos = $('.form-modal');
-
-    for (var i = 0; i < campos.length; i++) {
-      if (funcionarioSelecionado === "") {
-        campos[i].style.display = "none";
-      } else {
-        campos[i].style.display = "block"; 
-      }
-    }
   }
 </script>
 
