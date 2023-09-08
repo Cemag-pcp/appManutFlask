@@ -395,11 +395,12 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     """)
 
     df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
-    df_maquinas = df_maquinas[['codigo']]
+    df_maquinas = df_maquinas[['codigo','apelido']]
     df_maquinas = df_maquinas.rename(columns={'codigo':'maquina'})
 
-    df_combinado = df_combinado.merge(df_maquinas, on='maquina')
+    df_combinado = df_combinado.merge(df_maquinas, left_on='maquina', right_on='apelido')
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+    df_combinado = df_combinado.drop_duplicates()
 
     qtd_dias_uteis = dias_uteis(mes)
 
@@ -411,7 +412,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_combinado['MTTR'] = df_combinado['MTTR']
 
-    df_combinado_mttr = df_combinado[['maquina','qtd_manutencao','diferenca','MTTR']].values.tolist()
+    df_combinado_mttr = df_combinado[['apelido','qtd_manutencao','diferenca','MTTR']].values.tolist()
 
     if len(df_combinado)> 0:
 
@@ -420,7 +421,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         df_combinado.sort_values("MTTR", inplace=True)
 
-        grafico1_maquina = df_combinado['maquina'].tolist() # eixo x
+        grafico1_maquina = df_combinado['apelido'].tolist() # eixo x
         grafico2_mttr = df_combinado['MTTR'].tolist() # eixo y grafico 2
 
         # sorted_tuples = sorted(zip(grafico1_maquina, grafico2_mttr), key=lambda x: x[0])
