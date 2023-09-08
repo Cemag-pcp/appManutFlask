@@ -2054,7 +2054,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_mtbf += f" AND setor in ({setor_selecionado})"
+            query_mtbf += f" AND t1.setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
@@ -2087,7 +2087,7 @@ def grafico(): # Dashboard
         """)
 
         if setor_selecionado:
-            query_mttr += f" AND setor in ({setor_selecionado})"
+            query_mttr += f" AND t1.setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
