@@ -402,6 +402,12 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
     df_combinado = df_combinado.drop_duplicates()
 
+    df_combinado = df_combinado.reset_index(drop=True)
+
+    for i in range(len(df_combinado)):
+        if df_combinado['apelido'][i] == '':
+            df_combinado['apelido'][i] = df_combinado['maquina_y'][i]
+
     qtd_dias_uteis = dias_uteis(mes)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
@@ -413,6 +419,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_combinado['MTTR'] = df_combinado['MTTR']
 
     df_combinado_mttr = df_combinado[['apelido','qtd_manutencao','diferenca','MTTR']].values.tolist()
+
+    
 
     if len(df_combinado)> 0:
 
