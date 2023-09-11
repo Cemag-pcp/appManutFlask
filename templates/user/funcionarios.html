@@ -36,7 +36,7 @@
     </div> 
 
     <form action="{{ url_for('routes.funcionarios') }}" method="POST" enctype="multipart/form-data">
-      <a href="#" onclick="showEditarFuncionarios()"><i class="fas fa-pencil" style="color: black;" title="Editar Funcionário"></i></a>
+      <a onclick="showEditarFuncionarios()"><i class="fas fa-pencil" style="color: black;" title="Editar Funcionário"></i></a>
       <div class="form-row">
         <div class="form-group">
           <label for="nome">Nome</label>
@@ -167,6 +167,7 @@
 <script>
 
 function getFuncionario() {
+    showLoading();
     var funcionarioSelecionado = $('#funcionario').val();
     var nome = $('#editar_nome').val();
     var matricula = $('#editar_matricula').val();
@@ -199,7 +200,7 @@ function getFuncionario() {
           window.location.reload();
           // faça o processamento necessário para atualizar o DataFrame na página
 
-          $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
+          hideLoading(); // Oculta o overlay após atualizar os dados
         },
         error: function(error) {
           console.log(error);
@@ -209,6 +210,7 @@ function getFuncionario() {
 }
 
 function selectFuncionario() {
+    showLoading();
     var nome = $('#editar_nome').val();
     var matricula = $('#editar_matricula').val();
     var ativo = $('#editar_ativo').val();
@@ -225,38 +227,29 @@ function selectFuncionario() {
       }
     }
 
+    var select = document.getElementById("funcionario");
+    var selectedValue = select.options[select.selectedIndex].value;
+
+    console.log("Valor selecionado:", selectedValue);
+
     $.ajax({
-      url: '/editar_funcionarios',
-      method: 'GET',
-      data: {
-        nome_antigo: nome_antigo,
-        nome: nome,
-        matricula: matricula,
-        ativo: ativo,
-        salario: salario,
-        funcao:funcao,
-        // inclua outros dropdowns aqui
-      },
-      success: function(response) {
-        // atualizar o DataFrame com os dados retornados
-        var nomeAntigo = response.nome_antigo;
-        var nomeAtualizado = response.nome;
-        var matriculaAtualizada = response.matricula;
-        var atividadeAtualizada = response.ativo;
-        var salarioAtualizado = response.salario;
-        var funcaoAtualizada = response.funcao;
-
-        window.location.reload();
-        // faça o processamento necessário para atualizar o DataFrame na página
-
-        $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
-      },
-      error: function(error) {
-        console.log(error);
-        $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
-      }
-    });
-  }
+    url: "/editar_funcionarios", // Endpoint no servidor para obter dados do funcionário
+    method: "GET",
+    data: { selectedValue: selectedValue }, // Envie o valor selecionado para o servidor
+    success: function(data) {
+      // Atualize os campos de entrada com os dados do funcionário
+      document.getElementById("editar_nome").value = data[0];
+      document.getElementById("editar_matricula").value = data[1];
+      document.getElementById("editar_ativo").value = data[2];
+      document.getElementById("editar_salario").value = data[3];
+      document.getElementById("editar_funcao").value = data[4];
+      hideLoading();
+    },
+    error: function(error) {
+      console.error("Erro ao obter dados do funcionário:", error);
+    }
+  });
+}
 </script>
 
 {% endblock %}
