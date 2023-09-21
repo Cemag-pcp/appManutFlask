@@ -36,7 +36,7 @@
     </div> 
 
     <form action="{{ url_for('routes.funcionarios') }}" method="POST" enctype="multipart/form-data">
-
+      <a onclick="showEditarFuncionarios()"><i class="fas fa-pencil" style="color: black; cursor: pointer;" title="Editar Funcionário"></i></a>
       <div class="form-row">
         <div class="form-group">
           <label for="nome">Nome</label>
@@ -73,31 +73,183 @@
       <button id = 'salvar' class="btn btn-primary btn-block">
         Inserir 
       </button>
-      
-      <div id="modalFuncionario" class="tela" style="display: none;">
-        <div class="modal-content3">
-            <span class="close" onclick="closeModal()">&times;</span> <!-- Botão de fechar -->
-        <h4>Downloads</h4>
-        <div class="file-upload-lista" style="margin-top: 20px;">
-            <!-- Adicione o elemento input com o ID pdfInput1 -->
-            <input type="file" id="pdfInput1" accept=".pdf" style="margin-bottom: 30px;" enctype="multipart/form-data" multiple>
-            <button id="enviar_pdf" onclick="uploadPdf(codigo_maquina)">Enviar</button>
-        </div>
-            <table class="table table-striped" id="pdfTable">
-                <thead>
-                    <tr class="cabeçalho">
-                        <th>PDF</th>
-                        <th>Download</th>
-                        <th>Remover</th>
-                    </tr>
-                </thead>
-                <tbody id="pdfTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
     </form>
   </div>
 </div>
+
+<div class="modal fade" id="funcionarioModal" tabindex="-1" role="dialog" aria-labelledby="funcionarioModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="funcionarioModalLabel">Editar Funcionário</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div class="form-group2">  
+                <label for="funci">Funcionários</label>              
+                <select class="form-control form-control" id="funcionario" name="funcionario" onchange="selectFuncionario()" required>
+                  <option value="" selected disabled hidden></option>  
+                  {% for funcionario in funci %}
+                  <option value="{{funcionario[1]}}">{{funcionario[1]}}</option>
+                  {% endfor %}
+                </select>
+                <div class="form-modal" style="display: none;">
+                  <div class="form-group" >
+                    <label for="editar_nome">Nome</label>
+                    <input type="text" class="form-control" style="height: 38px;" name="editar_nome" id="editar_nome" required>
+                  </div>
+          
+                  <div class="form-group">
+                    <label for="editar_matricula">Matrícula</label>
+                    <input type="text" class="form-control" style="height: 38px;" name="editar_matricula" id="editar_matricula" required>
+                  </div>
+                </div>
+          
+                <div class="form-modal" style="display: none;">
+                  <div class="form-group">  
+                    <label for="editar_ativo">Em atividade?</label>              
+                    <select class="form-control form-control" id="editar_ativo" name="editar_ativo" id="editar_ativo" required>
+                      <option value="" selected disabled hidden></option>  
+                      <option value="true">Sim</option>
+                      <option value="false">Não</option>
+                    </select>
+                  </div>
+                
+                  <div class="form-group">
+                    <label for="editar_salario">Salário</label>
+                    <input type="number" class="form-control" style="height: 38px;" name="editar_salario" id="editar_salario" required>
+                  </div>
+                
+                <div class="form-group">
+                  <label for="editar_funcao">Função</label>
+                  <input type="text" class="form-control" style="height: 38px;" name="editar_funcao" id="editar_funcao" required>
+                </div>
+
+                <div>
+                  <button id="filtrar" onclick="getFuncionario()">Editar dados do Funcionário</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+
+
+<script>
+
+  function showEditarFuncionarios() {
+          showLoading()
+          $.ajax({
+            success: function() {
+                        
+                // Exibir o modal
+                $('#funcionarioModal').modal('show');
+
+                // Ocultar a tela de carregamento após um pequeno atraso (500 milissegundos)
+                setTimeout(function() {
+                    hideLoading(); // Esconde o indicador de carregamento
+                }, 10);
+            },
+            error: function(error) {
+                hideLoading();
+                alert('Essa Ordem de Serviço não contém imagem ou vídeo');
+                console.log(error);
+            }
+          });
+      }
+</script>
+
+<script>
+
+function getFuncionario() {
+    showLoading();
+    var funcionarioSelecionado = $('#funcionario').val();
+    var nome = $('#editar_nome').val();
+    var matricula = $('#editar_matricula').val();
+    var ativo = $('#editar_ativo').val();
+    var salario = $('#editar_salario').val();
+    var funcao = $('#editar_funcao').val();
+    
+    var nome_antigo = funcionarioSelecionado;
+    $.ajax({
+        url: '/editar_funcionarios',
+        method: 'POST',
+        data: {
+          nome_antigo: nome_antigo,
+          nome: nome,
+          matricula: matricula,
+          ativo: ativo,
+          salario: salario,
+          funcao:funcao,
+          // inclua outros dropdowns aqui
+        },
+        success: function(response) {
+          // atualizar o DataFrame com os dados retornados
+          var nomeAntigo = response.nome_antigo;
+          var nomeAtualizado = response.nome;
+          var matriculaAtualizada = response.matricula;
+          var atividadeAtualizada = response.ativo;
+          var salarioAtualizado = response.salario;
+          var funcaoAtualizada = response.funcao;
+
+          window.location.reload();
+          // faça o processamento necessário para atualizar o DataFrame na página
+
+          hideLoading(); // Oculta o overlay após atualizar os dados
+        },
+        error: function(error) {
+          console.log(error);
+          $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
+        }
+      });
+}
+
+function selectFuncionario() {
+    showLoading();
+    var nome = $('#editar_nome').val();
+    var matricula = $('#editar_matricula').val();
+    var ativo = $('#editar_ativo').val();
+    var salario = $('#editar_salario').val();
+    var funcao = $('#editar_funcao').val();
+    var funcionarioSelecionado = $('#funcionario').val();
+    var campos = $('.form-modal');
+
+    for (var i = 0; i < campos.length; i++) {
+      if (funcionarioSelecionado === "") {
+        campos[i].style.display = "none";
+      } else {
+        campos[i].style.display = "block"; 
+      }
+    }
+
+    var select = document.getElementById("funcionario");
+    var selectedValue = select.options[select.selectedIndex].value;
+
+    console.log("Valor selecionado:", selectedValue);
+
+    $.ajax({
+    url: "/editar_funcionarios", // Endpoint no servidor para obter dados do funcionário
+    method: "GET",
+    data: { selectedValue: selectedValue }, // Envie o valor selecionado para o servidor
+    success: function(data) {
+      // Atualize os campos de entrada com os dados do funcionário
+      document.getElementById("editar_nome").value = data[0];
+      document.getElementById("editar_matricula").value = data[1];
+      document.getElementById("editar_ativo").value = data[2];
+      document.getElementById("editar_salario").value = data[3];
+      document.getElementById("editar_funcao").value = data[4];
+      hideLoading();
+    },
+    error: function(error) {
+      console.error("Erro ao obter dados do funcionário:", error);
+    }
+  });
+}
+</script>
 
 {% endblock %}

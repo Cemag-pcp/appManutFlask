@@ -1714,7 +1714,24 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         n_ordem = request.form['n_ordem']
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
-        operador = json.dumps(operador)
+        # operador = json.dumps(operador)
+
+        matriculas_operadores = []
+
+        # Itere sobre a lista
+        for item in operador:
+            # Divida a string usando '-' como separador e pegue a parte antes do hífen
+            partes = item.split('-')
+            if len(partes) > 0:
+                matriculas = partes[0].strip()
+                matriculas_operadores.append(matriculas)
+
+        operador = matriculas_operadores
+
+        operador = ",".join(operador)
+
+        print(operador)
+
         tipo_manutencao = request.form['tipo_manutencao']
         datetimes = request.form['datetimes']
         area_manutencao = request.form['area_manutencao']
@@ -1774,8 +1791,8 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
                                     descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua) 
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
-              datafim, horafim, id_ordem, n_ordem, descmanutencao, [
-                  operador], natureza, tipo_manutencao, area_manutencao,
+              datafim, horafim, id_ordem, n_ordem, descmanutencao, 
+                  operador, natureza, tipo_manutencao, area_manutencao,
               pvlye, pa_plus, tratamento, ph_agua))
 
         cur.execute("""
@@ -1793,10 +1810,9 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
 @login_required
 def editar_ordem(id_ordem, n_ordem):
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     s = ('SELECT * FROM tb_ordens WHERE id_ordem = {} AND n_ordem = {}'.format(int(id_ordem), int(n_ordem)))
     cur.execute(s)
     data1 = pd.read_sql_query(s, conn)
@@ -1809,7 +1825,24 @@ def editar_ordem(id_ordem, n_ordem):
     executante = data1['operador'].values.tolist()[0].replace(
         "{", "").replace("[", "").replace("\\", "").replace('"', '').replace("]}", "")
     executante = [exec.strip() for exec in executante.split(',')]
+    
 
+    try:
+        s = ('SELECT * FROM tb_funcionario')
+        cur.execute(s)
+        df_funcionarios = pd.read_sql_query(s, conn)
+        
+        lista_executante = []
+
+        for matricula in executante:
+            funcionario = df_funcionarios[df_funcionarios['matricula'] == matricula][['nome']].values.tolist()[0][0]
+            lista_executante.append(matricula + " - " + funcionario) 
+
+        executante = lista_executante
+
+    except:
+        pass
+    
     tipo_manutencao = data1['tipo_manutencao'].values.tolist()[0]
     area_manutencao = data1['area_manutencao'].values.tolist()[0]
 
@@ -3543,7 +3576,54 @@ def funcionarios():
             conn.close()
 
             flash("Funcionário cadastrado com sucesso", category='sucess')
+            return render_template('user/funcionarios.html') 
+        
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    return render_template('user/funcionarios.html')
+    query = """SELECT * FROM tb_funcionario"""
 
+    cur.execute(query)
+    data = cur.fetchall()
+    df_data = pd.DataFrame(data)
+    funci = df_data.values.tolist()
 
+    return render_template("user/funcionarios.html", funci=funci)
+
+@routes_bp.route("/editar_funcionarios", methods=['POST', 'GET'])
+@login_required
+def editar_funcionarios():
+   
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'POST':
+        nome_antigo = request.form.get('nome_antigo')
+        nome_novo = request.form.get('nome')
+        matricula = request.form.get('matricula')
+        ativo = request.form.get('ativo')
+        salario = request.form.get('salario')
+        funcao = request.form.get('funcao')
+
+        # Use o valor selecionado no <select> para atualizar o registro no banco de dados
+        query = """
+        UPDATE tb_funcionario
+        SET nome = %s, matricula = %s, ativo = %s, salario = %s, funcao = %s
+        WHERE nome = %s
+        """
+        
+        cur.execute(query, (nome_novo, matricula, ativo, salario, funcao, nome_antigo))
+        conn.commit()
+        
+        return render_template("user/funcionarios.html")
+
+    selected_value = request.args.get('selectedValue')
+    if selected_value:
+        query = """SELECT nome, matricula, ativo, salario, funcao FROM tb_funcionario WHERE nome = '{}';""".format(selected_value)
+        cur.execute(query)
+        data = cur.fetchone()  # Assume que há apenas um registro correspondente
+    else:
+        # Se nenhum valor foi selecionado, retorne valores vazios
+        data = {'nome': '', 'matricula': '', 'ativo': '', 'salario': '', 'funcao': ''}
+
+    return jsonify(data)
