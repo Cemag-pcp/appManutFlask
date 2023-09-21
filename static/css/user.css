@@ -877,11 +877,34 @@ body {
   gap: 30px;
 }
 
+.cardBox2{
+  flex-direction: column;
+  position: relative;
+  width: 90%;
+  padding: 20px;
+  margin-left: 5%;
+  display: flex;
+  gap: 100px;
+  justify-content: center;
+}
+
 .cardBox .card{
   position: relative;
   flex-direction: row;
   background: var(--white);
   padding: 30px;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+}
+
+.cardBox2 .card{
+  position: relative;
+  flex-direction: row;
+  background: var(--white);
+  padding: 30px;
+  width: 400px;
   border-radius: 20px;
   display: flex;
   justify-content: space-between;
@@ -895,16 +918,34 @@ body {
   color: var(--blue);
 }
 
+.cardBox2 .card .card-text{
+  position: relative;
+  font-weight: 500;
+  font-size: 2em;
+  color: var(--blue);
+}
+
 .cardBox .card .card-title{
   color: var(--black2);
   font-size: 1em;
   margin-top: 5px;
 }
+
+.cardBox2 .card .card-title{
+  color: var(--black2);
+  font-size: 1em;
+  margin-top: 5px;
+}
+
 .cardBox .card .iconBx{
   font-size: 2.5em;
   color: rgb(172, 172, 172);
 }
 
+.cardBox2 .card .iconBx{
+  font-size: 2.5em;
+  color: rgb(172, 172, 172);
+}
 
 /* #andamento{
   margin-left: 30px;
@@ -1246,6 +1287,17 @@ input #file{
     border-radius: 0;
   }
 
+  .cardBox2 .card{
+    position: relative;
+    flex-direction: row;
+    background: var(--white);
+    padding: 30px;
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+  }
+
   .cardBox {
     position: relative;
     width: 100%;
@@ -1256,6 +1308,16 @@ input #file{
     gap: 30px;
     margin-bottom: 30px;
 }
+
+.cardBox2 {
+  position: relative;
+  width: 100%;
+  display: flex;
+  padding: 0;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
 .details {
   position: relative;
   width: 100%;
@@ -1292,6 +1354,11 @@ input #file{
   .cardBox{
     grid-template-columns: repeat(2,1fr);
   }
+
+  .cardBox2{
+    grid-template-columns: repeat(2,1fr);
+  }
+
   #form_filtros_graficos {
     display: inline-flex;
     padding: 30px;
@@ -1333,6 +1400,9 @@ input #file{
 
 @media(max-width: 480px){
   .cardBox{
+    grid-template-columns: repeat(1,1fr);
+  }
+  .cardBox2{
     grid-template-columns: repeat(1,1fr);
   }
 }
@@ -1446,10 +1516,9 @@ input #file{
 }
 
 .graphBox .box3{
-  display: grid;
+  display: flex;
   position: relative;
   width: 40%;
-  grid-template-columns: 1fr 1fr;
   padding: 20px;
   z-index: 0;
 }
@@ -1487,10 +1556,9 @@ input #file{
   }
 
   .graphBox .box3{
-    display: grid;
+    display: flex;
     position: relative;
-    width: 50%;
-    grid-template-columns: 1fr 1fr;
+    width: 60%;
     padding: 20px;
     z-index: 0;
   }
@@ -1516,6 +1584,15 @@ input #file{
     font-size: 12px;
     min-width: 35vh;
   }
+}
+
+@media (max-width: 1300px){
+  .graphBox .box3 {
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr;
+    justify-items: end;
+}
 }
 
 @media(max-width: 600px){
