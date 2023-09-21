@@ -1291,6 +1291,7 @@ input #file{
     position: relative;
     flex-direction: row;
     background: var(--white);
+    margin-top: 10px;
     padding: 30px;
     display: flex;
     justify-content: space-around;

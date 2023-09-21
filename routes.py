@@ -2376,33 +2376,6 @@ def grafico():  # Dashboard
 
         query_disponibilidade += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS'"
 
-
-        # """Query para criar gráfico de disponibilidade geral"""
-
-        # query_disponibilidade_geral = ("""
-        #     SELECT datafim, maquina, n_ordem, setor,
-        #         TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-        #         TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-        #     FROM tb_ordens
-        #     WHERE 1=1
-        # """)
-
-        # if setor_selecionado:
-        #     query_disponibilidade_geral += f" AND setor in ({setor_selecionado})"
-        # # if area_manutencao:
-        # #     query_disponibilidade_geral += f" AND area_manutencao = '{area_manutencao}'"
-        # if mes:
-        #     query_disponibilidade_geral += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
-        # if maquinas_importantes:
-        #     query_disponibilidade_geral += f" AND maquina in ({maquinas_selecionadas})"
-
-        # query_disponibilidade_geral += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS'"
-
-
-
-
-
-
         query_horas_trabalhada_area = ("""
         SELECT
             area_manutencao,
