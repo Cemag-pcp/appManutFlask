@@ -22,6 +22,7 @@ from werkzeug.utils import secure_filename
 import os
 import zipfile
 from io import BytesIO
+import re
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -729,7 +730,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_combinado['disponibilidade'] = (
             (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
 
-        disponibilidade_geral_maquina = df_combinado['disponibilidade'].mean().round(2)
+        disponibilidade_geral_maquina = df_combinado['disponibilidade'].mean().round(
+            2)
 
         if boleano_historico and not mes:
             """
@@ -764,11 +766,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             dados_disponibilidade = df_combinado_disponibilidade['disponibilidade'].tolist(
             )
 
-            disponibilidade_geral_maquina = df_combinado_disponibilidade['disponibilidade'].mean()
+            disponibilidade_geral_maquina = df_combinado_disponibilidade['disponibilidade'].mean(
+            )
 
             df_combinado_disponibilidade = df_combinado_disponibilidade[[
                 'maquina', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
-            
 
         else:
             print('Não Entrou no Boleano')
@@ -792,7 +794,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         context_disponibilidade = {'labels_disponibilidade_maquina': labels,
                                    'dados_disponibilidade_maquina': dados_disponibilidade,
-                                   'valor_disponibilidade_geral_maquina':disponibilidade_geral_maquina}
+                                   'valor_disponibilidade_geral_maquina': disponibilidade_geral_maquina}
 
     # query_mttr
     # calculo_indicadores_disponibilidade_setor
@@ -861,7 +863,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         # eixo y gráfico 1
         dados_disponibilidade = df_combinado['disponibilidade'].tolist()
 
-        disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(2)
+        disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
+            2)
 
         # sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
 
@@ -874,7 +877,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_disponibilidade_setor = {
             'labels_disponibilidade_setor': labels,
             'dados_disponibilidade_setor': dados_disponibilidade,
-            'valor_disponibilidade_geral_setor':disponibilidade_geral_setor}
+            'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
 
     else:
 
@@ -886,9 +889,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         disponibilidade_geral_setor = []
 
         context_disponibilidade_setor = {
-            'labels_disponibilidade_setor': labels, 
+            'labels_disponibilidade_setor': labels,
             'dados_disponibilidade_setor': dados_disponibilidade,
-            'valor_disponibilidade_geral_setor':disponibilidade_geral_setor}
+            'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
 
     # query_horas_trabalhada_tipo
     # horas_trabalhadas_tipo
@@ -1068,13 +1071,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_mtbf_top10_maquina = {
             'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}
 
-
     # query_disponibilidade_geral
-
-
-
-
-
 
     # Organize os resultados em um dicionário
     resultado = {
@@ -1095,11 +1092,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         'context_disponibilidade': context_disponibilidade,
         'df_combinado_disponibilidade': df_combinado_disponibilidade,
-        'disponibilidade_geral_maquina':disponibilidade_geral_maquina,
+        'disponibilidade_geral_maquina': disponibilidade_geral_maquina,
 
         'context_disponibilidade_setor': context_disponibilidade_setor,
         'df_disponibilidade_setor': df_disponibilidade_setor,
-        'disponibilidade_geral_setor':disponibilidade_geral_setor,
+        'disponibilidade_geral_setor': disponibilidade_geral_setor,
 
         'context_horas_trabalhadas_tipo': context_horas_trabalhadas_tipo,
         'lista_horas_trabalhadas_tipo': lista_horas_trabalhadas_tipo,
@@ -1260,31 +1257,45 @@ def calcular_dias_uteis(ano, mes):
 
 def custo_MO():
 
+    """
+    Cálculo de custo da mão obra por ordem de serviço
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     s = ("""
         SELECT
-            o.id_ordem,
-            o.dataabertura,
-            o.n_ordem,
-            o.status,
-            o.datainicio,
-            o.datafim,
-            o.operador,
-            o.descmanutencao,
-            TO_TIMESTAMP(o.datainicio || ' ' || o.horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-            TO_TIMESTAMP(o.datafim || ' ' || o.horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim,
-            func.nome,
-            func.matricula,
-            func.salario
-        FROM tb_ordens as o
-        LEFT JOIN tb_funcionario as func ON o.operador LIKE '%' || func.matricula || ' - ' || func.nome || '%'
-        WHERE (o.ordem_excluida IS NULL OR o.ordem_excluida = FALSE);
+            id_ordem,
+            dataabertura,
+            n_ordem,
+            status,
+            datainicio,
+            datafim,
+            STRING_AGG(REGEXP_REPLACE(operador, '[^\d,]', '', 'g'), ', ') AS operador,
+            MIN(TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS')) AS inicio,
+            MAX(TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS')) AS fim
+        FROM (
+            SELECT
+                id_ordem,
+                dataabertura,
+                n_ordem,
+                status,
+                datainicio,
+                datafim,
+                operador,
+                descmanutencao,
+                horainicio,
+                horafim
+            FROM tb_ordens
+            WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+        ) subquery
+        GROUP BY id_ordem, dataabertura, n_ordem, status, datainicio, datafim, descmanutencao;
         """)
 
     df_timeline = pd.read_sql_query(s, conn)
+    df_funcionario = pd.read_sql_query("SELECT * FROM tb_funcionario", conn) 
 
     df_timeline['inicio'] = df_timeline['inicio'].astype(str)
     df_timeline['fim'] = df_timeline['fim'].astype(str)
@@ -1298,6 +1309,15 @@ def custo_MO():
 
     df_timeline = df_timeline.replace(np.nan, '-')
 
+    df_timeline['operador'] = df_timeline['operador'].apply(lambda x: ', '.join(re.findall(r'\d+', x)))
+    
+    df_operadores = df_timeline['operador'].str.split(', ', expand=True).stack().reset_index(level=1, drop=True).reset_index()
+    df_operadores.columns = ['index', 'operador']
+
+    # Mesclar os DataFrames usando o índice original
+    df_resultado = df_timeline.drop(columns=['operador']).merge(df_operadores, left_index=True, right_on='index', how='inner')
+    df_timeline = df_resultado.drop(columns=['index'])
+    
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
@@ -1306,9 +1326,6 @@ def custo_MO():
         df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
             lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
-        for i in range(len(df_timeline)):
-            df_timeline['operador'][i] = df_timeline['operador'][i].replace(
-                "{", "").replace("[", "").replace("\\", "").replace('"', '').replace("]}", "")
     except:
         df_timeline['diferenca'] = 0
 
@@ -1318,6 +1335,11 @@ def custo_MO():
         df_timeline['datainicio'][0] = df_timeline['dataabertura'][0]
 
     df_final = df_timeline
+
+    df_final['operador'] = df_final['operador'].replace('',0).astype(int)
+    df_funcionario['matricula'] = df_funcionario['matricula'].astype(int)
+
+    df_timeline = df_final.merge(df_funcionario, left_on='operador', right_on='matricula')
 
     df_timeline['mesExecucao'] = df_timeline['fim'].dt.month
     df_timeline['anoExecucao'] = df_timeline['fim'].dt.year
@@ -1344,10 +1366,13 @@ def custo_MO():
 
     return df_final
 
-# Função para verificar a extensão do arquivo permitida
-
 
 def allowed_file(filename):
+
+    """
+    Função para verificar a extensão do arquivo permitida
+    """
+
     # Lista de extensões permitidas para vídeos
     ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -1437,6 +1462,8 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     df_custos = custo_MO()
 
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
+
+    df['proporcional'] = df['proporcional'].fillna(0)
 
     list_users = df.values.tolist()
 
@@ -1791,8 +1818,8 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
                                     descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua) 
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
-              datafim, horafim, id_ordem, n_ordem, descmanutencao, 
-                  operador, natureza, tipo_manutencao, area_manutencao,
+              datafim, horafim, id_ordem, n_ordem, descmanutencao,
+              operador, natureza, tipo_manutencao, area_manutencao,
               pvlye, pa_plus, tratamento, ph_agua))
 
         cur.execute("""
@@ -1810,7 +1837,8 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
 @login_required
 def editar_ordem(id_ordem, n_ordem):
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     s = ('SELECT * FROM tb_ordens WHERE id_ordem = {} AND n_ordem = {}'.format(int(id_ordem), int(n_ordem)))
@@ -1825,24 +1853,24 @@ def editar_ordem(id_ordem, n_ordem):
     executante = data1['operador'].values.tolist()[0].replace(
         "{", "").replace("[", "").replace("\\", "").replace('"', '').replace("]}", "")
     executante = [exec.strip() for exec in executante.split(',')]
-    
 
     try:
         s = ('SELECT * FROM tb_funcionario')
         cur.execute(s)
         df_funcionarios = pd.read_sql_query(s, conn)
-        
+
         lista_executante = []
 
         for matricula in executante:
-            funcionario = df_funcionarios[df_funcionarios['matricula'] == matricula][['nome']].values.tolist()[0][0]
-            lista_executante.append(matricula + " - " + funcionario) 
+            funcionario = df_funcionarios[df_funcionarios['matricula'] == matricula][[
+                'nome']].values.tolist()[0][0]
+            lista_executante.append(matricula + " - " + funcionario)
 
         executante = lista_executante
 
     except:
         pass
-    
+
     tipo_manutencao = data1['tipo_manutencao'].values.tolist()[0]
     area_manutencao = data1['area_manutencao'].values.tolist()[0]
 
@@ -3549,9 +3577,10 @@ def funcionarios():
             conn.close()
 
             flash("Funcionário cadastrado com sucesso", category='sucess')
-            return render_template('user/funcionarios.html') 
-        
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+            return render_template('user/funcionarios.html')
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """SELECT * FROM tb_funcionario"""
@@ -3563,11 +3592,13 @@ def funcionarios():
 
     return render_template("user/funcionarios.html", funci=funci)
 
+
 @routes_bp.route("/editar_funcionarios", methods=['POST', 'GET'])
 @login_required
 def editar_funcionarios():
-   
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if request.method == 'POST':
@@ -3584,19 +3615,24 @@ def editar_funcionarios():
         SET nome = %s, matricula = %s, ativo = %s, salario = %s, funcao = %s
         WHERE nome = %s
         """
-        
-        cur.execute(query, (nome_novo, matricula, ativo, salario, funcao, nome_antigo))
+
+        cur.execute(query, (nome_novo, matricula, ativo,
+                    salario, funcao, nome_antigo))
         conn.commit()
-        
+
         return render_template("user/funcionarios.html")
 
     selected_value = request.args.get('selectedValue')
     if selected_value:
-        query = """SELECT nome, matricula, ativo, salario, funcao FROM tb_funcionario WHERE nome = '{}';""".format(selected_value)
+        query = """SELECT nome, matricula, ativo, salario, funcao FROM tb_funcionario WHERE nome = '{}';""".format(
+            selected_value)
         cur.execute(query)
         data = cur.fetchone()  # Assume que há apenas um registro correspondente
     else:
         # Se nenhum valor foi selecionado, retorne valores vazios
-        data = {'nome': '', 'matricula': '', 'ativo': '', 'salario': '', 'funcao': ''}
+        data = {'nome': '', 'matricula': '',
+                'ativo': '', 'salario': '', 'funcao': ''}
 
     return jsonify(data)
+
+
