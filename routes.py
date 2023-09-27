@@ -721,6 +721,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
+    df_combinado = df_combinado.drop_duplicates().reset_index(drop=True)
+
     if len(df_combinado) > 0:
         print('Entrou')
         df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] -
@@ -865,7 +867,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
             2)
-
+        
         # sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
 
         # # Desempacotar as tuplas classificadas em duas listas separadas
@@ -1365,6 +1367,86 @@ def custo_MO():
     df_final = df_final[['id_ordem', 'proporcional']]
 
     return df_final
+
+
+def tempo_maquina_parada():
+    """
+    Cálculo de custo da mão obra por ordem de serviço
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    s = ("""
+        SELECT
+            id_ordem,
+            dataabertura,
+            n_ordem,
+            status,
+            datainicio,
+            datafim,
+            STRING_AGG(REGEXP_REPLACE(operador, '[^\d,]', '', 'g'), ', ') AS operador,
+            MIN(TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS')) AS inicio,
+            MAX(TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS')) AS fim
+        FROM (
+            SELECT
+                id_ordem,
+                dataabertura,
+                n_ordem,
+                status,
+                datainicio,
+                datafim,
+                operador,
+                descmanutencao,
+                horainicio,
+                horafim
+            FROM tb_ordens
+            WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+        ) subquery
+        GROUP BY id_ordem, dataabertura, n_ordem, status, datainicio, datafim, descmanutencao;
+        """)
+
+    df_timeline = pd.read_sql_query(s, conn)
+
+    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    df_timeline['fim'] = df_timeline['fim'].astype(str)
+
+    for i in range(len(df_timeline)):
+        if df_timeline['fim'][i] == 'NaT':
+            df_timeline['fim'][i] = 0
+            df_timeline['inicio'][i] = 0
+        else:
+            pass
+
+    df_timeline = df_timeline.replace(np.nan, '-')
+        
+    try:
+        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+        # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+            lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    except:
+        df_timeline['diferenca'] = 0
+
+    df_timeline = df_timeline.sort_values(by='n_ordem', ascending=True)
+
+    if df_timeline['datainicio'][0] == '-':
+        df_timeline['datainicio'][0] = df_timeline['dataabertura'][0]
+
+    df_final = df_timeline
+
+    df_final['operador'] = df_final['operador'].replace('',0).astype(int)
+
+
+    df_final = df_final[['id_ordem', 'proporcional']]
+
+    return df_final
+
+
 
 
 def allowed_file(filename):
