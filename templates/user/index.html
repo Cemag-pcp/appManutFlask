@@ -130,6 +130,7 @@
                             <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo MO</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Foto/Vídeo</th>
+                            <th style=" display: none; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descricao</th>
                         </tr>
 
                     </thead>
@@ -221,6 +222,9 @@
                                 {% endif %}
 
                             </td>
+
+                            <td data-title="Descricao" style="display: none; padding-bottom: 0px;">{{row[6]}}</td>
+
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -285,7 +289,7 @@
 
 function downloadFilteredCSV(filteredData) {
     // Adicione uma linha de cabeçalho com os nomes das colunas
-    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Menu'];
+    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Menu','Descricao'];
     filteredData.unshift(headerRow);
     var csvContent = "data:text/csv;charset=utf-8,";
 

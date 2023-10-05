@@ -1554,7 +1554,7 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
 
-    print(df)
+    print(df.iloc[:,6:])
 
     df['proporcional'] = df['proporcional'].fillna(0)
 
