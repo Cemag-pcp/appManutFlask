@@ -4,8 +4,11 @@
 }
 
 #imagemModal .modal-body {
-    max-height: 500px; /* Defina a altura máxima do corpo do modal conforme necessário */
-    overflow-y: auto; /* Adicione uma barra de rolagem vertical caso o conteúdo do modal seja maior do que o tamanho máximo definido */
+    max-height: 500px;
+    overflow-y: auto;
+    display: flex;
+    overflow-x: auto;
+    justify-content: flex-start;
 }
 
 #imagemModal2 .modal-body {
@@ -15,4 +18,11 @@
 #imagemModal video {
     width: 100%; /* O vídeo ocupará toda a largura disponível dentro do modal */
     height: 500; /* A altura será ajustada automaticamente proporcionalmente à largura para evitar distorção */
+}
+
+.modal-body {
+    position: relative;
+    display: flex;
+    padding: 1rem;
+    justify-content: center;
 }

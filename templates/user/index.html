@@ -129,7 +129,6 @@
                             <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
                             <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo MO</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Foto/Vídeo</th>
                             <th style=" display: none; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descricao</th>
                         </tr>
 
@@ -172,11 +171,21 @@
                             <td data-title="Custo MO" style="padding-bottom: 0px;">R$ {{row[37]}}</td>                  
                             
                             <td data-title="Menu" style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
-                                
+
                                 <div class="dropup">
+
+                                    {% if row[35] != "" %}
+                                        <a id="dropdown_os" class="dropdown-foto-video" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                            <i class="fa-solid fa-video"></i>
+                                        </a>
+                                    {% else %}
+                                        <a></a>
+                                    {% endif %}
+
                                     <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
                                     </button>
+
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                         <a id="dropdown_os" class="dropdown-item" href="/edit/{{row[11]}}"> 
                                             <i class="fas fa-wrench"></i> 
@@ -200,26 +209,14 @@
                                             <i class="fas fa-pencil"></i> 
                                         </a>
                                     </div>
+                                    {% if row[36] != "" %}
+                                        <a id="dropdown_os" class="dropdown-foto-video" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                            <i class="fas fa-image"></i> 
+                                        </a>
+                                        {% else %}
+                                        <a></a>
+                                        {% endif %}
                                 </div>
-
-                            </td>
-
-                            <td>
-                                {% if row[35] != "" %}
-                                <a id="dropdown_os" class="dropdown-item" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
-                                    <i class="fa-solid fa-video"></i>
-                                </a>
-                                {% else %}
-                                    <a></a>
-                                {% endif %}
-
-                                {% if row[36] != "" %}
-                                    <a id="dropdown_os" class="dropdown-item" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
-                                        <i class="fas fa-image"></i> 
-                                    </a>
-                                {% else %}
-                                    <a></a>
-                                {% endif %}
 
                             </td>
 

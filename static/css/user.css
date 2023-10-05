@@ -485,7 +485,11 @@ body {
 }
 
 .dropdown-item {
-  padding: 0.25rem 1rem; /* Adjust padding as needed */
+  padding: 0.25rem 1rem;
+}
+
+.dropdown-foto-video{
+  padding: 0.4rem 0.2rem;
 }
 
 .custom-dropdown {
@@ -517,12 +521,18 @@ body {
   padding-left: 15px;
 }
 
-.modal-body img{
-  margin: 0;
-  width: 450px;
+.dropdown, .dropup {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.modal-body img {
+  margin: 10;
+  width: 500px;
   height: auto;
   display: flex;
-  justify-content: center;
+  transform: rotate(90deg);
 }
 
 .modal-backdrop {
@@ -1908,4 +1918,9 @@ input #file{
     cursor: pointer;
     outline: none;
   }
+}
+
+video {
+  height: 600px;
+  width: 500px;
 }
