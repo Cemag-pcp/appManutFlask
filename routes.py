@@ -1447,8 +1447,6 @@ def tempo_maquina_parada():
     return df_final
 
 
-
-
 def allowed_file(filename):
 
     """
@@ -1475,20 +1473,27 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    s = (""" select t3.*, t4.parada1,t4.parada2,t4.parada3
-            from(
-                SELECT DISTINCT t1.total, t2.* 
-                FROM (
-                    SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
-                    FROM tb_carrinho
-                    JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
-                    GROUP BY tb_carrinho.id_ordem
-                    ) t1
-                RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
-            -- 	WHERE ordem_excluida isnull
-            ) t3
-            LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
-            ORDER BY t3.id_ordem;
+    s = (""" select DISTINCT t7.*, t8.id_ordem as contem_imagem
+            from (
+                select t5.*, t6.id_ordem as contem_video
+                from(
+                    select t3.*, t4.parada1,t4.parada2,t4.parada3
+                    from(
+                        SELECT DISTINCT t1.total, t2.* 
+                        FROM (
+                            SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+                            FROM tb_carrinho
+                            JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+                            GROUP BY tb_carrinho.id_ordem
+                            ) t1
+                        RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
+                    ) as t3
+                    LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
+                    ORDER BY t3.id_ordem
+                ) as t5
+                LEFT JOIN tb_videos_ordem_servico t6 on t5.id_ordem = t6.id_ordem
+                ) as t7
+            LEFT JOIN tb_imagens t8 on t7.id_ordem = t8.id_ordem;
          """)
 
     df = pd.read_sql_query(s, conn)
@@ -1541,9 +1546,15 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
         if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
             df['maquina_parada'][i] = False
 
+    print(df)
+
     df_custos = custo_MO()
 
+    print(df_custos)
+
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
+
+    print(df)
 
     df['proporcional'] = df['proporcional'].fillna(0)
 
