@@ -125,7 +125,7 @@
                             <th>Risco</th>
                             <th>Status</th>
                             <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
-                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Abertura</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Últ. atualização</th>
                             <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
                             <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo MO</th>
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
@@ -161,7 +161,7 @@
                             {% endif %}
 
                             <td data-title="Natureza" style="padding-bottom: 0px;">{{row[16]}}</td>
-                            <td data-title="Abertura" style="padding-bottom: 0px;">{{row[13]}}</td>
+                            <td data-title="Abertura" style="padding-bottom: 0px;">{{row[20]}}</td>
                             
                             {% if row[19] == True %}
                             <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-check-circle habilitado"></i></td>

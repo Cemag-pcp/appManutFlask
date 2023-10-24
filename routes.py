@@ -2023,12 +2023,22 @@ def editar_ordem_inicial(id_ordem, n_ordem):
 
     cur.execute(s)
     data1 = pd.read_sql_query(s, conn)
+    
+    try:
+        data_completa = str(data1['dataabertura'][0] - timedelta(hours=3))
+    except:
+        data_completa = str(data1['ultima_atualizacao'][0] - timedelta(hours=3))
 
-    data_completa = str(data1['ultima_atualizacao'][0])
-    data_datetime = datetime.strptime(data_completa, '%Y-%m-%d %H:%M:%S.%f%z')
+    try:
+        data_datetime = datetime.strptime(data_completa, '%Y-%m-%d %H:%M:%S.%f%z')
+    except:
+        data_datetime = datetime.strptime(data_completa, '%Y-%m-%d %H:%M:%S+00:00')
+    
+    if data_datetime.strftime('%H:%M') == '00:00':
+        data_completa = str(data1['ultima_atualizacao'][0])
+        data_datetime = datetime.strptime(data_completa, '%Y-%m-%d %H:%M:%S.%f%z')
+
     dataabertura = data_datetime.strftime('%Y-%m-%d %H:%M')
-
-    print(dataabertura)
 
     data1.reset_index(drop=True, inplace=True)
     data1.replace(np.nan, '', inplace=True)

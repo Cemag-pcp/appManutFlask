@@ -233,9 +233,10 @@
       $('input[name="datetimes"]').daterangepicker({
         singleDatePicker: true, // Define para usar apenas um campo de data
         timePicker: true,
-        startDate: moment(dataInicial, 'YYYY-MM-DD'),
+        timePicker24Hour: true,
+        startDate: moment(dataInicial, 'YYYY-MM-DD HH:mm'),
         locale: {
-          format: 'YYYY-MM-DD'
+          format: 'YYYY-MM-DD HH:mm'
         }
       });
     });
