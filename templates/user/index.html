@@ -589,17 +589,15 @@ function sortUniqueValues(values) {
                     modalBody += 'Seu navegador não suporta o elemento de vídeo.';
                     modalBody += '</video><br><br>';
                 }
-
+                
                 // Preencher o conteúdo do modal com os vídeos
                 $('#videoModal .modal-body').html(modalBody);
-
+                
                 // Exibir o modal
                 $('#videoModal').modal('show');
 
-                // Ocultar a tela de carregamento após um pequeno atraso (500 milissegundos)
-                setTimeout(function() {
-                    hideLoading();
-                }, 10);
+                console.log(videoURL);
+
             },
             error: function(error) {
                 hideLoading();
@@ -609,5 +607,6 @@ function sortUniqueValues(values) {
         });
     }
 </script>
+
 
 {% endblock %}

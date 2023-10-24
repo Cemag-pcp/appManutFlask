@@ -1683,21 +1683,47 @@ def add_student():  # Criar ordem de serviço
             if video.filename != '':
                 # Verificar a extensão do arquivo (opcional)
                 if allowed_file(video.filename):
-                    filename = secure_filename(video.filename)
+                    # filename = secure_filename(video.filename)
                     # video.save(os.path.join(routes_bp.config['UPLOAD_FOLDER'], filename))
 
                     # Ler os dados do vídeo como um objeto bytes
                     video_data = video.read()
-
+                    
+                    reduced_video_data = reduce_video_quality(video_data, 640, 480, "mp4", "libx264")
+                    
                     # Inserir os dados do vídeo no banco de dados
                     cur.execute(
-                        "INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (ultima_os, video_data))
+                        "INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (ultima_os, reduced_video_data))
                     conn.commit()
 
         conn.commit()
         flash('OS de número {} aberta com sucesso!'.format(ultima_os))
         return redirect(url_for('routes.open_os'))
 
+
+def reduce_video_quality(video_data, width, height, output_format, codec):
+
+    from moviepy.editor import VideoFileClip
+
+    # Salvar os dados do vídeo em um arquivo temporário
+    with open('temp_video.mp4', 'wb') as f:
+        f.write(video_data)
+
+    # Carregar o vídeo com o MoviePy
+    video_clip = VideoFileClip('temp_video.mp4')
+
+    # Redimensionar o vídeo
+    resized_clip = video_clip.resize((width, height))
+
+    # Salvar o vídeo redimensionado em um novo arquivo com um codec válido
+    output_file = 'reduced_video.' + output_format
+    resized_clip.write_videofile(output_file, codec=codec)
+
+    # Ler os dados do vídeo redimensionado de volta como bytes
+    with open(output_file, 'rb') as f:
+        reduced_video_data = f.read()
+
+    return reduced_video_data
 
 @routes_bp.route('/edit/<id_ordem>', methods=['POST', 'GET'])
 @login_required
@@ -2998,23 +3024,18 @@ def visualizar_midias(id_ordem):
 @routes_bp.route('/visualizar_video/<id_ordem>', methods=['GET'])
 @login_required
 def visualizar_video(id_ordem):
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor()
+    try:
+        with psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT video FROM tb_videos_ordem_servico WHERE id_ordem = %s", (id_ordem,))
+                videos_data = [base64.b64encode(row[0]).decode('utf-8') for row in cur.fetchall()]
 
-    # Buscar os vídeos associados à ordem de serviço
-    cur.execute(
-        "SELECT video FROM tb_videos_ordem_servico WHERE id_ordem = %s", (id_ordem,))
-    videos_data = [base64.b64encode(row[0]).decode('utf-8')
-                   for row in cur.fetchall()]
-
-    # Convertendo os dados de vídeo em URLs
-    video_urls = []
-    for video_data in videos_data:
-        video_url = f"data:video/mp4;base64,{video_data}"
-        video_urls.append(video_url)
-
-    return jsonify(videos_data=video_urls)
+        video_urls = [f"data:video/mp4;base64,{video_data}" for video_data in videos_data]
+        
+        return jsonify(videos_data=video_urls)
+    except Exception as e:
+        # Trate erros apropriadamente, como registrando ou retornando uma resposta de erro.
+        return jsonify(error=str(e))
 
 
 @routes_bp.route('/timeline-preventiva/<maquina>', methods=['POST', 'GET'])
@@ -3727,5 +3748,3 @@ def editar_funcionarios():
                 'ativo': '', 'salario': '', 'funcao': ''}
 
     return jsonify(data)
-
-
