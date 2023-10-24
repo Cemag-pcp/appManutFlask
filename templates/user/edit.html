@@ -320,39 +320,39 @@ $(function() {
         maquinaParadaHiddenInputThree.value = "false";
       }
     });
-  </script>
+</script>
 
-  <script>
-    function getMaquinas() {
-      var maquina_parada_toggle = document.getElementById('maquina-parada-toggle')
-      var execucao_maquina_toggle = document.getElementById('execucao-maquina-toggle')
-      var apos_execucao_toggle = document.getElementById('apos-execucao-toggle')
-      var setorSelecionado = document.getElementById("setor").value;
-      var maquina = document.getElementById("maquina").value;
-      var equipamentoFalha = document.getElementById("equipamento_em_falha");
-      var setorSolda = document.getElementById("setor_maquina_solda");
-      var codigoEquipamento = document.getElementById("codigo_equipamento");
-      var pvlye = document.getElementById("pvlye");
-      var tratamento = document.getElementById("tratamento");
-      
-      if (maquina === "ETE") {
+<script>
+  function getMaquinas() {
+    var maquina_parada_toggle = document.getElementById('maquina-parada-toggle')
+    var execucao_maquina_toggle = document.getElementById('execucao-maquina-toggle')
+    var apos_execucao_toggle = document.getElementById('apos-execucao-toggle')
+    var setorSelecionado = document.getElementById("setor").value;
+    var maquina = document.getElementById("maquina").value;
+    var equipamentoFalha = document.getElementById("equipamento_em_falha");
+    var setorSolda = document.getElementById("setor_maquina_solda");
+    var codigoEquipamento = document.getElementById("codigo_equipamento");
+    var pvlye = document.getElementById("pvlye");
+    var tratamento = document.getElementById("tratamento");
+    
+    if (maquina === "ETE") {
 
-        pvlye.style.display = "flex";
-        tratamento.style.display = "flex";
-        maquina_parada_toggle.style.display = "none";
-        execucao_maquina_toggle.style.display = "none";
-        apos_execucao_toggle.style.display = "none";
+      pvlye.style.display = "flex";
+      tratamento.style.display = "flex";
+      maquina_parada_toggle.style.display = "none";
+      execucao_maquina_toggle.style.display = "none";
+      apos_execucao_toggle.style.display = "none";
 
-      } else {
-        pvlye.style.display = "none";
-        tratamento.style.display = "none";
-        codigoEquipamento.style.display = "block";
-        equipamentoFalha.style.display = "block";
-        setorSolda.style.display = "flex";
-      }
+    } else {
+      pvlye.style.display = "none";
+      tratamento.style.display = "none";
+      codigoEquipamento.style.display = "block";
+      equipamentoFalha.style.display = "block";
+      setorSolda.style.display = "flex";
     }
-    document.addEventListener("DOMContentLoaded", function() {
-        getMaquinas();
-    });
-  </script>
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+      getMaquinas();
+  });
+</script>
 {% endblock %}

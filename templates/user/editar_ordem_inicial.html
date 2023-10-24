@@ -29,26 +29,35 @@
                     <label for="solicitante">Solicitante:</label>
                     <input type="text" name="solicitante" value="{{ordem[20]}}" class="form-control" readonly>
                 </div>
-                <div class="form-group">
-                    <label for="setor">Setor:</label>
-                    <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
-                      <option value="{{ordem[1]}}">{{ordem[1]}}</option>
-                      <option value="Administrativo">Administrativo</option>
-                      <option value="Almoxarifado">Almoxarifado</option>
-                      <option value="Corte e estamparia">Corte e estamparia</option>
-                      <option value="Expedição">Expedição</option>
-                      <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
-                      <option value="Solda">Solda</option>
-                      <option value="Montagem">Montagem</option>
-                      <option value="Pintura">Pintura</option>
-                      <option value="Carpintaria">Carpintaria</option>
-                      <option value="Usinagem">Usinagem</option>  
-                      <option value="Serra">Serra</option>
-                      <option value="Serralheria">Serralheria</option>
-                      <option value="Manutenção">Manutenção</option>
-                      <option value="Forjaria">Forjaria</option>
-                      <option value="Utilidades">Utilidades</option>
-                    </select>
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="setor">Setor:</label>
+                        <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
+                        <option value="{{ordem[1]}}">{{ordem[1]}}</option>
+                        <option value="Administrativo">Administrativo</option>
+                        <option value="Almoxarifado">Almoxarifado</option>
+                        <option value="Corte e estamparia">Corte e estamparia</option>
+                        <option value="Expedição">Expedição</option>
+                        <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                        <option value="Solda">Solda</option>
+                        <option value="Montagem">Montagem</option>
+                        <option value="Pintura">Pintura</option>
+                        <option value="Carpintaria">Carpintaria</option>
+                        <option value="Usinagem">Usinagem</option>  
+                        <option value="Serra">Serra</option>
+                        <option value="Serralheria">Serralheria</option>
+                        <option value="Manutenção">Manutenção</option>
+                        <option value="Forjaria">Forjaria</option>
+                        <option value="Utilidades">Utilidades</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="statusLista">Data e hora</label>
+                        <input id="data_edit" type="text" name="datetimes" />
+                    </div>
+                    
                 </div>
 
                 <div class="form-row">
@@ -214,4 +223,23 @@
     });
 </script>
 
+<script>
+    $(function() {
+      var dataAtual = "{{ dataabertura }}";
+      var dataInicial = dataAtual.split(" - ")[0];
+        
+        console.log(dataInicial);
+
+      $('input[name="datetimes"]').daterangepicker({
+        singleDatePicker: true, // Define para usar apenas um campo de data
+        timePicker: true,
+        startDate: moment(dataInicial, 'YYYY-MM-DD'),
+        locale: {
+          format: 'YYYY-MM-DD'
+        }
+      });
+    });
+    
+</script>
+  
 {% endblock %}

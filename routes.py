@@ -2024,6 +2024,12 @@ def editar_ordem_inicial(id_ordem, n_ordem):
     cur.execute(s)
     data1 = pd.read_sql_query(s, conn)
 
+    data_completa = str(data1['ultima_atualizacao'][0])
+    data_datetime = datetime.strptime(data_completa, '%Y-%m-%d %H:%M:%S.%f%z')
+    dataabertura = data_datetime.strftime('%Y-%m-%d %H:%M')
+
+    print(dataabertura)
+
     data1.reset_index(drop=True, inplace=True)
     data1.replace(np.nan, '', inplace=True)
     maquina = data1['maquina'][0]
@@ -2052,7 +2058,7 @@ def editar_ordem_inicial(id_ordem, n_ordem):
     if len(maquina) == 0:
         maquina.append('Outros')
 
-    return render_template('user/editar_ordem_inicial.html', ordem=data1[0], maquina=maquina, n_ordem=n_ordem)
+    return render_template('user/editar_ordem_inicial.html', ordem=data1[0], maquina=maquina, n_ordem=n_ordem, dataabertura=dataabertura)
 
 
 @routes_bp.route('/update_ordem/<id_ordem>/<n_ordem>', methods=['POST'])
@@ -2154,6 +2160,7 @@ def guardar_ordem_editada(id_ordem, n_ordem):
         problema = request.form['problema']
         risco = request.form.get("risco")
         maquina_parada = request.form.get('maquina-parada')
+        dataabertura = request.form.get('datetimes')
 
         try:
             maquina = maquina.split(" - ")[0]
@@ -2172,9 +2179,10 @@ def guardar_ordem_editada(id_ordem, n_ordem):
         cur.execute("""
             UPDATE tb_ordens
             SET setor=%s,maquina=%s,risco=%s,maquina_parada=%s,equipamento_em_falha=%s,setor_maquina_solda=%s,
-            qual_ferramenta=%s,cod_equipamento=%s,problemaaparente=%s
+            qual_ferramenta=%s,cod_equipamento=%s,problemaaparente=%s,dataabertura=%s
             WHERE id_ordem = %s
-            """, (setor, maquina, risco, maquina_parada, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, codigo_equipamento, problema, id_ordem))
+            """, (setor, maquina, risco, maquina_parada, equipamento_em_falha, setor_maquina_solda,
+                   qual_ferramenta, codigo_equipamento, problema, dataabertura, id_ordem))
 
         conn.commit()
         cur.close()
@@ -3727,5 +3735,3 @@ def editar_funcionarios():
                 'ativo': '', 'salario': '', 'funcao': ''}
 
     return jsonify(data)
-
-
