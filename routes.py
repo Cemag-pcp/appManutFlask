@@ -44,6 +44,27 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
 
+def calcular_minutos_uteis(row):
+    hora_inicio_trabalho = 7
+    hora_fim_trabalho = 17
+
+    # Extraia as datas de início e fim da linha
+    data_inicio = row['inicio']
+    data_fim = row['fim']
+
+    minutos_uteis = 0
+
+    # Itere pelas datas e horas entre data_inicio e data_fim
+    data_atual = data_inicio
+    while data_atual < data_fim:
+        if data_atual.hour >= hora_inicio_trabalho and data_atual.hour < hora_fim_trabalho:
+            minutos_uteis += 1
+
+        data_atual += timedelta(minutes=1)
+
+    return minutos_uteis
+
+
 def obter_nome_mes(numeros_meses):
 
     numeros_meses = list(map(int, numeros_meses))
@@ -410,8 +431,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-            lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+        # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+        #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
     except:
         df_timeline['diferenca'] = 0
@@ -604,8 +626,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-            lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+        # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+        #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
     except:
         df_timeline['diferenca'] = 0
@@ -660,7 +683,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_horas_trabalhadas = {
             'labels_horas_trabalhadas': grafico1_maquina, 'dados_horas_trabalhadas': grafico2_diferenca}
 
-    # query_disponibilidade
+    # query_disponibilidade 
     # calculo_indicadores_disponibilidade_maquinas
 
     df_timeline = pd.read_sql_query(query_disponibilidade, conn)
@@ -680,8 +703,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-            lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+        # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+        #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
     except:
         df_timeline['diferenca'] = 0
@@ -817,8 +841,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-            lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+        # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+        #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
     except:
         df_timeline['diferenca'] = 0
@@ -2461,7 +2486,7 @@ def grafico():  # Dashboard
 
         query_mtbf += " AND (t1.ordem_excluida IS NULL OR t1.ordem_excluida = FALSE) AND t1.natureza = 'OS';"
 
-        """ Finalizando MTTR por máquina e setor"""
+        """Finalizando MTTR por máquina e setor"""
 
         """Criando gráficos de barras MTTR por maquina"""
 
@@ -2494,7 +2519,9 @@ def grafico():  # Dashboard
 
         query_mttr += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS'"
 
-        """ Finalizando MTTR por máquina e setor"""
+        print(query_mttr)
+
+        """Finalizando MTTR por máquina e setor"""
 
         query_disponibilidade = ("""
             SELECT datafim, maquina, n_ordem, setor,
