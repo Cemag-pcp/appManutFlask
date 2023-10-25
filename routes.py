@@ -1564,6 +1564,10 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     df.reset_index(drop=True, inplace=True)
 
     for i in range(len(df)):
+        if df['dataabertura'][i].strftime('%H:%M') == '03:00':
+            df['dataabertura'][i] = df['ultima_atualizacao'][i]
+
+    for i in range(len(df)):
         if df['maquina_parada'][i] == '':
             df['maquina_parada'][i] = False
 
@@ -1579,7 +1583,7 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
 
-    print(df.iloc[:,6:])
+    print(df.iloc[:,4:])
 
     df['proporcional'] = df['proporcional'].fillna(0)
 
@@ -1741,6 +1745,9 @@ def get_employee(id_ordem):
     data1.reset_index(drop=True, inplace=True)
     data1.replace(np.nan, '', inplace=True)
 
+    dataabertura = data1['dataabertura'][0] - timedelta(hours=3)
+    dataabertura = dataabertura.tz_convert(None).strftime('%Y-%m-%d %H:%M')
+
     # Loop para percorrer todas as linhas da coluna
     for i in range(1, len(data1['dataabertura'])):
         if data1['dataabertura'][i] == '':
@@ -1809,7 +1816,7 @@ def get_employee(id_ordem):
     else:
         maquinas = maquinas[0]
 
-    return render_template('user/edit.html', ordem=data1[0], tb_funcionarios=tb_funcionarios,
+    return render_template('user/edit.html', dataabertura=dataabertura, ordem=data1[0], tb_funcionarios=tb_funcionarios,
                            opcoes=opcoes, tipo_manutencao=tipo_manutencao,
                            area_manutencao=area_manutencao, maquinas=maquinas, pvlye=pvlye, pa_plus=pa_plus,
                            tratamento=tratamento, ph_agua=ph_agua)
