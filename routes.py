@@ -44,6 +44,7 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
 
+# Crie uma função para calcular os minutos úteis
 def calcular_minutos_uteis(row):
     hora_inicio_trabalho = 7
     hora_fim_trabalho = 17
@@ -54,13 +55,18 @@ def calcular_minutos_uteis(row):
 
     minutos_uteis = 0
 
-    # Itere pelas datas e horas entre data_inicio e data_fim
-    data_atual = data_inicio
-    while data_atual < data_fim:
-        if data_atual.hour >= hora_inicio_trabalho and data_atual.hour < hora_fim_trabalho:
-            minutos_uteis += 1
+    # Verifique se as datas estão no mesmo dia
+    if data_inicio.date() == data_fim.date():
+        # Se estiverem no mesmo dia, calcule a diferença total em minutos
+        minutos_uteis = (data_fim - data_inicio).total_seconds() / 60
+    else:
+        # Caso contrário, itere pelas datas e horas entre data_inicio e data_fim
+        data_atual = data_inicio
+        while data_atual < data_fim:
+            if data_atual.hour >= hora_inicio_trabalho and data_atual.hour < hora_fim_trabalho:
+                minutos_uteis += 1
 
-        data_atual += timedelta(minutes=1)
+            data_atual += timedelta(minutes=1)
 
     return minutos_uteis
 
@@ -617,8 +623,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['inicio'] = df_timeline['inicio'].astype(str)
     df_timeline['fim'] = df_timeline['fim'].astype(str)
 
-    df_timeline = df_timeline.dropna()
-
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
 
     try:
@@ -822,10 +826,13 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
                                    'dados_disponibilidade_maquina': dados_disponibilidade,
                                    'valor_disponibilidade_geral_maquina': disponibilidade_geral_maquina}
 
-    # query_mttr
+
+    # Nova query para calculo de disponibilidade por setor
+
+    # query_disponibilidade 
     # calculo_indicadores_disponibilidade_setor
 
-    df_timeline = pd.read_sql_query(query_mttr, conn)
+    df_timeline = pd.read_sql_query(query_disponibilidade, conn)
 
     df_timeline['inicio'] = df_timeline['inicio'].astype(str)
     df_timeline['fim'] = df_timeline['fim'].astype(str)
@@ -834,6 +841,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
     df_timeline['mes'] = df_timeline['datafim'].dt.month
+
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
@@ -850,56 +858,105 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     # df_timeline = df_timeline[['datafim','diferenca']]
 
-    df_timeline['setor'] = df_timeline['setor']
-    df_timeline['setor'] = df_timeline['setor'].str.split(' - ').str[0]
+    df_timeline['maquina'] = df_timeline['maquina']
+    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
 
     df_agrupado_tempo = df_timeline.groupby(
-        ['setor'])['diferenca'].sum().reset_index()
-    df_agrupado_tempo['setor'] = df_agrupado_tempo['setor'].str.split(
+        ['maquina'])['diferenca'].sum().reset_index()
+    df_agrupado_tempo['maquina'] = df_agrupado_tempo['maquina'].str.split(
         ' - ').str[0]
 
-    df_agrupado_qtd = df_timeline[['setor']]
+    df_agrupado_qtd = df_timeline[['maquina']]
 
     # Contar a quantidade de manutenções por máquina
-    contagem = df_agrupado_qtd['setor'].value_counts()
-    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
+    contagem = df_agrupado_qtd['maquina'].value_counts()
+    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['maquina'].map(
+        contagem)
     df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
 
-    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='setor')
+    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='maquina')
 
+    s = ("""
+    SELECT * FROM tb_maquinas
+    """)
+
+    df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
+    df_maquinas = df_maquinas[['codigo','setor']]
+    df_maquinas = df_maquinas.rename(columns={'codigo': 'maquina'})
+
+    df_combinado = df_combinado.merge(df_maquinas, on='maquina')
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
     qtd_dias_uteis = dias_uteis(mes)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
-    if len(df_combinado) > 0:
+    df_combinado = df_combinado.drop_duplicates().reset_index(drop=True)
 
+    if len(df_combinado) > 0:
+        print('Entrou')
         df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] -
                                 df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
         df_combinado['MTTR'] = (
             df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
         df_combinado['disponibilidade'] = (
             (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
-        df_combinado.sort_values(by='disponibilidade', inplace=True)
-
-        df_disponibilidade_setor = df_combinado[[
-            'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
-
-        labels = df_combinado['setor'].tolist()  # eixo x
-        # eixo y gráfico 1
-        dados_disponibilidade = df_combinado['disponibilidade'].tolist()
 
         disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
             2)
-        
-        # sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
 
-        # # Desempacotar as tuplas classificadas em duas listas separadas
-        # labels, dados_disponibilidade = zip(*sorted_tuples)
+        df_disponibilidade_setor = df_combinado.groupby('setor').mean()[['MTBF','MTTR','disponibilidade']].reset_index()
+        df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
+        df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
+        df_disponibilidade_setor['disponibilidade'] = df_disponibilidade_setor['disponibilidade'].round(2)
 
-        # labels = list(labels)
-        # dados_disponibilidade = list(dados_disponibilidade)
+        if boleano_historico and not mes:
+            """
+            Se for GET pega todo o histórico e adiciona no atual
+            """
+            print('Entrou no Boleano')
+            historico_csv = pd.read_csv(
+                "disponibilidade_historico.csv", sep=';')
+
+            if setor_selecionado:
+                historico_csv = historico_csv[historico_csv['setor']
+                                              == setor_selecionado]
+
+            historico_csv['setor'] = historico_csv['setor'].str.split(
+                ' - ').str[0]
+            historico_csv['disponibilidade_historico_media'] = historico_csv['disponibilidade_historico_media'].str.replace(
+                ',', '.').str.replace("%", "").astype(float)
+            df_combinado_disponibilidade = df_combinado.merge(
+                historico_csv, how='outer', on='setor').fillna(100)
+            df_combinado_disponibilidade["disponibilidade_media"] = (
+                df_combinado_disponibilidade["disponibilidade"] + df_combinado_disponibilidade["disponibilidade_historico_media"]) / 2
+            df_combinado_disponibilidade = df_combinado_disponibilidade.drop(columns={
+                                                                             "disponibilidade"})
+            df_combinado_disponibilidade = df_combinado_disponibilidade.rename(
+                columns={"disponibilidade_media": 'disponibilidade'})
+
+            df_combinado_disponibilidade.sort_values(
+                by='disponibilidade', inplace=True)
+
+            labels = df_combinado_disponibilidade['setor'].tolist()  # eixo x
+            # eixo y gráfico 1
+            dados_disponibilidade = df_combinado_disponibilidade['disponibilidade'].tolist(
+            )
+
+            disponibilidade_geral_setor = df_combinado_disponibilidade['disponibilidade'].mean(
+            )
+
+            df_combinado_disponibilidade = df_combinado_disponibilidade[[
+                'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
+
+        else:
+            print('Não Entrou no Boleano')
+            labels = df_disponibilidade_setor['setor'].tolist()  # eixo x
+            # eixo y gráfico 1
+            dados_disponibilidade = df_disponibilidade_setor['disponibilidade'].tolist()
+
+            df_disponibilidade_setor = df_disponibilidade_setor[[
+                'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
 
         context_disponibilidade_setor = {
             'labels_disponibilidade_setor': labels,
@@ -907,7 +964,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
 
     else:
-
+        print('Não Entrou')
         labels = []
         dados_disponibilidade = []
         df_disponibilidade_setor = []
@@ -919,6 +976,104 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             'labels_disponibilidade_setor': labels,
             'dados_disponibilidade_setor': dados_disponibilidade,
             'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
+
+    # query_mttr
+    # calculo_indicadores_disponibilidade_setor
+
+    # df_timeline = pd.read_sql_query(query_mttr, conn)
+
+    # df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    # df_timeline['fim'] = df_timeline['fim'].astype(str)
+
+    # df_timeline = df_timeline.dropna()
+
+    # df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    # df_timeline['mes'] = df_timeline['datafim'].dt.month
+    # # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
+
+    # try:
+    #     df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+    #     df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
+    #     # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+    #     df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+    #     # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+    #     #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+
+    # except:
+    #     df_timeline['diferenca'] = 0
+
+    # # df_timeline = df_timeline[['datafim','diferenca']]
+
+    # df_timeline['setor'] = df_timeline['setor']
+    # df_timeline['setor'] = df_timeline['setor'].str.split(' - ').str[0]
+
+    # df_agrupado_tempo = df_timeline.groupby(
+    #     ['setor'])['diferenca'].sum().reset_index()
+    # df_agrupado_tempo['setor'] = df_agrupado_tempo['setor'].str.split(
+    #     ' - ').str[0]
+
+    # df_agrupado_qtd = df_timeline[['setor']]
+
+    # # Contar a quantidade de manutenções por máquina
+    # contagem = df_agrupado_qtd['setor'].value_counts()
+    # df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
+    # df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+
+    # df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='setor')
+
+    # df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+
+    # qtd_dias_uteis = dias_uteis(mes)
+
+    # df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
+
+    # if len(df_combinado) > 0:
+
+    #     df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] -
+    #                             df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
+    #     df_combinado['MTTR'] = (
+    #         df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
+    #     df_combinado['disponibilidade'] = (
+    #         (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+    #     df_combinado.sort_values(by='disponibilidade', inplace=True)
+
+    #     df_disponibilidade_setor = df_combinado[[
+    #         'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
+
+    #     labels = df_combinado['setor'].tolist()  # eixo x
+    #     # eixo y gráfico 1
+    #     dados_disponibilidade = df_combinado['disponibilidade'].tolist()
+
+    #     disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
+    #         2)
+        
+    #     # sorted_tuples = sorted(zip(labels, dados_disponibilidade), key=lambda x: x[0])
+
+    #     # # Desempacotar as tuplas classificadas em duas listas separadas
+    #     # labels, dados_disponibilidade = zip(*sorted_tuples)
+
+    #     # labels = list(labels)
+    #     # dados_disponibilidade = list(dados_disponibilidade)
+
+    #     context_disponibilidade_setor = {
+    #         'labels_disponibilidade_setor': labels,
+    #         'dados_disponibilidade_setor': dados_disponibilidade,
+    #         'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
+
+    # else:
+
+    #     labels = []
+    #     dados_disponibilidade = []
+    #     df_disponibilidade_setor = []
+    #     df_disponibilidade_setor = df_combinado[[
+    #         'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
+    #     disponibilidade_geral_setor = []
+
+    #     context_disponibilidade_setor = {
+    #         'labels_disponibilidade_setor': labels,
+    #         'dados_disponibilidade_setor': dados_disponibilidade,
+    #         'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
 
     # query_horas_trabalhada_tipo
     # horas_trabalhadas_tipo
@@ -2548,6 +2703,8 @@ def grafico():  # Dashboard
             query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
 
         query_disponibilidade += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS'"
+
+        print(query_disponibilidade)
 
         query_horas_trabalhada_area = ("""
         SELECT
