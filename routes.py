@@ -1900,8 +1900,14 @@ def get_employee(id_ordem):
     data1.reset_index(drop=True, inplace=True)
     data1.replace(np.nan, '', inplace=True)
 
-    dataabertura = data1['dataabertura'][0] - timedelta(hours=3)
-    dataabertura = dataabertura.tz_convert(None).strftime('%Y-%m-%d %H:%M')
+    data1.iloc[:,8:]
+
+    try:
+        dataabertura = data1['dataabertura'][0] - timedelta(hours=3)
+        dataabertura = dataabertura.tz_convert(None).strftime('%Y-%m-%d %H:%M')
+    except:
+        dataabertura = data1['ultima_atualizacao'][0] - timedelta(hours=3)
+        dataabertura = dataabertura.tz_convert(None).strftime('%Y-%m-%d %H:%M')
 
     # Loop para percorrer todas as linhas da coluna
     for i in range(1, len(data1['dataabertura'])):
