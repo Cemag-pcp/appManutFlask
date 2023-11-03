@@ -1719,9 +1719,12 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     df.reset_index(drop=True, inplace=True)
 
     for i in range(len(df)):
-        if df['dataabertura'][i].strftime('%H:%M') == '03:00':
-            df['dataabertura'][i] = df['ultima_atualizacao'][i]
-
+        try:
+            if df['dataabertura'][i].strftime('%H:%M') == '03:00':
+                df['dataabertura'][i] = df['ultima_atualizacao'][i]
+        except:
+            pass
+        
     for i in range(len(df)):
         if df['maquina_parada'][i] == '':
             df['maquina_parada'][i] = False
