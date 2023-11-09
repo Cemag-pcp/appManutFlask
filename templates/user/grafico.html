@@ -409,10 +409,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for hora_area in lista_horas_trabalhadas_area %}
+                        {% for hora_setor in lista_horas_trabalhadas_setor %}
                         <tr>
-                            <td>{{hora_area[0]}}</td>
-                            <td>{{hora_area[1]}}</td>
+                            <td>{{hora_setor[0]}}</td>
+                            <td>{{hora_setor[1]}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -987,8 +987,8 @@
         plugins: [ChartDataLabels]
     });
 
-    var eixo_y = {{ dados_horas_trabalhadas_area | safe }};
-    var eixo_x = {{ labels_horas_trabalhadas_area | safe }};
+    var eixo_y = {{ dados_horas_trabalhadas_setor | safe }};
+    var eixo_x = {{ labels_horas_trabalhadas_setor | safe }};
     var ctx = document.getElementById('grafico9').getContext('2d');
 
     var grafico = new Chart(ctx, {

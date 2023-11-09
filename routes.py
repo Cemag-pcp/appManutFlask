@@ -280,7 +280,7 @@ def cards(query):
     return lista_qt
 
 
-def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes):
+def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, query_horas_trabalhada_setor, mes):
 
     if setor_selecionado == '':
         setor_selecionado = None
@@ -681,78 +681,78 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     # query_mttr
     # Horas trabalhadas por setor
 
-    df_timeline = pd.read_sql_query(query_mttr, conn)
+    # df_timeline = pd.read_sql_query(query_mttr, conn)
 
-    df_timeline = df_timeline.sort_values(by='n_ordem')
+    # df_timeline = df_timeline.sort_values(by='n_ordem')
 
-    df_timeline = df_timeline.dropna()
+    # df_timeline = df_timeline.dropna()
 
-    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
-    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    # df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+    # df_timeline['fim'] = df_timeline['fim'].astype(str)
 
-    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    # df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
 
-    try:
-        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
-        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+    # try:
+    #     df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+    #     df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
-        # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
-        # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-        #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
+    #     # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+    #     df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+    #     # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+    #     #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
-    except:
-        df_timeline['diferenca'] = 0
+    # except:
+    #     df_timeline['diferenca'] = 0
 
-    df_agrupado_tempo = df_timeline.groupby(
-        ['setor'])['diferenca'].sum().reset_index()
+    # df_agrupado_tempo = df_timeline.groupby(
+    #     ['setor'])['diferenca'].sum().reset_index()
 
-    df_agrupado_qtd = df_timeline[['setor']]
+    # df_agrupado_qtd = df_timeline[['setor']]
 
-    # Contar a quantidade de manutenções por máquina
-    contagem = df_agrupado_qtd['setor'].value_counts()
-    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
-    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+    # # Contar a quantidade de manutenções por máquina
+    # contagem = df_agrupado_qtd['setor'].value_counts()
+    # df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
+    # df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
 
-    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='setor')
+    # df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='setor')
 
-    df_combinado['diferenca'] = (df_combinado['diferenca'] / 60)
-    df_combinado['percentual'] = (
-        df_combinado['diferenca'] / df_combinado['diferenca'].sum())
+    # df_combinado['diferenca'] = (df_combinado['diferenca'] / 60)
+    # df_combinado['percentual'] = (
+    #     df_combinado['diferenca'] / df_combinado['diferenca'].sum())
 
-    df_combinado = df_combinado.dropna()
+    # df_combinado = df_combinado.dropna()
 
-    lista_horas_trabalhadas = df_combinado.values.tolist()
+    # lista_horas_trabalhadas = df_combinado.values.tolist()
 
-    if len(df_combinado) > 0:
+    # if len(df_combinado) > 0:
 
-        df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
-        df_combinado['percentual'] = df_combinado['percentual'].round(2)
-        lista_horas_trabalhadas = df_combinado.values.tolist()
+    #     df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
+    #     df_combinado['percentual'] = df_combinado['percentual'].round(2)
+    #     lista_horas_trabalhadas = df_combinado.values.tolist()
 
-        grafico1_maquina = df_combinado['setor'].tolist()  # eixo x
-        # eixo y grafico 2
-        grafico2_diferenca = df_combinado['diferenca'].tolist()
+    #     grafico1_maquina = df_combinado['setor'].tolist()  # eixo x
+    #     # eixo y grafico 2
+    #     grafico2_diferenca = df_combinado['diferenca'].tolist()
 
-        sorted_tuples = sorted(
-            zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
+    #     sorted_tuples = sorted(
+    #         zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
 
-        # Desempacotar as tuplas classificadas em duas listas separadas
-        grafico1_maquina, grafico2_diferenca = zip(*sorted_tuples)
+    #     # Desempacotar as tuplas classificadas em duas listas separadas
+    #     grafico1_maquina, grafico2_diferenca = zip(*sorted_tuples)
 
-        grafico1_maquina = list(grafico1_maquina)
-        grafico2_diferenca = list(grafico2_diferenca)
+    #     grafico1_maquina = list(grafico1_maquina)
+    #     grafico2_diferenca = list(grafico2_diferenca)
 
-        context_horas_trabalhadas = {
-            'lista_horas_trabalhadas':lista_horas_trabalhadas, 'labels_horas_trabalhadas': grafico1_maquina, 'dados_horas_trabalhadas': grafico2_diferenca}
+    #     context_horas_trabalhadas = {
+    #         'lista_horas_trabalhadas':lista_horas_trabalhadas, 'labels_horas_trabalhadas': grafico1_maquina, 'dados_horas_trabalhadas': grafico2_diferenca}
 
-    else:
+    # else:
 
-        grafico1_maquina = []
-        grafico2_diferenca = []
+    #     grafico1_maquina = []
+    #     grafico2_diferenca = []
 
-        context_horas_trabalhadas = {
-            'lista_horas_trabalhadas':lista_horas_trabalhadas, 'labels_horas_trabalhadas': grafico1_maquina, 'dados_horas_trabalhadas': grafico2_diferenca}
+    #     context_horas_trabalhadas = {
+    #         'lista_horas_trabalhadas':lista_horas_trabalhadas, 'labels_horas_trabalhadas': grafico1_maquina, 'dados_horas_trabalhadas': grafico2_diferenca}
 
     # query_disponibilidade 
     # calculo_indicadores_disponibilidade_maquinas
@@ -1142,6 +1142,49 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_horas_trabalhadas_area = {
             'labels_horas_trabalhadas_area': grafico1_maquina, 'dados_horas_trabalhadas_area': grafico2_diferenca}
 
+    # query_horas_trabalhadas_setor
+
+    df_horas_tipo = pd.read_sql_query(query_horas_trabalhada_setor, conn)
+    # Converter a coluna 'diferenca' para o tipo 'timedelta'
+    df_horas_tipo['diferenca'] = pd.to_timedelta(df_horas_tipo['diferenca'])
+
+    # Extrair o total de horas a partir do timedelta e armazenar em uma nova coluna 'diferenca_horas'
+    df_horas_tipo['diferenca_horas'] = (
+        df_horas_tipo['diferenca'] / pd.Timedelta(hours=1)).round(2)
+
+    # Descartar a coluna 'diferenca' original, se necessário
+    df_horas_tipo.drop(columns=['diferenca'], inplace=True)
+
+    df_horas_tipo = df_horas_tipo.dropna()
+
+    lista_horas_trabalhadas_setor = df_horas_tipo.values.tolist()
+
+    if len(df_horas_tipo) > 0:
+
+        grafico1_maquina = df_horas_tipo['setor'].tolist()  # eixo x
+        # eixo y grafico 2
+        grafico2_diferenca = df_horas_tipo['diferenca_horas'].tolist()
+
+        sorted_tuples = sorted(
+            zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
+
+        # Desempacotar as tuplas classificadas em duas listas separadas
+        grafico1_maquina, grafico2_diferenca = zip(*sorted_tuples)
+
+        grafico1_maquina = list(grafico1_maquina)
+        grafico2_diferenca = list(grafico2_diferenca)
+
+        context_horas_trabalhadas_setor = {
+            'labels_horas_trabalhadas_setor': grafico1_maquina, 'dados_horas_trabalhadas_setor': grafico2_diferenca}
+
+    else:
+
+        grafico1_maquina = []
+        grafico2_diferenca = []
+
+        context_horas_trabalhadas_setor = {
+            'labels_horas_trabalhadas_setor': grafico1_maquina, 'dados_horas_trabalhadas_setor': grafico2_diferenca}
+
     # query mtbf
     # top 10
 
@@ -1249,8 +1292,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         'context_mttr_setor': context_mttr_setor,
         'df_combinado_mttr_setor': df_combinado_mttr_setor,
 
-        'context_horas_trabalhadas': context_horas_trabalhadas,
-        'lista_horas_trabalhadas': lista_horas_trabalhadas,
+        'context_horas_trabalhadas': context_horas_trabalhadas_setor,
+        'lista_horas_trabalhadas': lista_horas_trabalhadas_setor,
 
         'context_disponibilidade': context_disponibilidade,
         'df_combinado_disponibilidade': df_combinado_disponibilidade,
@@ -2743,8 +2786,26 @@ def grafico():  # Dashboard
 
         query_horas_trabalhada_tipo += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY tipo_manutencao;"
 
+        query_horas_trabalhada_setor = ("""
+        SELECT
+            setor,
+            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+        FROM tb_ordens
+        WHERE 1=1 
+        """)
+
+        if setor_selecionado:
+            query_horas_trabalhada_setor += f" AND setor in ({setor_selecionado})"
+        if mes:
+            query_horas_trabalhada_setor += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
+        if maquinas_importantes:
+            query_horas_trabalhada_setor += f" AND maquina in ({maquinas_selecionadas})"
+
+        query_horas_trabalhada_setor += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY setor;"
+
         resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado,
-                                 query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
+                                query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, 
+                                query_horas_trabalhada_setor, mes)
         
         context_mtbf_maquina = resultado['context_mtbf_maquina']
         context_mttr_maquina = resultado['context_mttr_maquina']
@@ -2847,9 +2908,19 @@ def grafico():  # Dashboard
         WHERE ordem_excluida ISNULL
         GROUP BY area_manutencao;
         """
+    
+    query_horas_trabalhada_setor = """
+        SELECT
+            setor,
+            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+        FROM tb_ordens
+        WHERE ordem_excluida ISNULL
+        GROUP BY setor;
+        """
 
     resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado,
-                             query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, mes)
+                            query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area,
+                            query_horas_trabalhada_setor, mes)
 
     context_mtbf_maquina = resultado['context_mtbf_maquina']
     context_mttr_maquina = resultado['context_mttr_maquina']
