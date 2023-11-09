@@ -159,8 +159,8 @@
                     <thead>
                         <tr>
                             <td>Máquina</td>
-                            <td>Quantidade</td>
-                            <td>Carga</td>
+                            <td>Qtd. OS</td>
+                            <td>H.Trabalhadas</td>
                             <td>MTBF</td>
                         </tr>
                     </thead>
@@ -191,8 +191,8 @@
                     <thead>
                         <tr>
                             <td>Setor</td>
-                            <td>Quant.</td>
-                            <td>Carga</td>
+                            <td>Qnt. OS</td>
+                            <td>H.Trabalhadas</td>
                             <td>MTBF</td>
                         </tr>
                     </thead>
@@ -223,8 +223,8 @@
                     <thead>
                         <tr>
                             <td>Máquina</td>
-                            <td>Quantidade</td>
-                            <td>Diferença</td>
+                            <td>Qnt. OS</td>
+                            <td>Dif. (H. trab sem parada - H. Parada)</td>
                             <td>MTTR</td>
                         </tr>
                     </thead>
@@ -255,8 +255,8 @@
                     <thead>
                         <tr>
                             <td>Setor</td>
-                            <td>Quantidade</td>
-                            <td>Carga</td>
+                            <td>Qtd. OS</td>
+                            <td>H.Trabalhadas</td>
                             <td>MTTR</td>
                         </tr>
                     </thead>
@@ -409,12 +409,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for horas_cc in lista_horas_trabalhadas %}
+                        {% for hora_area in lista_horas_trabalhadas_area %}
                         <tr>
-                            <td>{{horas_cc[0]}}</td>
-                            <td>{{horas_cc[1]}}</td>
-                            <td>{{horas_cc[2]|round(2)}}</td>
-                            <td>{{horas_cc[3]|round(2)}}</td>
+                            <td>{{hora_area[0]}}</td>
+                            <td>{{hora_area[1]}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -989,8 +987,8 @@
         plugins: [ChartDataLabels]
     });
 
-    var eixo_y = {{ dados_horas_trabalhadas | safe }};
-    var eixo_x = {{ labels_horas_trabalhadas | safe }};
+    var eixo_y = {{ dados_horas_trabalhadas_area | safe }};
+    var eixo_x = {{ labels_horas_trabalhadas_area | safe }};
     var ctx = document.getElementById('grafico9').getContext('2d');
 
     var grafico = new Chart(ctx, {
