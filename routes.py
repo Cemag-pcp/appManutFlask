@@ -10,7 +10,7 @@ from funcoes import gerador_de_semanas_informar_manutencao, login_required, gera
 import warnings
 from flask import session
 import base64
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
 from pandas.tseries.offsets import BMonthEnd
 from psycopg2 import Error
 import json
@@ -44,38 +44,12 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
 
-# Crie uma função para calcular os minutos úteis
-# def calcular_minutos_uteis(row):
-#     hora_inicio_trabalho = 7
-#     hora_fim_trabalho = 17
-
-#     # Extraia as datas de início e fim da linha
-
-#     if row['status'] != "Finalizada":
-#         data_inicio = row['inicio']
-#         data_fim = row['now']
-#     else:
-#         data_inicio = row['inicio']
-#         data_fim = row['fim']
-
-#     minutos_uteis = 0
-
-#     # Verifique se as datas estão no mesmo dia
-#     if data_inicio.date() == data_fim.date():
-#         # Se estiverem no mesmo dia, calcule a diferença total em minutos
-#         minutos_uteis = (data_fim - data_inicio).total_seconds() / 60
-#     else:
-#         # Caso contrário, itere pelas datas e horas entre data_inicio e data_fim
-#         data_atual = data_inicio
-#         while data_atual < data_fim:
-#             if data_atual.hour >= hora_inicio_trabalho and data_atual.hour < hora_fim_trabalho:
-#                 minutos_uteis += 1
-
-#             data_atual += timedelta(minutes=1)
-
-#     return minutos_uteis
-
 def calcular_minutos_uteis(row):
+
+    """
+    Função para calcular os minutos úteis entre duas datas
+    """
+
     hora_inicio_trabalho = 7
     hora_fim_trabalho = 17
 
@@ -114,6 +88,10 @@ def calcular_minutos_uteis(row):
 
 def obter_nome_mes(numeros_meses):
 
+    """
+    Função para obter nome do mês com base no número dele.
+    """
+
     numeros_meses = list(map(int, numeros_meses))
 
     nomes_meses = {
@@ -138,6 +116,10 @@ def obter_nome_mes(numeros_meses):
 
 def ultimo_dia_mes(mes):
 
+    """
+    Função para buscar o último dia do mês e hora.
+    """
+
     # Especifique o mês desejado
     mes_desejado = mes[0]  # Outubro
 
@@ -154,6 +136,10 @@ def ultimo_dia_mes(mes):
 
 
 def dias_uteis(meses):
+
+    """
+    Função que calcula os dias úteis em um determinado período de meses.
+    """
 
     qtd_dias_uteis_total = 0
 
@@ -214,6 +200,10 @@ def dias_uteis(meses):
 
 def tempo_os():
 
+    """
+    Função para calcular tempo de execução de os. 
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
 
@@ -254,6 +244,10 @@ def tempo_os():
 
 def cards(query):
 
+    """
+    Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
 
@@ -282,11 +276,20 @@ def cards(query):
 
 def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, query_horas_trabalhada_setor, mes):
 
+    """
+    Função para gerar todos os gráficos
+    """
+
     if setor_selecionado == '':
         setor_selecionado = None
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
+
+    """
+    Gráfico de MTBF por máquina
+    utiliza a query_mtbf
+    """
 
     # query_mtbf
     # mtbf_maquina
@@ -381,6 +384,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_mtbf_maquina = {
             'labels_mtbf_maquina': grafico1_maquina, 'dados_mtbf_maquina': grafico1_mtbf}
 
+    """
+    Gráfico de MTBF por setor
+    utiliza a query_mtbf
+    """
+
     # query_mtbf
     # mtbf_setor
 
@@ -470,6 +478,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         context_mtbf_setor = {
             'labels_mtbf_setor': grafico1_maquina, 'dados_mtbf_setor': grafico1_mtbf}
+
+    """
+    Gráfico de MTTR por máquina
+    utiliza a query_mttr
+    """
 
     # query_mttr
     # mttr_maquina
@@ -588,6 +601,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_mttr_maquina = {
             'labels_mttr_maquina': grafico1_maquina, 'dados_mttr_maquina': grafico2_mttr}
 
+    """
+    Gráfico de MTTR por setor
+    utiliza a query_mttr
+    """
+
     # query_mttr
     # mttr_setor
 
@@ -678,81 +696,10 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_mttr_setor = {
             'labels_mttr_setor': grafico1_maquina, 'dados_mttr_setor': grafico2_mttr}
 
-    # query_mttr
-    # Horas trabalhadas por setor
-
-    # df_timeline = pd.read_sql_query(query_mttr, conn)
-
-    # df_timeline = df_timeline.sort_values(by='n_ordem')
-
-    # df_timeline = df_timeline.dropna()
-
-    # df_timeline['inicio'] = df_timeline['inicio'].astype(str)
-    # df_timeline['fim'] = df_timeline['fim'].astype(str)
-
-    # df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
-
-    # try:
-    #     df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
-    #     df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
-
-    #     # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-    #     df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
-    #     # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-    #     #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
-
-    # except:
-    #     df_timeline['diferenca'] = 0
-
-    # df_agrupado_tempo = df_timeline.groupby(
-    #     ['setor'])['diferenca'].sum().reset_index()
-
-    # df_agrupado_qtd = df_timeline[['setor']]
-
-    # # Contar a quantidade de manutenções por máquina
-    # contagem = df_agrupado_qtd['setor'].value_counts()
-    # df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['setor'].map(contagem)
-    # df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
-
-    # df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='setor')
-
-    # df_combinado['diferenca'] = (df_combinado['diferenca'] / 60)
-    # df_combinado['percentual'] = (
-    #     df_combinado['diferenca'] / df_combinado['diferenca'].sum())
-
-    # df_combinado = df_combinado.dropna()
-
-    # lista_horas_trabalhadas = df_combinado.values.tolist()
-
-    # if len(df_combinado) > 0:
-
-    #     df_combinado['diferenca'] = df_combinado['diferenca'].round(2)
-    #     df_combinado['percentual'] = df_combinado['percentual'].round(2)
-    #     lista_horas_trabalhadas = df_combinado.values.tolist()
-
-    #     grafico1_maquina = df_combinado['setor'].tolist()  # eixo x
-    #     # eixo y grafico 2
-    #     grafico2_diferenca = df_combinado['diferenca'].tolist()
-
-    #     sorted_tuples = sorted(
-    #         zip(grafico1_maquina, grafico2_diferenca), key=lambda x: x[0])
-
-    #     # Desempacotar as tuplas classificadas em duas listas separadas
-    #     grafico1_maquina, grafico2_diferenca = zip(*sorted_tuples)
-
-    #     grafico1_maquina = list(grafico1_maquina)
-    #     grafico2_diferenca = list(grafico2_diferenca)
-
-    #     context_horas_trabalhadas = {
-    #         'lista_horas_trabalhadas':lista_horas_trabalhadas, 'labels_horas_trabalhadas': grafico1_maquina, 'dados_horas_trabalhadas': grafico2_diferenca}
-
-    # else:
-
-    #     grafico1_maquina = []
-    #     grafico2_diferenca = []
-
-    #     context_horas_trabalhadas = {
-    #         'lista_horas_trabalhadas':lista_horas_trabalhadas, 'labels_horas_trabalhadas': grafico1_maquina, 'dados_horas_trabalhadas': grafico2_diferenca}
+    """
+    Gráfico de DISPONIBILIDADE por máquina
+    utiliza a query_disponibilidade
+    """
 
     # query_disponibilidade 
     # calculo_indicadores_disponibilidade_maquinas
@@ -900,7 +847,10 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
                                    'dados_disponibilidade_maquina': dados_disponibilidade,
                                    'valor_disponibilidade_geral_maquina': disponibilidade_geral_maquina}
 
-    # Nova query para calculo de disponibilidade por setor
+    """
+    Gráfico de DISPONIBILIDADE por setor
+    utiliza a query_disponibilidade
+    """
 
     # query_disponibilidade 
     # calculo_indicadores_disponibilidade_setor
@@ -1055,6 +1005,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             'dados_disponibilidade_setor': dados_disponibilidade,
             'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
 
+    """
+    Gráfico de horas trabalhadas por tipo de manutenção
+    utiliza a query_horas_trabalhada_tipo
+    """
+
     # query_horas_trabalhada_tipo
     # horas_trabalhadas_tipo
 
@@ -1099,6 +1054,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_horas_trabalhadas_tipo = {
             'labels_horas_trabalhadas_tipo': grafico1_maquina, 'dados_horas_trabalhadas_tipo': grafico2_diferenca}
 
+    """
+    Gráfico de horas trabalhadas por área de manutenção
+    utiliza a query_horas_trabalhada_area
+    """
+
     # query_horas_trabalhada_area
 
     df_horas_area = pd.read_sql_query(query_horas_trabalhada_area, conn)
@@ -1142,6 +1102,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_horas_trabalhadas_area = {
             'labels_horas_trabalhadas_area': grafico1_maquina, 'dados_horas_trabalhadas_area': grafico2_diferenca}
 
+    """
+    Gráfico de horas trabalhadas por setor
+    utiliza a query_horas_trabalhadas_setor
+    """
+
     # query_horas_trabalhadas_setor
 
     df_horas_tipo = pd.read_sql_query(query_horas_trabalhada_setor, conn)
@@ -1184,6 +1149,11 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         context_horas_trabalhadas_setor = {
             'labels_horas_trabalhadas_setor': grafico1_maquina, 'dados_horas_trabalhadas_setor': grafico2_diferenca}
+
+    """
+    Gráfico de top 10 MTBF por máquina
+    utiliza a query_mtbf
+    """
 
     # query mtbf
     # top 10
@@ -1276,8 +1246,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         context_mtbf_top10_maquina = {
             'labels_mtbf_top10_maquina': grafico1_top10_maquina, 'dados_mtbf_top10_maquina': grafico1_top10_mtbf}
 
-    # query_disponibilidade_geral
-
     # Organize os resultados em um dicionário
     resultado = {
         'context_mtbf_maquina': context_mtbf_maquina,
@@ -1316,76 +1284,12 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     return resultado
 
-# def calculo_media_os(query):
-
-
-def grafico_area(query):
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-
-    # query = ("""
-    #     SELECT maquina, area_manutencao, datafim, id_ordem
-    #     FROM tb_ordens
-    # """)
-
-    df_area = pd.read_sql_query(query, conn)
-
-    mes_atual = datetime.today().month
-
-    df_area['mes'] = pd.to_datetime(df_area['datafim']).dt.month
-    df_area = df_area[df_area['mes'] == mes_atual]
-    df_area = df_area.drop_duplicates(subset='id_ordem', keep='last')
-    df_area = df_area.dropna()
-    df_area = df_area[['area_manutencao']].reset_index(drop=True)
-
-    contagem = df_area['area_manutencao'].value_counts()
-    # df_area['qtde_area'] = df_area['area_manutencao'].map(contagem)
-
-    area = df_area['area_manutencao'].unique().tolist()
-    quantidade_area = contagem.tolist()
-
-    pizza_context = {'pizza1_area': area, 'pizza1_quantidade': quantidade_area}
-
-    return pizza_context
-
-
-def tempo_os2(query):
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-
-    # Obtém os dados da tabela
-    s = (query)
-
-    df_timeline = pd.read_sql_query(s, conn)
-
-    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
-    df_timeline['fim'] = df_timeline['fim'].astype(str)
-
-    df_timeline = df_timeline.dropna()
-
-    try:
-        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
-        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
-
-        # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-            lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
-
-    except:
-        df_timeline['diferenca'] = 0
-
-    df_timeline = df_timeline[['datafim', 'diferenca']]
-    df_agrupado = df_timeline.groupby(
-        'datafim')['diferenca'].sum().reset_index()
-
-    # df_timeline = df_timeline.values.tolist()
-
-    return df_agrupado
-
 
 def formulario_os(id_ordem):
+
+    """
+    Função para gerar arquivo excel com informações sobre a OS.
+    """
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -1439,12 +1343,21 @@ def formulario_os(id_ordem):
 
 def mes_atual():
 
+    """
+    Função para mostrar mês atual
+    """
+
     mesAtual = datetime.now().month
 
     return mesAtual
 
 
 def calcular_dias_uteis(ano, mes):
+
+    """
+    Função para calcular dias úteis
+    """
+
     dias_uteis = []
 
     start_date = pd.Timestamp(year=ano, month=mes, day=1)
@@ -1573,8 +1486,9 @@ def custo_MO():
 
 
 def tempo_maquina_parada():
+    
     """
-    Cálculo de custo da mão obra por ordem de serviço
+    Função para calcular tempo de máquina parada
     """
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -1665,12 +1579,20 @@ def allowed_file(filename):
 @login_required
 def inicio():  # Redirecionar para a página de login
 
+    """
+    Rota para página de login
+    """
+
     return render_template("login/login.html")
 
 
 @routes_bp.route('/index')
 @login_required
 def Index():  # Página inicial (Página com a lista de ordens de serviço)
+
+    """
+    Rota para página principal da aplicação, mostrando a tabela principal.
+    """
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -1775,6 +1697,10 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
 @routes_bp.route('/add_student', methods=['POST', 'GET'])
 def add_student():  # Criar ordem de serviço
+
+    """
+    Rota para criar ordem de serviço
+    """
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -1914,6 +1840,10 @@ def add_student():  # Criar ordem de serviço
 # Página para edição da ordem de serviço (Informar o andamento da ordem)
 def get_employee(id_ordem):
 
+    """
+    Função para criar uma execução para ordem de serviço
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
 
@@ -2012,6 +1942,10 @@ def get_employee(id_ordem):
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required
 def update_student(id_ordem):  # Inserir as edições no banco de dados
+
+    """
+    Rota para editar ordem de serviço
+    """
 
     # # Execute a instrução SQL para alterar o tipo da coluna
     # alter_query = "ALTER TABLE tb_ordens ALTER COLUMN tipo_manutencao TYPE TEXT;"
@@ -2149,6 +2083,10 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
 @login_required
 def editar_ordem(id_ordem, n_ordem):
 
+    """
+    Rota para editar execução dentro da ordem de serviço
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2231,6 +2169,10 @@ def editar_ordem(id_ordem, n_ordem):
 @routes_bp.route('/editar_ordem_inicial/<id_ordem>/<n_ordem>', methods=['POST', 'GET'])
 @login_required
 def editar_ordem_inicial(id_ordem, n_ordem):
+
+    """
+    Rota para editar a ordem de serviço inicial, por exemplo: data de abertura, máquina, setor...
+    """
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -3116,6 +3058,304 @@ def plan_52semanas():  # Tabela com as 52 semanas
     df_maquinas = df_maquinas.values.tolist()
 
     return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas)
+
+
+@routes_bp.route('/preventivas', methods=['GET'])
+@login_required
+def preventivas():
+    
+    """
+    Rota para visualizar as opções de atividades preventivas
+    """
+
+    # Obter o código da máquina a partir dos parâmetros da consulta
+    codigo_maquina = request.args.get('codigo_maquina')
+
+    print(codigo_maquina)
+
+    # Use o código da máquina para gerar as opções dinamicamente
+    # Substitua esta lógica pela lógica real que você precisa
+    opcoes = obter_opcoes_preventivas(codigo_maquina)
+
+    return jsonify(opcoes)
+
+
+# Função de exemplo para gerar opções com base no código da máquina
+def obter_opcoes_preventivas(codigo_maquina):
+
+    """
+    Função para buscar grupos de atividades por máquina caso tenha
+    """
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = f"""SELECT DISTINCT (grupo) FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}'"""
+
+    cur.execute(sql)
+    grupos = cur.fetchall()
+
+    if len(grupos) == 0:
+        return [[]]
+    else:
+        return grupos
+
+
+@routes_bp.route('/atividadesGrupo', methods=['GET'])
+@login_required
+def atividadesGrupo():
+    # Obtenha os parâmetros da consulta
+    codigo_maquina = request.args.get('codigo_maquina')
+    grupo_selecionado = request.args.get('grupo')
+
+    print(codigo_maquina)
+    print(grupo_selecionado)
+
+    # Use os parâmetros para carregar os dados associados
+    dados_associados,parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)
+
+    # Retorne os dados como JSON
+    return jsonify(dados_associados,parametros)
+
+# Função de exemplo para obter dados associados a uma máquina e grupo
+def tarefasGrupo(codigo_maquina, grupo_selecionado):
+    
+    """
+    Função para buscar atividades preventivas de acordo com o grupo escolhido
+    """
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    sql = f"""SELECT * FROM tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo_selecionado}'"""
+
+    cur.execute(sql)
+    atividades = cur.fetchall()
+        
+    sql = f"""SELECT ult_manutencao,periodicidade FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' and grupo = '{grupo_selecionado}'"""
+
+    cur.execute(sql)
+    parametros = cur.fetchall()
+
+    parametros[0][0] = formatar_data(parametros[0][0])
+
+    if len(atividades) == 0:
+        return [[]],parametros
+    else:
+        return atividades,parametros
+
+
+def formatar_data(data):
+    
+    """
+    Função para formatar data dentro da lista
+    """
+
+    return data.strftime("%Y-%m-%d") if isinstance(data, date) else data
+
+
+@routes_bp.route('/criar-grupo', methods=['POST'])
+def rota_criar_grupo():
+
+    """
+    Rota para receber o nome da máquina e criar o grupo
+    """
+
+    codigo_maquina = request.get_json()
+
+    criar_grupo(codigo_maquina['codigo_maquina'])
+
+    return 'sucess'
+
+
+def criar_grupo(codigo_maquina):
+
+    """
+    Função para criar grupo de atividades preventivas ao clicar no botão "Criar grupo".
+    Recebe apenas a máquina e busca o último grupo criado a ela e adicionar + 1.
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = f"""SELECT * FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' ORDER BY grupo"""
+
+    cur.execute(sql)
+    grupos = cur.fetchall()
+
+    if len(grupos) > 0:
+        grupos_existentes = []
+
+        for grupo in range(len(grupos)):
+
+            numero_grupo = grupos[grupo][2].split()[1]
+            grupos_existentes.append(numero_grupo)
+
+        grupos_inteiro = [int(grupo) for grupo in grupos_existentes]
+        ultimo_grupo = max(grupos_inteiro)
+        
+        numero_proximo_grupo = ultimo_grupo+1
+
+        nome_proximo_grupo = 'Grupo ' + str(numero_proximo_grupo)
+    else:
+        nome_proximo_grupo = 'Grupo 1'
+        
+    sql = f"""INSERT INTO tb_grupos_preventivas (codigo,grupo) VALUES ('{codigo_maquina}','{nome_proximo_grupo}')"""
+
+    cur.execute(sql)
+
+    conn.commit()
+    conn.close()
+
+
+@routes_bp.route('/receber-tarefas', methods=['POST'])
+def receber_tarefas():
+
+    """
+    Rota para receber as atividades associadas a maquina e ao grupo
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    json_tarefas = request.get_json()
+
+    print(json_tarefas)
+
+    periodicidade = int(json_tarefas['parametros'][0]['periodicidade_grupo'])
+    ultima_manutencao = json_tarefas['parametros'][0]['ultima_manutencao']
+    grupo = json_tarefas['parametros'][0]['grupo']
+    codigo_maquina = json_tarefas['parametros'][0]['codigo_maquina']
+
+    sql_update = f"""UPDATE tb_grupos_preventivas SET ult_manutencao = '{ultima_manutencao}', periodicidade = {periodicidade}
+        WHERE codigo = '{codigo_maquina}' and grupo = '{grupo}'"""
+
+    sql_insert = f"""INSERT INTO tb_grupos_preventivas (codigo,grupo,ult_manutencao,periodicidade) VALUES ('{codigo_maquina}', '{grupo}',
+        '{ultima_manutencao}', '{periodicidade}')"""
+    
+    try:
+        cur.execute(sql_update)
+    except:
+        cur.execute(sql_insert) 
+
+    conn.commit()
+
+    if len(json_tarefas['dadosTabela']) > 0:
+        adicionar_editar_tarefa(json_tarefas)
+  
+    return 'sucess'
+
+
+def adicionar_editar_tarefa(json_tarefas):
+    """
+    Função para editar e adicionar tarefa no banco de dados.
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    for tarefa in range(len(json_tarefas['dadosTabela'])):
+        
+        if json_tarefas['dadosTabela'][tarefa]['atividadeAntiga'] != '':
+
+            atividade_atual = json_tarefas['dadosTabela'][tarefa]['atividade']
+            responsabilidade_atual = json_tarefas['dadosTabela'][tarefa]['responsabilidade']
+
+            atividade_antiga = json_tarefas['dadosTabela'][tarefa]['atividadeAntiga']
+            responsabilidade_antiga = json_tarefas['dadosTabela'][tarefa]['responsabilidadeAntiga']
+
+            sql_edit = f"""UPDATE tb_atividades_preventiva SET atividade = '{atividade_atual}', responsabilidade = '{responsabilidade_atual}' 
+                        WHERE atividade = '{atividade_antiga}' and responsabilidade = '{responsabilidade_antiga}'"""
+            
+            cur.execute(sql_edit)
+        
+        else:
+
+            for item in range(len(json_tarefas['dadosTabela'])):
+                atividade = json_tarefas['dadosTabela'][item]['atividade'] 
+                responsabilidade = json_tarefas['dadosTabela'][item]['responsabilidade']
+                grupo = json_tarefas['dadosTabela'][item]['grupo']
+                codigo_maquina = json_tarefas['dadosTabela'][item]['codigo_maquina']
+                
+                sql = f"""
+                        INSERT INTO tb_atividades_preventiva (codigo,grupo,responsabilidade,atividade)
+                            VALUES ('{codigo_maquina}','{grupo}','{responsabilidade}','{atividade}')
+                        """
+
+                cur.execute(sql)
+
+    conn.commit()
+    conn.close()
+
+
+@routes_bp.route('/receber-upload', methods=['POST'])
+def receber_upload():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Obter o arquivo do formulário
+    file = request.files['file']
+
+    # Obter outras informações do formulário
+    grupo_selecionado = request.form['grupoSelecionado']
+    codigo_maquina = request.form['codigo_maquina']   
+
+    # Salvar o arquivo no servidor (opcional)
+    file.save('uploads_atividade/' + file.filename)
+
+    file = r"uploads_atividade/" + file.filename
+
+    # Processar o arquivo com Pandas
+    df = pd.read_csv(file, sep=";")
+
+    df['grupo'] = grupo_selecionado
+
+    df = df[['codigo_maquina','grupo','responsabilidade','atividade']]
+
+    df_list = df.values.tolist()
+
+    for row in df_list:       
+
+        codigo_maquina = row[0]
+        grupo = row[1]
+        responsabilidade = row[2]
+        atividade = row[3]
+
+        sql_insert = f"""INSERT INTO tb_atividades_preventiva (codigo,grupo,responsabilidade,atividade)
+                        VALUES ('{codigo_maquina}','{grupo}','{responsabilidade}','{atividade}')"""
+
+        cur.execute(sql_insert)
+
+    conn.commit()
+    conn.close()
+
+    os.remove(file)
+    
+
+
+    return 'sucess'
+
+
+@routes_bp.route('/download-modelo-atividades', methods=['GET'])
+def download_modelo_excel():
+    # Caminho para o arquivo modelo CSV
+    excel_filename = 'modelo_atividades.csv'
+
+    # Envie o arquivo para download
+    return send_file(excel_filename, as_attachment=True)
 
 
 @routes_bp.route('/cadastrar52', methods=['POST', 'GET'])

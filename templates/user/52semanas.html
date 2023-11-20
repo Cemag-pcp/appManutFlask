@@ -56,11 +56,14 @@ th, td {
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                         <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=row[0]) }}" class="btn" target="_blank">
-                          <i class="fas fa-clipboard-list"></i> <!-- Ícone "eye" -->
+                          <i class="fas fa-clipboard-list"></i>
                         </a>
                         <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
                           <i class="fas fa-clock"></i>
                         </a>
+                        <a id="dropdown_os" class="dropdown-item">
+                          <i class="fa-solid fa-file-lines docIcon" title="Documentos" onclick="modalGrupoAtividade('{{ row[0] }}')" style="cursor: pointer;"></i>
+                      </a>
                       </div>
                   </div>
                 </td>                
@@ -74,5 +77,471 @@ th, td {
     </div>
   </div>
 </div>
+
+<!-- Modal para listar opções -->
+<div id="modalGrupoAtividade" class="tela" style="display: none;">
+  <div class="modal-content3">
+      <span class="close" onclick="closeModalAtividade()">&times;</span> <!-- Botão de fechar -->
+    <h4>Grupo de atividades</h4>
+    <label for="name_grupo">Grupos</label>
+    <select name="selectGrupos" id="selectGrupos">
+      <option></option>
+    </select>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <button id="criarGrupo">Criar grupo</button>  
+        </div>
+        <div class="col-sm">
+          <button id="grupoExistente">Entrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="mensagem"></div>
+</div>
+
+<!-- Modal para visualizar tarefas associadas ao grupo selecionado -->
+<div id="modalGrupoExistente" class="tela" style="display: none;">
+  <div class="modal-content3" style="width: 70%;">
+      <span class="close" onclick="closeModalGrupo()">&times;</span> 
+  <h4>Tarefas</h4>
+    
+    <label>Periodicidade (meses):</label>
+    <input id="periodicidade_grupo" type="number">
+    <label>Última manutenção do grupo:</label>
+    <input id="ultima_manutencao" value="" type="date">
+    <label>Adicionar excel</label>  
+    <button id="adicionarArquivo">Adicionar arquivo</button>
+
+    <table class="table table-striped" id="tableTarefas">
+        <thead>
+            <tr class="cabeçalho">
+                <th>Atividade</th>
+                <th>Responsabilidade</th>
+            </tr>
+        </thead>
+        <tbody>
+          <!-- Dados serão adicionados aqui dinamicamente -->
+        </tbody>
+    </table>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <button class="add-row">+</button></td>
+        </div>
+        <div class="col-sm">
+          <button class="salvar_tarefa" id="salvar_tarefa">Salvar</button></td>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal para inserir arquivo -->
+<div id="modalInserirArquivo" class="tela" style="display: none;">
+  <div class="modal-content3">
+      <span class="close" onclick="closeModalInserirArquivo()">&times;</span> <!-- Botão de fechar -->
+    <h4>Inserir Arquivo</h4>
+    <a href="{{ url_for('routes.download_modelo_excel') }}" download>
+      <button>Baixar Excel Modelo</button>
+    </a>
+
+    <form id="fileForm" enctype="multipart/form-data">
+      <input id="fileSelect" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+      <button type="button" onclick="uploadFile()">Salvar</button>
+    </form>
+
+  </div>
+  <div id="mensagem"></div>
+</div>
+
+<script>
+  
+  // Função para exibir o modal para escolha do grupo
+  function modalGrupoAtividade(codigo_maquina) {        
+    // Definir o código de máquina na variável global
+    window.codigo_maquina = codigo_maquina;
+    
+    // Exibir o modal
+    var modal = document.getElementById("modalGrupoAtividade");
+    modal.style.display = "block";
+    
+    // Coletar grupos
+    coletarGrupos(codigo_maquina);
+  }
+  
+  // Função para mostrar os grupos disponíveis para aquela máquina
+  function coletarGrupos(codigo_maquina) {
+
+    $('#selectGrupos').empty();
+    
+    showLoading();
+
+    $.ajax({
+        url: `/preventivas?codigo_maquina=${codigo_maquina}`,
+        type: 'GET',
+        success: function (data) {
+            // Limpar o conteúdo atual do select
+            $('#selectGrupos').empty();
+          
+            console.log(data.length);
+
+            // Populando o select com as opções recebidas
+            for (var i = 0; i < data.length; i++) {
+                $('#selectGrupos').append(`<option value="${data[i]}">${data[i]}</option>`);
+            }
+
+            hideLoading();
+        },
+        error: function (error) {
+            console.error(error);
+            hideLoading();
+        }
+    });
+  }
+
+  // Função para abrir o modalGrupoAtividade e enviar dados para o backend
+  function modalGrupoAtividade(codigo_maquina) {        
+      var modal = document.getElementById("modalGrupoAtividade");
+      modal.style.display = "block";
+
+      window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
+        
+      coletarGrupos(codigo_maquina);
+  }
+
+  // Função para lidar com o clique no botão "Entrar"
+  function entrarGrupo() {
+    var grupoSelecionado = $('#selectGrupos').val();
+
+    // Fechar o modalGrupoAtividade
+    closeModalGrupo();
+
+    showLoading();
+
+    // Chamar a rota no backend para carregar dados associados
+    $.ajax({
+        url: `/atividadesGrupo?codigo_maquina=${window.codigo_maquina}&grupo=${grupoSelecionado}`,
+        type: 'GET',
+        success: function (data) {
+            // Popule o modalGrupoExistente com os dados recebidos
+            console.log("Dados recebidos:", data);
+             // Verifica se data é um array
+            if (typeof data === 'object' && data !== null) {
+                popularModalGrupoExistente(data);
+            } else {
+                console.error("Os dados recebidos não são um array:", data);
+            }
+            hideLoading();
+        },
+        error: function (error) {
+            console.error(error);
+            hideLoading();
+        }
+    });
+  }
+
+  // Função para fechar o modal
+  function closeModalGrupo() {
+    var modal = document.getElementById("modalGrupoExistente");
+    modal.style.display = "none";
+    
+  }
+
+  function closeModalAtividade() {
+    var modal = document.getElementById("modalGrupoAtividade");
+    modal.style.display = "none";
+    $('#modalGrupoExistente').off('click', '.add-row');
+  }
+
+  $('#grupoExistente').on('click', function() {
+    entrarGrupo();
+  });
+
+  function popularModalGrupoExistente(dados) {
+    
+    var tabela = $('#tableTarefas tbody');
+    tabela.empty(); // Limpa a tabela antes de popular
+
+    var periodicidade_grupo = $('#periodicidade_grupo');
+    var ultima_manutencao = $('#ultima_manutencao');
+
+    periodicidade_grupo.val(dados[1][0][1]);
+    ultima_manutencao.val(dados[1][0][0]);
+
+    // Itera sobre os dados e adiciona linhas à tabela
+    for (var i = 0; i < dados[0].length; i++) {
+        var atividade = dados[0][i][3];
+        var responsabilidade = dados[0][i][2];
+
+        // Verifica se atividade é indefinida e atribui uma string vazia se for o caso
+        atividade = (typeof atividade !== 'undefined') ? atividade : '';
+
+        // Verifica se responsabilidade é indefinida e atribui uma string vazia se for o caso
+        responsabilidade = (typeof responsabilidade !== 'undefined') ? responsabilidade : '';
+
+        // // Adiciona uma nova linha à tabela
+        // tabela.append(
+        //     `<tr>
+        //         <td> 
+        //           <textarea rows="4" cols="30">${atividade}</textarea>
+        //         </td>
+        //         <td>  
+        //           <select>
+        //               <option value="${responsabilidade}">${responsabilidade}</option>
+        //               <option value="Elétrica">Elétrica</option>
+        //               <option value="Mecânica">Mecânica</option>
+        //               <option value="Predial">Predial</option>
+        //           </select>
+        //         </td>
+        //      </tr>`
+        // );
+        var linha = $(`
+            <tr>
+                <td> 
+                    <textarea rows="4" cols="30">${atividade}</textarea>
+                </td>
+                <td>  
+                    <select>
+                        <option value="${responsabilidade}">${responsabilidade}</option>
+                        <option value="Elétrica">Elétrica</option>
+                        <option value="Mecânica">Mecânica</option>
+                        <option value="Predial">Predial</option>
+                    </select>
+                </td>
+            </tr>`);
+
+        // Salva os valores originais como data atributos
+        linha.data('originalAtividade', atividade);
+        linha.data('originalResponsabilidade', responsabilidade);
+
+        tabela.append(linha);
+    }
+  
+    // Adicionar um evento de clique ao botão "+" para adicionar uma nova linha
+    $('#modalGrupoExistente').off('click', '.add-row').on('click', '.add-row', function() {
+        const newRow = `<tr>
+                          <td> <textarea rows="4" cols="30"></textarea>
+                          </td>
+                          <td>  <select>
+                                  <option value=""></option>
+                                  <option value="Elétrica">Elétrica</option>
+                                  <option value="Mecânica">Mecânica</option>
+                                  <option value="Predial">Predial</option>
+                                </select>
+                              </td>
+                      </tr>`;
+
+        // Adicionar a nova linha à tabela
+        $('#tableTarefas tbody').append(newRow);
+    });
+
+    // Exibir o modalGrupoExistente
+    $('#modalGrupoExistente').show();
+
+  }
+
+  // Função para lidar com o clique no botão "criarGrupo"
+  function criarGrupo() {
+
+    var codigo_maquina = window.codigo_maquina;
+    showLoading();
+    // Chamar a rota no backend para carregar dados associados
+    $.ajax({
+        url: `/criar-grupo`,
+        type: 'POST',
+        data: JSON.stringify({ codigo_maquina: codigo_maquina }),  // Converte os dados para JSON
+        contentType: 'application/json',
+        success: function (data) {
+          modalGrupoAtividade(codigo_maquina)
+          hideLoading();
+        },
+        error: function (error) {
+            console.error(error);
+            hideLoading();
+        }
+    });
+  }
+
+  $('#criarGrupo').on('click', function() {
+    
+    criarGrupo();
+    
+  });
+
+  function salvarTarefas(grupo) {
+    var dadosTabela = [];
+    var codigo_maquina = window.codigo_maquina;
+
+    var periodicidade_grupo = $('#periodicidade_grupo').val();
+    var ultima_manutencao = $('#ultima_manutencao').val();
+
+    var parametros = [];
+    parametros.push({
+      periodicidade_grupo: periodicidade_grupo,
+      ultima_manutencao: ultima_manutencao,
+      grupo: grupo,
+      codigo_maquina: codigo_maquina
+    });
+
+    if (periodicidade_grupo !== '' && ultima_manutencao !== '') {
+
+      // Itera sobre as linhas da tabela
+      $('#tableTarefas tbody tr').each(function () {
+          var linha = $(this);
+          var atividade = linha.find('textarea').val();
+          var responsabilidade = linha.find('select').val();
+
+          var atividadeAntiga = linha.data('originalAtividade');
+          var responsabilidadeAntiga = linha.data('originalResponsabilidade');
+
+          if (atividadeAntiga === undefined) {
+            atividadeAntiga = '';
+          }
+
+          if (responsabilidadeAntiga === undefined) {
+            responsabilidadeAntiga = '';
+          }
+
+          console.log("atividade antiga:", atividadeAntiga);
+
+          if (
+            atividade !== linha.data('originalAtividade') ||
+            responsabilidade !== linha.data('originalResponsabilidade')
+          ) {
+            // Adiciona a classe "alterada" à linha
+            linha.addClass('alterada');
+
+            // Adiciona os dados da linha ao array
+            dadosTabela.push({
+              atividade: atividade,
+              responsabilidade: responsabilidade,
+              codigo_maquina: codigo_maquina,
+              grupo: grupo,
+              atividadeAntiga: atividadeAntiga,
+              responsabilidadeAntiga: responsabilidadeAntiga
+            })
+
+          } 
+      });
+
+      // Adiciona tanto dadosTabela quanto parametros ao objeto
+      var dadosEnviar = {
+        dadosTabela: dadosTabela,
+        parametros: parametros,
+      };
+
+      // Chama a rota no backend para enviar os dados
+      $.ajax({
+          url: '/receber-tarefas',
+          type: 'POST',
+          data: JSON.stringify(dadosEnviar),
+          contentType: 'application/json',
+          success: function (data) {
+            exibirMensagem('sucesso', 'Tarefas salvas com sucesso.');
+            entrarGrupo();
+          },
+          error: function (error) {
+            exibirMensagem('aviso', 'Por favor, preencha todos os campos.');
+          }
+      });
+
+    } else {
+      exibirMensagem('aviso', 'Por favor, preencha todos os campos.');
+    }
+
+  
+  }
+
+  // Adiciona um evento de clique ao botão dentro do modal
+  $('#salvar_tarefa').on('click', function () {
+    
+    var grupo = $('#selectGrupos').val();
+    
+    salvarTarefas(grupo);
+
+  });
+
+  function exibirMensagem(tipo, texto) {
+    var mensagemElement = document.getElementById('mensagem');
+
+    // Define o texto da mensagem
+    mensagemElement.innerText = texto;
+
+    // Define a classe de estilo com base no tipo
+    mensagemElement.className = 'sucesso';
+    if (tipo === 'aviso') {
+      mensagemElement.className = 'aviso';
+    }
+
+    // Exibe a mensagem
+    mensagemElement.style.top = '20px'; // Define a posição para exibir a mensagem
+
+    // Aguarda 3 segundos e esconde a mensagem
+    setTimeout(function () {
+      mensagemElement.style.top = '-100px'; // Define a posição para esconder a mensagem
+    }, 3000); // 3000 milissegundos = 3 segundos
+  }
+
+  function uploadFile() {
+    
+    var grupoSelecionado = $('#selectGrupos').val();
+    var codigo_maquina = window.codigo_maquina;
+
+    var fileInput = document.getElementById('fileSelect');
+    var file = fileInput.files[0];
+
+    var formData = new FormData();
+    formData.append('file', file);
+    formData.append('grupoSelecionado', grupoSelecionado);
+    formData.append('codigo_maquina', codigo_maquina);
+
+    $.ajax({
+        url: '/receber-upload',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(data) {
+            console.log(data);
+            closeModalInserirArquivo();
+
+            var grupo = $('#selectGrupos').val();
+            salvarTarefas(grupo);
+
+        },
+        error: function(error) {
+            console.error('Error:', error);
+        }
+    });
+  }
+
+  function closeModalInserirArquivo() {
+    var modal = document.getElementById("modalInserirArquivo");
+    modal.style.display = "none";
+  }
+
+  function modalInserirArquivo(codigo_maquina) {        
+    // Definir o código de máquina na variável global
+    window.codigo_maquina = codigo_maquina;
+    
+    // Exibir o modal
+    var modal = document.getElementById("modalInserirArquivo");
+    modal.style.display = "block";
+    
+  }
+
+  $('#adicionarArquivo').on('click', function(){
+
+    modalInserirArquivo(codigo_maquina);
+
+  })
+
+</script>
 
 {% endblock %}
