@@ -112,6 +112,8 @@ th, td {
     <input id="periodicidade_grupo" type="number">
     <label>Última manutenção do grupo:</label>
     <input id="ultima_manutencao" value="" type="date">
+    <label>Próxima manutenção</label>
+    <input type="date" readonly id="proxima_manutencao">
     <label>Adicionar excel</label>  
     <button id="adicionarArquivo">Adicionar arquivo</button>
 
@@ -241,6 +243,7 @@ th, td {
         },
         error: function (error) {
             console.error(error);
+            exibirMensagem('aviso', 'Escolha ou crie um grupo válido.');
             hideLoading();
         }
     });
@@ -270,9 +273,11 @@ th, td {
 
     var periodicidade_grupo = $('#periodicidade_grupo');
     var ultima_manutencao = $('#ultima_manutencao');
+    var proxima_manutencao = $('#proxima_manutencao');
 
     periodicidade_grupo.val(dados[1][0][1]);
     ultima_manutencao.val(dados[1][0][0]);
+    proxima_manutencao.val(dados[1][0][2]);
 
     // Itera sobre os dados e adiciona linhas à tabela
     for (var i = 0; i < dados[0].length; i++) {

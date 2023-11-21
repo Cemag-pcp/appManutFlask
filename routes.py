@@ -11,7 +11,7 @@ import warnings
 from flask import session
 import base64
 from datetime import datetime, timedelta, time, date
-from pandas.tseries.offsets import BMonthEnd
+from pandas.tseries.offsets import BMonthEnd,MonthEnd,BDay
 from psycopg2 import Error
 import json
 from PIL import Image
@@ -23,6 +23,7 @@ import os
 import zipfile
 from io import BytesIO
 import re
+from pandas_market_calendars import get_calendar
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -3110,14 +3111,16 @@ def atividadesGrupo():
     codigo_maquina = request.args.get('codigo_maquina')
     grupo_selecionado = request.args.get('grupo')
 
-    print(codigo_maquina)
-    print(grupo_selecionado)
-
     # Use os parâmetros para carregar os dados associados
     dados_associados,parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)
+    
+    proxima_data = proxima_data_util(parametros[0][0], parametros[0][1])
+
+    parametros[0].append(formatar_data(proxima_data))
 
     # Retorne os dados como JSON
     return jsonify(dados_associados,parametros)
+
 
 # Função de exemplo para obter dados associados a uma máquina e grupo
 def tarefasGrupo(codigo_maquina, grupo_selecionado):
@@ -3147,6 +3150,28 @@ def tarefasGrupo(codigo_maquina, grupo_selecionado):
         return [[]],parametros
     else:
         return atividades,parametros
+
+
+def proxima_data_util(data, periodicidade):
+    
+    """
+    Função para calcular proxima manutenção com base na periodicidade.
+    """
+    # Converte a data para o formato DateTime
+    data = pd.to_datetime(data)
+
+    # Calcula a próxima data útil considerando apenas dias úteis
+    proxima_data = data + pd.DateOffset(months=periodicidade)
+
+    proxima_data_string = formatar_data(proxima_data)
+    data_string = formatar_data(data)
+
+    # Adiciona os dias úteis necessários
+    proxima_data_util = data + BDay(np.busday_count(data_string, proxima_data_string, "0111110"))
+
+    proxima_data_util = formatar_data(proxima_data_util)
+
+    return proxima_data_util
 
 
 def formatar_data(data):
@@ -3281,18 +3306,17 @@ def adicionar_editar_tarefa(json_tarefas):
         
         else:
 
-            for item in range(len(json_tarefas['dadosTabela'])):
-                atividade = json_tarefas['dadosTabela'][item]['atividade'] 
-                responsabilidade = json_tarefas['dadosTabela'][item]['responsabilidade']
-                grupo = json_tarefas['dadosTabela'][item]['grupo']
-                codigo_maquina = json_tarefas['dadosTabela'][item]['codigo_maquina']
-                
-                sql = f"""
-                        INSERT INTO tb_atividades_preventiva (codigo,grupo,responsabilidade,atividade)
-                            VALUES ('{codigo_maquina}','{grupo}','{responsabilidade}','{atividade}')
-                        """
+            atividade = json_tarefas['dadosTabela'][tarefa]['atividade'] 
+            responsabilidade = json_tarefas['dadosTabela'][tarefa]['responsabilidade']
+            grupo = json_tarefas['dadosTabela'][tarefa]['grupo']
+            codigo_maquina = json_tarefas['dadosTabela'][tarefa]['codigo_maquina']
+            
+            sql = f"""
+                    INSERT INTO tb_atividades_preventiva (codigo,grupo,responsabilidade,atividade)
+                        VALUES ('{codigo_maquina}','{grupo}','{responsabilidade}','{atividade}')
+                    """
 
-                cur.execute(sql)
+            cur.execute(sql)
 
     conn.commit()
     conn.close()
@@ -3731,9 +3755,16 @@ def lista_maquinas():
 @routes_bp.route('/excluir-ordem', methods=['POST'])
 @login_required
 def excluir_ordem():
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     data = request.get_json()
     id_linha = data['id']
     texto = data['texto']
+
+    print(id_linha, texto)
 
     query = """UPDATE tb_ordens
             SET ordem_excluida = 'yes', motivo_exclusao = %s
@@ -3743,10 +3774,6 @@ def excluir_ordem():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(query, [texto, id_linha])
     conn.commit()
-
-    print(id_linha, texto)
-
-    flash("Ordem de serviço excluída com sucesso", category='sucess')
 
     return 'Dados recebidos com sucesso!'
 

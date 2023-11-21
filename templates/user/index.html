@@ -490,7 +490,7 @@ function sortUniqueValues(values) {
         .then(response => response.text())
         .then(data => {
             console.log(data); // Exemplo: imprime a resposta do backend no console
-            // Faça o processamento adicional ou exiba uma mensagem de sucesso para o usuário
+            location.reload();
         })
         .catch(error => {
             console.error('Erro:', error); // Tratamento de erro
