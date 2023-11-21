@@ -23,7 +23,6 @@ import os
 import zipfile
 from io import BytesIO
 import re
-from pandas_market_calendars import get_calendar
 
 routes_bp = Blueprint('routes', __name__)
 
