@@ -1,48 +1,48 @@
 import psycopg2  # pip install psycopg2
 import psycopg2.extras
 import pandas as pd
-from routes import proxima_data_util
 
-DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
-DB_NAME = "postgres"
-DB_USER = "postgres"
-DB_PASS = "15512332"
-
-conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-query = """select distinct * from tb_grupos_preventivas where ult_manutencao is not null"""
-
-cur.execute(query)
-data = cur.fetchall()
-
-df_data = pd.DataFrame(data)
-
-df_data['proxima_manutencao'] = ''
-
-for row in range(len(df_data)):
+def inicio():
     
-    ultima_manutencao = df_data[3][row]
-    periodicidade = df_data[4][row]
+    DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
+    DB_NAME = "postgres"
+    DB_USER = "postgres"
+    DB_PASS = "15512332"
 
-    proxima_manutencao = proxima_data_util(ultima_manutencao, periodicidade)
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    df_data['proxima_manutencao'][row] = proxima_manutencao
+    query = """select distinct * from tb_grupos_preventivas where ult_manutencao is not null"""
 
-hoje_string = date.today().strftime("%Y-%m-%d")
-hoje_string = '2023-11-20'
+    cur.execute(query)
+    data = cur.fetchall()
 
-proxima_manutencao_hoje = df_data[df_data['proxima_manutencao'] == hoje_string]
-proxima_manutencao_hoje = proxima_manutencao_hoje.drop_duplicates(subset=1)
+    df_data = pd.DataFrame(data)
 
-if len(proxima_manutencao_hoje) > 0:
+    df_data['proxima_manutencao'] = ''
 
-    for index, row in proxima_manutencao_hoje.iterrows():
-        maquina = row[1]
-        grupo = row[2]
-        atividades = buscar_atividades(maquina,grupo)
-        criar_ordem(maquina, atividades)
+    for row in range(len(df_data)):
+        
+        ultima_manutencao = df_data[3][row]
+        periodicidade = df_data[4][row]
+
+        proxima_manutencao = proxima_data_util(ultima_manutencao, periodicidade)
+
+        df_data['proxima_manutencao'][row] = proxima_manutencao
+
+    hoje_string = date.today().strftime("%Y-%m-%d")
+
+    proxima_manutencao_hoje = df_data[df_data['proxima_manutencao'] == hoje_string]
+    proxima_manutencao_hoje = proxima_manutencao_hoje.drop_duplicates(subset=1)
+
+    if len(proxima_manutencao_hoje) > 0:
+
+        for index, row in proxima_manutencao_hoje.iterrows():
+            maquina = row[1]
+            grupo = row[2]
+            atividades = buscar_atividades(maquina,grupo)
+            criar_ordem(maquina, atividades)
 
 
 def buscar_atividades(maquina,grupo):
@@ -62,6 +62,28 @@ def buscar_atividades(maquina,grupo):
     atividades = '\n'.join(atividades_lista)
 
     return atividades
+
+
+def proxima_data_util(data, periodicidade):
+    
+    """
+    Função para calcular proxima manutenção com base na periodicidade.
+    """
+    # Converte a data para o formato DateTime
+    data = pd.to_datetime(data)
+
+    # Calcula a próxima data útil considerando apenas dias úteis
+    proxima_data = data + pd.DateOffset(months=periodicidade)
+
+    proxima_data_string = formatar_data(proxima_data)
+    data_string = formatar_data(data)
+
+    # Adiciona os dias úteis necessários
+    proxima_data_util = data + BDay(np.busday_count(data_string, proxima_data_string, "0111110"))
+
+    proxima_data_util = formatar_data(proxima_data_util)
+
+    return proxima_data_util
 
 
 def criar_ordem(maquina, atividades):
