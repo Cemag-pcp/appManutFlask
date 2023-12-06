@@ -3237,14 +3237,21 @@ def rota_criar_grupo():
     Rota para receber o nome da máquina e criar o grupo
     """
 
-    codigo_maquina = request.get_json()
+    data = request.get_json()
 
-    criar_grupo(codigo_maquina['codigo_maquina'])
+    nome_grupo = data['nome_grupo']
+    codigo_maquina = data['codigo_maquina']
+
+    print(codigo_maquina,nome_grupo)
+
+    resultado_criar_grupo = criar_grupo(codigo_maquina,nome_grupo)
+
+    if resultado_criar_grupo == "Grupo já existente":
+        return jsonify("Grupo já existente")
 
     return 'sucess'
 
-
-def criar_grupo(codigo_maquina):
+def criar_grupo(codigo_maquina,nome_grupo):
 
     """
     Função para criar grupo de atividades preventivas ao clicar no botão "Criar grupo".
@@ -3256,34 +3263,22 @@ def criar_grupo(codigo_maquina):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = f"""SELECT * FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' ORDER BY grupo"""
+    sql = f"""SELECT * FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' AND grupo = '{nome_grupo}' """
 
     cur.execute(sql)
     grupos = cur.fetchall()
 
     if len(grupos) > 0:
-        grupos_existentes = []
-
-        for grupo in range(len(grupos)):
-
-            numero_grupo = grupos[grupo][2].split()[1]
-            grupos_existentes.append(numero_grupo)
-
-        grupos_inteiro = [int(grupo) for grupo in grupos_existentes]
-        ultimo_grupo = max(grupos_inteiro)
+        return "Grupo já existente"
         
-        numero_proximo_grupo = ultimo_grupo+1
-
-        nome_proximo_grupo = 'Grupo ' + str(numero_proximo_grupo)
-    else:
-        nome_proximo_grupo = 'Grupo 1'
-        
-    sql = f"""INSERT INTO tb_grupos_preventivas (codigo,grupo) VALUES ('{codigo_maquina}','{nome_proximo_grupo}')"""
+    sql = f"""INSERT INTO tb_grupos_preventivas (codigo,grupo) VALUES ('{codigo_maquina}','{nome_grupo}')"""
 
     cur.execute(sql)
 
     conn.commit()
     conn.close()
+
+    return "Sucesso"
 
 
 @routes_bp.route('/receber-tarefas', methods=['POST'])

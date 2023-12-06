@@ -36,8 +36,8 @@
 }
 
 .file-upload__button {
-  background: rgb(255, 161, 113);
-  border: 2px solid rgb(255, 142, 85);
+  background: rgb(255, 185, 150);
+  border: none;
   border-radius: 4px;
   outline: none;
   padding: 0.5em 0.8em;
@@ -52,12 +52,14 @@
 }
 
 .file-upload__button:hover {
-  background: rgb(255, 142, 85);;
+  background: rgb(255, 174, 134);
+  border: none;
   outline: none;
 }
 
 .file-upload__button:active {
-  background: rgb(255, 142, 85);;
+  background: rgb(255, 174, 134);
+  border: none;
   outline: none;
 }
 

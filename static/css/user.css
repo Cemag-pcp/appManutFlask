@@ -1674,6 +1674,12 @@ input #file{
   outline: none;
 }
 
+.form-preventiva{
+  display: flex;
+  flex-direction: column;
+}
+
+
 #baixar_csv:hover {
   background: rgb(255, 142, 85);;
   outline: none;
@@ -1927,3 +1933,13 @@ video {
 
 .tabelaEsquerda { width: 50%; float: left; }
 .tabelaDireita {width: 50%; float: right; }
+
+#botao_add_linha,#salvar_tarefa{
+  padding: 7px;
+  outline: none;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 1em;
+  border-radius: 10px;
+  background: rgb(198 198 198);
+}
