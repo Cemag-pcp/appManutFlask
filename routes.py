@@ -2369,7 +2369,7 @@ def open_os():  # Página de abrir OS
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """SELECT * FROM tb_matriculas"""
-
+    
     cur.execute(query)
     data = cur.fetchall()
     df_data = pd.DataFrame(data, columns=['id', 'matricula', 'nome'])
@@ -3111,9 +3111,12 @@ def atividadesGrupo():
     grupo_selecionado = request.args.get('grupo')
 
     # Use os parâmetros para carregar os dados associados
-    dados_associados,parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)
+    dados_associados,parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)    
     
-    proxima_data = proxima_data_util(parametros[0][0], parametros[0][1])
+    try:
+        proxima_data = proxima_data_util(parametros[0][0], parametros[0][1]*30)
+    except:
+        proxima_data = ''
 
     parametros[0].append(formatar_data(proxima_data))
 
@@ -3151,26 +3154,71 @@ def tarefasGrupo(codigo_maquina, grupo_selecionado):
         return atividades,parametros
 
 
-def proxima_data_util(data, periodicidade):
+@routes_bp.route("/excluir-tarefa", methods=['POST'])
+def excluirTarefa():
     
     """
-    Função para calcular proxima manutenção com base na periodicidade.
+    Rota para excluir uma atividade preventiva
     """
-    # Converte a data para o formato DateTime
-    data = pd.to_datetime(data)
 
-    # Calcula a próxima data útil considerando apenas dias úteis
-    proxima_data = data + pd.DateOffset(months=periodicidade)
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
 
-    proxima_data_string = formatar_data(proxima_data)
-    data_string = formatar_data(data)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    # Adiciona os dias úteis necessários
-    proxima_data_util = data + BDay(np.busday_count(data_string, proxima_data_string, "0111110"))
+    data = request.get_json()
+    codigo_maquina = data['codigo_maquina']
+    grupo = data['grupoSelecionado']
+    responsabilidade = data['responsabilidade']
+    atividade = data['atividade']
+    
+    sql_delete = f"""DELETE FROM public.tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo}'
+                        and responsabilidade = '{responsabilidade}' and atividade = '{atividade}'"""
 
-    proxima_data_util = formatar_data(proxima_data_util)
+    cur.execute(sql_delete)
 
-    return proxima_data_util
+    conn.commit()
+    conn.close()
+
+    return 'sucess'
+
+
+def proxima_data_util(data_inicial, periodicidade):
+  
+  """
+  Retorna a próxima data útil, contando apenas dias úteis, sem sábados e domingos.
+
+  Args:
+    data_inicial: A data inicial.
+    periodicidade: A periodicidade da data.
+
+  Returns:
+    A próxima data útil.
+  """
+
+  # Converte as datas para objetos do tipo date.
+
+  data_inicial = date.fromisoformat(data_inicial)
+
+  # Calcula o número de dias úteis entre a data inicial e a data atual.
+
+  dias_uteis = 0
+  while data_inicial <= date.today():
+    if data_inicial.weekday() < 5:
+      dias_uteis += 1
+    data_inicial += timedelta(days=1)
+
+  # Adiciona a periodicidade à data inicial.
+
+  data_final = data_inicial + timedelta(days=int(periodicidade))
+
+  # Verifica se a data final é um sábado ou domingo.
+
+  if data_final.weekday() >= 5:
+    # Empurra a data para segunda-feira.
+    data_final += timedelta(days=3)
+
+  return data_final.isoformat()
 
 
 def formatar_data(data):

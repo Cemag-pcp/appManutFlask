@@ -840,7 +840,7 @@ body {
   font-weight: bold;
 }
 
-#filtro_semanas input{
+#filtro_semanas input{  
   width: 110px;
   margin: 5px;
 }
@@ -1924,3 +1924,6 @@ video {
   height: 600px;
   width: 500px;
 }
+
+.tabelaEsquerda { width: 50%; float: left; }
+.tabelaDireita {width: 50%; float: right; }

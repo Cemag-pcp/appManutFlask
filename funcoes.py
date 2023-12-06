@@ -23,12 +23,12 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,tombamen
 
     df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Tombamento','Classificação','Última Manutenção','Periodicidade'])
     
-    # codigo_maquina = 'ABC'
-    # grupo = 'ABC'
-    # maquina = 'ABC'
-    # classificacao = 'A'
-    # ultima_manutencao = '2023-06-12'
-    # periodicidade = 'Quinzenal'
+    codigo_maquina = 'ABC'
+    grupo = 'ABC'
+    maquina = 'ABC'
+    classificacao = 'A'
+    ultima_manutencao = '2023-06-12'
+    periodicidade = 'Quinzenal'
 
     # Converte a coluna de data para o tipo datetime
     df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
@@ -62,7 +62,6 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,tombamen
                 # df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
                 #                                     'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
                 
-
                 df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
                            'Última Manutenção': data_manutencao,
                            'Código da máquina': nome_maquina,
@@ -98,7 +97,6 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,tombamen
                 # df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
                 #                                     'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
                 
-
                 df_new_row = pd.DataFrame({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"),
                            'Última Manutenção': data_manutencao,
                            'Código da máquina': nome_maquina,
@@ -529,3 +527,103 @@ def gerador_de_semanas_informar_manutencao_diario(grupo,codigo_maquina,maquina,t
     df_vazio = df_vazio.replace(np.nan, '')
     
     return df_vazio
+
+import pandas as pd
+from datetime import timedelta
+
+# Supondo que você tenha um DataFrame com as informações
+# Substitua isso pelos seus dados reais
+data = {
+    'codigo': [1],
+    'periodicidade': [2],  # Exemplo de periodicidade em meses
+    'data_ultima_manutencao': ['2023-01-01']
+}
+
+df = pd.DataFrame(data)
+df['data_ultima_manutencao'] = pd.to_datetime(df['data_ultima_manutencao'])
+
+# Inicializa uma lista para armazenar as datas planejadas
+datas_planejadas = []
+
+# Define a função para calcular a próxima data ajustada
+def calcular_proxima_data(data_atual, periodicidade_em_dias):
+    dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
+    proxima_data = data_atual + dias_uteis
+    return proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
+
+# Inicializar lista para armazenar as datas planejadas
+datas_planejadas = []
+
+# Iterar sobre os códigos
+for item in data['codigo']:
+    print(item)
+    
+    # Iterar sobre as 52 semanas
+    for semana in range(52):
+        if semana == 0:
+            data_atual = pd.to_datetime(data[data['codigo'] == item]['ultima_manutencao'].values[0])
+        else:
+            data_atual = datas_planejadas[-1]
+
+        proxima_data_planejada = calcular_proxima_data(data_atual, data[data['codigo'] == item]['periodicidade'].values[0])
+        datas_planejadas.append(proxima_data_planejada)
+
+# Criar DataFrame com a coluna 'proxima_manutencao'
+df_resultado = pd.DataFrame({'proxima_manutencao': datas_planejadas})
+
+# Adicionar a coluna 'codigo' ao DataFrame resultado
+df_resultado['codigo'] = [item for item in data['codigo'] for _ in range(52)]
+df_resultado['tombamento'] = [item for item in data['tombamento'] for _ in range(52)]
+df_resultado['setor'] = [item for item in data['setor'] for _ in range(52)]
+df_resultado['descricao'] = [item for item in data['descricao'] for _ in range(52)]
+df_resultado['classificacao'] = [item for item in data['classificacao'] for _ in range(52)]
+df_resultado['periodicidade'] = [item for item in data['periodicidade'] for _ in range(52)]
+df_resultado['ultima_manutencao'] = [item for item in data['ultima_manutencao'] for _ in range(52)]
+
+# Reordenar as colunas se desejar
+df_resultado = df_resultado[['codigo','tombamento','setor','descricao','classificacao','periodicidade','ultima_manutencao','proxima_manutencao']]
+df_resultado['numero_semana'] = df_resultado['proxima_manutencao'].dt.isocalendar().week
+
+# Exibir o DataFrame resultante
+df_resultado.to_csv('planejamento_anual.csv')
+
+
+
+
+# # Cria um DataFrame com as datas planejadas
+# df_planejamento = pd.DataFrame({'data_planejada': datas_planejadas})
+
+# # Imprime o DataFrame resultante
+# print(df_planejamento)
+
+
+
+# conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+#                         password=DB_PASS, host=DB_HOST)
+
+# cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+# data = pd.read_sql_query(con=conn, sql='select * from tb_maquinas_preventivas')
+# data.dtypes
+# data = data[['codigo','tombamento','setor','descricao','classificacao','periodicidade','ultima_manutencao']]
+
+# def periodicidade(row):
+#     if row == 'Semanal':
+#         return 7
+#     elif row == 'Mensal':
+#         return 30
+#     elif row == 'Bimestral':
+#         return 60
+#     elif row == 'Quinzenal':
+#         return 15
+#     else:
+#         return None
+    
+    
+
+# data['periodicidade'] = data['periodicidade'].apply(periodicidade)
+
+
+
+# data_antigo = data.to_csv()
+

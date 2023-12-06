@@ -28,6 +28,7 @@ th, td {
 {% endwith %}
 
 <div id = "tabela2" class='container-fluid'>
+  
   <div class="row justify-content-md-center">
     <div class = "board2" style="overflow-x: auto;">
       <div id = "titulo" class="row">
@@ -75,7 +76,45 @@ th, td {
         </tbody>
       </table>
     </div>
+    
+    <div class = "board2" style="overflow-x: auto;">
+      <div class="tabelaEsquerda">
+        <table>
+          <thead>
+            <tr>
+              <th>Teste</th>
+              <th>Teste</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr>
+                <td>Teste</td>                
+                <td>Teste</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+        
+      <div class="tabelaDireita">
+        <table>
+          <thead>
+            <tr>
+              <th>Teste</th>
+              <th>Teste</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr>
+                <td>Teste</td>                
+                <td>Teste</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
+
 </div>
 
 <!-- Modal para listar opções -->
@@ -99,15 +138,15 @@ th, td {
       </div>
     </div>
   </div>
-  <div id="mensagem"></div>
 </div>
 
 <!-- Modal para visualizar tarefas associadas ao grupo selecionado -->
 <div id="modalGrupoExistente" class="tela" style="display: none;">
+  
   <div class="modal-content3" style="width: 70%;">
       <span class="close" onclick="closeModalGrupo()">&times;</span> 
   <h4>Tarefas</h4>
-    
+
     <label>Periodicidade (meses):</label>
     <input id="periodicidade_grupo" type="number">
     <label>Última manutenção do grupo:</label>
@@ -122,6 +161,7 @@ th, td {
             <tr class="cabeçalho">
                 <th>Atividade</th>
                 <th>Responsabilidade</th>
+                <th>Excluir</th>
             </tr>
         </thead>
         <tbody>
@@ -141,7 +181,6 @@ th, td {
     </div>
 
   </div>
-
 </div>
 
 <!-- Modal para inserir arquivo -->
@@ -159,8 +198,9 @@ th, td {
     </form>
 
   </div>
-  <div id="mensagem"></div>
 </div>
+
+<div id="mensagem"></div>
 
 <script>
   
@@ -290,36 +330,25 @@ th, td {
         // Verifica se responsabilidade é indefinida e atribui uma string vazia se for o caso
         responsabilidade = (typeof responsabilidade !== 'undefined') ? responsabilidade : '';
 
-        // // Adiciona uma nova linha à tabela
-        // tabela.append(
-        //     `<tr>
-        //         <td> 
-        //           <textarea rows="4" cols="30">${atividade}</textarea>
-        //         </td>
-        //         <td>  
-        //           <select>
-        //               <option value="${responsabilidade}">${responsabilidade}</option>
-        //               <option value="Elétrica">Elétrica</option>
-        //               <option value="Mecânica">Mecânica</option>
-        //               <option value="Predial">Predial</option>
-        //           </select>
-        //         </td>
-        //      </tr>`
-        // );
         var linha = $(`
-            <tr>
-                <td> 
-                    <textarea rows="4" cols="30">${atividade}</textarea>
-                </td>
-                <td>  
-                    <select>
-                        <option value="${responsabilidade}">${responsabilidade}</option>
-                        <option value="Elétrica">Elétrica</option>
-                        <option value="Mecânica">Mecânica</option>
-                        <option value="Predial">Predial</option>
-                    </select>
-                </td>
-            </tr>`);
+                  <tr>
+                      <td> 
+                          <textarea rows="4" cols="30">${atividade}</textarea>
+                      </td>
+                      <td>  
+                          <select>
+                              <option value="${responsabilidade}">${responsabilidade}</option>
+                              <option value="Elétrica">Elétrica</option>
+                              <option value="Mecânica">Mecânica</option>
+                              <option value="Predial">Predial</option>
+                          </select>
+                      </td>
+                      <td>
+                        <button class="excluirTarefa">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </td>
+                  </tr>`);
 
         // Salva os valores originais como data atributos
         linha.data('originalAtividade', atividade);
@@ -339,7 +368,12 @@ th, td {
                                   <option value="Mecânica">Mecânica</option>
                                   <option value="Predial">Predial</option>
                                 </select>
-                              </td>
+                          </td>
+                          <td>
+                            <button class="excluirTarefa">
+                              <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
                       </tr>`;
 
         // Adicionar a nova linha à tabela
@@ -380,6 +414,9 @@ th, td {
   });
 
   function salvarTarefas(grupo) {
+
+    showLoading();
+
     var dadosTabela = [];
     var codigo_maquina = window.codigo_maquina;
 
@@ -450,14 +487,17 @@ th, td {
           success: function (data) {
             exibirMensagem('sucesso', 'Tarefas salvas com sucesso.');
             entrarGrupo();
+            hideLoading();
           },
           error: function (error) {
             exibirMensagem('aviso', 'Por favor, preencha todos os campos.');
+            hideLoading();
           }
       });
 
     } else {
       exibirMensagem('aviso', 'Por favor, preencha todos os campos.');
+      hideLoading();
     }
 
   
@@ -489,7 +529,7 @@ th, td {
 
     // Aguarda 3 segundos e esconde a mensagem
     setTimeout(function () {
-      mensagemElement.style.top = '-100px'; // Define a posição para esconder a mensagem
+      mensagemElement.style.top = '-204px'; // Define a posição para esconder a mensagem
     }, 3000); // 3000 milissegundos = 3 segundos
   }
 
@@ -543,9 +583,55 @@ th, td {
 
   $('#adicionarArquivo').on('click', function(){
 
-    modalInserirArquivo(codigo_maquina);
+    var periodicidade_grupo = $('#periodicidade_grupo').val();
+    var ultima_manutencao = $('#ultima_manutencao').val();
 
+    if (periodicidade_grupo === '' || ultima_manutencao === '') {
+      exibirMensagem('aviso', 'Por favor, preencha os campos de periodicidade e data.');
+      return;
+    }
+    else {
+      modalInserirArquivo(codigo_maquina);
+    }
+    
   })
+
+  // Adicionar tratamento de evento para o botão de excluir
+  $('#tableTarefas tbody').on('click', '.excluirTarefa', function() {
+      var linha = $(this).closest('tr');
+      var atividade = linha.find('textarea').val();
+      var responsabilidade = linha.find('select').val();
+      var idDaLinha = linha.data('id'); // Substitua 'id' pelo nome da propriedade que armazena a identificação única da linha
+      window.codigo_maquina = codigo_maquina; 
+      var grupoSelecionado = $('#selectGrupos').val();
+
+      showLoading();
+
+      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+      $.ajax({
+          type: 'POST',
+          url: 'excluir-tarefa',
+          contentType: 'application/json',
+          data: JSON.stringify({
+                id: idDaLinha,
+                atividade: atividade,
+                responsabilidade: responsabilidade,
+                grupoSelecionado: grupoSelecionado,
+                codigo_maquina: codigo_maquina
+        }),
+        success: function(data) {
+            // A resposta do backend foi bem-sucedida, remova a linha da tabela
+            linha.remove();
+            hideLoading();
+            exibirMensagem('sucesso','Tarefa excluída com sucesso.')
+        },
+        error: function(err) {
+            console.error('Erro ao excluir do banco de dados:', err);
+            // Adicione aqui a lógica para lidar com erros, se necessário
+            hideLoading();
+        }
+      });
+  });
 
 </script>
 

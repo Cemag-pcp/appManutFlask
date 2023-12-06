@@ -1,8 +1,18 @@
 import psycopg2  # pip install psycopg2
 import psycopg2.extras
 import pandas as pd
+from datetime import date,timedelta
+from pandas.tseries.offsets import BMonthEnd,MonthEnd,BDay
+import numpy as np
 
-def inicio():
+
+DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
+DB_NAME = "postgres"
+DB_USER = "postgres"
+DB_PASS = "15512332"
+
+
+def geral():
     
     DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
     DB_NAME = "postgres"
@@ -13,7 +23,7 @@ def inicio():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """select distinct * from tb_grupos_preventivas where ult_manutencao is not null"""
+    query = """select distinct *, periodicidade*30 as periodicidade_em_dias from tb_grupos_preventivas where ult_manutencao is not null"""
 
     cur.execute(query)
     data = cur.fetchall()
@@ -25,7 +35,7 @@ def inicio():
     for row in range(len(df_data)):
         
         ultima_manutencao = df_data[3][row]
-        periodicidade = df_data[4][row]
+        periodicidade = df_data[5][row]
 
         proxima_manutencao = proxima_data_util(ultima_manutencao, periodicidade)
 
@@ -45,6 +55,15 @@ def inicio():
             criar_ordem(maquina, atividades)
 
 
+def formatar_data(data):
+    
+    """
+    Função para formatar data dentro da lista
+    """
+
+    return data.strftime("%Y-%m-%d") if isinstance(data, date) else data
+
+
 def buscar_atividades(maquina,grupo):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -62,28 +81,6 @@ def buscar_atividades(maquina,grupo):
     atividades = '\n'.join(atividades_lista)
 
     return atividades
-
-
-def proxima_data_util(data, periodicidade):
-    
-    """
-    Função para calcular proxima manutenção com base na periodicidade.
-    """
-    # Converte a data para o formato DateTime
-    data = pd.to_datetime(data)
-
-    # Calcula a próxima data útil considerando apenas dias úteis
-    proxima_data = data + pd.DateOffset(months=periodicidade)
-
-    proxima_data_string = formatar_data(proxima_data)
-    data_string = formatar_data(data)
-
-    # Adiciona os dias úteis necessários
-    proxima_data_util = data + BDay(np.busday_count(data_string, proxima_data_string, "0111110"))
-
-    proxima_data_util = formatar_data(proxima_data_util)
-
-    return proxima_data_util
 
 
 def criar_ordem(maquina, atividades):
@@ -132,3 +129,41 @@ def criar_ordem(maquina, atividades):
     # Certifique-se de cometer as alterações e fechar a conexão
     conn.commit()
     conn.close()
+
+
+def proxima_data_util(data_inicial, periodicidade):
+  
+  """
+  Retorna a próxima data útil, contando apenas dias úteis, sem sábados e domingos.
+
+  Args:
+    data_inicial: A data inicial.
+    periodicidade: A periodicidade da data.
+
+  Returns:
+    A próxima data útil.
+  """
+
+  # Converte as datas para objetos do tipo date.
+
+  # data_inicial = date.fromisoformat(data_inicial)
+
+  # Calcula o número de dias úteis entre a data inicial e a data atual.
+
+  dias_uteis = 0
+  while data_inicial <= date.today():
+    if data_inicial.weekday() < 5:
+      dias_uteis += 1
+    data_inicial += timedelta(days=1)
+
+  # Adiciona a periodicidade à data inicial.
+
+  data_final = data_inicial + timedelta(days=int(periodicidade))
+
+  # Verifica se a data final é um sábado ou domingo.
+
+  if data_final.weekday() >= 5:
+    # Empurra a data para segunda-feira.
+    data_final += timedelta(days=3)
+
+  return data_final.isoformat()
