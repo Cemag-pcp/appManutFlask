@@ -44,7 +44,7 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
 
-def calcular_minutos_uteis(row):
+def calcular_minutos_uteis(row, df):
 
     """
     Função para calcular os minutos úteis entre duas datas
@@ -60,8 +60,10 @@ def calcular_minutos_uteis(row):
     # df_timeline['mes_hoje'][33]
     # df_timeline['mes_hoje'][33] >= df_timeline['mes'][33]
 
+    ordem_finalizada = df[(df['status'] == 'Finalizada') & (df['id_ordem'] == row['status'])]
+
     # Extraia as datas de início e fim da linha
-    if row['status'] != "Finalizada" and row['parada3'] == 'false' and row['mes_hoje'] >= row['mes']: 
+    if row['status'] != "Finalizada" and row['parada3'] == 'false' and row['mes_hoje'] >= row['mes'] and len(ordem_finalizada) > 0: 
         data_inicio = pd.to_datetime(row['inicio']).replace(tzinfo=None)  # Remova as informações de fuso horário
         data_fim = row['ultimo_dia_mes'].replace(tzinfo=None)  # Remova as informações de fuso horário
     else:
@@ -513,7 +515,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1, df=df_timeline)
         # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
         #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
@@ -728,7 +730,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1, df=df_timeline)
         # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
         #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
@@ -739,6 +741,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline['maquina'] = df_timeline['maquina']
     df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
+
+    # df_timeline[df_timeline['maquina'] == 'ES-DESBOBI']
 
     df_agrupado_tempo = df_timeline.groupby(
         ['maquina'])['diferenca'].sum().reset_index()
@@ -877,7 +881,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1)
+        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1, df=df_timeline)
         # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
         #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
@@ -1053,6 +1057,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         context_horas_trabalhadas_tipo = {
             'labels_horas_trabalhadas_tipo': grafico1_maquina, 'dados_horas_trabalhadas_tipo': grafico2_diferenca}
+
+    
 
     """
     Gráfico de horas trabalhadas por área de manutenção
@@ -2722,7 +2728,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
+            query_horas_trabalhada_tipo += f" AND EXTRACT(MONTH FROM datafim) in ({mes_selecionado})"
         if maquinas_importantes:
             query_horas_trabalhada_tipo += f" AND maquina in ({maquinas_selecionadas})"
 
