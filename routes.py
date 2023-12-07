@@ -2369,7 +2369,7 @@ def open_os():  # Página de abrir OS
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """SELECT * FROM tb_matriculas"""
-    
+
     cur.execute(query)
     data = cur.fetchall()
     df_data = pd.DataFrame(data, columns=['id', 'matricula', 'nome'])
@@ -3050,7 +3050,7 @@ def plan_52semanas():  # Tabela com as 52 semanas
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
 
-    s = (""" SELECT * FROM tb_maquinas_preventivas """)
+    s = (""" SELECT * FROM tb_planejamento_anual """)
 
     df_maquinas = pd.read_sql_query(s, conn)
 
