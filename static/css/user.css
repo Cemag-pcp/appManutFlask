@@ -1677,6 +1677,7 @@ input #file{
 .form-preventiva{
   display: flex;
   flex-direction: column;
+  margin-bottom: 10px;
 }
 
 
@@ -1938,8 +1939,11 @@ video {
   padding: 7px;
   outline: none;
   cursor: pointer;
+  color: white;
+  border: none;
   font-weight: 400;
   font-size: 1em;
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   border-radius: 10px;
-  background: rgb(198 198 198);
+  background: #47a0ff;
 }

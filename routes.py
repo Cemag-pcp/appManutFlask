@@ -3092,7 +3092,7 @@ def obter_opcoes_preventivas(codigo_maquina):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = f"""SELECT DISTINCT (grupo) FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}'"""
+    sql = f"""SELECT DISTINCT (grupo) FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' AND excluidos = 'false' """
 
     cur.execute(sql)
     grupos = cur.fetchall()
@@ -3171,9 +3171,12 @@ def excluirTarefa():
     grupo = data['grupoSelecionado']
     responsabilidade = data['responsabilidade']
     atividade = data['atividade']
+    idDaLinha = data['idDaLinha']
+
+    print(data)
     
     sql_delete = f"""DELETE FROM public.tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo}'
-                        and responsabilidade = '{responsabilidade}' and atividade = '{atividade}'"""
+                        and responsabilidade = '{responsabilidade}' and atividade = '{atividade}' and id = '{idDaLinha}' """
 
     cur.execute(sql_delete)
 
@@ -3341,8 +3344,10 @@ def adicionar_editar_tarefa(json_tarefas):
             atividade_antiga = json_tarefas['dadosTabela'][tarefa]['atividadeAntiga']
             responsabilidade_antiga = json_tarefas['dadosTabela'][tarefa]['responsabilidadeAntiga']
 
-            sql_edit = f"""UPDATE tb_atividades_preventiva SET atividade = '{atividade_atual}', responsabilidade = '{responsabilidade_atual}' 
-                        WHERE atividade = '{atividade_antiga}' and responsabilidade = '{responsabilidade_antiga}'"""
+            id_unico = int(json_tarefas['dadosTabela'][tarefa]['id_unico'])
+
+            sql_edit = f"""UPDATE tb_atividades_preventiva SET atividade = '{atividade_atual}', responsabilidade = '{responsabilidade_atual}', id = {id_unico}
+                        WHERE atividade = '{atividade_antiga}' and responsabilidade = '{responsabilidade_antiga}' and id = {id_unico} """
             
             cur.execute(sql_edit)
         
@@ -4229,6 +4234,36 @@ def excluir_execucao():
 
     return 'Execução excluída com sucesso'
 
+@routes_bp.route('/excluir-grupo', methods=['POST'])
+@login_required
+def excluir_grupo():
+
+
+    json_grupos_excluidos = request.get_json()
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    excluido = True
+    
+    codigo_maquina = json_grupos_excluidos['codigo_maquina']
+
+    grupoSelecionado = json_grupos_excluidos['grupoSelecionado']
+
+    print(codigo_maquina,grupoSelecionado,excluido)
+
+    cur.execute(""" UPDATE tb_grupos_preventivas
+                    SET excluidos=%s
+                    WHERE codigo = %s AND grupo = %s
+                    """, (excluido, codigo_maquina, grupoSelecionado))
+
+    conn.commit()
+    conn.close()
+
+    flash("Execução excluída com sucesso", category='sucess')
+
+    return 'Execução excluída com sucesso'
 
 @routes_bp.route("/funcionarios", methods=['POST', 'GET'])
 @login_required

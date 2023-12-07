@@ -127,7 +127,9 @@ th, td {
       <select name="selectGrupos" id="selectGrupos" class="form-control" style="margin-bottom: 20px; width: 90%;">
         <option></option>
       </select>
-      <i class="fa fa-trash" style="cursor: pointer;"></i>
+      <button class="excluirGrupo" style="background: transparent;border: none;cursor: pointer;">
+        <i class="fa fa-trash" style="cursor: pointer;"></i>
+      </button>
     </div>
 
       <div class="form-row">
@@ -158,7 +160,7 @@ th, td {
   
   <div class="modal-content3">
       <span class="close" onclick="closeModalGrupo()">&times;</span> 
-    <h4>Tarefas</h4>
+    <h4 class="modal-title"></h4>
 
     <div class="form-row-preventivas">
       <div class="form-preventiva">
@@ -235,7 +237,7 @@ th, td {
             // Limpar o conteúdo atual do select
             $('#selectGrupos').empty();
           
-            console.log(data.length);
+            console.log(data);
 
             // Populando o select com as opções recebidas
             for (var i = 0; i < data.length; i++) {
@@ -276,6 +278,7 @@ th, td {
         type: 'GET',
         success: function (data) {
             // Popule o modalGrupoExistente com os dados recebidos
+            $('.modal-title').text("Tarefa do grupo: " + grupoSelecionado);
             console.log("Dados recebidos:", data);
              // Verifica se data é um array
             if (typeof data === 'object' && data !== null) {
@@ -333,6 +336,7 @@ th, td {
     for (var i = 0; i < dados[0].length; i++) {
         var atividade = dados[0][i][3];
         var responsabilidade = dados[0][i][2];
+        var id_unico = dados[0][i][4];
 
         // Verifica se atividade é indefinida e atribui uma string vazia se for o caso
         atividade = (typeof atividade !== 'undefined') ? atividade : '';
@@ -340,13 +344,15 @@ th, td {
         // Verifica se responsabilidade é indefinida e atribui uma string vazia se for o caso
         responsabilidade = (typeof responsabilidade !== 'undefined') ? responsabilidade : '';
 
+        id_unico = (typeof id_unico !== 'undefined') ? id_unico : '';
+
         var linha = $(`
                   <tr>
                       <td> 
                           <textarea rows="4" cols="30">${atividade}</textarea>
                       </td>
                       <td>  
-                          <select>
+                          <select class="form-control">
                               <option value="${responsabilidade}">${responsabilidade}</option>
                               <option value="Elétrica">Elétrica</option>
                               <option value="Mecânica">Mecânica</option>
@@ -354,15 +360,19 @@ th, td {
                           </select>
                       </td>
                       <td>
-                        <button class="excluirTarefa">
+                        <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
                           <i class="fa fa-trash"></i>
                         </button>
+                      </td>
+                      <td style="display:none">
+                        <input type="number" class="form-control" value="${id_unico}">
                       </td>
                   </tr>`);
 
         // Salva os valores originais como data atributos
         linha.data('originalAtividade', atividade);
         linha.data('originalResponsabilidade', responsabilidade);
+        linha.data('originalId_unico',id_unico)
 
         tabela.append(linha);
     }
@@ -372,7 +382,7 @@ th, td {
         const newRow = `<tr>
                           <td> <textarea rows="4" cols="30"></textarea>
                           </td>
-                          <td>  <select>
+                          <td>  <select class="form-control">
                                   <option value=""></option>
                                   <option value="Elétrica">Elétrica</option>
                                   <option value="Mecânica">Mecânica</option>
@@ -380,7 +390,7 @@ th, td {
                                 </select>
                           </td>
                           <td>
-                            <button class="excluirTarefa">
+                            <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
                               <i class="fa fa-trash"></i>
                             </button>
                         </td>
@@ -400,6 +410,7 @@ th, td {
 
     let codigo_maquina = window.codigo_maquina;
     let nome_grupo = $("#renomearGrupo").val();
+    
     showLoading();
     // Chamar a rota no backend para carregar dados associados
     $.ajax({
@@ -426,11 +437,13 @@ th, td {
   $('#nomear_grupo').on('click',function() {
 
     criarGrupo();
+    $('#modalRenomearGrupo').hide()
 
   })
 
   $('#criarGrupo').on('click', function() {
-    
+
+    $('#renomearGrupo').val("")
     $('#modalRenomearGrupo').show();
     
   });
@@ -450,7 +463,7 @@ th, td {
       periodicidade_grupo: periodicidade_grupo,
       ultima_manutencao: ultima_manutencao,
       grupo: grupo,
-      codigo_maquina: codigo_maquina
+      codigo_maquina: codigo_maquina,
     });
 
     if (periodicidade_grupo !== '' && ultima_manutencao !== '') {
@@ -460,6 +473,7 @@ th, td {
           var linha = $(this);
           var atividade = linha.find('textarea').val();
           var responsabilidade = linha.find('select').val();
+          var id_unico = linha.find('input').val();
 
           var atividadeAntiga = linha.data('originalAtividade');
           var responsabilidadeAntiga = linha.data('originalResponsabilidade');
@@ -476,7 +490,8 @@ th, td {
 
           if (
             atividade !== linha.data('originalAtividade') ||
-            responsabilidade !== linha.data('originalResponsabilidade')
+            responsabilidade !== linha.data('originalResponsabilidade') ||
+            id_unico !== linha.data('originalId_unico')
           ) {
             // Adiciona a classe "alterada" à linha
             linha.addClass('alterada');
@@ -485,6 +500,7 @@ th, td {
             dadosTabela.push({
               atividade: atividade,
               responsabilidade: responsabilidade,
+              id_unico:id_unico,
               codigo_maquina: codigo_maquina,
               grupo: grupo,
               atividadeAntiga: atividadeAntiga,
@@ -623,9 +639,11 @@ th, td {
       var linha = $(this).closest('tr');
       var atividade = linha.find('textarea').val();
       var responsabilidade = linha.find('select').val();
-      var idDaLinha = linha.data('id'); // Substitua 'id' pelo nome da propriedade que armazena a identificação única da linha
+      var idDaLinha = linha.find('input').val(); // Substitua 'id' pelo nome da propriedade que armazena a identificação única da linha
       window.codigo_maquina = codigo_maquina; 
       var grupoSelecionado = $('#selectGrupos').val();
+
+      console.log(idDaLinha)
 
       showLoading();
 
@@ -635,7 +653,7 @@ th, td {
           url: 'excluir-tarefa',
           contentType: 'application/json',
           data: JSON.stringify({
-                id: idDaLinha,
+                idDaLinha: idDaLinha,
                 atividade: atividade,
                 responsabilidade: responsabilidade,
                 grupoSelecionado: grupoSelecionado,
@@ -646,6 +664,43 @@ th, td {
             linha.remove();
             hideLoading();
             exibirMensagem('sucesso','Tarefa excluída com sucesso.')
+        },
+        error: function(err) {
+            console.error('Erro ao excluir do banco de dados:', err);
+            // Adicione aqui a lógica para lidar com erros, se necessário
+            hideLoading();
+        }
+      });
+  });
+
+  $('.excluirGrupo').on('click', function() {
+
+      var grupoSelecionado = $('#selectGrupos').val();
+
+      resultado = confirm('Clique "Ok" se realmente deseja excluir o grupo ' + grupoSelecionado)
+
+      if(resultado == false){
+        return
+      }
+    
+      console.log(codigo_maquina,grupoSelecionado)
+
+      dadosExcluir = {codigo_maquina:codigo_maquina,
+                      grupoSelecionado:grupoSelecionado}
+
+      showLoading();
+
+      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+      $.ajax({
+          type: 'POST',
+          url: 'excluir-grupo',
+          contentType: 'application/json',
+          data: JSON.stringify(dadosExcluir),
+        success: function(data) {
+            console.log('entrou no success')
+            coletarGrupos(codigo_maquina);
+            hideLoading();
+            exibirMensagem('sucesso','Grupo excluído com sucesso.')
         },
         error: function(err) {
             console.error('Erro ao excluir do banco de dados:', err);
