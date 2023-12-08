@@ -3136,7 +3136,7 @@ def tarefasGrupo(codigo_maquina, grupo_selecionado):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    sql = f"""SELECT * FROM tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo_selecionado}'"""
+    sql = f"""SELECT * FROM tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo_selecionado}' and excluidos = 'false' """
 
     cur.execute(sql)
     atividades = cur.fetchall()
@@ -3169,14 +3169,19 @@ def excluirTarefa():
     data = request.get_json()
     codigo_maquina = data['codigo_maquina']
     grupo = data['grupoSelecionado']
-    responsabilidade = data['responsabilidade']
-    atividade = data['atividade']
-    idDaLinha = data['idDaLinha']
+    excluidos = True
+    try:
+        idDaLinha = data['idDaLinha']
+    except:
+        idDaLinha = None
 
     print(data)
-    
-    sql_delete = f"""DELETE FROM public.tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo}'
-                        and responsabilidade = '{responsabilidade}' and atividade = '{atividade}' and id = '{idDaLinha}' """
+
+    if idDaLinha == '' or idDaLinha == None:
+        sql_delete = f"""UPDATE public.tb_atividades_preventiva SET excluidos = '{excluidos}' WHERE codigo = '{codigo_maquina}' AND grupo = '{grupo}'; """
+
+    else:
+        sql_delete = f"""DELETE FROM public.tb_atividades_preventiva WHERE grupo = '{grupo}' and id = '{idDaLinha}' """
 
     cur.execute(sql_delete)
 

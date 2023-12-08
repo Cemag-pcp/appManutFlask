@@ -1935,7 +1935,7 @@ video {
 .tabelaEsquerda { width: 50%; float: left; }
 .tabelaDireita {width: 50%; float: right; }
 
-#botao_add_linha,#salvar_tarefa{
+#botao_add_linha,.salvar_tarefa{
   padding: 7px;
   outline: none;
   cursor: pointer;

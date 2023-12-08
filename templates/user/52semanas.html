@@ -176,8 +176,13 @@ th, td {
         <input type="date" readonly id="proxima_manutencao" class="form-control">
       </div>
       <div class="form-preventiva">
-        <label>Adicionar excel</label>  
-        <button id="adicionarArquivo" class="file-upload__button">Adicionar arquivo</button>
+        <label>Adicionar excel</label>
+        <div style="display: flex; justify-content: space-between; align-items: center;">  
+          <button id="adicionarArquivo" class="file-upload__button">Adicionar arquivo</button>
+          <button id="remover_todas_atividades"  style="background: transparent;border: none;cursor: pointer;">
+            <i class="fa fa-trash" style="color: red; cursor: pointer;"></i>
+          </button>
+        </div>
       </div>
     </div>
     <table class="table table-striped" id="tableTarefas">
@@ -208,12 +213,12 @@ th, td {
       <span class="close" onclick="closeModalInserirArquivo()">&times;</span> <!-- Botão de fechar -->
     <h4>Inserir Arquivo</h4>
     <a href="{{ url_for('routes.download_modelo_excel') }}" download>
-      <button>Baixar Excel Modelo</button>
+      <button class="file-upload__button" style="font-size: 14px; margin-top: 20px;">Baixar Excel Modelo</button>
     </a>
 
     <form id="fileForm" enctype="multipart/form-data">
-      <input id="fileSelect" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-      <button type="button" onclick="uploadFile()">Salvar</button>
+      <input id="fileSelect" style="text-overflow: ellipsis;margin-top: 20px;margin-bottom: 20px;width: 300px;" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+      <button type="button" class="salvar_tarefa" onclick="uploadFile()">Salvar</button>
     </form>
 
   </div>
@@ -645,6 +650,11 @@ th, td {
 
       console.log(idDaLinha)
 
+      if(idDaLinha === undefined){
+        linha.remove();
+        return
+      }
+
       showLoading();
 
       // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
@@ -662,6 +672,63 @@ th, td {
         success: function(data) {
             // A resposta do backend foi bem-sucedida, remova a linha da tabela
             linha.remove();
+            hideLoading();
+            exibirMensagem('sucesso','Tarefa excluída com sucesso.')
+        },
+        error: function(err) {
+            console.error('Erro ao excluir do banco de dados:', err);
+            // Adicione aqui a lógica para lidar com erros, se necessário
+            hideLoading();
+        }
+      });
+  });
+
+    // Adicionar tratamento de evento para o botão de excluir
+    $('#remover_todas_atividades').on('click', function() {
+      window.codigo_maquina = codigo_maquina; 
+      var grupoSelecionado = $('#selectGrupos').val();
+
+      resultado = confirm('Clique "Ok" se realmente deseja excluir TODAS as atividades do grupo ' + grupoSelecionado)
+
+      if(resultado == false){
+        return
+      }
+
+      var linhas = $('#tableTarefas tbody tr');
+
+      if (linhas.length === 0) {
+          // Se não houver linhas, não há nada a fazer
+          return;
+      }
+
+      showLoading();
+
+      // Crie um array para armazenar os IDs das linhas a serem removidas
+      var idsParaRemover = [];
+
+      // Percorra todas as linhas e obtenha os IDs
+      linhas.each(function() {
+          var linha = $(this);
+          var idDaLinha = linha.find('input').val();
+
+          if (idDaLinha !== undefined) {
+              idsParaRemover.push(idDaLinha);
+          }
+
+          // Remova a linha da tabela (não espera pela resposta do backend)
+          linha.remove();
+      });
+
+      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+      $.ajax({
+          type: 'POST',
+          url: 'excluir-tarefa',
+          contentType: 'application/json',
+          data: JSON.stringify({
+                grupoSelecionado: grupoSelecionado,
+                codigo_maquina: codigo_maquina
+        }),
+        success: function(data) {
             hideLoading();
             exibirMensagem('sucesso','Tarefa excluída com sucesso.')
         },
