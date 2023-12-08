@@ -733,7 +733,7 @@ body {
   overflow-x: hidden;
 }
 
-#dropdown_os a{
+.dropdown_os a{
   max-width: 100%;
   height: auto;
   margin: 0;

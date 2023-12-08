@@ -1593,6 +1593,11 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     """
     Rota para página principal da aplicação, mostrando a tabela principal.
     """
+    setor_selecionado = session.get('setor')
+    identificador_selecionado = session.get('identificador')
+
+    print(setor_selecionado,identificador_selecionado )
+
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -1678,21 +1683,15 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
         if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
             df['maquina_parada'][i] = False
 
-    print(df)
-
     df_custos = custo_MO()
 
-    print(df_custos)
-
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
-
-    print(df.iloc[:,4:])
 
     df['proporcional'] = df['proporcional'].fillna(0)
 
     list_users = df.values.tolist()
 
-    return render_template('user/index.html', list_users=list_users)
+    return render_template('user/index.html', list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
 
 
 @routes_bp.route('/add_student', methods=['POST', 'GET'])

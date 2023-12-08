@@ -21,11 +21,14 @@
 {% endif %}
 {% endwith %}
 
+<input id="identificador_logado" name="identificador_logado" value="{{ identificador_selecionado }}" style="display: none;">
+<input id="setor_logado" name="setor_logado" value="{{ setor_selecionado }}" style="display: none;">
+
 <div id = "tabela" class="container-fluid">
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
             <div id = "titulo" class="row">
-                <div>
+                <div id="voltar">
                     <a href="#" onclick="window.history.back();" class="botao-voltar">
                       <i class="fas fa-arrow-left"></i>
                     </a>
@@ -41,12 +44,17 @@
                     <th>OS
                         <input class="form-control form-control" id="os-filter" style='padding: .375rem .25rem;' name="os-filter">
                     </th>
-                    <th>Execução
+                    <th>Tipo de Manutenção
                         <select class="form-control" id="execucao-filter" name="execucao-filter">
                             <option value="">Todos</option>  
-                            {% for row in list_users %}
-                            <option value="{{row[12]}}">{{row[12]}}</option>
-                            {% endfor %}
+                            <option value="Não Informado" style="color: transparent;">Não Informado</option>
+                            <option value="Corretiva">Corretiva</option>
+                            <option value="Preventiva">Preventiva</option>
+                            <option value="Preditiva">Preditiva</option>
+                            <option value="Apoio">Apoio</option>
+                            <option value="Projetos">Projetos</option>
+                            <option value="sesmt">SESMT</option>  
+                            <option value="Corretiva Programada">Corretiva Programada</option>  
                         </select>
                     </th>
                     <th>Setor
@@ -120,7 +128,7 @@
                     <thead class="hide-thead">
                         <tr>
                             <th style="width: 30px;">OS</th>
-                            <th style="width: 40px;">Execução</th>
+                            <th style="width: 40px;">Tipo de Manut.</th>
                             <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
                             <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. ou Local</th>
                             <th>Risco</th>
@@ -138,7 +146,11 @@
                         {% for row in list_users %}
                         <tr>
                             <td data-title="OS" class="colunaOs" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[11]}}</td>
-                            <td data-title="Execução" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[12]}}</td>
+                            {% if row[17] != '' %}
+                            <td data-title="Tipo Manutenção" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[17]}}</td>
+                            {% else %}
+                            <td data-title="Tipo Manutenção" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap; color: transparent;">Não Informado</td>
+                            {% endif %}
                             <td data-title="Setor" class="colunaSetor" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
                             <td data-title="Maquina" class="colunaMaquina" style="padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
                             <td data-title="Risco" style="padding-bottom: 0px;">{{row[4]}}</td>
@@ -188,25 +200,25 @@
                                     </button>
 
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <a id="dropdown_os" class="dropdown-item" href="/edit/{{row[11]}}"> 
+                                        <a id="dropdown_os_1" class="dropdown-item dropdown_os" href="/edit/{{row[11]}}"> 
                                             <i class="fas fa-wrench"></i> 
                                         </a>    
-                                        <a  id = 'dropdown_os' class = "dropdown-item" href="/edit_material/{{row[11]}}" class="btn"> 
+                                        <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 
                                             <i class="fas fa-box"></i> 
                                         </a>
-                                        <a id = 'dropdown_os' class = "dropdown-item" href="/timeline/{{row[11]}}" class="btn"> 
+                                        <a class = "dropdown-item dropdown_os dropdownsss" href="/timeline/{{row[11]}}" class="btn"> 
                                             <i class="fas fa-clock"></i> 
                                         </a>
-                                        <a id="dropdown_os_excluir" class="dropdown-item btn" onclick="abrirModalExclusao('{{ row[11] }}')">
+                                        <a class="dropdown-item btn dropdown_os dropdownsss" onclick="abrirModalExclusao('{{ row[11] }}')">
                                             <i class="fas fa-trash"></i>
                                         </a>  
-                                        <a id="dropdown_os" class="dropdown-item" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                        <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                             <i class="fas fa-image"></i> 
                                         </a>
-                                        <a id="dropdown_os" class="dropdown-item" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
+                                        <a class="dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
                                             <i class="fa-solid fa-file-pdf"></i> 
                                         </a>
-                                        <a id="dropdown_os" class="dropdown-item" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
+                                        <a class="dropdown-item dropdown_os dropdownsss" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
                                             <i class="fas fa-pencil"></i> 
                                         </a>
                                     </div>
