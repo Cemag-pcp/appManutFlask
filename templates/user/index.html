@@ -21,9 +21,6 @@
 {% endif %}
 {% endwith %}
 
-<input id="identificador_logado" name="identificador_logado" value="{{ identificador_selecionado }}" style="display: none;">
-<input id="setor_logado" name="setor_logado" value="{{ setor_selecionado }}" style="display: none;">
-
 <div id = "tabela" class="container-fluid">
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
@@ -34,7 +31,7 @@
                     </a>
                   </div>
                 <h1 class="visao">Ordem de serviço</h1>
-                <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+                <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
             </div>
             <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
 
@@ -200,7 +197,7 @@
                                     </button>
 
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <a id="dropdown_os_1" class="dropdown-item dropdown_os" href="/edit/{{row[11]}}"> 
+                                        <a id="dropdown_os_1" class="dropdown-item dropdown_os" href="/edit/{{ row[11] }}/{{ identificador_selecionado }}/{{ setor_selecionado }}"> 
                                             <i class="fas fa-wrench"></i> 
                                         </a>    
                                         <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 

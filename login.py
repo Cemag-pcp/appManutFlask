@@ -29,14 +29,16 @@ def home():  # Página de login
 def login(): # Lógica de login
     
     if 'loggedin' in session:
+        print("If 1")   
     # Usuário já está logado, redirecione para a página inicial
         return redirect(url_for('routes.Index'))
     
     else:
-
+        print("Else 1")   
         msg=''
         
         if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+            print("If 2")   
             email = request.form['username']
             pw = request.form['password']
 
@@ -55,8 +57,11 @@ def login(): # Lógica de login
                 session['setor'] = account['setor']
                 session['identificador'] = account['identificador']
 
+                print(session['setor'],session['identificador'])
+
                 return redirect(url_for("routes.Index",email=email))
-            else:           
+            else:   
+                print("Else 2")        
                 flash('Usuário ou Senha inválida')
 
         return render_template('login/login.html', msg = msg)

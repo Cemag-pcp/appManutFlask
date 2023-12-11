@@ -14,7 +14,6 @@
 {% endif %}
 {% endwith %}
 
-
 <div class="col-md-4 offset-md-4">
 <div id = 'edicao' class = 'card card-body'>
   <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
@@ -22,7 +21,7 @@
         <i class="fas fa-arrow-left"></i>
       </a>
     <h5 style="margin-right: 30%; margin-left: 30%;">Execução</h5>
-    <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+    <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
   </div> 
 <div class="row">
     <div class = 'col offset'>
@@ -102,7 +101,7 @@
             <div class="form-row" id="tratamento" style="display: none;">
               <div class="form-group">        
                 <label for="tratamento">Tratamento Eficaz?</label>
-                <select style = 'height: 50px;' class="form-control" name="tratamento" id = "tratamento" value="{{tratamento}}">
+                <select style = 'height: 50px;' class="form-control form-control" name="tratamento" id = "tratamento" value="{{tratamento}}">
                   <option value="" selected disabled hidden></option>
                   <option>Sim</option>
                   <option>Não</option>
@@ -110,7 +109,7 @@
               </div>
               <div class="form-group">
                 <label for="ph-agua">PH Água</label>
-                <input class="form-control" type="text" name="ph-agua" id="ph-agua" value="{{ph_agua}}">
+                <input class="form-control form-control" type="text" name="ph-agua" id="ph-agua" value="{{ph_agua}}">
               </div>
             </div>
             <!-- E.T.E -->
@@ -118,8 +117,8 @@
             <div class="form-row">
                 {% if tipo_manutencao == '' %}
                 <div class="form-group" style="width: 48%;"> 
-                    <label for="operador">Tipo de manutenção</label>
-                    <select style = 'height: 50px;' class="form-control form-control" name="tipo_manutencao">
+                    <label>Tipo de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control1" name="tipo_manutencao" id="tipo_manutencao">
                         <option value="" selected disabled hidden></option>  
                         <option value="Corretiva">Corretiva</option>
                         <option value="Preventiva">Preventiva</option>
@@ -132,16 +131,16 @@
                 </div>
                 {% else %}
                 <div class="form-group">
-                    <label for="operador">Tipo de manutenção</label>
-                    <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control" readonly="readonly">
+                    <label>Tipo de manutenção</label>
+                    <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control form-control1" readonly="readonly">
                 </div>
 
                 {% endif %}
 
                 {% if area_manutencao == '' %}
                 <div class="form-group" style="width: 48%;"> 
-                    <label for="operador">Área de manutenção</label>
-                    <select style = 'height: 50px;' class="form-control form-control" name="area_manutencao">
+                    <label>Área de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control1" name="area_manutencao">
                         <option value="" selected disabled hidden></option>  
                         <option value="Predial">Predial</option>
                         <option value="Mecânica">Mecânica</option>
@@ -151,17 +150,17 @@
                 {% else %}
                 <div class="form-group">
                     <label for="area">Área de manutenção</label>
-                    <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control" readonly="readonly">
+                    <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control form-control1" readonly="readonly">
                 </div>
                 {% endif %}
               </div>
             <div class="form-group">
                 <label for="statusLista">Data e hora</label>
-                <input id="data_edit" type="text" name="datetimes" />
+                <input id="data_edit" class="form-control form-control1" type="text" name="datetimes" />
             </div>
-            <div class="form-group" style="width: 100%;"> 
+            <div class="form-group operadores" style="width: 100%;"> 
                 <label for="operador_label">Operadores</label>
-                <select class="form-control" id="operador" name="operador" multiple required>
+                <select class="form-control form-control" id="operador" name="operador" multiple required>
                     {% for funcionario in tb_funcionarios %}
                         <option>{{funcionario[0]}}</option>
                     {% endfor %}
@@ -171,17 +170,17 @@
     <div class = 'col-md-12 offset'>
             <div class="form-group">
                 <label for="descmanutencao">Observação da manutenção:</label>
-                <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41"></textarea>
+                <textarea id="descmanutencao" class="form-control form-control1" name="descmanutencao" rows="5" cols="41"></textarea>
             </div>
             <div class="form-group">        
                 <label for="statusLista">Status</label>
-                <select class="form-control form-control" id="statusLista" name="statusLista">
+                <select class="form-control form-control1" id="statusLista" name="statusLista">
                     {% for opcao in opcoes %}
                     <option value="{{ opcao }}">{{ opcao }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-row">
+            <div class="form-row toggles_campos">
               <div class="toggle" id="maquina-parada-toggle" style="display: none;">
                   <label for="maquina-realmente-parada">Máquina está parada?</label>
                   <label class="switch2">
@@ -207,7 +206,12 @@
             <br>
             <div class="form-group">
             <button id = 'salvar_edicao' type="submit" class="btn btn-primary btn-block">
-                Salvar
+              Salvar
+            </button>
+            <input name="numero_ordem" id="numero_ordem" value="{{ordem[10]}}" style="display: none;">
+            <input id="maquinas_preventivas" value="{{ preventiva }}" style="display: none;">
+            <button id ='ok_edicao' type="submit" class="btn btn-primary btn-block" style="display: none;">
+              Ok
             </button>
             </div>
         </form>

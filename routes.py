@@ -1596,9 +1596,6 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     setor_selecionado = session.get('setor')
     identificador_selecionado = session.get('identificador')
 
-    print(setor_selecionado,identificador_selecionado )
-
-
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1834,14 +1831,16 @@ def add_student():  # Criar ordem de serviço
         return redirect(url_for('routes.open_os'))
 
 
-@routes_bp.route('/edit/<id_ordem>', methods=['POST', 'GET'])
+@routes_bp.route('/edit/<id_ordem>/<identificador_selecionado>/<setor_selecionado>', methods=['POST', 'GET'])
 @login_required
 # Página para edição da ordem de serviço (Informar o andamento da ordem)
-def get_employee(id_ordem):
+def get_employee(id_ordem, identificador_selecionado, setor_selecionado):
 
     """
     Função para criar uma execução para ordem de serviço
     """
+
+    print(setor_selecionado,identificador_selecionado)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -1899,6 +1898,7 @@ def get_employee(id_ordem):
     ph_agua = data1['ph_agua'].values.tolist()[0]
 
     data1 = data1.values.tolist()
+ 
     opcaoAtual = data1[0][4]
 
     lista_opcoes = ['Em execução', 'Finalizada', 'Aguardando material']
@@ -1923,6 +1923,7 @@ def get_employee(id_ordem):
             FROM tb_ordens AS t1
             JOIN tb_maquinas AS t2 ON t1.maquina = t2.codigo
             WHERE t1.id_ordem = {}""".format((int(id_ordem)))
+    
     cur.execute(query)
 
     maquinas = cur.fetchall()
@@ -1932,11 +1933,61 @@ def get_employee(id_ordem):
     else:
         maquinas = maquinas[0]
 
+    query_maquinas_preventivas = f""" SELECT DISTINCT codigo
+                                        FROM tb_ordens AS t1
+                                        JOIN tb_maquinas_preventivas AS t2 ON t1.maquina = t2.codigo
+                                        WHERE t1.id_ordem = {int(id_ordem)} """
+    
+    cur.execute(query_maquinas_preventivas)
+
+    maquinas_preventivas = cur.fetchall()
+
+    preventiva = False
+
+    if len(maquinas_preventivas) > 0:
+
+        preventiva = True
+
     return render_template('user/edit.html', dataabertura=dataabertura, ordem=data1[0], tb_funcionarios=tb_funcionarios,
                            opcoes=opcoes, tipo_manutencao=tipo_manutencao,
                            area_manutencao=area_manutencao, maquinas=maquinas, pvlye=pvlye, pa_plus=pa_plus,
-                           tratamento=tratamento, ph_agua=ph_agua)
+                           tratamento=tratamento, ph_agua=ph_agua,identificador_selecionado=identificador_selecionado,
+                           setor_selecionado=setor_selecionado,preventiva=preventiva)
 
+@routes_bp.route('/envio_ok', methods=['POST'])
+@login_required
+def envio_ok():  # Inserir as edições no banco de dados
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    json_confirmacao = request.get_json()
+    
+    numero_execucao = json_confirmacao['numero_execucao']
+
+    numeroOrdemValue = int(json_confirmacao['numeroOrdemValue'])
+
+    confirmacao = True
+
+    query = "SELECT n_execucao FROM tb_confirmacao;"
+
+    cur.execute(query)
+
+    maquinas_preventivas = cur.fetchall()
+
+    for maquina in maquinas_preventivas:
+        print(maquina[0], numeroOrdemValue)
+        if maquina[0] == numeroOrdemValue:
+            print("Entrou")
+            return "Número da Ordem já enviado"
+
+    cur.execute("INSERT INTO tb_confirmacao (n_ordem,n_execucao,confirmacao) VALUES (%s,%s,%s)",(numero_execucao,numeroOrdemValue,confirmacao))
+
+    conn.commit()
+
+    return "Sucesso"
 
 @routes_bp.route('/update/<id_ordem>', methods=['POST'])
 @login_required

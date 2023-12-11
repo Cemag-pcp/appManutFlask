@@ -1,5 +1,5 @@
 // Obtém o elemento do botão "Abrir Menu"
-var menuButton = document.getElementById("menu-button");
+var menuButton = document.querySelector(".menu-button");
 
 // Obtém o elemento do menu
 var menu = document.getElementById("menu");
