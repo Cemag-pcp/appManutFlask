@@ -23,12 +23,12 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,tombamen
 
     df_maquinas = pd.DataFrame(data = lista_campos, columns=['Código da máquina', 'Grupo','Descrição da máquina','Tombamento','Classificação','Última Manutenção','Periodicidade'])
     
-    codigo_maquina = 'ABC'
-    grupo = 'ABC'
-    maquina = 'ABC'
-    classificacao = 'A'
-    ultima_manutencao = '2023-06-12'
-    periodicidade = 'Quinzenal'
+    # codigo_maquina = 'ABC'
+    # grupo = 'ABC'
+    # maquina = 'ABC'
+    # classificacao = 'A'
+    # ultima_manutencao = '2023-06-12'
+    # periodicidade = 'Quinzenal'
 
     # Converte a coluna de data para o tipo datetime
     df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
@@ -528,64 +528,74 @@ def gerador_de_semanas_informar_manutencao_diario(grupo,codigo_maquina,maquina,t
     
     return df_vazio
 
-# import pandas as pd
-# from datetime import timedelta
+# Define a função para calcular a próxima data ajustada
+def calcular_proxima_data(data_atual, periodicidade_em_dias):
+    dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
+    proxima_data = data_atual + dias_uteis
+    return proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
 
-# # Supondo que você tenha um DataFrame com as informações
-# # Substitua isso pelos seus dados reais
-# data = {
-#     'codigo': [1],
-#     'periodicidade': [2],  # Exemplo de periodicidade em meses
-#     'data_ultima_manutencao': ['2023-01-01']
-# }
+def gerar_planejamento_maquinas_preventivas(codigo_maquina,grupo,maquina,tombamento,classificacao,ultima_manutencao,periodicidade):
 
-# df = pd.DataFrame(data)
-# df['data_ultima_manutencao'] = pd.to_datetime(df['data_ultima_manutencao'])
+    # codigo_maquina = 'ABC'
+    # grupo = 'ABC'
+    # maquina = 'ABC'
+    # classificacao = 'A'
+    # ultima_manutencao = '2023-06-12'
+    # periodicidade = 2
+    # tombamento = 'teste'
 
-# # Inicializa uma lista para armazenar as datas planejadas
-# datas_planejadas = []
+    data = {
+        'codigo': pd.Series(codigo_maquina, index=[0]),
+        'periodicidade': pd.Series(periodicidade, index=[0]),
+        'ultima_manutencao': pd.Series(ultima_manutencao, index=[0]),
+        'maquina': pd.Series(maquina, index=[0]),
+        'tombamento': pd.Series(tombamento, index=[0]),
+        'classificacao': pd.Series(classificacao, index=[0]),
+        'setor': pd.Series(grupo, index=[0])
+    }
 
-# # Define a função para calcular a próxima data ajustada
-# def calcular_proxima_data(data_atual, periodicidade_em_dias):
-#     dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
-#     proxima_data = data_atual + dias_uteis
-#     return proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
+    df = pd.DataFrame(data)
+    df['ultima_manutencao'] = pd.to_datetime(df['ultima_manutencao'])
 
-# # Inicializar lista para armazenar as datas planejadas
-# datas_planejadas = []
+    # Inicializa uma lista para armazenar as datas planejadas
+    datas_planejadas = []
 
-# # Iterar sobre os códigos
-# for item in data['codigo']:
-#     print(item)
-    
-#     # Iterar sobre as 52 semanas
-#     for semana in range(52):
-#         if semana == 0:
-#             data_atual = pd.to_datetime(data[data['codigo'] == item]['ultima_manutencao'].values[0])
-#         else:
-#             data_atual = datas_planejadas[-1]
+    # Inicializar lista para armazenar as datas planejadas
+    datas_planejadas = []
 
-#         proxima_data_planejada = calcular_proxima_data(data_atual, data[data['codigo'] == item]['periodicidade'].values[0])
-#         datas_planejadas.append(proxima_data_planejada)
+    # Iterar sobre os códigos
+    for item in data['codigo']:
+        
+        # Iterar sobre as 52 semanas
+        for semana in range(52):
+            if semana == 0:
+                data_atual = pd.to_datetime(df[df['codigo'] == item]['ultima_manutencao'].values[0])
+            else:
+                data_atual = datas_planejadas[-1]
 
-# # Criar DataFrame com a coluna 'proxima_manutencao'
-# df_resultado = pd.DataFrame({'proxima_manutencao': datas_planejadas})
+            proxima_data_planejada = calcular_proxima_data(data_atual, int(df[df['codigo'] == item]['periodicidade'].values[0]))
+            datas_planejadas.append(proxima_data_planejada)
 
-# # Adicionar a coluna 'codigo' ao DataFrame resultado
-# df_resultado['codigo'] = [item for item in data['codigo'] for _ in range(52)]
-# df_resultado['tombamento'] = [item for item in data['tombamento'] for _ in range(52)]
-# df_resultado['setor'] = [item for item in data['setor'] for _ in range(52)]
-# df_resultado['descricao'] = [item for item in data['descricao'] for _ in range(52)]
-# df_resultado['classificacao'] = [item for item in data['classificacao'] for _ in range(52)]
-# df_resultado['periodicidade'] = [item for item in data['periodicidade'] for _ in range(52)]
-# df_resultado['ultima_manutencao'] = [item for item in data['ultima_manutencao'] for _ in range(52)]
+    # Criar DataFrame com a coluna 'proxima_manutencao'
+    df_resultado = pd.DataFrame({'proxima_manutencao': datas_planejadas})
 
-# # Reordenar as colunas se desejar
-# df_resultado = df_resultado[['codigo','tombamento','setor','descricao','classificacao','periodicidade','ultima_manutencao','proxima_manutencao']]
+    # Adicionar a coluna 'codigo' ao DataFrame resultado
+    df_resultado['codigo'] = [item for item in data['codigo'] for _ in range(52)]
+    df_resultado['tombamento'] = [item for item in data['tombamento'] for _ in range(52)]
+    df_resultado['setor'] = [item for item in data['setor'] for _ in range(52)]
+    df_resultado['maquina'] = [item for item in data['maquina'] for _ in range(52)]
+    df_resultado['classificacao'] = [item for item in data['classificacao'] for _ in range(52)]
+    df_resultado['periodicidade'] = [item for item in data['periodicidade'] for _ in range(52)]
+    df_resultado['ultima_manutencao'] = [item for item in data['ultima_manutencao'] for _ in range(52)]
 
-# df_resultado = df_resultado[df_resultado['proxima_manutencao'] < '2025-01-01']
+    # Reordenar as colunas se desejar
+    df_resultado = df_resultado[['codigo','tombamento','setor','maquina','classificacao','periodicidade','ultima_manutencao','proxima_manutencao']]
 
-# df_resultado['ultima_manutencao'] = pd.to_datetime(df_resultado['ultima_manutencao'])
+    df_resultado = df_resultado[df_resultado['proxima_manutencao'] < '2025-01-01']
+
+    df_resultado['ultima_manutencao'] = pd.to_datetime(df_resultado['ultima_manutencao'])
+
+    return df_resultado
 
 # # Exibir o DataFrame resultante
 # df_resultado.to_csv('planejamento_anual.csv', index=False)
