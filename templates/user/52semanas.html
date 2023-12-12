@@ -42,9 +42,14 @@ th, td {
         <thead>
           <tr>
             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
-            {% for coluna in colunas %}
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ coluna }}</th>
-            {% endfor %}
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tombamento</th>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classificação</th>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (Dias)</th>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
+            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
           </tr>
         </thead>
         <tbody>
@@ -76,42 +81,37 @@ th, td {
         </tbody>
       </table>
     </div>
-    
-    <div class = "board2" style="overflow-x: auto;">
-      <div class="tabelaEsquerda">
-        <table>
+    <div class="row justify-content-md-center">
+      <div class = "board2" style="overflow-x: auto;">
+        <div id = "titulo" class="row">
+          <h1 class="visao">Planejamento por grupos de atividade</h1>
+        </div>
+        <table id="table3" class="table table-striped">
           <thead>
             <tr>
-              <th>Teste</th>
-              <th>Teste</th>
+              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
+              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
+              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Grupo</th>
+              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
+              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (meses)</th>
+              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
             </tr>
           </thead>
           <tbody>
+            {% for grupos in df_grupos_notna %}
               <tr>
-                <td>Teste</td>                
-                <td>Teste</td>
+                <td></td>
+                <td>{{grupos[1]}}</td>
+                <td>{{grupos[2]}}</td>
+                <td>{{grupos[3]}}</td>
+                <td>{{grupos[4]}}</td>
+                <td>{{grupos[6]}}</td>
               </tr>
+              {% endfor %}
           </tbody>
         </table>
       </div>
-        
-      <div class="tabelaDireita">
-        <table>
-          <thead>
-            <tr>
-              <th>Teste</th>
-              <th>Teste</th>
-            </tr>
-          </thead>
-          <tbody>
-              <tr>
-                <td>Teste</td>                
-                <td>Teste</td>
-              </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+
 
   </div>
 
@@ -231,8 +231,6 @@ th, td {
             // Limpar o conteúdo atual do select
             $('#selectGrupos').empty();
           
-            console.log(data.length);
-
             // Populando o select com as opções recebidas
             for (var i = 0; i < data.length; i++) {
                 $('#selectGrupos').append(`<option value="${data[i]}">${data[i]}</option>`);
@@ -272,7 +270,6 @@ th, td {
         type: 'GET',
         success: function (data) {
             // Popule o modalGrupoExistente com os dados recebidos
-            console.log("Dados recebidos:", data);
              // Verifica se data é um array
             if (typeof data === 'object' && data !== null) {
                 popularModalGrupoExistente(data);
@@ -450,8 +447,6 @@ th, td {
             responsabilidadeAntiga = '';
           }
 
-          console.log("atividade antiga:", atividadeAntiga);
-
           if (
             atividade !== linha.data('originalAtividade') ||
             responsabilidade !== linha.data('originalResponsabilidade')
@@ -553,7 +548,6 @@ th, td {
         processData: false,
         contentType: false,
         success: function(data) {
-            console.log(data);
             closeModalInserirArquivo();
 
             var grupo = $('#selectGrupos').val();

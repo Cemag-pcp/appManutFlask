@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 import numpy as np
 import json
-from funcoes import gerador_de_semanas_informar_manutencao, login_required, gerador_de_semanas_informar_manutencao_diario
+from funcoes import gerador_de_semanas_informar_manutencao, login_required, gerador_de_semanas_informar_manutencao_diario,gerar_planejamento_maquinas_preventivas,calcular_proxima_data
 import warnings
 from flask import session
 import base64
@@ -2375,7 +2375,7 @@ def open_os():  # Página de abrir OS
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """SELECT * FROM tb_matriculas"""
-    
+
     cur.execute(query)
     data = cur.fetchall()
     df_data = pd.DataFrame(data, columns=['id', 'matricula', 'nome'])
@@ -2404,7 +2404,7 @@ def filtro_maquinas(setor):
         FROM (
             SELECT codigo, descricao, setor FROM tb_maquinas
             UNION
-            SELECT codigo, descricao, setor FROM tb_maquinas_preventivas
+            SELECT codigo, descricao, setor FROM tb_planejamento_anual
             ) as t1
         WHERE t1.setor = {}
         """.format("'" + setor + "'")
@@ -2505,7 +2505,7 @@ def grafico():  # Dashboard
             "SELECT DISTINCT setor FROM tb_ordens WHERE ordem_excluida IS NULL OR ordem_excluida = FALSE;")
         setores = cur.fetchall()
 
-        cur.execute("SELECT * FROM tb_maquinas_preventivas")
+        cur.execute("SELECT * FROM tb_planejamento_anual")
         name_cols = ['codigo', 'tombamento', 'setor',
                      'descricao', 'criticidade', 'periodicidade']
         df_maquinas = pd.DataFrame(cur.fetchall()).iloc[:, :6]
@@ -2520,7 +2520,7 @@ def grafico():  # Dashboard
 
         if maquinas_importantes or len(maquinas) != 0:
             cur.execute(
-                'SELECT DISTINCT (codigo) FROM tb_maquinas_preventivas')
+                'SELECT DISTINCT (codigo) FROM tb_planejamento_anual')
             maquinas_preventivas = cur.fetchall()
             maquinas_preventivas = [valor[0] for valor in maquinas_preventivas]
             maquinas_selecionadas = ",".join(
@@ -2908,7 +2908,7 @@ def grafico():  # Dashboard
         "SELECT DISTINCT setor FROM tb_ordens WHERE ordem_excluida IS NULL OR ordem_excluida = FALSE;")
     setores = cur.fetchall()
 
-    cur.execute("SELECT * FROM tb_maquinas_preventivas")
+    cur.execute("SELECT * FROM tb_planejamento_anual")
     name_cols = ['codigo', 'tombamento', 'setor',
                  'descricao', 'criticidade', 'periodicidade']
     df_maquinas = pd.DataFrame(cur.fetchall()).iloc[:, :6]
@@ -3056,14 +3056,37 @@ def plan_52semanas():  # Tabela com as 52 semanas
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
 
-    s = (""" SELECT * FROM tb_maquinas_preventivas """)
+    s = (""" SELECT * FROM tb_planejamento_anual """)
 
     df_maquinas = pd.read_sql_query(s, conn)
 
     colunas = df_maquinas.columns.tolist()
     df_maquinas = df_maquinas.values.tolist()
 
-    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas)
+    s = (""" select * from tb_grupos_preventivas where excluidos = 'False'""")
+
+    df_grupos = pd.read_sql_query(s, conn)
+    
+    df_grupos_nan = df_grupos[df_grupos.isna().any(axis=1)]
+    df_grupos_nan['proxima_manutencao'] = 'À decidir'
+
+    df_grupos_notna = df_grupos.dropna()
+
+    df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
+    
+    # df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'], format="%Y-%m-%d")
+
+    df_grupos_notna = pd.concat([df_grupos_notna,df_grupos_nan])
+
+    df_grupos_notna['ult_manutencao'] = df_grupos_notna['ult_manutencao'].fillna('À decidir')
+    df_grupos_notna['periodicidade'] = df_grupos_notna['periodicidade'].fillna('À decidir')
+
+    df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].astype(str)
+    df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].apply(lambda x: x.replace(" 00:00:00",""))
+
+    df_grupos_notna = df_grupos_notna.values.tolist()
+    
+    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas, df_grupos_notna=df_grupos_notna)
 
 
 @routes_bp.route('/preventivas', methods=['GET'])
@@ -3456,18 +3479,35 @@ def cadastro_preventiva():
             periodicidade = request.form['periodicidade']
             apelido = request.form['apelido']
 
-            print(periodicidade)
+            print(codigo,setor,descricao,tombamento,criticidade,manut_inicial,periodicidade,togglePreventiva)
 
-            df = gerador_de_semanas_informar_manutencao(
-                setor, codigo, descricao, tombamento, criticidade, manut_inicial, periodicidade)
+            # df = gerador_de_semanas_informar_manutencao(
+            #     setor, codigo, descricao, tombamento, criticidade, manut_inicial, periodicidade)
 
-            print(df)
+            print("antes")
+
+            # codigo = 'teste1'
+            # setor = 'Administrativo'
+            # descricao ='123'
+            # tombamento = '123'
+            # criticidade = 'B'
+            # manut_inicial = '2023-12-12'
+            # periodicidade = 30
+            # apelido = 'teste'
+
+            df = gerar_planejamento_maquinas_preventivas(codigo,setor,descricao,tombamento,criticidade,manut_inicial,periodicidade)
+            
+            print("depois")
+
+            df['ultima_manutencao'] = df['ultima_manutencao'].dt.strftime("%Y-%m-%d")
+            df['proxima_manutencao'] = df['proxima_manutencao'].dt.strftime("%Y-%m-%d")
+            df['periodicidade'] = df['periodicidade'].astype(str)
 
             lista = df.values.tolist()
-            lista = lista[0]
+            # lista = lista[0]
 
             s = ("""
-                SELECT * FROM tb_maquinas_preventivas
+                SELECT * FROM tb_planejamento_anual
                 """)
 
             maquina_cadastrada = pd.read_sql_query(s, conn)
@@ -3484,11 +3524,11 @@ def cadastro_preventiva():
                         cursor_factory=psycopg2.extras.DictCursor)
 
                     # Consulta SQL para inserir os dados na tabela
-                    sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(
-                        ','.join(['%s'] * len(lista)))
+                    sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(','.join(['%s'] * len(lista[0])))
 
-                    # Executar a consulta SQL com a lista de dados
-                    cur.execute(sql_insert, lista)
+                    # Executar a consulta SQL para cada sublista
+                    for linha in lista:
+                        cur.execute(sql_insert, linha)
 
                     query_max = ("""SELECT max(id) FROM tb_maquinas""")
                     cur.execute(query_max)
@@ -3770,13 +3810,13 @@ def lista_maquinas():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(""" SELECT 
-                        tb_maquinas_preventivas.codigo,
-                        tb_maquinas_preventivas.setor,
-                        tb_maquinas_preventivas.descricao,
-                        tb_maquinas_preventivas.tombamento,
+                        tb_planejamento_anual.codigo,
+                        tb_planejamento_anual.setor,
+                        tb_planejamento_anual.descricao,
+                        tb_planejamento_anual.tombamento,
                         tb_maquinas.apelido
-                    FROM tb_maquinas_preventivas
-                    JOIN tb_maquinas ON tb_maquinas_preventivas.codigo = tb_maquinas.codigo; """)
+                    FROM tb_planejamento_anual
+                    JOIN tb_maquinas ON tb_planejamento_anual.codigo = tb_maquinas.codigo; """)
 
     df_c_preventivas = pd.DataFrame(cur.fetchall(), columns=[
                                     'codigo', 'setor', 'descricao', 'tombamento', 'apelido'])
@@ -3934,7 +3974,7 @@ def editar_maquina_preventiva(codigo):
 
         if codigo_novo != codigo_inicial:
 
-            query = """SELECT * FROM tb_maquinas_preventivas WHERE codigo = '{}'""".format(
+            query = """SELECT * FROM tb_planejamento_anual WHERE codigo = '{}'""".format(
                 codigo_novo)
             data = pd.read_sql_query(query, conn)
 
@@ -3957,11 +3997,11 @@ def editar_maquina_preventiva(codigo):
                     """, (codigo_novo, setor, codigo_inicial))
 
                 cur.execute("""
-                    DELETE FROM tb_maquinas_preventivas
+                    DELETE FROM tb_planejamento_anual
                     WHERE codigo = '{}'
                     """.format(codigo_inicial))
 
-                sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(
+                sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
                     ','.join(['%s'] * len(lista)))
                 cur.execute(sql_insert, lista)
 
@@ -3993,11 +4033,11 @@ def editar_maquina_preventiva(codigo):
             """Query para editar a linha do codigo escolhido"""
 
             cur.execute("""
-                DELETE FROM tb_maquinas_preventivas
+                DELETE FROM tb_planejamento_anual
                 WHERE codigo = '{}'
                 """.format(codigo_inicial))
 
-            sql_insert = "INSERT INTO tb_maquinas_preventivas VALUES ({})".format(
+            sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
                 ','.join(['%s'] * len(lista)))
             cur.execute(sql_insert, lista)
 
@@ -4029,17 +4069,17 @@ def editar_maquina_preventiva(codigo):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """SELECT 
-                tb_maquinas_preventivas.codigo,
-                tb_maquinas_preventivas.tombamento,
-                tb_maquinas_preventivas.setor,
-                tb_maquinas_preventivas.descricao,
-                tb_maquinas_preventivas.classificacao,
-                tb_maquinas_preventivas.periodicidade,
-                tb_maquinas_preventivas.ultima_manutencao,
+                tb_planejamento_anual.codigo,
+                tb_planejamento_anual.tombamento,
+                tb_planejamento_anual.setor,
+                tb_planejamento_anual.descricao,
+                tb_planejamento_anual.classificacao,
+                tb_planejamento_anual.periodicidade,
+                tb_planejamento_anual.ultima_manutencao,
                 tb_maquinas.apelido
-            FROM tb_maquinas_preventivas
-            JOIN tb_maquinas ON tb_maquinas_preventivas.codigo = tb_maquinas.codigo
-            WHERE tb_maquinas_preventivas.codigo = '{}';""".format(codigo)
+            FROM tb_planejamento_anual
+            JOIN tb_maquinas ON tb_planejamento_anual.codigo = tb_maquinas.codigo
+            WHERE tb_planejamento_anual.codigo = '{}';""".format(codigo)
 
     cur.execute(query)
     data = cur.fetchall()
@@ -4112,7 +4152,7 @@ def salvar_edicao_maquina(codigo):
 
             try:
                 cur.execute("""
-                    UPDATE tb_maquinas_preventivas
+                    UPDATE tb_planejamento_anual
                     SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
                     WHERE codigo = %s
                     """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
@@ -4135,7 +4175,7 @@ def salvar_edicao_maquina(codigo):
             """, (setor, codigo_novo, descricao, tombamento, apelido, codigo_inicial))
 
         cur.execute("""
-            UPDATE tb_maquinas_preventivas
+            UPDATE tb_planejamento_anual
             SET codigo=%s,tombamento=%s,setor=%s,descricao=%s
             WHERE codigo = %s
             """, (codigo_novo, tombamento, setor, descricao, codigo_inicial))
@@ -4173,7 +4213,7 @@ def excluir_maquina():
 
         cur.execute(query, [codigo_maquina])
 
-        query = """DELETE FROM tb_maquinas_preventivas
+        query = """DELETE FROM tb_planejamento_anual
                 WHERE codigo = %s;
                 """
 
@@ -4199,7 +4239,7 @@ def excluir_preventiva():
             dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        query = """DELETE FROM tb_maquinas_preventivas
+        query = """DELETE FROM tb_planejamento_anual
                 WHERE codigo = %s;
                 """
 
