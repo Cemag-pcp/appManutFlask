@@ -1965,11 +1965,15 @@ def envio_ok():  # Inserir as edições no banco de dados
 
     json_confirmacao = request.get_json()
     
-    numero_execucao = json_confirmacao['numero_execucao']
+    numero_execucao = int(json_confirmacao['numero_execucao'])
 
     numeroOrdemValue = int(json_confirmacao['numeroOrdemValue'])
 
+    status = 'Finalizada'
+
     confirmacao = True
+
+    print(status,confirmacao,numero_execucao,numeroOrdemValue)
 
     query = "SELECT n_execucao FROM tb_confirmacao;"
 
@@ -1985,13 +1989,19 @@ def envio_ok():  # Inserir as edições no banco de dados
 
     cur.execute("INSERT INTO tb_confirmacao (n_ordem,n_execucao,confirmacao) VALUES (%s,%s,%s)",(numero_execucao,numeroOrdemValue,confirmacao))
 
+    cur.execute("""
+        UPDATE tb_ordens
+        SET status=%s, confirmacao=%s
+        WHERE n_ordem = %s and id_ordem = %s
+        """, (status, confirmacao , numero_execucao - 1, numeroOrdemValue))
+
     conn.commit()
 
     return "Sucesso"
 
-@routes_bp.route('/update/<id_ordem>', methods=['POST'])
+@routes_bp.route('/update/<id_ordem>/<identificador_selecionado>/<setor_selecionado>', methods=['POST'])
 @login_required
-def update_student(id_ordem):  # Inserir as edições no banco de dados
+def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Inserir as edições no banco de dados
 
     """
     Rota para editar ordem de serviço
@@ -2037,6 +2047,7 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         n_ordem = request.form['n_ordem']
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
+        confirmacao = False
         # operador = json.dumps(operador)
 
         matriculas_operadores = []
@@ -2065,6 +2076,23 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
 
         natureza = natureza
 
+        query_maquinas_preventivas = f""" SELECT DISTINCT codigo
+                                        FROM tb_ordens AS t1
+                                        JOIN tb_maquinas_preventivas AS t2 ON t1.maquina = t2.codigo
+                                        WHERE t1.id_ordem = {int(id_ordem)} """
+    
+        cur.execute(query_maquinas_preventivas)
+
+        maquinas_preventivas = cur.fetchall()
+
+
+        if len(maquinas_preventivas) > 0 and status == 'Finalizada':
+            status = 'Aguardando OK'
+            confirmacao = True
+            print("Entrou")
+        else:
+            print("Entrou no Elsee ")
+
         try:
             botao1 = request.form['maquina-parada-1']
 
@@ -2080,8 +2108,9 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         except:
             botao3 = 'false'
 
-        if status == 'Finalizada':
+        if status == 'Finalizada' or status == 'Aguardando OK':
             botao3 = 'true'
+            
 
         print(botao1)
         print(botao2)
@@ -2111,12 +2140,12 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         cur.execute("""
             INSERT INTO tb_ordens ( id, setor,maquina,risco,status,problemaaparente,
                                     datainicio,horainicio,datafim,horafim,id_ordem,n_ordem,
-                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua) 
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua,confirmacao) 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
               datafim, horafim, id_ordem, n_ordem, descmanutencao,
               operador, natureza, tipo_manutencao, area_manutencao,
-              pvlye, pa_plus, tratamento, ph_agua))
+              pvlye, pa_plus, tratamento, ph_agua, confirmacao))
 
         cur.execute("""
             INSERT INTO tb_paradas (id_ordem,n_ordem, parada1, parada2, parada3) 
@@ -2126,8 +2155,7 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
-        return redirect(url_for('routes.get_employee', id_ordem=id_ordem))
-
+        return redirect(url_for('routes.get_employee', id_ordem=id_ordem,identificador_selecionado=identificador_selecionado,setor_selecionado=setor_selecionado))
 
 @routes_bp.route('/editar_ordem/<id_ordem>/<n_ordem>', methods=['POST', 'GET'])
 @login_required

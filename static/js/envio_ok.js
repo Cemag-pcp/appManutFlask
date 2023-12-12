@@ -29,9 +29,9 @@ if(isEditRoute){
                     hideLoading();
                     return
                 } else {
-                    alert("Enviado com sucesso")
+                    window.location.href = '/index';
+                    return
                 }
-                location.reload();
             },
             error: function(error) {
                 console.error('Erro na requisição:', error);

@@ -33,8 +33,12 @@
                 <h1 class="visao">Ordem de serviço</h1>
                 <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
             </div>
-            <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
-
+            <div style="display: flex; justify-content: space-between;align-items: center;">
+                <a href="/logout" style="font-size: 20px; color: black;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+                <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
+            </div>
             <table class="table" style="display: flex; justify-content: space-between;">
                 <thead>
                   <tr class="container filter-wrapper2 filters">
@@ -92,6 +96,7 @@
                             <option>Em execução</option>
                             <option>Finalizada</option>
                             <option>Aguardando material</option>
+                            <option>Aguardando OK</option>
                             <option>Em espera</option>
                         </select>
                     </th>
@@ -164,6 +169,10 @@
                             <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <span class="flag-aguardando">Aguardando material</span>
                             </td>
+                            {% elif row[5] == 'Aguardando OK' %}
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-aguardando-OK">Aguardando OK</span>
+                            </td>
                             {% else %}
                             <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <span class="flag-em-espera">Em espera</span>
@@ -184,7 +193,7 @@
 
                                 <div class="dropup">
 
-                                    {% if row[35] != "" %}
+                                    {% if row[36] != "" %}
                                         <a id="dropdown_os" class="dropdown-foto-video" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
                                             <i class="fa-solid fa-video"></i>
                                         </a>
@@ -219,7 +228,7 @@
                                             <i class="fas fa-pencil"></i> 
                                         </a>
                                     </div>
-                                    {% if row[36] != "" %}
+                                    {% if row[37] != "" %}
                                         <a id="dropdown_os" class="dropdown-foto-video" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                             <i class="fas fa-image"></i> 
                                         </a>
