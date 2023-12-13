@@ -318,7 +318,15 @@ $(function() {
   });
 
   function updateToggleVisibility(status, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado) {
-    if (maquinaValue === 'ETE' || identificador_logado === "2") {
+    if (status !== 'Aguardando OK' && identificador_logado === "2") {
+      $('#maquina-parada-toggle').hide();
+      $('#execucao-maquina-toggle').hide();
+      $('#apos-execucao-toggle').hide();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
+      $('#ok_edicao').hide();
+    }else if  (maquinaValue === 'ETE' || identificador_logado === "2") {
       $('#maquina-parada-toggle').hide();
       $('#execucao-maquina-toggle').hide();
       $('#apos-execucao-toggle').hide();
