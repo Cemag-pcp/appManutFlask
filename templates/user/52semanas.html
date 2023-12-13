@@ -36,7 +36,7 @@ th, td {
           <i class="fas fa-arrow-left"></i>
         </a>
         <h1 class="visao">Planejamento</h1>
-        <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+        <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
       </div>
       <table id="table2" class="table table-striped">
         <thead>
@@ -67,8 +67,8 @@ th, td {
                         <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
                           <i class="fas fa-clock"></i>
                         </a>
-                        <a id="dropdown_os" class="dropdown-item">
-                          <i class="fa-solid fa-file-lines docIcon" title="Documentos" onclick="modalGrupoAtividade('{{ row[0] }}')" style="cursor: pointer;"></i>
+                        <a id="dropdown_os" class="dropdown-item" onclick="modalGrupoAtividade('{{ row[0] }}')" style="cursor: pointer;">
+                          <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
                       </a>
                       </div>
                   </div>
@@ -123,19 +123,34 @@ th, td {
       <span class="close" onclick="closeModalAtividade()">&times;</span> <!-- Botão de fechar -->
     <h4>Grupo de atividades</h4>
     <label for="name_grupo">Grupos</label>
-    <select name="selectGrupos" id="selectGrupos">
-      <option></option>
-    </select>
+    <div style="display: flex; justify-content: space-around; align-items: baseline;">
+      <select name="selectGrupos" id="selectGrupos" class="form-control" style="margin-bottom: 20px; width: 90%;">
+        <option></option>
+      </select>
+      <button class="excluirGrupo" style="background: transparent;border: none;cursor: pointer;">
+        <i class="fa fa-trash" style="cursor: pointer;"></i>
+      </button>
+    </div>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-sm">
-          <button id="criarGrupo">Criar grupo</button>  
+      <div class="form-row">
+        <div class="form-group">
+          <button id="criarGrupo" class="file-upload__button" style="width: 80%;">Criar grupo</button>  
         </div>
-        <div class="col-sm">
-          <button id="grupoExistente">Entrar</button>
+        <div class="form-group">
+          <button id="grupoExistente" class="file-upload__button" style="width: 80%;">Entrar</button>
         </div>
       </div>
+  </div>
+</div>
+
+<div id="modalRenomearGrupo" class="tela" style="display: none;">
+  <div class="modal-content3">
+      <span class="close" onclick="closeModalRenomear()">&times;</span> <!-- Botão de fechar -->
+    <h4>Defina um nome para o grupo</h4>
+    <label for="name_grupo">Nome do Grupo</label>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <input type="text" id="renomearGrupo" class="form-control">
+      <button class="file-upload__button" id="nomear_grupo">Nomear Grupo</button>
     </div>
   </div>
 </div>
@@ -143,19 +158,33 @@ th, td {
 <!-- Modal para visualizar tarefas associadas ao grupo selecionado -->
 <div id="modalGrupoExistente" class="tela" style="display: none;">
   
-  <div class="modal-content3" style="width: 70%;">
+  <div class="modal-content3">
       <span class="close" onclick="closeModalGrupo()">&times;</span> 
-  <h4>Tarefas</h4>
+    <h4 class="modal-title"></h4>
 
-    <label>Periodicidade (meses):</label>
-    <input id="periodicidade_grupo" type="number">
-    <label>Última manutenção do grupo:</label>
-    <input id="ultima_manutencao" value="" type="date">
-    <label>Próxima manutenção</label>
-    <input type="date" readonly id="proxima_manutencao">
-    <label>Adicionar excel</label>  
-    <button id="adicionarArquivo">Adicionar arquivo</button>
-
+    <div class="form-row-preventivas">
+      <div class="form-preventiva">
+        <label>Periodicidade (meses):</label>
+        <input id="periodicidade_grupo" type="number" class="form-control">
+      </div>
+      <div class="form-preventiva">
+        <label>Última manutenção do grupo:</label>
+        <input id="ultima_manutencao" value="" type="date" class="form-control">
+      </div>
+      <div class="form-preventiva">
+        <label>Próxima manutenção:</label>
+        <input type="date" readonly id="proxima_manutencao" class="form-control">
+      </div>
+      <div class="form-preventiva">
+        <label>Adicionar excel</label>
+        <div style="display: flex; justify-content: space-between; align-items: center;">  
+          <button id="adicionarArquivo" class="file-upload__button">Adicionar arquivo</button>
+          <button id="remover_todas_atividades"  style="background: transparent;border: none;cursor: pointer;">
+            <i class="fa fa-trash" style="color: red; cursor: pointer;"></i>
+          </button>
+        </div>
+      </div>
+    </div>
     <table class="table table-striped" id="tableTarefas">
         <thead>
             <tr class="cabeçalho">
@@ -170,17 +199,12 @@ th, td {
     </table>
 
     <div class="container">
-      <div class="row">
-        <div class="col-sm">
-          <button class="add-row">+</button></td>
-        </div>
-        <div class="col-sm">
-          <button class="salvar_tarefa" id="salvar_tarefa">Salvar</button></td>
-        </div>
+      <div class="form-row">
+        <button class="add-row" id="botao_add_linha">+</button></td>
+        <button class="salvar_tarefa" id="salvar_tarefa">Salvar</button></td>
       </div>
     </div>
-
-  </div>
+   </div>
 </div>
 
 <!-- Modal para inserir arquivo -->
@@ -189,12 +213,12 @@ th, td {
       <span class="close" onclick="closeModalInserirArquivo()">&times;</span> <!-- Botão de fechar -->
     <h4>Inserir Arquivo</h4>
     <a href="{{ url_for('routes.download_modelo_excel') }}" download>
-      <button>Baixar Excel Modelo</button>
+      <button class="file-upload__button" style="font-size: 14px; margin-top: 20px;">Baixar Excel Modelo</button>
     </a>
 
     <form id="fileForm" enctype="multipart/form-data">
-      <input id="fileSelect" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-      <button type="button" onclick="uploadFile()">Salvar</button>
+      <input id="fileSelect" style="text-overflow: ellipsis;margin-top: 20px;margin-bottom: 20px;width: 300px;" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+      <button type="button" class="salvar_tarefa" onclick="uploadFile()">Salvar</button>
     </form>
 
   </div>
@@ -203,19 +227,6 @@ th, td {
 <div id="mensagem"></div>
 
 <script>
-  
-  // Função para exibir o modal para escolha do grupo
-  function modalGrupoAtividade(codigo_maquina) {        
-    // Definir o código de máquina na variável global
-    window.codigo_maquina = codigo_maquina;
-    
-    // Exibir o modal
-    var modal = document.getElementById("modalGrupoAtividade");
-    modal.style.display = "block";
-    
-    // Coletar grupos
-    coletarGrupos(codigo_maquina);
-  }
   
   // Função para mostrar os grupos disponíveis para aquela máquina
   function coletarGrupos(codigo_maquina) {
@@ -270,6 +281,8 @@ th, td {
         type: 'GET',
         success: function (data) {
             // Popule o modalGrupoExistente com os dados recebidos
+            $('.modal-title').text("Tarefa do grupo: " + grupoSelecionado);
+            console.log("Dados recebidos:", data);
              // Verifica se data é um array
             if (typeof data === 'object' && data !== null) {
                 popularModalGrupoExistente(data);
@@ -299,6 +312,12 @@ th, td {
     $('#modalGrupoExistente').off('click', '.add-row');
   }
 
+  function closeModalRenomear() {
+    var modal = document.getElementById("modalRenomearGrupo");
+    modal.style.display = "none";
+    $('#modalRenomearGrupo').hide();
+  }
+
   $('#grupoExistente').on('click', function() {
     entrarGrupo();
   });
@@ -320,6 +339,7 @@ th, td {
     for (var i = 0; i < dados[0].length; i++) {
         var atividade = dados[0][i][3];
         var responsabilidade = dados[0][i][2];
+        var id_unico = dados[0][i][4];
 
         // Verifica se atividade é indefinida e atribui uma string vazia se for o caso
         atividade = (typeof atividade !== 'undefined') ? atividade : '';
@@ -327,13 +347,15 @@ th, td {
         // Verifica se responsabilidade é indefinida e atribui uma string vazia se for o caso
         responsabilidade = (typeof responsabilidade !== 'undefined') ? responsabilidade : '';
 
+        id_unico = (typeof id_unico !== 'undefined') ? id_unico : '';
+
         var linha = $(`
                   <tr>
                       <td> 
                           <textarea rows="4" cols="30">${atividade}</textarea>
                       </td>
                       <td>  
-                          <select>
+                          <select class="form-control">
                               <option value="${responsabilidade}">${responsabilidade}</option>
                               <option value="Elétrica">Elétrica</option>
                               <option value="Mecânica">Mecânica</option>
@@ -341,15 +363,19 @@ th, td {
                           </select>
                       </td>
                       <td>
-                        <button class="excluirTarefa">
+                        <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
                           <i class="fa fa-trash"></i>
                         </button>
+                      </td>
+                      <td style="display:none">
+                        <input type="number" class="form-control" value="${id_unico}">
                       </td>
                   </tr>`);
 
         // Salva os valores originais como data atributos
         linha.data('originalAtividade', atividade);
         linha.data('originalResponsabilidade', responsabilidade);
+        linha.data('originalId_unico',id_unico)
 
         tabela.append(linha);
     }
@@ -359,7 +385,7 @@ th, td {
         const newRow = `<tr>
                           <td> <textarea rows="4" cols="30"></textarea>
                           </td>
-                          <td>  <select>
+                          <td>  <select class="form-control">
                                   <option value=""></option>
                                   <option value="Elétrica">Elétrica</option>
                                   <option value="Mecânica">Mecânica</option>
@@ -367,7 +393,7 @@ th, td {
                                 </select>
                           </td>
                           <td>
-                            <button class="excluirTarefa">
+                            <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
                               <i class="fa fa-trash"></i>
                             </button>
                         </td>
@@ -385,17 +411,24 @@ th, td {
   // Função para lidar com o clique no botão "criarGrupo"
   function criarGrupo() {
 
-    var codigo_maquina = window.codigo_maquina;
+    let codigo_maquina = window.codigo_maquina;
+    let nome_grupo = $("#renomearGrupo").val();
+    
     showLoading();
     // Chamar a rota no backend para carregar dados associados
     $.ajax({
         url: `/criar-grupo`,
         type: 'POST',
-        data: JSON.stringify({ codigo_maquina: codigo_maquina }),  // Converte os dados para JSON
+        data: JSON.stringify({ codigo_maquina: codigo_maquina, nome_grupo:nome_grupo }),  // Converte os dados para JSON
         contentType: 'application/json',
         success: function (data) {
-          modalGrupoAtividade(codigo_maquina)
+          console.log(data)
           hideLoading();
+          if(data === 'Grupo já existente'){
+            exibirMensagem('aviso','Nome de grupo já existente')
+            return
+          }
+          modalGrupoAtividade(codigo_maquina)
         },
         error: function (error) {
             console.error(error);
@@ -404,9 +437,17 @@ th, td {
     });
   }
 
-  $('#criarGrupo').on('click', function() {
-    
+  $('#nomear_grupo').on('click',function() {
+
     criarGrupo();
+    $('#modalRenomearGrupo').hide()
+
+  })
+
+  $('#criarGrupo').on('click', function() {
+
+    $('#renomearGrupo').val("")
+    $('#modalRenomearGrupo').show();
     
   });
 
@@ -425,7 +466,7 @@ th, td {
       periodicidade_grupo: periodicidade_grupo,
       ultima_manutencao: ultima_manutencao,
       grupo: grupo,
-      codigo_maquina: codigo_maquina
+      codigo_maquina: codigo_maquina,
     });
 
     if (periodicidade_grupo !== '' && ultima_manutencao !== '') {
@@ -435,6 +476,7 @@ th, td {
           var linha = $(this);
           var atividade = linha.find('textarea').val();
           var responsabilidade = linha.find('select').val();
+          var id_unico = linha.find('input').val();
 
           var atividadeAntiga = linha.data('originalAtividade');
           var responsabilidadeAntiga = linha.data('originalResponsabilidade');
@@ -449,7 +491,8 @@ th, td {
 
           if (
             atividade !== linha.data('originalAtividade') ||
-            responsabilidade !== linha.data('originalResponsabilidade')
+            responsabilidade !== linha.data('originalResponsabilidade') ||
+            id_unico !== linha.data('originalId_unico')
           ) {
             // Adiciona a classe "alterada" à linha
             linha.addClass('alterada');
@@ -458,6 +501,7 @@ th, td {
             dadosTabela.push({
               atividade: atividade,
               responsabilidade: responsabilidade,
+              id_unico:id_unico,
               codigo_maquina: codigo_maquina,
               grupo: grupo,
               atividadeAntiga: atividadeAntiga,
@@ -595,9 +639,16 @@ th, td {
       var linha = $(this).closest('tr');
       var atividade = linha.find('textarea').val();
       var responsabilidade = linha.find('select').val();
-      var idDaLinha = linha.data('id'); // Substitua 'id' pelo nome da propriedade que armazena a identificação única da linha
+      var idDaLinha = linha.find('input').val(); // Substitua 'id' pelo nome da propriedade que armazena a identificação única da linha
       window.codigo_maquina = codigo_maquina; 
       var grupoSelecionado = $('#selectGrupos').val();
+
+      console.log(idDaLinha)
+
+      if(idDaLinha === undefined){
+        linha.remove();
+        return
+      }
 
       showLoading();
 
@@ -607,7 +658,7 @@ th, td {
           url: 'excluir-tarefa',
           contentType: 'application/json',
           data: JSON.stringify({
-                id: idDaLinha,
+                idDaLinha: idDaLinha,
                 atividade: atividade,
                 responsabilidade: responsabilidade,
                 grupoSelecionado: grupoSelecionado,
@@ -618,6 +669,100 @@ th, td {
             linha.remove();
             hideLoading();
             exibirMensagem('sucesso','Tarefa excluída com sucesso.')
+        },
+        error: function(err) {
+            console.error('Erro ao excluir do banco de dados:', err);
+            // Adicione aqui a lógica para lidar com erros, se necessário
+            hideLoading();
+        }
+      });
+  });
+
+    // Adicionar tratamento de evento para o botão de excluir
+    $('#remover_todas_atividades').on('click', function() {
+      window.codigo_maquina = codigo_maquina; 
+      var grupoSelecionado = $('#selectGrupos').val();
+
+      resultado = confirm('Clique "Ok" se realmente deseja excluir TODAS as atividades do grupo ' + grupoSelecionado)
+
+      if(resultado == false){
+        return
+      }
+
+      var linhas = $('#tableTarefas tbody tr');
+
+      if (linhas.length === 0) {
+          // Se não houver linhas, não há nada a fazer
+          return;
+      }
+
+      showLoading();
+
+      // Crie um array para armazenar os IDs das linhas a serem removidas
+      var idsParaRemover = [];
+
+      // Percorra todas as linhas e obtenha os IDs
+      linhas.each(function() {
+          var linha = $(this);
+          var idDaLinha = linha.find('input').val();
+
+          if (idDaLinha !== undefined) {
+              idsParaRemover.push(idDaLinha);
+          }
+
+          // Remova a linha da tabela (não espera pela resposta do backend)
+          linha.remove();
+      });
+
+      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+      $.ajax({
+          type: 'POST',
+          url: 'excluir-tarefa',
+          contentType: 'application/json',
+          data: JSON.stringify({
+                grupoSelecionado: grupoSelecionado,
+                codigo_maquina: codigo_maquina
+        }),
+        success: function(data) {
+            hideLoading();
+            exibirMensagem('sucesso','Tarefa excluída com sucesso.')
+        },
+        error: function(err) {
+            console.error('Erro ao excluir do banco de dados:', err);
+            // Adicione aqui a lógica para lidar com erros, se necessário
+            hideLoading();
+        }
+      });
+  });
+
+  $('.excluirGrupo').on('click', function() {
+
+      var grupoSelecionado = $('#selectGrupos').val();
+
+      resultado = confirm('Clique "Ok" se realmente deseja excluir o grupo ' + grupoSelecionado)
+
+      if(resultado == false){
+        return
+      }
+    
+      console.log(codigo_maquina,grupoSelecionado)
+
+      dadosExcluir = {codigo_maquina:codigo_maquina,
+                      grupoSelecionado:grupoSelecionado}
+
+      showLoading();
+
+      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+      $.ajax({
+          type: 'POST',
+          url: 'excluir-grupo',
+          contentType: 'application/json',
+          data: JSON.stringify(dadosExcluir),
+        success: function(data) {
+            console.log('entrou no success')
+            coletarGrupos(codigo_maquina);
+            hideLoading();
+            exibirMensagem('sucesso','Grupo excluído com sucesso.')
         },
         error: function(err) {
             console.error('Erro ao excluir do banco de dados:', err);

@@ -1599,6 +1599,8 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     """
     Rota para página principal da aplicação, mostrando a tabela principal.
     """
+    setor_selecionado = session.get('setor')
+    identificador_selecionado = session.get('identificador')
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -1684,21 +1686,15 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
         if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
             df['maquina_parada'][i] = False
 
-    print(df)
-
     df_custos = custo_MO()
 
-    print(df_custos)
-
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
-
-    print(df.iloc[:,4:])
 
     df['proporcional'] = df['proporcional'].fillna(0)
 
     list_users = df.values.tolist()
 
-    return render_template('user/index.html', list_users=list_users)
+    return render_template('user/index.html', list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
 
 
 @routes_bp.route('/add_student', methods=['POST', 'GET'])
@@ -1841,14 +1837,16 @@ def add_student():  # Criar ordem de serviço
         return redirect(url_for('routes.open_os'))
 
 
-@routes_bp.route('/edit/<id_ordem>', methods=['POST', 'GET'])
+@routes_bp.route('/edit/<id_ordem>/<identificador_selecionado>/<setor_selecionado>', methods=['POST', 'GET'])
 @login_required
 # Página para edição da ordem de serviço (Informar o andamento da ordem)
-def get_employee(id_ordem):
+def get_employee(id_ordem, identificador_selecionado, setor_selecionado):
 
     """
     Função para criar uma execução para ordem de serviço
     """
+
+    print(setor_selecionado,identificador_selecionado)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -1906,6 +1904,7 @@ def get_employee(id_ordem):
     ph_agua = data1['ph_agua'].values.tolist()[0]
 
     data1 = data1.values.tolist()
+ 
     opcaoAtual = data1[0][4]
 
     lista_opcoes = ['Em execução', 'Finalizada', 'Aguardando material']
@@ -1930,6 +1929,7 @@ def get_employee(id_ordem):
             FROM tb_ordens AS t1
             JOIN tb_maquinas AS t2 ON t1.maquina = t2.codigo
             WHERE t1.id_ordem = {}""".format((int(id_ordem)))
+    
     cur.execute(query)
 
     maquinas = cur.fetchall()
@@ -1939,15 +1939,75 @@ def get_employee(id_ordem):
     else:
         maquinas = maquinas[0]
 
+    query_maquinas_preventivas = f""" SELECT DISTINCT codigo
+                                        FROM tb_ordens AS t1
+                                        JOIN tb_maquinas_preventivas AS t2 ON t1.maquina = t2.codigo
+                                        WHERE t1.id_ordem = {int(id_ordem)} """
+    
+    cur.execute(query_maquinas_preventivas)
+
+    maquinas_preventivas = cur.fetchall()
+
+    preventiva = False
+
+    if len(maquinas_preventivas) > 0:
+
+        preventiva = True
+
     return render_template('user/edit.html', dataabertura=dataabertura, ordem=data1[0], tb_funcionarios=tb_funcionarios,
                            opcoes=opcoes, tipo_manutencao=tipo_manutencao,
                            area_manutencao=area_manutencao, maquinas=maquinas, pvlye=pvlye, pa_plus=pa_plus,
-                           tratamento=tratamento, ph_agua=ph_agua)
+                           tratamento=tratamento, ph_agua=ph_agua,identificador_selecionado=identificador_selecionado,
+                           setor_selecionado=setor_selecionado,preventiva=preventiva)
 
-
-@routes_bp.route('/update/<id_ordem>', methods=['POST'])
+@routes_bp.route('/envio_ok', methods=['POST'])
 @login_required
-def update_student(id_ordem):  # Inserir as edições no banco de dados
+def envio_ok():  # Inserir as edições no banco de dados
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    json_confirmacao = request.get_json()
+    
+    numero_execucao = int(json_confirmacao['numero_execucao'])
+
+    numeroOrdemValue = int(json_confirmacao['numeroOrdemValue'])
+
+    status = 'Finalizada'
+
+    confirmacao = True
+
+    print(status,confirmacao,numero_execucao,numeroOrdemValue)
+
+    query = "SELECT n_execucao FROM tb_confirmacao;"
+
+    cur.execute(query)
+
+    maquinas_preventivas = cur.fetchall()
+
+    for maquina in maquinas_preventivas:
+        print(maquina[0], numeroOrdemValue)
+        if maquina[0] == numeroOrdemValue:
+            print("Entrou")
+            return "Número da Ordem já enviado"
+
+    cur.execute("INSERT INTO tb_confirmacao (n_ordem,n_execucao,confirmacao) VALUES (%s,%s,%s)",(numero_execucao,numeroOrdemValue,confirmacao))
+
+    cur.execute("""
+        UPDATE tb_ordens
+        SET status=%s, confirmacao=%s
+        WHERE n_ordem = %s and id_ordem = %s
+        """, (status, confirmacao , numero_execucao - 1, numeroOrdemValue))
+
+    conn.commit()
+
+    return "Sucesso"
+
+@routes_bp.route('/update/<id_ordem>/<identificador_selecionado>/<setor_selecionado>', methods=['POST'])
+@login_required
+def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Inserir as edições no banco de dados
 
     """
     Rota para editar ordem de serviço
@@ -1993,6 +2053,7 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         n_ordem = request.form['n_ordem']
         descmanutencao = request.form['descmanutencao']
         operador = request.form.getlist('operador')
+        confirmacao = False
         # operador = json.dumps(operador)
 
         matriculas_operadores = []
@@ -2021,6 +2082,23 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
 
         natureza = natureza
 
+        query_maquinas_preventivas = f""" SELECT DISTINCT codigo
+                                        FROM tb_ordens AS t1
+                                        JOIN tb_maquinas_preventivas AS t2 ON t1.maquina = t2.codigo
+                                        WHERE t1.id_ordem = {int(id_ordem)} """
+    
+        cur.execute(query_maquinas_preventivas)
+
+        maquinas_preventivas = cur.fetchall()
+
+
+        if len(maquinas_preventivas) > 0 and status == 'Finalizada':
+            status = 'Aguardando OK'
+            confirmacao = True
+            print("Entrou")
+        else:
+            print("Entrou no Elsee ")
+
         try:
             botao1 = request.form['maquina-parada-1']
 
@@ -2036,8 +2114,9 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         except:
             botao3 = 'false'
 
-        if status == 'Finalizada':
+        if status == 'Finalizada' or status == 'Aguardando OK':
             botao3 = 'true'
+            
 
         print(botao1)
         print(botao2)
@@ -2067,12 +2146,12 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         cur.execute("""
             INSERT INTO tb_ordens ( id, setor,maquina,risco,status,problemaaparente,
                                     datainicio,horainicio,datafim,horafim,id_ordem,n_ordem,
-                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua) 
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua,confirmacao) 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
               datafim, horafim, id_ordem, n_ordem, descmanutencao,
               operador, natureza, tipo_manutencao, area_manutencao,
-              pvlye, pa_plus, tratamento, ph_agua))
+              pvlye, pa_plus, tratamento, ph_agua, confirmacao))
 
         cur.execute("""
             INSERT INTO tb_paradas (id_ordem,n_ordem, parada1, parada2, parada3) 
@@ -2082,8 +2161,7 @@ def update_student(id_ordem):  # Inserir as edições no banco de dados
         flash('OS de número {} atualizada com sucesso!'.format(int(id_ordem)))
         conn.commit()
 
-        return redirect(url_for('routes.get_employee', id_ordem=id_ordem))
-
+        return redirect(url_for('routes.get_employee', id_ordem=id_ordem,identificador_selecionado=identificador_selecionado,setor_selecionado=setor_selecionado))
 
 @routes_bp.route('/editar_ordem/<id_ordem>/<n_ordem>', methods=['POST', 'GET'])
 @login_required
@@ -3121,7 +3199,7 @@ def obter_opcoes_preventivas(codigo_maquina):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = f"""SELECT DISTINCT (grupo) FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}'"""
+    sql = f"""SELECT DISTINCT (grupo) FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' AND excluidos = 'false' """
 
     cur.execute(sql)
     grupos = cur.fetchall()
@@ -3165,7 +3243,7 @@ def tarefasGrupo(codigo_maquina, grupo_selecionado):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    sql = f"""SELECT * FROM tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo_selecionado}'"""
+    sql = f"""SELECT * FROM tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo_selecionado}' and excluidos = 'false' """
 
     cur.execute(sql)
     atividades = cur.fetchall()
@@ -3198,11 +3276,19 @@ def excluirTarefa():
     data = request.get_json()
     codigo_maquina = data['codigo_maquina']
     grupo = data['grupoSelecionado']
-    responsabilidade = data['responsabilidade']
-    atividade = data['atividade']
-    
-    sql_delete = f"""DELETE FROM public.tb_atividades_preventiva WHERE codigo = '{codigo_maquina}' and grupo = '{grupo}'
-                        and responsabilidade = '{responsabilidade}' and atividade = '{atividade}'"""
+    excluidos = True
+    try:
+        idDaLinha = data['idDaLinha']
+    except:
+        idDaLinha = None
+
+    print(data)
+
+    if idDaLinha == '' or idDaLinha == None:
+        sql_delete = f"""UPDATE public.tb_atividades_preventiva SET excluidos = '{excluidos}' WHERE codigo = '{codigo_maquina}' AND grupo = '{grupo}'; """
+
+    else:
+        sql_delete = f"""DELETE FROM public.tb_atividades_preventiva WHERE grupo = '{grupo}' and id = '{idDaLinha}' """
 
     cur.execute(sql_delete)
 
@@ -3266,14 +3352,21 @@ def rota_criar_grupo():
     Rota para receber o nome da máquina e criar o grupo
     """
 
-    codigo_maquina = request.get_json()
+    data = request.get_json()
 
-    criar_grupo(codigo_maquina['codigo_maquina'])
+    nome_grupo = data['nome_grupo']
+    codigo_maquina = data['codigo_maquina']
+
+    print(codigo_maquina,nome_grupo)
+
+    resultado_criar_grupo = criar_grupo(codigo_maquina,nome_grupo)
+
+    if resultado_criar_grupo == "Grupo já existente":
+        return jsonify("Grupo já existente")
 
     return 'sucess'
 
-
-def criar_grupo(codigo_maquina):
+def criar_grupo(codigo_maquina,nome_grupo):
 
     """
     Função para criar grupo de atividades preventivas ao clicar no botão "Criar grupo".
@@ -3285,34 +3378,22 @@ def criar_grupo(codigo_maquina):
 
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = f"""SELECT * FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' ORDER BY grupo"""
+    sql = f"""SELECT * FROM tb_grupos_preventivas WHERE codigo = '{codigo_maquina}' AND grupo = '{nome_grupo}' """
 
     cur.execute(sql)
     grupos = cur.fetchall()
 
     if len(grupos) > 0:
-        grupos_existentes = []
-
-        for grupo in range(len(grupos)):
-
-            numero_grupo = grupos[grupo][2].split()[1]
-            grupos_existentes.append(numero_grupo)
-
-        grupos_inteiro = [int(grupo) for grupo in grupos_existentes]
-        ultimo_grupo = max(grupos_inteiro)
+        return "Grupo já existente"
         
-        numero_proximo_grupo = ultimo_grupo+1
-
-        nome_proximo_grupo = 'Grupo ' + str(numero_proximo_grupo)
-    else:
-        nome_proximo_grupo = 'Grupo 1'
-        
-    sql = f"""INSERT INTO tb_grupos_preventivas (codigo,grupo) VALUES ('{codigo_maquina}','{nome_proximo_grupo}')"""
+    sql = f"""INSERT INTO tb_grupos_preventivas (codigo,grupo) VALUES ('{codigo_maquina}','{nome_grupo}')"""
 
     cur.execute(sql)
 
     conn.commit()
     conn.close()
+
+    return "Sucesso"
 
 
 @routes_bp.route('/receber-tarefas', methods=['POST'])
@@ -3375,8 +3456,10 @@ def adicionar_editar_tarefa(json_tarefas):
             atividade_antiga = json_tarefas['dadosTabela'][tarefa]['atividadeAntiga']
             responsabilidade_antiga = json_tarefas['dadosTabela'][tarefa]['responsabilidadeAntiga']
 
-            sql_edit = f"""UPDATE tb_atividades_preventiva SET atividade = '{atividade_atual}', responsabilidade = '{responsabilidade_atual}' 
-                        WHERE atividade = '{atividade_antiga}' and responsabilidade = '{responsabilidade_antiga}'"""
+            id_unico = int(json_tarefas['dadosTabela'][tarefa]['id_unico'])
+
+            sql_edit = f"""UPDATE tb_atividades_preventiva SET atividade = '{atividade_atual}', responsabilidade = '{responsabilidade_atual}', id = {id_unico}
+                        WHERE atividade = '{atividade_antiga}' and responsabilidade = '{responsabilidade_antiga}' and id = {id_unico} """
             
             cur.execute(sql_edit)
         
@@ -4280,6 +4363,36 @@ def excluir_execucao():
 
     return 'Execução excluída com sucesso'
 
+@routes_bp.route('/excluir-grupo', methods=['POST'])
+@login_required
+def excluir_grupo():
+
+
+    json_grupos_excluidos = request.get_json()
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    excluido = True
+    
+    codigo_maquina = json_grupos_excluidos['codigo_maquina']
+
+    grupoSelecionado = json_grupos_excluidos['grupoSelecionado']
+
+    print(codigo_maquina,grupoSelecionado,excluido)
+
+    cur.execute(""" UPDATE tb_grupos_preventivas
+                    SET excluidos=%s
+                    WHERE codigo = %s AND grupo = %s
+                    """, (excluido, codigo_maquina, grupoSelecionado))
+
+    conn.commit()
+    conn.close()
+
+    flash("Execução excluída com sucesso", category='sucess')
+
+    return 'Execução excluída com sucesso'
 
 @routes_bp.route("/funcionarios", methods=['POST', 'GET'])
 @login_required

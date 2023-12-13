@@ -528,28 +528,28 @@ def gerador_de_semanas_informar_manutencao_diario(grupo,codigo_maquina,maquina,t
     
     return df_vazio
 
-import pandas as pd
-from datetime import timedelta
+# import pandas as pd
+# from datetime import timedelta
 
-# Supondo que você tenha um DataFrame com as informações
-# Substitua isso pelos seus dados reais
-data = {
-    'codigo': [1],
-    'periodicidade': [2],  # Exemplo de periodicidade em meses
-    'data_ultima_manutencao': ['2023-01-01']
-}
+# # Supondo que você tenha um DataFrame com as informações
+# # Substitua isso pelos seus dados reais
+# data = {
+#     'codigo': [1],
+#     'periodicidade': [2],  # Exemplo de periodicidade em meses
+#     'data_ultima_manutencao': ['2023-01-01']
+# }
 
-df = pd.DataFrame(data)
-df['data_ultima_manutencao'] = pd.to_datetime(df['data_ultima_manutencao'])
+# df = pd.DataFrame(data)
+# df['data_ultima_manutencao'] = pd.to_datetime(df['data_ultima_manutencao'])
 
-# Inicializa uma lista para armazenar as datas planejadas
-datas_planejadas = []
+# # Inicializa uma lista para armazenar as datas planejadas
+# datas_planejadas = []
 
-# Define a função para calcular a próxima data ajustada
-def calcular_proxima_data(data_atual, periodicidade_em_dias):
-    dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
-    proxima_data = data_atual + dias_uteis
-    return proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
+# # Define a função para calcular a próxima data ajustada
+# def calcular_proxima_data(data_atual, periodicidade_em_dias):
+#     dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
+#     proxima_data = data_atual + dias_uteis
+#     return proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
 
 def gerar_planejamento_maquinas_preventivas(codigo_maquina,grupo,maquina,tombamento,classificacao,ultima_manutencao,periodicidade):
 

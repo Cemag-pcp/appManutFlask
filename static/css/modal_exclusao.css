@@ -44,7 +44,7 @@
 
     .modal-content3 {
         background-color: #fefefe;
-        margin: 15% auto;
+        margin: 100px auto;
         padding: 20px;
         border: 1px solid #888;
         width: 30%;
@@ -52,7 +52,10 @@
     }
 
     .close {
+        display: flex;
+        justify-content: flex-end;
         color: #aaa;
+        margin-right: 10px;
         float: right;
         font-size: 28px;
         font-weight: bold;
@@ -135,6 +138,5 @@
     @media (max-width:768px){
         .modal-content3 {
             width: 100%;
-            padding-right: 0;
         }
     }

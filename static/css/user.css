@@ -105,7 +105,20 @@ body {
   color: rgba(0, 0, 0, 0.6);
 } 
 
-#salvar_edicao{
+/* #salvar_edicao{
+  width: 100%;
+  height: 40px;
+  background: #fff;
+  outline: none;
+  border: 2px solid rgb(252, 90, 10,0.3);
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 1em;
+  color: black;
+  font-weight: 500;
+} */
+
+#ok_edicao{
   width: 100%;
   height: 40px;
   background: #fff;
@@ -119,6 +132,10 @@ body {
 }
 
 #salvar_edicao:hover {
+  background: rgb(0, 89, 255)
+}
+
+#ok_edicao:hover {
   background: rgb(253, 207, 183);
 }
 
@@ -190,7 +207,7 @@ body {
   transform: translateX(0);
 }
 
-#menu-button {
+.menu-button {
   z-index: 4;
   place-items: center;
   padding: 12px;
@@ -203,7 +220,7 @@ body {
 
 @media (max-width: 600px) {
   /* Ajuste para telas menores (menu oculto) */
-  #menu-button {
+  .menu-button {
     position: relative;
     padding: 6px;
 }
@@ -733,7 +750,7 @@ body {
   overflow-x: hidden;
 }
 
-#dropdown_os a{
+.dropdown_os a{
   max-width: 100%;
   height: auto;
   margin: 0;
@@ -1674,6 +1691,13 @@ input #file{
   outline: none;
 }
 
+.form-preventiva{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+
 #baixar_csv:hover {
   background: rgb(255, 142, 85);;
   outline: none;
@@ -1811,7 +1835,7 @@ input #file{
     border-radius: 4px;
     outline: none;
     padding: 0.5em 0.8em;
-    width: 120px;
+    width: 165px;
     color: #ffffff;
     font-size: 0.8em;
     font-family: 'Poppins', sans-serif;
@@ -1927,3 +1951,29 @@ video {
 
 .tabelaEsquerda { width: 50%; float: left; }
 .tabelaDireita {width: 50%; float: right; }
+
+#botao_add_linha,.salvar_tarefa{
+  padding: 7px;
+  outline: none;
+  cursor: pointer;
+  color: white;
+  border: none;
+  font-weight: 400;
+  font-size: 1em;
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: #47a0ff;
+}
+
+input[type=checkbox]{
+  border: 0px;
+  width: 25px;
+  height: 30px;
+  vertical-align: middle;
+}
+
+.check{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}

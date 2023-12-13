@@ -4,6 +4,7 @@ from flask import Blueprint
 import psycopg2.extras
 import psycopg2 #pip install psycopg2 
 from funcoes import login_required
+import pandas as pd
 
 app = Flask(__name__, static_url_path='/static/css')
 
@@ -28,14 +29,16 @@ def home():  # Página de login
 def login(): # Lógica de login
     
     if 'loggedin' in session:
+        print("If 1")   
     # Usuário já está logado, redirecione para a página inicial
         return redirect(url_for('routes.Index'))
     
     else:
-
+        print("Else 1")   
         msg=''
         
         if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+            print("If 2")   
             email = request.form['username']
             pw = request.form['password']
 
@@ -46,13 +49,19 @@ def login(): # Lógica de login
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute("""SELECT * FROM tb_contas WHERE email = {} AND pw = {}""".format(email, pw))
             account = cur.fetchone()
-            
+
             if account:
                 session['loggedin'] = True
                 session['id'] = account['id']
                 session['username'] = account['email']
-                return redirect(url_for('routes.Index'))
-            else:           
+                session['setor'] = account['setor']
+                session['identificador'] = account['identificador']
+
+                print(session['setor'],session['identificador'])
+
+                return redirect(url_for("routes.Index",email=email))
+            else:   
+                print("Else 2")        
                 flash('Usuário ou Senha inválida')
 
         return render_template('login/login.html', msg = msg)

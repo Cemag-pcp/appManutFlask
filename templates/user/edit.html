@@ -14,7 +14,6 @@
 {% endif %}
 {% endwith %}
 
-
 <div class="col-md-4 offset-md-4">
 <div id = 'edicao' class = 'card card-body'>
   <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
@@ -22,11 +21,11 @@
         <i class="fas fa-arrow-left"></i>
       </a>
     <h5 style="margin-right: 30%; margin-left: 30%;">Execução</h5>
-    <button id="menu-button"><i class="fa-solid fa-bars"></i></button>
+    <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
   </div> 
 <div class="row">
+  <form action="/update/{{ordem[10]}}/{{ identificador_selecionado }}/{{ setor_selecionado }}" method="POST">
     <div class = 'col offset'>
-        <form action="/update/{{ordem[10]}}" method="POST">
           <div class="form-row">
             <div class="form-group">
                 <label for="setor">Setor:</label>
@@ -102,7 +101,7 @@
             <div class="form-row" id="tratamento" style="display: none;">
               <div class="form-group">        
                 <label for="tratamento">Tratamento Eficaz?</label>
-                <select style = 'height: 50px;' class="form-control" name="tratamento" id = "tratamento" value="{{tratamento}}">
+                <select style = 'height: 50px;' class="form-control form-control" name="tratamento" id = "tratamento" value="{{tratamento}}">
                   <option value="" selected disabled hidden></option>
                   <option>Sim</option>
                   <option>Não</option>
@@ -110,7 +109,7 @@
               </div>
               <div class="form-group">
                 <label for="ph-agua">PH Água</label>
-                <input class="form-control" type="text" name="ph-agua" id="ph-agua" value="{{ph_agua}}">
+                <input class="form-control form-control" type="text" name="ph-agua" id="ph-agua" value="{{ph_agua}}">
               </div>
             </div>
             <!-- E.T.E -->
@@ -118,8 +117,8 @@
             <div class="form-row">
                 {% if tipo_manutencao == '' %}
                 <div class="form-group" style="width: 48%;"> 
-                    <label for="operador">Tipo de manutenção</label>
-                    <select style = 'height: 50px;' class="form-control form-control" name="tipo_manutencao">
+                    <label>Tipo de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control1" name="tipo_manutencao" id="tipo_manutencao">
                         <option value="" selected disabled hidden></option>  
                         <option value="Corretiva">Corretiva</option>
                         <option value="Preventiva">Preventiva</option>
@@ -132,16 +131,16 @@
                 </div>
                 {% else %}
                 <div class="form-group">
-                    <label for="operador">Tipo de manutenção</label>
-                    <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control" readonly="readonly">
+                    <label>Tipo de manutenção</label>
+                    <input type='text' name="tipo_manutencao" value="{{ tipo_manutencao }}" class="form-control form-control1" readonly="readonly">
                 </div>
 
                 {% endif %}
 
                 {% if area_manutencao == '' %}
                 <div class="form-group" style="width: 48%;"> 
-                    <label for="operador">Área de manutenção</label>
-                    <select style = 'height: 50px;' class="form-control form-control" name="area_manutencao">
+                    <label>Área de manutenção</label>
+                    <select style = 'height: 50px;' class="form-control form-control1" name="area_manutencao">
                         <option value="" selected disabled hidden></option>  
                         <option value="Predial">Predial</option>
                         <option value="Mecânica">Mecânica</option>
@@ -151,17 +150,17 @@
                 {% else %}
                 <div class="form-group">
                     <label for="area">Área de manutenção</label>
-                    <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control" readonly="readonly">
+                    <input type='text' name="area_manutencao" value="{{ area_manutencao }}" class="form-control form-control1" readonly="readonly">
                 </div>
                 {% endif %}
               </div>
             <div class="form-group">
                 <label for="statusLista">Data e hora</label>
-                <input id="data_edit" type="text" name="datetimes" />
+                <input id="data_edit" class="form-control form-control1" type="text" name="datetimes" />
             </div>
-            <div class="form-group" style="width: 100%;"> 
+            <div class="form-group operadores" style="width: 100%;"> 
                 <label for="operador_label">Operadores</label>
-                <select class="form-control" id="operador" name="operador" multiple required>
+                <select class="form-control form-control" id="operador" name="operador" multiple required>
                     {% for funcionario in tb_funcionarios %}
                         <option>{{funcionario[0]}}</option>
                     {% endfor %}
@@ -171,18 +170,18 @@
     <div class = 'col-md-12 offset'>
             <div class="form-group">
                 <label for="descmanutencao">Observação da manutenção:</label>
-                <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41"></textarea>
+                <textarea id="descmanutencao" class="form-control form-control1" name="descmanutencao" rows="5" cols="41"></textarea>
             </div>
             <div class="form-group">        
                 <label for="statusLista">Status</label>
-                <select class="form-control form-control" id="statusLista" name="statusLista">
+                <select class="form-control form-control1" id="statusLista" name="statusLista">
                     {% for opcao in opcoes %}
                     <option value="{{ opcao }}">{{ opcao }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-row">
-              <div class="toggle" id="maquina-parada-toggle" style="display: none;">
+            <div class="form-row toggles_campos">
+                <div class="toggle" id="maquina-parada-toggle" style="display: none;">
                   <label for="maquina-realmente-parada">Máquina está parada?</label>
                   <label class="switch2">
                     <input type="checkbox" name="maquina-parada-1" id="maquina-parada-1" value="true"> 
@@ -203,17 +202,74 @@
                       <span class="slider round"></span>
                     </label>
                 </div>
+              </div>
+                <div style="display: flex; flex-direction: column;">
+                  <div class="check" id="limpeza-toggle" style="display: none;">
+                    <label for="limpeza">Limpeza no local?</label>
+                    <label class="switch2">
+                      <input type="checkbox" name="limpeza-local" id="limpeza-local" value="true">
+                    </label>
+                </div>  
+                <div class="check" id="protecao-toggle" style="display: none;">
+                  <label for="protec">Proteções?</label>
+                    <label class="switch2">
+                      <input type="checkbox" name="protecao-local" id="protecao-local" value="true">
+                    </label>
+                </div>
+                <div class="check" id="funcionalidade-toggle" style="display: none;">
+                  <label for="funcionalidade">Funcionalidade no equipamento?</label>
+                  <label class="switch2">
+                    <input type="checkbox" name="funcionalidade-equipamento" id="funcionalidade-equipamento" value="true">
+                  </label>
+                </div>
             </div>
             <br>
             <div class="form-group">
             <button id = 'salvar_edicao' type="submit" class="btn btn-primary btn-block">
-                Salvar
+              Salvar
+            </button>
+            <input name="numero_ordem" id="numero_ordem" value="{{ordem[10]}}" style="display: none;">
+            <input id="maquinas_preventivas" value="{{ preventiva }}" style="display: none;">
+            <button id ='ok_edicao' type="submit" class="btn btn-primary btn-block" style="display: none;">
+              Ok
             </button>
             </div>
         </form>
     </div>
 </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        // Função para verificar o estado do botão
+        function verificarEstadoBotao() {
+            var maquinas_preventivas = $('#maquinas_preventivas').val();
+            var status = $('#statusLista').val();
+            var limpeza = $('#limpeza-local').prop('checked');
+            var protecao = $('#protecao-local').prop('checked');
+            var funcionalidade = $('#funcionalidade-equipamento').prop('checked');
+
+            // Habilitar ou desabilitar o botão com base nas condições
+            if (status === 'Finalizada' && limpeza && protecao && funcionalidade && maquinas_preventivas ==='True') {
+                $('#salvar_edicao').prop('disabled', false);
+            } else if(status === 'Finalizada' && maquinas_preventivas ==='False') {
+              $('#salvar_edicao').prop('disabled', false);
+            } else if(status !== 'Finalizada') {
+                $('#salvar_edicao').prop('disabled', false);
+            } else if(status !== 'Finalizada') {
+              $('#salvar_edicao').prop('disabled', false);
+            } else{
+                $('#salvar_edicao').prop('disabled', true);
+            }
+        }
+
+        // Associar a função ao evento de mudança do statusLista e dos checkboxes
+        $('#statusLista, #limpeza-local, #protecao-local, #funcionalidade-equipamento').change(verificarEstadoBotao);
+
+        // Inicialmente, verificar o estado do botão
+        verificarEstadoBotao();
+    });
+</script>
 
 <script>
 $(function() {
@@ -245,46 +301,87 @@ $(function() {
       var selectedStatus = $(this).val();
       var nOrdem = parseInt($('#n_ordem').val());
       var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
+      var maquinas_preventivas = $('#maquinas_preventivas').val();// boolean
+      var identificador_logado = $('.identificador_logado').val();
 
-      updateToggleVisibility(selectedStatus, nOrdem, maquinaValue);
+      updateToggleVisibility(selectedStatus, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
     });
 
     // Update toggle visibility on page load
     var selectedStatus = $('#statusLista').val();
     var nOrdem = parseInt($('#n_ordem').val());
     var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
-    updateToggleVisibility(selectedStatus, nOrdem, maquinaValue);
+    var maquinas_preventivas = $('#maquinas_preventivas').val(); // boolean
+    var identificador_logado = $('.identificador_logado').val();
+    console.log(identificador_logado)
+    updateToggleVisibility(selectedStatus, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
   });
 
-  function updateToggleVisibility(status, nOrdem, maquinaValue) {
-    if (maquinaValue === 'ETE') {
+  function updateToggleVisibility(status, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado) {
+    if (maquinaValue === 'ETE' || identificador_logado === "2") {
       $('#maquina-parada-toggle').hide();
       $('#execucao-maquina-toggle').hide();
       $('#apos-execucao-toggle').hide();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
+    }else if (status === 'Finalizada' && maquinas_preventivas === "True" && nOrdem > 0){
+      $('#maquina-parada-toggle').hide();
+      $('#execucao-maquina-toggle').show();
+      $('#apos-execucao-toggle').hide();
+      $('#limpeza-toggle').show();
+      $('#protecao-toggle').show();
+      $('#funcionalidade-toggle').show();
+    }else if (status === 'Aguardando OK'){
+      $('#maquina-parada-toggle').hide();
+      $('#execucao-maquina-toggle').hide();
+      $('#apos-execucao-toggle').hide();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
+      $('#salvar_edicao').hide();
     }else if (nOrdem === 1 && status === 'Finalizada') {
       $('#maquina-parada-toggle').hide();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').hide();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
     } else if (nOrdem === 2 && status === 'Finalizada') {
       $('#maquina-parada-toggle').hide();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').hide();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
     } else if (status === 'Finalizada') {
       $('#maquina-parada-toggle').hide();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').hide();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
     } else if (nOrdem === 1) {
       $('#maquina-parada-toggle').show();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').show();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
     } else if (nOrdem === 2) {
       $('#maquina-parada-toggle').show();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').show();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
     } else {
       $('#maquina-parada-toggle').show();
       $('#execucao-maquina-toggle').show();
       $('#apos-execucao-toggle').show();
+      $('#limpeza-toggle').hide();
+      $('#protecao-toggle').hide();
+      $('#funcionalidade-toggle').hide();
     }
   }
 
