@@ -98,16 +98,36 @@ th, td {
             </tr>
           </thead>
           <tbody>
-            {% for grupos in df_grupos_notna %}
-              <tr>
-                <td></td>
+            {% for grupos in df_final_list %}
+              <tr class="clickable-row">
+                <td><i class="fa-solid fa-caret-right" style="font-size: 20px;"></i> </td>
+                <td>{{grupos[0]}}</td>
                 <td>{{grupos[1]}}</td>
                 <td>{{grupos[2]}}</td>
                 <td>{{grupos[3]}}</td>
                 <td>{{grupos[4]}}</td>
-                <td>{{grupos[6]}}</td>
               </tr>
-              {% endfor %}
+              <tr class="expandable-row">
+                <td colspan="6" style="padding: 0;">
+                  <table style="width: 100%;">
+                    <thead>
+                      <tr style="background-color: #626262; color: white;">
+                        <th>Atividades</th>
+                        <th>Responsabilidade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for atividade in grupos[5] %}
+                        <tr style="background-color: #aeaeae;color: white; font-weight: bold;">
+                          <td>{{atividade}}</td>
+                          <td>{{grupos[6]}}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

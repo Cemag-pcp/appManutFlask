@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Verifica se a rota atual contém "/edit/"
     var isEditRoute = window.location.pathname.includes("/edit/");
+    var semanas_52 = window.location.pathname.includes("/52semanas");
 
     if (identificadorLogado === '2') {
         if (!isEditRoute) {
@@ -62,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Chama a função applyFilters() apenas se não estiver na rota "/edit/"
-    if (!isEditRoute) {
+    if (!isEditRoute || !semanas_52) {
         applyFilters();
     }
 });

@@ -3143,7 +3143,11 @@ def plan_52semanas():  # Tabela com as 52 semanas
 
     s = (""" select * from tb_grupos_preventivas where excluidos = 'False'""")
 
+    query = (""" SELECT codigo,grupo,atividade,responsabilidade FROM tb_atividades_preventiva""")
+
     df_grupos = pd.read_sql_query(s, conn)
+
+    df_atividades = pd.read_sql_query(query, conn)
     
     df_grupos_nan = df_grupos[df_grupos.isna().any(axis=1)]
     df_grupos_nan['proxima_manutencao'] = 'À decidir'
@@ -3162,9 +3166,24 @@ def plan_52semanas():  # Tabela com as 52 semanas
     df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].astype(str)
     df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].apply(lambda x: x.replace(" 00:00:00",""))
 
-    df_grupos_notna = df_grupos_notna.values.tolist()
-    
-    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas, df_grupos_notna=df_grupos_notna)
+    # Merge das tabelas
+    df_merged = pd.merge(df_grupos_notna, df_atividades, on=['codigo', 'grupo'], how='left')
+
+    # Groupby e criar nova coluna 'atividade' com listas de atividades
+    df_grouped = df_merged.groupby(['codigo', 'grupo']).apply(lambda x: pd.Series({
+        'ult_manutencao': x['ult_manutencao'].iloc[0],
+        'periodicidade': x['periodicidade'].iloc[0],
+        'proxima_manutencao': x['proxima_manutencao'].iloc[0],
+        'atividade': x['atividade'].fillna('').tolist(),
+        'responsabilidade': x['responsabilidade'].fillna('').iloc[0],
+    })).reset_index()
+
+    # Resetar o índice
+    df_grouped.reset_index(drop=True, inplace=True)
+
+    df_final_list = df_grouped.values.tolist()
+
+    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas, df_final_list=df_final_list)
 
 
 @routes_bp.route('/preventivas', methods=['GET'])
@@ -3177,8 +3196,6 @@ def preventivas():
 
     # Obter o código da máquina a partir dos parâmetros da consulta
     codigo_maquina = request.args.get('codigo_maquina')
-
-    print(codigo_maquina)
 
     # Use o código da máquina para gerar as opções dinamicamente
     # Substitua esta lógica pela lógica real que você precisa
@@ -3282,8 +3299,6 @@ def excluirTarefa():
     except:
         idDaLinha = None
 
-    print(data)
-
     if idDaLinha == '' or idDaLinha == None:
         sql_delete = f"""UPDATE public.tb_atividades_preventiva SET excluidos = '{excluidos}' WHERE codigo = '{codigo_maquina}' AND grupo = '{grupo}'; """
 
@@ -3357,8 +3372,6 @@ def rota_criar_grupo():
     nome_grupo = data['nome_grupo']
     codigo_maquina = data['codigo_maquina']
 
-    print(codigo_maquina,nome_grupo)
-
     resultado_criar_grupo = criar_grupo(codigo_maquina,nome_grupo)
 
     if resultado_criar_grupo == "Grupo já existente":
@@ -3409,8 +3422,6 @@ def receber_tarefas():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     json_tarefas = request.get_json()
-
-    print(json_tarefas)
 
     periodicidade = int(json_tarefas['parametros'][0]['periodicidade_grupo'])
     ultima_manutencao = json_tarefas['parametros'][0]['ultima_manutencao']
