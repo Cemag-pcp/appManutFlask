@@ -14,12 +14,15 @@
 {% endif %}
 {% endwith %}
 
-
-<div id='form_filtros_graficos'>
+<div class="titulo_voltar_menu">
     <a href="#" onclick="window.history.back();" class="botao-voltar">
         <i class="fas fa-arrow-left"></i>
     </a>
     <h4>Gráficos</h4>
+    <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div id='form_filtros_graficos'>
+    
     <form id="formulario" action="{{ url_for('routes.grafico') }}" method="POST">
 
         <label for="filtro_setor">Setor:</label>
@@ -73,7 +76,6 @@
 
         <button id="filtra_grafico" type="submit">Filtrar</button>
     </form>
-    <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
 </div>
 <div class="cardBox">
     <div class='card'>

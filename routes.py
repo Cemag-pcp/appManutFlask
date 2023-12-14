@@ -3143,7 +3143,7 @@ def plan_52semanas():  # Tabela com as 52 semanas
 
     s = (""" select * from tb_grupos_preventivas where excluidos = 'False'""")
 
-    query = (""" SELECT codigo,grupo,atividade,responsabilidade FROM tb_atividades_preventiva""")
+    query = (""" SELECT codigo,grupo,atividade,responsabilidade FROM tb_atividades_preventiva WHERE excluidos = 'False';""")
 
     df_grupos = pd.read_sql_query(s, conn)
 
@@ -3175,11 +3175,13 @@ def plan_52semanas():  # Tabela com as 52 semanas
         'periodicidade': x['periodicidade'].iloc[0],
         'proxima_manutencao': x['proxima_manutencao'].iloc[0],
         'atividade': x['atividade'].fillna('').tolist(),
-        'responsabilidade': x['responsabilidade'].fillna('').iloc[0],
+        'responsabilidade': x['responsabilidade'].fillna('').tolist(),
     })).reset_index()
 
     # Resetar o índice
     df_grouped.reset_index(drop=True, inplace=True)
+
+    print(df_grouped)
 
     df_final_list = df_grouped.values.tolist()
 
@@ -3776,8 +3778,8 @@ def timeline_preventiva(maquina):
     df = pd.read_sql_query(s, conn)
     df['maquina'] = df['maquina'].str.strip()
 
-    df = df[df['maquina'] == maquina]
-    df = df[df['natureza'] == 'Planejada'].reset_index(drop=True)
+    df = df[df['maquina'] == maquina].reset_index(drop=True)
+    # df = df[df['natureza'] == 'Planejada'].reset_index(drop=True)
 
     df[['dataabertura', 'id_ordem']]
 
