@@ -283,8 +283,14 @@ body {
 #titulo {
   display: flex;
   flex-wrap: nowrap;
-  margin-right: -15px;
-  margin-left: -15px;
+}
+
+.titulo_voltar_menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 50px 10% 0px 10%;
+  background-color: rgba(255, 255, 255, 0.4)
 }
 
 #tabela .board{
@@ -1094,10 +1100,8 @@ input #file{
   width: 100%;
   height: 100px;
   align-items: center;
-  padding-left: 10%;
   margin-bottom: 80px;
   background-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
 }
 
 #form_filtros_graficos #filtra_grafico{
@@ -1394,9 +1398,7 @@ input #file{
     width: 100%;
     height: auto;
     margin-bottom: 30px;
-    margin-top: 60px;
-    background-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+    background-color: rgba(255, 255, 255, 0.4);
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
@@ -1806,11 +1808,14 @@ input #file{
     align-content: center;
     justify-items: center;
     grid-template-columns: 1fr 1fr;
-    border: solid 2px #007bff;
 }
   
   .custom-table .colunaOs{
     max-width:100%; 
+  }
+
+  #linhas_52semanas{
+    font-size: 11px;
   }
 
   .custom-table .colunaExec{
@@ -1976,4 +1981,8 @@ input[type=checkbox]{
   display: flex;
   justify-content: space-between;
   width: 100%;
+}
+
+.clickable-row{
+  cursor: pointer;
 }

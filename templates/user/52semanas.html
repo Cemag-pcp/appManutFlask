@@ -38,8 +38,8 @@ th, td {
         <h1 class="visao">Planejamento</h1>
         <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
       </div>
-      <table id="table2" class="table table-striped">
-        <thead>
+      <table id="table2" class="table custom-table table-striped">
+        <thead class="hide-thead">
           <tr>
             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
@@ -55,7 +55,7 @@ th, td {
         <tbody>
           {% for row in data %}
             <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
-                <td>
+                <td style="width: 50px;">
                   <div class="dropdown">
                       <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                           <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
@@ -73,21 +73,27 @@ th, td {
                       </div>
                   </div>
                 </td>                
-                {% for item in row %}
-                <td>{{ item }}</td>
-                {% endfor %}
+                <td data-title="Código">{{ row[0] }}</td>
+                <td data-title="Tombamento">{{ row[1] }}</td>
+                <td data-title="Setor">{{ row[2] }}</td>
+                <td data-title="Descrição">{{ row[3] }}</td>
+                <td data-title="Classificação">{{ row[4] }}</td>
+                <td data-title="Periodicidade (Dias)">{{ row[5] }}</td>
+                <td data-title="Última manutenção">{{ row[6] }}</td>
+                <td data-title="Próxima manutenção">{{ row[7] }}</td>
             </tr>
             {% endfor %}
         </tbody>
       </table>
+    </div>
     </div>
     <div class="row justify-content-md-center">
       <div class = "board2" style="overflow-x: auto;">
         <div id = "titulo" class="row">
           <h1 class="visao">Planejamento por grupos de atividade</h1>
         </div>
-        <table id="table3" class="table table-striped">
-          <thead>
+        <table id="table3" class="table custom-table table-striped">
+          <thead class="hide-thead">
             <tr>
               <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
               <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
@@ -98,16 +104,56 @@ th, td {
             </tr>
           </thead>
           <tbody>
-            {% for grupos in df_grupos_notna %}
-              <tr>
-                <td></td>
-                <td>{{grupos[1]}}</td>
-                <td>{{grupos[2]}}</td>
-                <td>{{grupos[3]}}</td>
-                <td>{{grupos[4]}}</td>
-                <td>{{grupos[6]}}</td>
+            {% for grupos in df_final_list %}
+              <tr class="clickable-row">
+                <td><i class="fa-solid fa-caret-right" style="font-size: 20px;"></i> </td>
+                <td data-title="Código">{{grupos[0]}}</td>
+                <td data-title="Grupo">{{grupos[1]}}</td>
+                <td data-title="Última manutenção">{{grupos[2]}}</td>
+                <td data-title="Periodicidade (meses)">{{grupos[3]}}</td>
+                <td data-title="Próxima manutenção">{{grupos[4]}}</td>
               </tr>
-              {% endfor %}
+              <tr class="expandable-row">
+                {% if grupos[5] == [''] %}
+                <td colspan="6" style="padding: 0;">
+                  <table style="width: 100%;">
+                    <thead>
+                      <tr style="background-color: #626262; color: white;">
+                        <th>Atividades</th>
+                        <th>Responsabilidade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: #aeaeae;color: white; font-weight: bold;">
+                            <td><i class="fa-solid fa-ban" style="color: #ff0000;"></i></td>
+                            <td><i class="fa-solid fa-ban" style="color: #ff0000;"></i></td>
+                        </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+                {% else %}
+                <td colspan="6" style="padding: 0;">
+                  <table style="width: 100%;">
+                    <thead>
+                      <tr style="background-color: #626262; color: white;">
+                        <th>Atividades</th>
+                        <th>Responsabilidade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for i in range(grupos[5]|length) %}
+                          <tr style="background-color: #aeaeae;color: white; font-weight: bold;">
+                              <td>{{ grupos[5][i] }}</td>
+                              <td>{{ grupos[6][i] }}</td>
+                          </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              {% endif %}
+            {% endfor %}
           </tbody>
         </table>
       </div>

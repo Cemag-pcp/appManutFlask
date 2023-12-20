@@ -1,13 +1,10 @@
 .botao-voltar {
-    position: absolute;
     display: inline-flex;
     justify-content: center;
     color: #333;
     z-index: 4;
     background-color: #fff;
     place-items: center;
-    left: 5%;
-    transform: translate(0%,0%);
     padding: 12px;
     font-size: 24px;
     border: solid 1px black;
@@ -19,16 +16,12 @@
     @media(max-width:600px){
     
         .botao-voltar {
-            position: fixed;
-            top: 10px;
             display: inline-flex;
             justify-content: center;
             color: #333;
             z-index: 4;
             background-color: #fff;
             place-items: center;
-            left: 5%;
-            transform: translate(0%,25%);
             padding: 9px;
             font-size: 24px;
             border: solid 1px black;
