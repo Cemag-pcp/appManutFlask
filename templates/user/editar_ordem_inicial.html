@@ -17,11 +17,11 @@
 <div id = 'edicao' class = 'card card-body'>
     <div class="row">
         <div class = 'col offset'>
-            <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
+            <div id = 'abertura_titulo' style="display: flex;justify-content: space-between;align-items: center; margin-bottom: 25px;">
                 <a href="#" onclick="window.history.back();" class="botao-voltar">
                   <i class="fas fa-arrow-left"></i>
                 </a>
-              <h3 style="font-size: 20px;margin-left: 25%;margin-right: 10%;">Editar ordem inicial</h3>
+              <h3 style="font-size: 20px;">Editar ordem inicial</h3>
               <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
             </div> 
             <form action="/guardar_ordem_editada/{{ordem[10]}}/{{n_ordem}}" method="POST">

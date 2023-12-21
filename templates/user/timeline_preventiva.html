@@ -8,14 +8,15 @@
 </style>
 
 <div id = 'linha_tempo'class="card card-body">
-  <div class="row justify-content-md-center">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
     <a href="#" onclick="window.history.back();" class="botao-voltar">
       <i class="fas fa-arrow-left"></i>
     </a>
+    <h3 style="font-size: 20px;">Histórico de preventivas da máquina: {{ maquina }}</h3>
     <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
-    <div class="row"><h3>Histórico de preventivas da máquina: {{ maquina }}</h3></div>
-      <table id="example" class="table table-striped table-bordered">
-        <thead>
+  </div>
+      <table id="example" class="table custom-table table-striped">
+        <thead class="hide-thead">
           <tr style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             <td></td>
             <td>No Ordem</td>
@@ -44,7 +45,7 @@
               </div>
             </td> 
             
-            <td>{{ data[10] }}</td>
+            <td data-title="N° Ordem">{{ data[10] }}</td>
             
             {% if data[4].strip() == 'Finalizada' %}
             <td id="status_os_finalizadas_timeline">{{ data[4] }}</td>
@@ -56,9 +57,9 @@
             <td id="status_os_aguardando_timeline">{{ data[4] }}</td>
             {% endif %} 
 
-            <td>{{data[12]}}</td>
-            <td>{{data[8]}}</td>
-            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{data[14]}}</td>
+            <td data-title="N° Ordem">{{data[12]}}</td>
+            <td data-title="Última atualização">{{data[8]}}</td>
+            <td data-title="Operadores" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{data[14]}}</td>
 
         </tr>
         {% endfor %}

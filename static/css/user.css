@@ -75,6 +75,7 @@ body {
 .form-row {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
 }
 
 .form-modal{
