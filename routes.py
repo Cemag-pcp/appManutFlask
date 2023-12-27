@@ -4072,93 +4072,93 @@ def editar_maquina_preventiva(codigo):
 
         print(lista)
 
-        # if codigo_novo != codigo_inicial:
+        if codigo_novo != codigo_inicial:
 
-        #     query = """SELECT * FROM tb_planejamento_anual WHERE codigo = '{}'""".format(
-        #         codigo_novo)
-        #     data = pd.read_sql_query(query, conn)
+            query = """SELECT * FROM tb_planejamento_anual WHERE codigo = '{}'""".format(
+                codigo_novo)
+            data = pd.read_sql_query(query, conn)
 
-        #     if len(data) > 0:
-        #         flash("Código já cadastrado.", category='error')
-        #         codigo = codigo_novo
-        #         conn.close()
+            if len(data) > 0:
+                flash("Código já cadastrado.", category='error')
+                codigo = codigo_novo
+                conn.close()
 
-        #         return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
-        #                                setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
-        #                                manutencao_inicial=manutencao_inicial)
+                return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+                                       setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
+                                       manutencao_inicial=manutencao_inicial)
 
-        #     else:
-        #         """Query para editar a linha do codigo escolhido"""
+            else:
+                """Query para editar a linha do codigo escolhido"""
 
-        #         cur.execute("""
-        #             UPDATE tb_ordens
-        #             SET maquina=%s, setor=%s
-        #             WHERE maquina = %s
-        #             """, (codigo_novo, setor, codigo_inicial))
+                cur.execute("""
+                    UPDATE tb_ordens
+                    SET maquina=%s, setor=%s
+                    WHERE maquina = %s
+                    """, (codigo_novo, setor, codigo_inicial))
 
-        #         cur.execute("""
-        #             DELETE FROM tb_planejamento_anual
-        #             WHERE codigo = '{}'
-        #             """.format(codigo_inicial))
+                cur.execute("""
+                    DELETE FROM tb_planejamento_anual
+                    WHERE codigo = '{}'
+                    """.format(codigo_inicial))
 
-        #         sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-        #             ','.join(['%s'] * len(lista)))
-        #         cur.execute(sql_insert, lista)
+                sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+                    ','.join(['%s'] * len(lista)))
+                cur.execute(sql_insert, lista)
 
-        #         try:
-        #             cur.execute("""
-        #                 UPDATE tb_maquinas
-        #                 SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
-        #                 WHERE codigo = %s
-        #                 """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
+                try:
+                    cur.execute("""
+                        UPDATE tb_maquinas
+                        SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
+                        WHERE codigo = %s
+                        """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
 
-        #             cur.execute("""
-        #                 UPDATE tb_ordens
-        #                 SET maquina=%s, setor=%s
-        #                 WHERE maquina = %s
-        #                 """, (codigo_novo, setor, codigo_inicial))
+                    cur.execute("""
+                        UPDATE tb_ordens
+                        SET maquina=%s, setor=%s
+                        WHERE maquina = %s
+                        """, (codigo_novo, setor, codigo_inicial))
 
-        #         except:
-        #             pass
+                except:
+                    pass
 
-        #         conn.commit()
-        #         conn.close()
+                conn.commit()
+                conn.close()
 
-        #     return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
-        #                            setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
-        #                            manutencao_inicial=manutencao_inicial, apelido=apelido, periodicidade=periodicidade)
+            return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+                                   setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
+                                   manutencao_inicial=manutencao_inicial, apelido=apelido, periodicidade=periodicidade)
 
-        # else:
+        else:
 
-        #     """Query para editar a linha do codigo escolhido"""
+            """Query para editar a linha do codigo escolhido"""
 
-        #     cur.execute("""
-        #         DELETE FROM tb_planejamento_anual
-        #         WHERE codigo = '{}'
-        #         """.format(codigo_inicial))
+            cur.execute("""
+                DELETE FROM tb_planejamento_anual
+                WHERE codigo = '{}'
+                """.format(codigo_inicial))
 
-        #     sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-        #         ','.join(['%s'] * len(lista)))
-        #     cur.execute(sql_insert, lista)
+            sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+                ','.join(['%s'] * len(lista)))
+            cur.execute(sql_insert, lista)
 
-        #     try:
-        #         cur.execute("""
-        #             UPDATE tb_maquinas
-        #             SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
-        #             WHERE codigo = %s
-        #             """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
+            try:
+                cur.execute("""
+                    UPDATE tb_maquinas
+                    SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
+                    WHERE codigo = %s
+                    """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
 
-        #         cur.execute("""
-        #             UPDATE tb_ordens
-        #             SET maquina=%s, setor=%s
-        #             WHERE maquina = %s
-        #             """, (codigo_novo, setor, codigo_inicial))
+                cur.execute("""
+                    UPDATE tb_ordens
+                    SET maquina=%s, setor=%s
+                    WHERE maquina = %s
+                    """, (codigo_novo, setor, codigo_inicial))
 
-        #     except:
-        #         pass
+            except:
+                pass
 
-        # conn.commit()
-        # conn.close()
+        conn.commit()
+        conn.close()
 
         return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
                                setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
@@ -4191,7 +4191,6 @@ def editar_maquina_preventiva(codigo):
     criticidade = data[0][4]
     periodicidade = data[0][5]
     manutencao_inicial = data[0][6]
-    print(manutencao_inicial)
     apelido = data[0][7]
     # manutencao_inicial = datetime.strptime(
     #     manutencao_inicial, "%d/%m/%Y").strftime("%Y-%m-%d")
