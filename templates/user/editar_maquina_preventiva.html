@@ -66,15 +66,16 @@
 
           <div class="form-group">  
 
-            <label for="periodicidade">Periodicidade</label>              
-            <select style = 'height: 38px;' class="form-control form-control" id="periodicidade" name="periodicidade" required>
+            <label for="periodicidade">Periodicidade (Dias)</label>              
+            <!-- <select style = 'height: 38px;' class="form-control form-control" id="periodicidade" name="periodicidade" required>
               <option value="{{periodicidade}}">{{periodicidade}}</option>
               <option>Semanal</option>
               <option>Quinzenal</option>
               <option>Mensal</option>
               <option>Bimestral</option>
               <option>Semestral</option> 
-            </select>
+            </select> -->
+            <input type="number" style = 'height: 38px;' class="form-control form-control" id="periodicidade" name="periodicidade" value="{{periodicidade}}" required>
             
           </div>
           
