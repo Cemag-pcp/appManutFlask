@@ -4068,9 +4068,6 @@ def editar_maquina_preventiva(codigo):
         print(df)
 
         lista = df.values.tolist()
-        lista = lista[0]
-
-        print(lista)
 
         if codigo_novo != codigo_inicial:
 
@@ -4101,9 +4098,14 @@ def editar_maquina_preventiva(codigo):
                     WHERE codigo = '{}'
                     """.format(codigo_inicial))
 
-                sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-                    ','.join(['%s'] * len(lista)))
-                cur.execute(sql_insert, lista)
+                # sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+                #     ','.join(['%s'] * len(lista)))
+                # cur.execute(sql_insert, lista)
+
+                for row in lista:
+                    placeholders = ', '.join(['%s'] * len(row))
+                    sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(placeholders)
+                    cur.execute(sql_insert, row)
 
                 try:
                     cur.execute("""
@@ -4137,9 +4139,14 @@ def editar_maquina_preventiva(codigo):
                 WHERE codigo = '{}'
                 """.format(codigo_inicial))
 
-            sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-                ','.join(['%s'] * len(lista)))
-            cur.execute(sql_insert, lista)
+            # sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+            #     ','.join(['%s'] * len(lista)))
+            # cur.execute(sql_insert, lista)
+
+            for row in lista:
+                placeholders = ', '.join(['%s'] * len(row))
+                sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(placeholders)
+                cur.execute(sql_insert, row)
 
             try:
                 cur.execute("""
