@@ -638,11 +638,15 @@ th, td {
         processData: false,
         contentType: false,
         success: function(data) {
-            closeModalInserirArquivo();
-
-            var grupo = $('#selectGrupos').val();
-            salvarTarefas(grupo);
-
+            if(data === 'Colunas do arquivo não correspondem ao modelo'){
+              alert('Colunas do arquivo não correspondem ao modelo')
+            } else if(data === 'Código de máquina inválido'){
+              alert('Código de máquina inválido')
+            }  else {
+              closeModalInserirArquivo();
+              var grupo = $('#selectGrupos').val();
+              salvarTarefas(grupo);
+            }
         },
         error: function(error) {
             console.error('Error:', error);

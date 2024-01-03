@@ -3156,6 +3156,8 @@ def plan_52semanas():  # Tabela com as 52 semanas
 
     df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
     
+    print(df_grupos_notna)
+
     # df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'], format="%Y-%m-%d")
 
     df_grupos_notna = pd.concat([df_grupos_notna,df_grupos_nan])
@@ -3180,8 +3182,6 @@ def plan_52semanas():  # Tabela com as 52 semanas
 
     # Resetar o índice
     df_grouped.reset_index(drop=True, inplace=True)
-
-    print(df_grouped)
 
     df_final_list = df_grouped.values.tolist()
 
@@ -3233,17 +3233,39 @@ def obter_opcoes_preventivas(codigo_maquina):
 @login_required
 def atividadesGrupo():
     # Obtenha os parâmetros da consulta
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     codigo_maquina = request.args.get('codigo_maquina')
     grupo_selecionado = request.args.get('grupo')
 
-    # Use os parâmetros para carregar os dados associados
-    dados_associados,parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)    
-    
-    try:
-        proxima_data = proxima_data_util(parametros[0][0], parametros[0][1]*30)
-    except:
-        proxima_data = ''
+    sql = 'SELECT ult_manutencao,periodicidade FROM tb_grupos_preventivas WHERE codigo = %s and grupo = %s'
 
+    cur.execute(sql,(codigo_maquina,grupo_selecionado))
+    data = cur.fetchall()
+
+    print(data)
+   # Use os parâmetros para carregar os dados associados
+    dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)  
+    nova_data = data[0][0].strftime("%Y-%m-%d")
+    periodicidade = data[0][1]
+    df = pd.DataFrame({'data': [nova_data],
+                    'periodicidade': [periodicidade]})
+    df.index = [0]  # Adiciona um índice à primeira linha
+
+    df['data'] = pd.to_datetime(df['data'])
+
+    print(df)
+
+    try:
+        df['proxima_manutencao'] = df.apply(lambda row: calcular_proxima_data(row['data'], int(row['periodicidade'])*30), axis=1)
+        proxima_data = df['proxima_manutencao'][0]
+    except Exception as e:
+        print(f"Erro ao calcular próxima manutenção: {e}")
+        proxima_data = None
+
+    
     parametros[0].append(formatar_data(proxima_data))
 
     # Retorne os dados como JSON
@@ -3509,13 +3531,29 @@ def receber_upload():
     grupo_selecionado = request.form['grupoSelecionado']
     codigo_maquina = request.form['codigo_maquina']   
 
+    print(file)
+
+    print(codigo_maquina)
+
     # Salvar o arquivo no servidor (opcional)
-    file.save('uploads_atividade/' + file.filename)
+    # file.save('uploads_atividade/' + file.filename)
 
-    file = r"uploads_atividade/" + file.filename
+    # file = r"uploads_atividade/" + file.filename
 
-    # Processar o arquivo com Pandas
-    df = pd.read_csv(file, sep=";")
+    try:
+        df = pd.read_csv(file, sep=";", encoding='ISO-8859-1')
+    except pd.errors.ParserError:
+        df = pd.read_excel(file)
+
+    # Remover caracteres especiais do cabeçalho das colunas
+    df.columns = df.columns.str.replace('ï»¿', '')
+
+    colunas_esperadas = ['codigo_maquina', 'responsabilidade', 'atividade']  # Substitua com as colunas reais
+    print(df.columns)
+
+    # Verificar se as colunas do DataFrame coincidem com as colunas esperadas
+    if set(df.columns) != set(colunas_esperadas):
+        return 'Colunas do arquivo não correspondem ao modelo'
 
     df['grupo'] = grupo_selecionado
 
@@ -3525,23 +3563,25 @@ def receber_upload():
 
     for row in df_list:       
 
-        codigo_maquina = row[0]
+        codigo_maquina_grupo = row[0]
+        print(codigo_maquina)
+        print(codigo_maquina_grupo)
+        if codigo_maquina != codigo_maquina_grupo:
+            return 'Código de máquina inválido'
         grupo = row[1]
         responsabilidade = row[2]
         atividade = row[3]
 
         sql_insert = f"""INSERT INTO tb_atividades_preventiva (codigo,grupo,responsabilidade,atividade)
-                        VALUES ('{codigo_maquina}','{grupo}','{responsabilidade}','{atividade}')"""
+                        VALUES ('{codigo_maquina_grupo}','{grupo}','{responsabilidade}','{atividade}')"""
 
         cur.execute(sql_insert)
 
     conn.commit()
     conn.close()
 
-    os.remove(file)
+    # os.remove(file)
     
-
-
     return 'sucess'
 
 
@@ -3601,6 +3641,8 @@ def cadastro_preventiva():
 
             lista = df.values.tolist()
             # lista = lista[0]
+
+            print(lista)
 
             s = ("""
                 SELECT * FROM tb_planejamento_anual

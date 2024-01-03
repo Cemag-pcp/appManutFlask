@@ -546,10 +546,12 @@ def gerador_de_semanas_informar_manutencao_diario(grupo,codigo_maquina,maquina,t
 # datas_planejadas = []
 
 # Define a função para calcular a próxima data ajustada
+
 def calcular_proxima_data(data_atual, periodicidade_em_dias):
     dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
     proxima_data = data_atual + dias_uteis
-    return proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
+    proxima_data = proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
+    return proxima_data.strftime("%Y-%m-%d") 
 
 def gerar_planejamento_maquinas_preventivas(codigo_maquina,grupo,maquina,tombamento,classificacao,ultima_manutencao,periodicidade):
 
