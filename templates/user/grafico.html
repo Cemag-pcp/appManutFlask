@@ -1,5 +1,5 @@
 {% extends "user/layout.html" %}
-{% block body %}
+{% block containerFluid %}
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}
@@ -14,13 +14,10 @@
 {% endif %}
 {% endwith %}
 
-<div class="titulo_voltar_menu">
-    <a href="#" onclick="window.history.back();" class="botao-voltar">
-        <i class="fas fa-arrow-left"></i>
-    </a>
-    <h4>Gráficos</h4>
-    <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
-</div>
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+
 <div id='form_filtros_graficos'>
     
     <form id="formulario" action="{{ url_for('routes.grafico') }}" method="POST">
@@ -37,15 +34,6 @@
             {% endfor %}
 
         </select>
-
-        <!-- <label for="area_manutencao">Área de Manutenção:</label>
-    <select class="select2"id="area_manutencao" name="area_manutencao">
-        <option value="">Todos</option>
-        <option value="{{area_manutencao}}" selected disabled hidden>{{area_manutencao}}</option>
-        <option value="Predial" >Predial</option>
-        <option value="Mecânica" >Mecânica</option>
-        <option value="Elétrica" >Elétrica</option>
-    </select> -->
 
         <label for="data_filtro">Mês:</label>
         <select id="data_filtro" name="data_filtro" multiple>
@@ -77,41 +65,81 @@
         <button id="filtra_grafico" type="submit">Filtrar</button>
     </form>
 </div>
-<div class="cardBox">
-    <div class='card'>
-        <div>
-            <h5 class="card-title">Em Execução</h5>
-            <p class="card-text">{{lista_qt[3]}}</p>
-        </div>
-        <div class="iconBx">
-            <i class="fa-solid fa-bars-progress"></i>
-        </div>
-    </div>
-    <div class='card'>
-        <div>
-            <h5 class="card-title"></i>Em Espera</h5>
-            <p class="card-text">{{lista_qt[0]}}</p>
-        </div>
-        <div class="iconBx">
-            <i class="fa-solid fa-lock-open"></i>
-        </div>
-    </div>
-    <div class='card'>
-        <div>
-            <h5 class="card-title"></i>Finalizadas</h5>
-            <p class="card-text">{{lista_qt[2]}}</p>
-        </div>
-        <div class="iconBx">
-            <i class="fa-sharp fa-solid fa-square-check"></i>
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Cards</h1>
+</div>
+
+<div class="row">
+    <!-- Earnings (Monthly) Card Example -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Em Execução</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[3]}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class='card'>
-        <div>
-            <h5 class="card-title">Aguardando material</h5>
-            <p class="card-text">{{lista_qt[1]}}</p>
+
+    <!-- Earnings (Monthly) Card Example -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Em Espera</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[0]}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="iconBx">
-            <i class="fa-solid fa-spinner"></i>
+    </div>
+
+    <!-- Earnings (Monthly) Card Example -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Finalizada</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[2]}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-secondary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                            Aguardando Material</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[1]}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -421,29 +449,25 @@
                 </table>
             </div>
         </div>
-        <div class="cardBox2">
-            <div class='card'>
-                <div>
-                    <h5 class="card-title">Disponibilidade Geral</h5>
-                    <p class="card-text">{{disponibilidade_geral_setor}}%</p>
-                </div>
-                <div class="iconBx">
-                    <i class="fa-solid fa-gear"></i>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Disponibilidade Geral</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{disponibilidade_geral_setor}}%</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- <div class='card'>
-                <div>
-                    <h5 class="card-title"></i>Disponibilidade das Máquinas</h5>
-                    <p class="card-text">{{disponibilidade_geral_maquina}}%</p>
-                </div>
-                <div class="iconBx">
-                    <i class="fa-solid fa-gear"></i>
-                </div>
-            </div> -->
         </div>
     </div>
 </div>
-
+</div>
 
 <script>
 

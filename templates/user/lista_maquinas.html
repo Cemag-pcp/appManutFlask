@@ -1,37 +1,12 @@
 {% extends "user/layout.html" %}
-{% block body %}
-
-<style>
-    th, td {
-      text-align: center;
-      width: auto;
-    }
-</style>
-
-{% with messages = get_flashed_messages()  %}
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-success" role="sucess">
-    <strong>Sucesso!</strong> {{ message }}
-    <button type="button" class="close" data-dismiss="sucess" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
+{% block containerFluid %}
 
 <div id = "tabela" class="container-fluid">
     <div class="row justify-content-md-center">
         <div class = "board" style="overflow-x: auto;">
             <div id = "titulo" class="row">
                 <div>
-                    <a href="#" onclick="window.history.back();" class="botao-voltar">
-                      <i class="fas fa-arrow-left"></i>
-                    </a>
-                  </div>
                 <h1 class="visao">Máquinas Cadastradas</h1>
-                <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
             </div>
             <div class="table-responsive">
                 <table id="table2" class="table custom-table table-striped">

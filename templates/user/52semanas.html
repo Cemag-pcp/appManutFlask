@@ -1,31 +1,5 @@
 {% extends "user/layout.html" %}
-{% block body %}
-
-<style>
-th, td {
-  text-align: center;
-}
-</style>
-
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class="flash">
-      {% for message in messages %}
-        {% if message == 'Máquina cadastrada com sucesso' %}
-          <div class="alert alert-success">
-            <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            <strong>Success! </strong> {{ message }}
-          </div>
-        {% else %}
-          <div class="alert alert-danger">
-            <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            <strong>Danger! </strong> {{ message }}
-          </div>
-        {% endif %}
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+{% block containerFluid %}
 
 <div id = "tabela2" class='container-fluid'>
   
@@ -36,7 +10,6 @@ th, td {
           <i class="fas fa-arrow-left"></i>
         </a>
         <h1 class="visao">Planejamento</h1>
-        <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
       </div>
       <table id="table2" class="table custom-table table-striped">
         <thead class="hide-thead">
