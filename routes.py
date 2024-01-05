@@ -3549,7 +3549,7 @@ def receber_upload():
     # file = r"uploads_atividade/" + file.filename
 
     try:
-        df = pd.read_csv(file, sep=";", encoding='ISO-8859-1')
+        df = pd.read_csv(file, sep=";", encoding='utf-8')
     except pd.errors.ParserError:
         df = pd.read_excel(file)
 
