@@ -1,15 +1,23 @@
 {% extends "user/layout.html" %}
+
+{% block title %}
+<title>Panorama Geral - OS</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+{% endblock %}
+
 {% block containerFluid %}
 
 
-<div id = "tabela">
+<div class="container-fluid">
     <div>
         <div class = "board" style="overflow-x: auto;">
             <div style="display: flex; justify-content: space-between;align-items: center;flex-direction: row-reverse;">
-                <a href="/logout" style="font-size: 20px; color: black;">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </a>
-                <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
+                <a class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onclick="downloadFilteredData()"><i class="fas fa-download fa-sm text-white-50"></i> Baixar CSV</a>
             </div>
             <table class="table" style="display: flex; justify-content: space-between;">
                 <thead>
@@ -328,6 +336,10 @@
 
 
 </div>
+
+{% endblock %}
+
+{% block scripts %}
 
 <script>
 
@@ -656,9 +668,5 @@ function sortUniqueValues(values) {
         });
     }
 </script>
-
-{% endblock %}
-
-{% block scripts %}
 
 {% endblock %}

@@ -62,26 +62,24 @@
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li> -->
-
+            <li class="nav-item" onclick="location.href='/index'">
+                <a class="nav-link" href="/index">
+                    <i class="fas fa-fw fa-table"></i>
+                  <span>Panorama Geral - OS</span></a>
+            </li>
             <!-- Divider -->
             <hr class="sidebar-divider">
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Tabelas
+                Preventivas
             </div>
       
             <!-- Nav Item - Pages Collapse Menu -->
-          
-              <li class="nav-item" onclick="location.href='/index'">
-                <a class="nav-link" href="/index">
-                  <i class="fas fa-fw fa-tachometer-alt"></i>
-                  <span>Tabela Inicial</span></a>
-              </li>
         
-              <li class="nav-item" onclick="location.href='/index'">
+              <li class="nav-item">
                 <a class="nav-link" href="/52semanas">
-                  <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <i class="fas fa-fw fa-table"></i>
                   <span>Planejamento</span></a>
               </li>
 
@@ -94,34 +92,61 @@
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
                     aria-expanded="true" aria-controls="collapsePages">
                     <i class="fas fa-fw fa-cog"></i>
-                    <span>Máquinas</span>
+                    <span>Lista de Máquinas</span>
                 </a>
                 <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">OS:</h6>
+                        <h6 class="collapse-header">Lista / Cadastro</h6>
                         <a class="collapse-item" href="/lista_maquinas">Lista de Máquinas</a>
                         <a class="collapse-item" href="/cadastrar52">Cadastrar Máquina</a>
                     </div>
                 </div>
+            </li> -->
+
+            <li class="nav-item">
+                <a class="nav-link" href="/lista_maquinas">
+                    <i class="fas fa-fw fa-table"></i>
+                  <span>Lista de Máquinas</span></a>
             </li>
 
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Dashboards
+            </div>
+
             <!-- Nav Item - Charts -->
-            <!-- <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link" href="charts.html">
                     <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Charts</span></a>
-            </li> -->
+                    <span>Gráficos</span></a>
+            </li>
 
-            <!-- Nav Item - Tables -->
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="tables.html">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Tables</span></a>
-            </li> -->
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Cadastro
+            </div>
+
+            <!-- Nav Item - Charts -->
+            <li class="nav-item">
+                <a class="nav-link" href="charts.html">
+                    <i class="fas fa-fw fa-chart-area"></i>
+                    <span>Cadastro de Máquinas</span></a>
+            </li>
+            <li class="nav-item" onclick="mostrarAlertaSenha()">
+                <a class="nav-link" href="/funcionarios">
+                    <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    <span>Cadastro de Funcionários</span></a>
+            </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -374,7 +399,7 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
+                    <a class="btn btn-primary" href="/logout">Logout</a>
                 </div>
             </div>
         </div>
@@ -396,6 +421,7 @@
     <!-- Page level custom scripts -->
     <script src="static/js/demo/chart-area-demo.js"></script>
     <script src="static/js/demo/chart-pie-demo.js"></script>
+    <script src="static/js/senha.js"></script>
     {% block scripts %}
 
     {% endblock %}
