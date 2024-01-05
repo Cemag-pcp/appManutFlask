@@ -187,13 +187,13 @@
                             {% else %}
                             <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-times-circle desabilitado"></i></td>
                             {% endif %}
-                            <td data-title="Custo MO" style="padding-bottom: 0px;">R$ {{row[38]}}</td>                  
+                            <td data-title="Custo MO" style="padding-bottom: 0px;">R$ {{row[39]}}</td>                  
                             
                             <td data-title="Menu" style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
 
                                 <div class="dropup">
 
-                                    {% if row[36] != "" %}
+                                    {% if row[37] != "" %}
                                         <a id="dropdown_os" class="dropdown-foto-video" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
                                             <i class="fa-solid fa-video"></i>
                                         </a>
@@ -228,7 +228,7 @@
                                             <i class="fas fa-pencil"></i> 
                                         </a>
                                     </div>
-                                    {% if row[37] != "" %}
+                                    {% if row[38] != "" %}
                                         <a id="dropdown_os" class="dropdown-foto-video" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                             <i class="fas fa-image"></i> 
                                         </a>
@@ -297,7 +297,6 @@
             </div>
         </div>
     </div>
-
 
 </div>
 

@@ -40,6 +40,7 @@ DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
 
+
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
@@ -2009,6 +2010,7 @@ def envio_ok():  # Inserir as edições no banco de dados
 
     return "Sucesso"
 
+
 @routes_bp.route('/update/<id_ordem>/<identificador_selecionado>/<setor_selecionado>', methods=['POST'])
 @login_required
 def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Inserir as edições no banco de dados
@@ -2166,6 +2168,7 @@ def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Ins
         conn.commit()
 
         return redirect(url_for('routes.get_employee', id_ordem=id_ordem,identificador_selecionado=identificador_selecionado,setor_selecionado=setor_selecionado))
+
 
 @routes_bp.route('/editar_ordem/<id_ordem>/<n_ordem>', methods=['POST', 'GET'])
 @login_required
