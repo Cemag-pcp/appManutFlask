@@ -3246,9 +3246,15 @@ def atividadesGrupo():
     data = cur.fetchall()
 
     print(data)
-   # Use os parâmetros para carregar os dados associados
+
+    # Use os parâmetros para carregar os dados associados
     dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)  
-    nova_data = data[0][0].strftime("%Y-%m-%d")
+    
+    try:
+        nova_data = data[0][0].strftime("%Y-%m-%d")
+    except AttributeError:
+        nova_data = None
+    
     periodicidade = data[0][1]
     df = pd.DataFrame({'data': [nova_data],
                     'periodicidade': [periodicidade]})

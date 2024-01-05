@@ -506,7 +506,12 @@ th, td {
 
     var periodicidade_grupo = $('#periodicidade_grupo').val();
     var ultima_manutencao = $('#ultima_manutencao').val();
-
+    if (ultima_manutencao === '') {
+      hideLoading();
+      exibirMensagem('aviso', 'Por favor, escolha uma data.');
+      return;
+    }
+      
     var parametros = [];
     parametros.push({
       periodicidade_grupo: periodicidade_grupo,
