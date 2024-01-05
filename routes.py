@@ -3549,7 +3549,7 @@ def receber_upload():
     # file = r"uploads_atividade/" + file.filename
 
     try:
-        df = pd.read_csv(file, sep=";", encoding='ISO-8859-1')
+        df = pd.read_csv(file, sep=";", encoding='utf-8')
     except pd.errors.ParserError:
         df = pd.read_excel(file)
 
@@ -3559,6 +3559,7 @@ def receber_upload():
     df.columns = df.columns.str.replace('ï»¿', '')
 
     colunas_esperadas = ['codigo_maquina', 'responsabilidade', 'atividade']  # Substitua com as colunas reais
+
     print(df.columns)
 
     # Verificar se as colunas do DataFrame coincidem com as colunas esperadas
