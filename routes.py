@@ -3553,6 +3553,8 @@ def receber_upload():
     except pd.errors.ParserError:
         df = pd.read_excel(file)
 
+    df = df.iloc[:, :3]
+
     # Remover caracteres especiais do cabeçalho das colunas
     df.columns = df.columns.str.replace('ï»¿', '')
 
@@ -3575,7 +3577,7 @@ def receber_upload():
         print(codigo_maquina)
         print(codigo_maquina_grupo)
         if codigo_maquina != codigo_maquina_grupo:
-            return 'Código de máquina inválido'
+            break
         grupo = row[1]
         responsabilidade = row[2]
         atividade = row[3]
