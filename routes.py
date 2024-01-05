@@ -121,12 +121,15 @@ def ultimo_dia_mes(mes):
     """
     Função para buscar o último dia do mês e hora.
     """
-
+    
     # Especifique o mês desejado
     mes_desejado = mes[0]  # Outubro
-
+    
     # Obtenha o último dia do mês desejado
-    ultimo_dia_do_mes = datetime(datetime.now().year, mes_desejado + 1, 1) - timedelta(days=1)
+    if mes_desejado == 12:
+        ultimo_dia_do_mes = datetime(datetime.now().year+1, 1, 1) - timedelta(days=1)
+    else:
+        ultimo_dia_do_mes = datetime(datetime.now().year, mes_desejado + 1, 1) - timedelta(days=1)
 
     # Defina a hora desejada
     hora_desejada = time(23, 59, 59)
@@ -721,7 +724,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(mes)
 
-    # df_timeline = df_timeline.drop_duplicates(subset=['id_ordem'])
+    # df_timeline = df_timeline.drop_duplicates(subset=['id_ordem','n_ordem'])
 
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
@@ -1599,6 +1602,7 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     """
     Rota para página principal da aplicação, mostrando a tabela principal.
     """
+    
     setor_selecionado = session.get('setor')
     identificador_selecionado = session.get('identificador')
 
@@ -1691,7 +1695,7 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
 
     df['proporcional'] = df['proporcional'].fillna(0)
-
+    
     list_users = df.values.tolist()
 
     return render_template('user/index.html', list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
@@ -2762,7 +2766,7 @@ def grafico():  # Dashboard
                 FROM
                     tb_ordens
                 WHERE
-                    1=1
+                    1=1 AND ordem_excluida isnull
             """)
 
         if setor_selecionado:
@@ -2775,8 +2779,6 @@ def grafico():  # Dashboard
             query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
 
         query_disponibilidade += """ ) AS t1 JOIN tb_paradas t2 ON t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem"""
-
-        print(query_disponibilidade)
 
         query_horas_trabalhada_area = ("""
         SELECT
@@ -4106,15 +4108,14 @@ def editar_maquina_preventiva(codigo):
         apelido = request.form['apelido']
 
         print(codigo_inicial, codigo_novo, tombamento, descricao,
-              setor, criticidade, periodicidade, data_formatada)
+                setor, criticidade, periodicidade, data_formatada)
 
-        df = gerador_de_semanas_informar_manutencao(
-            setor, codigo_novo, descricao, tombamento, criticidade, data_formatada, periodicidade)
+        df = gerar_planejamento_maquinas_preventivas(
+                codigo_novo,setor,descricao,tombamento,criticidade,manutencao_inicial,periodicidade)
+        
+        print(df)
 
         lista = df.values.tolist()
-        lista = lista[0]
-
-        print(lista)
 
         if codigo_novo != codigo_inicial:
 
@@ -4145,9 +4146,14 @@ def editar_maquina_preventiva(codigo):
                     WHERE codigo = '{}'
                     """.format(codigo_inicial))
 
-                sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-                    ','.join(['%s'] * len(lista)))
-                cur.execute(sql_insert, lista)
+                # sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+                #     ','.join(['%s'] * len(lista)))
+                # cur.execute(sql_insert, lista)
+
+                for row in lista:
+                    placeholders = ', '.join(['%s'] * len(row))
+                    sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(placeholders)
+                    cur.execute(sql_insert, row)
 
                 try:
                     cur.execute("""
@@ -4181,9 +4187,14 @@ def editar_maquina_preventiva(codigo):
                 WHERE codigo = '{}'
                 """.format(codigo_inicial))
 
-            sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-                ','.join(['%s'] * len(lista)))
-            cur.execute(sql_insert, lista)
+            # sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+            #     ','.join(['%s'] * len(lista)))
+            # cur.execute(sql_insert, lista)
+
+            for row in lista:
+                placeholders = ', '.join(['%s'] * len(row))
+                sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(placeholders)
+                cur.execute(sql_insert, row)
 
             try:
                 cur.execute("""
@@ -4236,8 +4247,8 @@ def editar_maquina_preventiva(codigo):
     periodicidade = data[0][5]
     manutencao_inicial = data[0][6]
     apelido = data[0][7]
-    manutencao_inicial = datetime.strptime(
-        manutencao_inicial, "%d/%m/%Y").strftime("%Y-%m-%d")
+    # manutencao_inicial = datetime.strptime(
+    #     manutencao_inicial, "%d/%m/%Y").strftime("%Y-%m-%d")
 
     if not tombamento:
         tombamento = ''

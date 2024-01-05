@@ -553,7 +553,8 @@ def calcular_proxima_data(data_atual, periodicidade_em_dias):
     proxima_data = proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
     return proxima_data.strftime("%Y-%m-%d") 
 
-def gerar_planejamento_maquinas_preventivas(codigo_maquina,grupo,maquina,tombamento,classificacao,ultima_manutencao,periodicidade):
+def gerar_planejamento_maquinas_preventivas(codigo_maquina,grupo,maquina,
+                                            tombamento,classificacao,ultima_manutencao,periodicidade):
 
     # codigo_maquina = 'ABC'
     # grupo = 'ABC'
