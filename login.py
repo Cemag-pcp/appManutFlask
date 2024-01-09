@@ -50,6 +50,8 @@ def login(): # Lógica de login
             cur.execute("""SELECT * FROM tb_contas WHERE email = {} AND pw = {}""".format(email, pw))
             account = cur.fetchone()
 
+            print(account)
+
             if account:
                 session['loggedin'] = True
                 session['id'] = account['id']

@@ -1604,7 +1604,7 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     Rota para página principal da aplicação, mostrando a tabela principal.
     """
     
-    setor_selecionado = session.get('setor')
+    setor_selecionado = str(session.get('setor'))
     identificador_selecionado = session.get('identificador')
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -1636,6 +1636,17 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     df = pd.read_sql_query(s, conn)
     df = df.sort_values(by='id_ordem').reset_index(drop=True)
+
+    if identificador_selecionado == 1:
+        pass
+    else:  
+        df_solicitantes = df[['id_ordem','solicitante']].dropna().reset_index(drop=True)
+        df_solicitantes = df_solicitantes.rename(columns={'solicitante':'solicitantes'})
+        df = df.merge(df_solicitantes,how='left',on='id_ordem')
+        df['solicitante'] = df['solicitantes']
+        df = df.fillna('')
+        df = df[df['solicitantes'].str.contains(setor_selecionado)]
+        df = df.drop(columns=['solicitantes'], axis=1)
 
     df = df[df['ordem_excluida'] != True].reset_index(drop=True)
 
