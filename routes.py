@@ -61,30 +61,52 @@ def calcular_minutos_uteis(row, df):
     # df_timeline['mes_hoje'][33]
     # df_timeline['mes_hoje'][33] >= df_timeline['mes'][33]
 
-    ordem_finalizada = df[(df['status'] == 'Finalizada') & (df['id_ordem'] == row['status'])]
+    # ordem_finalizada = df[(df['status'] == 'Finalizada') & (df['id_ordem'] == row['status'])]
+
+
+    # print(row['now'], row['fim'])
 
     # Extraia as datas de início e fim da linha
-    if row['status'] != "Finalizada" and row['parada3'] == 'false' and row['mes_hoje'] >= row['mes'] and len(ordem_finalizada) > 0: 
+    if row['status'] != "Finalizada" and row['parada3'] == 'false' and  row['now'] >= row['datafim']: #and len(ordem_finalizada) > 0: 
         data_inicio = pd.to_datetime(row['inicio']).replace(tzinfo=None)  # Remova as informações de fuso horário
         data_fim = row['ultimo_dia_mes'].replace(tzinfo=None)  # Remova as informações de fuso horário
     else:
         data_inicio = pd.to_datetime(row['inicio']).replace(tzinfo=None)  # Remova as informações de fuso horário
         data_fim = row['fim'].replace(tzinfo=None)  # Remova as informações de fuso horário
 
+    # minutos_uteis = 0
+
+    # data_inicio = datetime("2023-12-06 11:14:00")
+    # data_fim = datetime("2023-12-31 23:59:00")
+
+    # # Verifique se as datas estão no mesmo dia
+    # if data_inicio.date() == data_fim.date():
+    #     # Se estiverem no mesmo dia, calcule a diferença total em minutos
+    #     minutos_uteis = (data_fim - data_inicio).total_seconds() / 60
+    # else:
+    #     # Caso contrário, itere pelas datas e horas entre data_inicio e data_fim
+    #     data_atual = data_inicio
+    #     while data_atual < data_fim:
+    #         if hora_inicio_trabalho <= data_atual.hour < hora_fim_trabalho:
+    #             minutos_uteis += 1
+
+    #         data_atual += timedelta(minutes=1)
+
+    # return minutos_uteis
+
+    # Função para verificar se uma determinada hora está dentro do horário de trabalho
+    def dentro_do_horario_trabalho(data):
+        return hora_inicio_trabalho <= data.hour < hora_fim_trabalho
+
+    # Inicialize variáveis
     minutos_uteis = 0
+    data_atual = data_inicio
 
-    # Verifique se as datas estão no mesmo dia
-    if data_inicio.date() == data_fim.date():
-        # Se estiverem no mesmo dia, calcule a diferença total em minutos
-        minutos_uteis = (data_fim - data_inicio).total_seconds() / 60
-    else:
-        # Caso contrário, itere pelas datas e horas entre data_inicio e data_fim
-        data_atual = data_inicio
-        while data_atual < data_fim:
-            if hora_inicio_trabalho <= data_atual.hour < hora_fim_trabalho:
-                minutos_uteis += 1
-
-            data_atual += timedelta(minutes=1)
+    # Calcule o número de minutos úteis
+    while data_atual <= data_fim:
+        if data_atual.weekday() < 5 and dentro_do_horario_trabalho(data_atual):
+            minutos_uteis += 1
+        data_atual += timedelta(minutes=1)
 
     return minutos_uteis
 
@@ -128,7 +150,7 @@ def ultimo_dia_mes(mes):
     
     # Obtenha o último dia do mês desejado
     if mes_desejado == 12:
-        ultimo_dia_do_mes = datetime(datetime.now().year+1, 1, 1) - timedelta(days=1)
+        ultimo_dia_do_mes = datetime(datetime.now().year, 1, 1) - timedelta(days=1)
     else:
         ultimo_dia_do_mes = datetime(datetime.now().year, mes_desejado + 1, 1) - timedelta(days=1)
 
@@ -724,7 +746,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['mes_hoje'] = datetime.now().month
 
     df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(mes)
-
+    
     # df_timeline = df_timeline.drop_duplicates(subset=['id_ordem','n_ordem'])
 
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
@@ -878,6 +900,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(mes)
 
+    df_timeline.dtypes
+
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
@@ -886,6 +910,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
         df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1, df=df_timeline)
+        # df_timeline['diferenca'] = 
         # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
         #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
@@ -2768,7 +2793,9 @@ def grafico():  # Dashboard
         query_disponibilidade = ("""
             SELECT t1.*, t2.parada3
             FROM (
+            WITH ordens_cte AS (
                 SELECT
+                    ultima_atualizacao,
                     status,
                     id_ordem,
                     datafim,
@@ -2780,19 +2807,21 @@ def grafico():  # Dashboard
                 FROM
                     tb_ordens
                 WHERE
-                    1=1 AND ordem_excluida isnull
+                    1=1
+                    AND ordem_excluida IS NULL
             """)
 
         if setor_selecionado:
             query_disponibilidade += f" AND  setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
-        if mes:
-            query_disponibilidade += f" AND EXTRACT(MONTH FROM ultima_atualizacao) in ({mes_selecionado})"
         if maquinas_importantes:
             query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
+        query_disponibilidade += """) SELECT * FROM ordens_cte"""
+        if mes:
+            query_disponibilidade += f" WHERE EXTRACT(MONTH FROM fim) in ({mes_selecionado})"    
 
-        query_disponibilidade += """ ) AS t1 JOIN tb_paradas t2 ON t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem"""
+        query_disponibilidade += """ ) AS t1 JOIN tb_paradas t2 ON t1.id_ordem = t2.id_ordem AND t1.n_ordem = t2.n_ordem;"""
 
         query_horas_trabalhada_area = ("""
         SELECT
