@@ -18,12 +18,15 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
 
-<div id='form_filtros_graficos'>
-    
-    <form id="formulario" action="{{ url_for('routes.grafico') }}" method="POST">
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Filtros Gráficos</h6>
+    </div>
+    <div class="card-body">
+      <form  action="{{ url_for('routes.grafico') }}" method="POST">
 
         <label for="filtro_setor">Setor:</label>
-        <select id="filtro_setor" name="filtro_setor" multiple>
+        <select class="form-control" aria-label="Default select example">
 
             {% for setor in setores %}
             {% if setor[0] in lista_setore_selecionado %}
@@ -36,7 +39,7 @@
         </select>
 
         <label for="data_filtro">Mês:</label>
-        <select id="data_filtro" name="data_filtro" multiple>
+        <select class="form-control" aria-label="Default select example">
             <option value="1" {% if not todos_meses and 1 in mes %}selected{% endif %}>Janeiro</option>
             <option value="2" {% if not todos_meses and 2 in mes %}selected{% endif %}>Fevereiro</option>
             <option value="3" {% if not todos_meses and 3 in mes %}selected{% endif %}>Março</option>
@@ -50,21 +53,22 @@
             <option value="11" {% if not todos_meses and 11 in mes %}selected{% endif %}>Novembro</option>
             <option value="12" {% if not todos_meses and 12 in mes %}selected{% endif %}>Dezembro</option>
         </select>
-
+        <div>
         <label for="maquinas-favoritas">Máquinas importantes</label>
-
-        <label class="switch">
-            {% if maquinas_importantes %}
-            <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas" checked>
-            {% else %}
-            <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas">
-            {% endif %}
-            <span class="slider round"></span>
-        </label>
-
-        <button id="filtra_grafico" type="submit">Filtrar</button>
+          <label class="switch">
+              {% if maquinas_importantes %}
+              <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas" checked>
+              {% else %}
+              <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas">
+              {% endif %}
+              <span class="slider round"></span>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
     </form>
+    </div>
 </div>
+    
 
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -142,115 +146,170 @@
             </div>
         </div>
     </div>
-
-
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">MTBF por Máquina</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico1"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
 </div>
-<div class="graphBox">
-    <div class="box">
-        <canvas id="grafico1"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>MTBF por máquina</h3>
+    <!-- DataTales Example -->
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">MTBF por Máquina</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <td>Máquina</td>
+                        <td>Quantidade</td>
+                        <td>Carga</td>
+                        <td>MTBF</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mtbf_maquina in lista_mtbf_maquina %}
+                    <tr>
+                        <td>{{mtbf_maquina[0]}}</td>
+                        <td>{{mtbf_maquina[1]}}</td>
+                        <td>{{mtbf_maquina[2]}}</td>
+                        <td>{{mtbf_maquina[3]}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                    </table>
                 </div>
-                <table class="table" id="tabela_graficos1">
-                    <thead>
-                        <tr>
-                            <td>Máquina</td>
-                            <td>Quantidade</td>
-                            <td>Carga</td>
-                            <td>MTBF</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mtbf_maquina in lista_mtbf_maquina %}
-                        <tr>
-                            <td>{{mtbf_maquina[0]}}</td>
-                            <td>{{mtbf_maquina[1]}}</td>
-                            <td>{{mtbf_maquina[2]}}</td>
-                            <td>{{mtbf_maquina[3]}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 </div>
-<div class="graphBox">
-    <div class="box">
-        <canvas id="grafico1top10"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>Top 10 menores - MTBF por máquina</h3>
-                </div>
-                <table class="table" id="tabela_grafico1top10">
-                    <thead>
-                        <tr>
-                            <td>Máquina</td>
-                            <td>Qtd. OS</td>
-                            <td>H.Trabalhadas</td>
-                            <td>MTBF</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mtbf_maquina_top10 in top_10_maiores_MTBF_lista %}
-                        <tr>
-                            <td>{{mtbf_maquina_top10[0]}}</td>
-                            <td>{{mtbf_maquina_top10[1]}}</td>
-                            <td>{{mtbf_maquina_top10[2]}}</td>
-                            <td>{{mtbf_maquina_top10[3]}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Top 10 menores - MTBF por máquina</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico1top10"></canvas>
             </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Top 10 - MTBF por Máquina</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable3" width="100%" cellspacing="0">
+                <thead>
+                <tr>
+                    <td>Máquina</td>
+                    <td>Qtd. OS</td>
+                    <td>H.Trabalhadas</td>
+                    <td>MTBF</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mtbf_maquina_top10 in top_10_maiores_MTBF_lista %}
+                <tr>
+                    <td>{{mtbf_maquina_top10[0]}}</td>
+                    <td>{{mtbf_maquina_top10[1]}}</td>
+                    <td>{{mtbf_maquina_top10[2]}}</td>
+                    <td>{{mtbf_maquina_top10[3]}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+            </div>
+        </div>
         </div>
     </div>
 </div>
-<div class="graphBox">
-    <div class="box">
-        <canvas id="grafico2"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>MTBF por setor</h3>
-                </div>
-                <table class="table" id="tabela_graficos2">
-                    <thead>
-                        <tr>
-                            <td>Setor</td>
-                            <td>Qnt. OS</td>
-                            <td>H.Trabalhadas</td>
-                            <td>MTBF</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mtbf_setor in lista_mtbf_setor %}
-                        <tr>
-                            <td>{{mtbf_setor[0]}}</td>
-                            <td>{{mtbf_setor[1]}}</td>
-                            <td>{{mtbf_setor[2]}}</td>
-                            <td>{{mtbf_setor[3]}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">MTBF por setor</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico2"></canvas>
             </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
         </div>
     </div>
-</div>
-<div class="graphBox">
-    <div class="box">
-        <canvas id="grafico3"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>MTTR por máquina</h3>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">MTBF por setor</h6>
                 </div>
-                <table class="table" id="tabela_graficos3">
-                    <thead>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable4" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <td>Setor</td>
+                                    <td>Qnt. OS</td>
+                                    <td>H.Trabalhadas</td>
+                                    <td>MTBF</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mtbf_setor in lista_mtbf_setor %}
+                                <tr>
+                                    <td>{{mtbf_setor[0]}}</td>
+                                    <td>{{mtbf_setor[1]}}</td>
+                                    <td>{{mtbf_setor[2]}}</td>
+                                    <td>{{mtbf_setor[3]}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">MTTR por Máquina</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico3"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">MTTR por máquina</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable5" width="100%" cellspacing="0">
+                        <thead>
                         <tr>
                             <td>Máquina</td>
                             <td>Qnt. OS</td>
@@ -268,116 +327,172 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<div class="graphBox">
-    <div class="box">
-        <canvas id="grafico4"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>MTTR por setor</h3>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">MTTR por Setor</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico4"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">MTTR por Setor</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable6" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <td>Setor</td>
+                                <td>Qtd. OS</td>
+                                <td>H.Trabalhadas</td>
+                                <td>MTTR</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mttr_setor in lista_mttr_setor %}
+                            <tr>
+                                <td>{{mttr_setor[0]}}</td>
+                                <td>{{mttr_setor[1]}}</td>
+                                <td>{{mttr_setor[2]|round(2)}}</td>
+                                <td>{{mttr_setor[3]|round(2)}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <table class="table" id="tabela_graficos4">
-                    <thead>
-                        <tr>
-                            <td>Setor</td>
-                            <td>Qtd. OS</td>
-                            <td>H.Trabalhadas</td>
-                            <td>MTTR</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mttr_setor in lista_mttr_setor %}
-                        <tr>
-                            <td>{{mttr_setor[0]}}</td>
-                            <td>{{mttr_setor[1]}}</td>
-                            <td>{{mttr_setor[2]|round(2)}}</td>
-                            <td>{{mttr_setor[3]|round(2)}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 </div>
-<div class="graphBox">
-    <div class="box">
-        <canvas id="grafico5"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>Disponibilidade Máquina</h3>
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Disponibilidade por Máquina</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico5"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Disponibilidade por Máquina</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable7" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <td>Máquina</td>
+                                <td>MTBF</td>
+                                <td>MTTR</td>
+                                <td>Disponibilidade</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disponibilidade_maquina in lista_disponibilidade_maquina %}
+                            <tr>
+                                <td>{{disponibilidade_maquina[0]}}</td>
+                                <td>{{disponibilidade_maquina[1]}}</td>
+                                <td>{{disponibilidade_maquina[2]}}</td>
+                                <td>{{disponibilidade_maquina[3]|round(2)}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <table class="table" id="tabela_graficos5">
-                    <thead>
-                        <tr>
-                            <td>Máquina</td>
-                            <td>MTBF</td>
-                            <td>MTTR</td>
-                            <td>Disponibilidade</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for disponibilidade_maquina in lista_disponibilidade_maquina %}
-                        <tr>
-                            <td>{{disponibilidade_maquina[0]}}</td>
-                            <td>{{disponibilidade_maquina[1]}}</td>
-                            <td>{{disponibilidade_maquina[2]}}</td>
-                            <td>{{disponibilidade_maquina[3]|round(2)}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 </div>
-<div class="graphBox">
-    <div class="box">
-        <canvas id="grafico6"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>Disponibilidade Setor</h3>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Disponibilidade por Setor</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico6"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Disponibilidade por Setor</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable8" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <td>Setor</td>
+                                <td>MTBF</td>
+                                <td>MTTR</td>
+                                <td>Disponibilidade</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disponibilidade_setor in lista_disponibilidade_setor %}
+                            <tr>
+                                <td>{{disponibilidade_setor[0]}}</td>
+                                <td>{{disponibilidade_setor[1]}}</td>
+                                <td>{{disponibilidade_setor[2]}}</td>
+                                <td>{{disponibilidade_setor[3]}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <table class="table" id="tabela_graficos6">
-                    <thead>
-                        <tr>
-                            <td>Setor</td>
-                            <td>MTBF</td>
-                            <td>MTTR</td>
-                            <td>Disponibilidade</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for disponibilidade_setor in lista_disponibilidade_setor %}
-                        <tr>
-                            <td>{{disponibilidade_setor[0]}}</td>
-                            <td>{{disponibilidade_setor[1]}}</td>
-                            <td>{{disponibilidade_setor[2]}}</td>
-                            <td>{{disponibilidade_setor[3]}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 </div>
-<div class="graphBox">
-    <div class="box2">
-        <canvas id="grafico7"></canvas>
-        <div class="details2">
-            <div class="recentOrders2">
-                <div class="cardHeader">
-                    <h3>Horas trabalhadas (tipo de manutenção)</h3>
-                </div>
-                <table class="table" id="tabela_graficos7">
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Horas trabalhadas (tipo de manutenção)</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico7"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Horas trabalhadas (tipo de manutenção)</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable9" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <td>Tipo de manutenção</td>
@@ -395,14 +510,30 @@
                 </table>
             </div>
         </div>
-        <canvas id="grafico8"></canvas>
-        <div class="details2">
-            <div class="recentOrders2">
-                <div class="cardHeader">
-                    <h3>Horas trabalhadas (área manutenção)</h3>
-                </div>
-                <table class="table" id="tabela_graficos8">
-                    <thead>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Horas trabalhadas (área manutenção)</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico8"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Horas trabalhadas (área manutenção)</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable10" width="100%" cellspacing="0">
+                        <thead>
                         <tr>
                             <td>Área de manutenção</td>
                             <td>Horas</td>
@@ -421,21 +552,31 @@
         </div>
     </div>
 </div>
-<div class="graphBox">
-    <div class="box3">
-        <canvas id="grafico9"></canvas>
-        <div class="details">
-            <div class="recentOrders">
-                <div class="cardHeader">
-                    <h3>Horas trabalhadas (por Setor)</h3>
-                </div>
-                <table class="table" id="tabela_graficos9">
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Horas trabalhadas (por Setor)</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-bar">
+                <canvas id="grafico9"></canvas>
+            </div>
+            <hr>
+            Styling for the bar chart can be found in the
+            <code>/js/demo/chart-bar-demo.js</code> file.
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Horas trabalhadas (por Setor)</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable11" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <td>Setor</td>
                             <td>OS</td>
-                            <td>Horas</td>
-                            <td>Percentual</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -467,609 +608,673 @@
         </div>
     </div>
 </div>
-</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Page level plugins -->
+<script src="static/vendor/chart.js/Chart.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="static/js/demo/chart-area-demo.js"></script>
+<script src="static/js/demo/chart-pie-demo.js"></script>
+<script src="static/js/demo/chart-bar-demo.js"></script>
+<!-- Bootstrap core JavaScript-->
+<script src="static/vendor/jquery/jquery.min.js"></script>
+<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="static/js/sb-admin-2.min.js"></script>
+
+<!-- Page level plugins -->
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="static/js/demo/datatables-demo.js"></script>
+
+
+
 
 <script>
 
-    var eixo_y = {{ dados_mtbf_maquina | safe }};
-    var eixo_x = {{ labels_mtbf_maquina | safe }};
-    var ctx = document.getElementById('grafico1').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                color: 'black', // Define a cor dos rótulos para branco
-                font: {
-                    size: 14 // Define o tamanho da fonte dos rótulos
-                },
-                label: 'MTBF',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 159, 64, 1)',
-                    'rgba(255, 205, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(201, 203, 207, 1)'
-                ],
-                borderColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(255, 159, 64)',
-                    'rgb(255, 205, 86)',
-                    'rgb(75, 192, 192)',
-                    'rgb(54, 162, 235)',
-                    'rgb(153, 102, 255)',
-                    'rgb(201, 203, 207)'
-                ],
-                borderWidth: 1
-            }]
+// Bar Chart Example
+var eixo_y = {{ dados_mtbf_maquina | safe }};
+var eixo_x = {{ labels_mtbf_maquina | safe }};
+var ctx = document.getElementById("grafico1");
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
         },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    display: true, // Defina como false para remover as grades do eixo x
-                },
-                y: {
-                    display: true, // Defina como false para remover as grades do eixo y
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'MTBF por máquina',
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 30
-                    }
-                }
-            }
-        }
-    });
-
-    var eixo_y = {{ dados_mtbf_top10_maquina | safe }};
-    var eixo_x = {{ labels_mtbf_top10_maquina | safe }};
-    var ctx = document.getElementById('grafico1top10').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                color: 'black', // Define a cor dos rótulos para branco
-                font: {
-                    size: 14 // Define o tamanho da fonte dos rótulos
-                },
-                label: 'MTBF',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 159, 64, 1)',
-                    'rgba(255, 205, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(201, 203, 207, 1)'
-                ],
-                borderColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(255, 159, 64)',
-                    'rgb(255, 205, 86)',
-                    'rgb(75, 192, 192)',
-                    'rgb(54, 162, 235)',
-                    'rgb(153, 102, 255)',
-                    'rgb(201, 203, 207)'
-                ],
-                borderWidth: 1
-            }]
+        gridLines: {
+          display: false,
+          drawBorder: false
         },
-        options: {
-            responsive: true,
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    display: true, // Defina como false para remover as grades do eixo x
-                },
-                y: {
-                    display: true, // Defina como false para remover as grades do eixo y
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'MTBF por máquina (top 10 - Menores)',
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 30
-                    }
-                }
-            }
+        ticks: {
+          maxTicksLimit: 6
+        },
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 90,
+          maxTicksLimit: 10,
+          padding: 10,
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
         }
-    });
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+  }
+});
+
+
+// Bar Chart Example
+var eixo_y = {{ dados_mtbf_top10_maquina | safe }};
+var eixo_x = {{ labels_mtbf_top10_maquina | safe }};
+var ctx = document.getElementById("grafico1top10");
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          maxTicksLimit: 6
+        },
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 90,
+          maxTicksLimit: 10,
+          padding: 10,
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
+        }
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+  }
+});
     // Gráfico MTBF por setor
-
-    var eixo_y = {{ dados_mtbf_setor | safe }};
-    var eixo_x = {{ labels_mtbf_setor | safe }};
-    var ctx = document.getElementById('grafico2').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                color: 'black', // Define a cor dos rótulos para branco
-                font: {
-                    size: 14 // Define o tamanho da fonte dos rótulos
-                },
-                label: 'MTBF',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1,
-                backgroundColor: [
-                    '#1155cc',
-                    'rgba(255, 99, 132, 1)',
-                    '#b7b7b7',
-                    '#0b5394',
-                    '#f1c232',
-                    '#f1894d',
-                    '#00ffff',
-                    '#ff9900',
-                    'rgba(75, 192, 192, 1)',
-                    '#ffff00',
-                    '#6aa84f',
-                    '#00ff00'
-                ],
-                borderWidth: 1
-            }]
+var eixo_y = {{ dados_mtbf_setor | safe }};
+var eixo_x = {{ labels_mtbf_setor | safe }};
+var ctx = document.getElementById('grafico2');
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
         },
-        options: {
-            responsive: true,
-            plugins: {
-                datalabels: {
-                    color: 'black', // Define a cor dos rótulos para branco
-                    font: {
-                        size: 10, // Define o tamanho da fonte dos rótulos
-                        weight: 'bold'
-                    },
-                },
-                title: {
-                    display: true,
-                    text: 'MTBF por setor (horas)', // Define o texto do título do gráfico
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    }
-                },
-            }
+        gridLines: {
+          display: false,
+          drawBorder: false
         },
-        plugins: [ChartDataLabels]
-    });
-
+        ticks: {
+          maxTicksLimit: 6
+        },
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 90,
+          maxTicksLimit: 10,
+          padding: 10,
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
+        }
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+  }
+});
     // Gráfico MTTR por máquina
 
-    var eixo_y = {{ dados_mttr_maquina | safe }};
-    var eixo_x = {{ labels_mttr_maquina | safe }};
-    var ctx = document.getElementById('grafico3').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                color: 'black', // Define a cor dos rótulos para branco
-                font: {
-                    size: 10, // Define o tamanho da fonte dos rótulos
-                    weight: 'bold' // Define o tamanho da fonte dos rótulos
-                },
-                label: 'MTTR',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 159, 64, 1)',
-                    'rgba(255, 205, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(201, 203, 207, 1)'
-                ],
-                borderColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(255, 159, 64)',
-                    'rgb(255, 205, 86)',
-                    'rgb(75, 192, 192)',
-                    'rgb(54, 162, 235)',
-                    'rgb(153, 102, 255)',
-                    'rgb(201, 203, 207)'
-                ],
-                borderWidth: 1
-            }]
+    // Gráfico MTBF por setor
+var eixo_y = {{ dados_mttr_maquina | safe }};
+var eixo_x = {{ labels_mttr_maquina | safe }};
+var ctx = document.getElementById('grafico3');
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
         },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    display: true, // Defina como false para remover as grades do eixo x
-                },
-                y: {
-                    display: true, // Defina como false para remover as grades do eixo y
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'MTTR por máquina',
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 30
-                    }
-                }
-            }
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          maxTicksLimit: 6
+        },
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 90,
+          maxTicksLimit: 10,
+          padding: 10,
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
         }
-    });
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+  }
+});
 
     // Gráfico MTTR por setor
 
-    var eixo_y = {{ dados_mttr_setor | safe }};
-    var eixo_x = {{ labels_mttr_setor | safe }};
-    var ctx = document.getElementById('grafico4').getContext('2d');
+var eixo_y = {{ dados_mttr_setor | safe }};
+var eixo_x = {{ labels_mttr_setor | safe }};
+var ctx = document.getElementById('grafico4');
 
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                color: 'black', // Define a cor dos rótulos para branco
-                font: {
-                    size: 10, // Define o tamanho da fonte dos rótulos
-                    weight: 'bold' // Define o tamanho da fonte dos rótulos
-                },
-                label: 'MTTR',
-                data: eixo_y,
-                fill: false,
-                tension: 0.1,
-                backgroundColor: [
-                    '#1155cc',
-                    'rgba(255, 99, 132, 1)',
-                    '#b7b7b7',
-                    '#0b5394',
-                    '#f1c232',
-                    '#f1894d',
-                    '#00ffff',
-                    '#ff9900',
-                    'rgba(75, 192, 192, 1)',
-                    '#ffff00',
-                    '#6aa84f',
-                    '#00ff00'
-                ],
-                borderWidth: 1
-            }]
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
         },
-        options: {
-            responsive: true,
-            plugins: {
-                datalabels: {
-                    color: 'black', // Define a cor dos rótulos para branco
-                    font: {
-                        size: 10, // Define o tamanho da fonte dos rótulos
-                        weight: 'bold' // Define o tamanho da fonte dos rótulos
-                    },
-                },
-                title: {
-                    display: true,
-                    text: 'MTTR por setor (horas)', // Define o texto do título do gráfico
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    }
-                },
-            }
+        gridLines: {
+          display: false,
+          drawBorder: false
         },
-        plugins: [ChartDataLabels]
-    });
+        ticks: {
+          maxTicksLimit: 6
+        },
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 10,
+          maxTicksLimit: 10,
+          padding: 10,
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
+        }
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+  }
+});
 
     // Disponibilidade por maquina
 
-    var eixo_y = {{ dados_disponibilidade_maquina | safe }};
-    var eixo_x = {{ labels_disponibilidade_maquina | safe }};
-    var ctx = document.getElementById('grafico5').getContext('2d');
+var eixo_y = {{ dados_disponibilidade_maquina | safe }};
+var eixo_x = {{ labels_disponibilidade_maquina | safe }};
+var ctx = document.getElementById('grafico5');
 
-    var grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                color: 'black', // Define a cor dos rótulos para branco
-                font: {
-                    size: 10, // Define o tamanho da fonte dos rótulos
-                    weight: 'bold' // Define o tamanho da fonte dos rótulos
-                },
-                label: 'Disponibilidade',
-                data: eixo_y,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 159, 64, 1)',
-                    'rgba(255, 205, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(201, 203, 207, 1)'
-                ],
-                borderColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(255, 159, 64)',
-                    'rgb(255, 205, 86)',
-                    'rgb(75, 192, 192)',
-                    'rgb(54, 162, 235)',
-                    'rgb(153, 102, 255)',
-                    'rgb(201, 203, 207)'
-                ],
-                borderWidth: 1
-            }]
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
         },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    display: true, // Defina como false para remover as grades do eixo x
-                },
-                y: {
-                    display: true, // Defina como false para remover as grades do eixo y
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Disponibilidade por máquina',
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 30
-                    }
-                }
-            }
-
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          maxTicksLimit: 6
+        },
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 100,
+          maxTicksLimit: 10,
+          padding: 10,
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
         }
-    });
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+  }
+});
 
     // Disponibilidade por setor
 
-    var eixo_y = {{ dados_disponibilidade_setor | safe }};
-    var eixo_x = {{ labels_disponibilidade_setor | safe }};
-    var ctx = document.getElementById('grafico6').getContext('2d');
+var eixo_y = {{ dados_disponibilidade_setor | safe }};
+var eixo_x = {{ labels_disponibilidade_setor | safe }};
+var ctx = document.getElementById('grafico6');
 
-    var grafico = new Chart(ctx, {
-        type: 'bar', // Alterando o tipo de gráfico para pizza
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'Disponibilidade',
-                data: eixo_y,
-                backgroundColor: [
-                    '#1155cc',
-                    'rgba(255, 99, 132, 1)',
-                    '#b7b7b7',
-                    '#0b5394',
-                    '#f1c232',
-                    '#f1894d',
-                    '#00ffff',
-                    '#ff9900',
-                    'rgba(75, 192, 192, 1)',
-                    '#ffff00',
-                    '#6aa84f',
-                    '#00ff00'
-                ],
-                borderWidth: 1
-            }]
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
         },
-        options: {
-            responsive: true,
-            plugins: {
-                datalabels: {
-                    color: 'black', // Define a cor dos rótulos para branco
-                    font: {
-                        size: 10, // Define o tamanho da fonte dos rótulos
-                        weight: 'bold' // Define o tamanho da fonte dos rótulos
-                    },
-                    formatter: function (value, context) {
-                        return value + '%'; // Adiciona o símbolo "%" ao lado do número
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Disponibilidade por Setor', // Define o texto do título do gráfico
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    }
-                },
-            }
+        gridLines: {
+          display: false,
+          drawBorder: false
         },
-        plugins: [ChartDataLabels]
-    });
-
-    var eixo_y = {{ dados_horas_trabalhadas_tipo | safe }};
-    var eixo_x = {{ labels_horas_trabalhadas_tipo | safe }};
-    var ctx = document.getElementById('grafico7').getContext('2d');
-
-    var grafico = new Chart(ctx, {
-        type: 'pie', // Alterando o tipo de gráfico para pizza
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'Horas',
-                data: eixo_y,
-                backgroundColor: [
-                    '#1155cc',
-                    'rgba(255, 99, 132, 1)',
-                    '#b7b7b7',
-                    '#0b5394',
-                    '#f1c232',
-                    '#f1894d',
-                    '#00ffff',
-                    '#ff9900',
-                    'rgba(75, 192, 192, 1)',
-                    '#ffff00',
-                    '#6aa84f',
-                    '#00ff00'
-                ],
-                borderWidth: 1
-            }]
+        ticks: {
+          maxTicksLimit: 6
         },
-        options: {
-            responsive: true,
-            plugins: {
-                datalabels: {
-                    color: 'black', // Define a cor dos rótulos para branco
-                    font: {
-                        size: 10, // Define o tamanho da fonte dos rótulos
-                        weight: 'bold' // Define o tamanho da fonte dos rótulos
-                    },
-                },
-                title: {
-                    display: true,
-                    text: 'Horas trabalhadas (Tipo)', // Define o texto do título do gráfico
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    }
-                },
-            }
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 100,
+          maxTicksLimit: 10,
+          padding: 10,
         },
-        plugins: [ChartDataLabels]
-    });
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
+        }
+      }],
+    },
+    legend: {
+      display: false
+    },
+    tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+  }
+});
 
-    var eixo_y = {{ dados_horas_trabalhadas_area | safe }};
-    var eixo_x = {{ labels_horas_trabalhadas_area | safe }};
-    var ctx = document.getElementById('grafico8').getContext('2d');
+var eixo_y = {{ dados_horas_trabalhadas_tipo | safe }};
+var eixo_x = {{ labels_horas_trabalhadas_tipo | safe }};
+var ctx = document.getElementById('grafico7');
 
-    var grafico = new Chart(ctx, {
-        type: 'pie', // Alterando o tipo de gráfico para pizza
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'Horas',
-                data: eixo_y,
-                backgroundColor: [
-                    '#1155cc',
-                    'rgba(255, 99, 132, 1)',
-                    '#b7b7b7',
-                    '#0b5394',
-                    '#f1c232',
-                    '#f1894d',
-                    '#00ffff',
-                    '#ff9900',
-                    'rgba(75, 192, 192, 1)',
-                    '#ffff00',
-                    '#6aa84f',
-                    '#00ff00'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                datalabels: {
-                    color: 'black', // Define a cor dos rótulos para branco
-                    font: {
-                        size: 10, // Define o tamanho da fonte dos rótulos
-                        weight: 'bold' // Define o tamanho da fonte dos rótulos
-                    },
-                },
-                title: {
-                    display: true,
-                    text: 'Horas trabalhadas (Área)', // Define o texto do título do gráfico
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    }
-                },
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
+var myBarChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474'],
+      hoverBackgroundColor:['#2e59d9', '#17a673', '#2c9faf'],
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+    legend: {
+      display: false
+    },
+    cutoutPercentage: 50,
+  },
+});
 
-    var eixo_y = {{ dados_horas_trabalhadas_setor | safe }};
-    var eixo_x = {{ labels_horas_trabalhadas_setor | safe }};
-    var ctx = document.getElementById('grafico9').getContext('2d');
 
-    var grafico = new Chart(ctx, {
-        type: 'pie', // Alterando o tipo de gráfico para pizza
-        data: {
-            labels: eixo_x,
-            datasets: [{
-                label: 'Horas trabalhadas',
-                data: eixo_y,
-                backgroundColor: [
-                    '#1155cc',
-                    'rgba(255, 99, 132, 1)',
-                    '#b7b7b7',
-                    '#0b5394',
-                    '#f1c232',
-                    '#f1894d',
-                    '#00ffff',
-                    '#ff9900',
-                    'rgba(75, 192, 192, 1)',
-                    '#ffff00',
-                    '#6aa84f',
-                    '#00ff00'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                datalabels: {
-                    color: 'black', // Define a cor dos rótulos para branco
-                    font: {
-                        size: 10, // Define o tamanho da fonte dos rótulos
-                        weight: 'bold' // Define o tamanho da fonte dos rótulos
-                    },
-                },
-                title: {
-                    display: true,
-                    text: 'Horas trabalhadas (setor)', // Define o texto do título do gráfico
-                    font: {
-                        size: 18, // Define o tamanho da fonte do título
-                        weight: 'bold' // Define o peso (negrito) da fonte do título
-                    }
-                },
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
+var eixo_y = {{ dados_horas_trabalhadas_area | safe }};
+var eixo_x = {{ labels_horas_trabalhadas_area | safe }};
+var ctx = document.getElementById('grafico8');
 
-</script>
+var myBarChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474'],
+      hoverBackgroundColor:['#2e59d9', '#17a673', '#2c9faf'],
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+    legend: {
+      display: false
+    },
+    cutoutPercentage: 50,
+  },
+});
 
-<script>
-    $(document).ready(function () {
-        $('.select2').select2();
-    });
+var eixo_y = {{ dados_horas_trabalhadas_setor | safe }};
+var eixo_x = {{ labels_horas_trabalhadas_setor | safe }};
+var ctx = document.getElementById('grafico9');
+
+var myBarChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: eixo_x,
+    datasets: [{
+      label: 'MTBF',
+      backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474','#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474','#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474','#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474'],
+      hoverBackgroundColor:['#2e59d9', '#17a673', '#2c9faf'],
+      data: eixo_y,
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      caretPadding: 10,
+    },
+    legend: {
+      display: false
+    },
+    cutoutPercentage: 50,
+  },
+});
+
 </script>
 
 {% endblock %}

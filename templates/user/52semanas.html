@@ -1,65 +1,65 @@
 {% extends "user/layout.html" %}
 {% block containerFluid %}
 
-<div id = "tabela2" class='container-fluid'>
+<div class='container-fluid'>
   
-  <div class="row justify-content-md-center">
-    <div class = "board2" style="overflow-x: auto;">
-      <div id = "titulo" class="row">
-        <a href="#" onclick="window.history.back();" class="botao-voltar">
-          <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1 class="visao">Planejamento</h1>
-      </div>
-      <table id="table2" class="table custom-table table-striped">
-        <thead class="hide-thead">
-          <tr>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tombamento</th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classificação</th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (Dias)</th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
-            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in data %}
-            <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
-                <td style="width: 50px;">
-                  <div class="dropdown">
-                      <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
-                      </button>
-                      <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                        <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=row[0]) }}" class="btn" target="_blank">
-                          <i class="fas fa-clipboard-list"></i>
-                        </a>
-                        <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
-                          <i class="fas fa-clock"></i>
-                        </a>
-                        <a id="dropdown_os" class="dropdown-item" onclick="modalGrupoAtividade('{{ row[0] }}')" style="cursor: pointer;">
-                          <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
-                      </a>
+<div class="card shadow mb-4">
+  <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Planejamento</h6>
+  </div>
+    <div class="card-body">
+      <div class="table-responsive">
+          <table class="table table-bordered" id="dataTable12" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tombamento</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classificação</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (Dias)</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
+                </tr>
+              </thead>
+            <tbody>
+              {% for row in data %}
+                <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
+                    <td style="width: 50px;">
+                      <div class="dropdown">
+                          <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=row[0]) }}" class="btn" target="_blank">
+                              <i class="fas fa-clipboard-list"></i>
+                            </a>
+                            <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
+                              <i class="fas fa-clock"></i>
+                            </a>
+                            <a id="dropdown_os" class="dropdown-item" onclick="modalGrupoAtividade('{{ row[0] }}')" style="cursor: pointer;">
+                              <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
+                          </a>
+                          </div>
                       </div>
-                  </div>
-                </td>                
-                <td data-title="Código">{{ row[0] }}</td>
-                <td data-title="Tombamento">{{ row[1] }}</td>
-                <td data-title="Setor">{{ row[2] }}</td>
-                <td data-title="Descrição">{{ row[3] }}</td>
-                <td data-title="Classificação">{{ row[4] }}</td>
-                <td data-title="Periodicidade (Dias)">{{ row[5] }}</td>
-                <td data-title="Última manutenção">{{ row[6] }}</td>
-                <td data-title="Próxima manutenção">{{ row[7] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-      </table>
+                    </td>                
+                    <td data-title="Código">{{ row[0] }}</td>
+                    <td data-title="Tombamento">{{ row[1] }}</td>
+                    <td data-title="Setor">{{ row[2] }}</td>
+                    <td data-title="Descrição">{{ row[3] }}</td>
+                    <td data-title="Classificação">{{ row[4] }}</td>
+                    <td data-title="Periodicidade (Dias)">{{ row[5] }}</td>
+                    <td data-title="Última manutenção">{{ row[6] }}</td>
+                    <td data-title="Próxima manutenção">{{ row[7] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
     </div>
-    </div>
+  </div>
+</div>
     <div class="row justify-content-md-center">
       <div class = "board2" style="overflow-x: auto;">
         <div id = "titulo" class="row">
@@ -244,6 +244,10 @@
 </div>
 
 <div id="mensagem"></div>
+
+{% endblock %}
+
+{% block scripts %}
 
 <script>
   

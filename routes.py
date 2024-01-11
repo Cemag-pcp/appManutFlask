@@ -2833,6 +2833,8 @@ def grafico():  # Dashboard
                                 query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, 
                                 query_horas_trabalhada_setor, mes)
         
+        print(resultado)
+
         context_mtbf_maquina = resultado['context_mtbf_maquina']
         context_mttr_maquina = resultado['context_mttr_maquina']
         context_mttr_setor = resultado['context_mttr_setor']
@@ -2852,6 +2854,7 @@ def grafico():  # Dashboard
 
         lista_mtbf_setor = resultado['df_timeline_mtbf_setor']
         lista_mtbf_maquina = resultado['df_timeline_copia']
+        
         lista_disponibilidade_setor = resultado['df_disponibilidade_setor']
         lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
         lista_mttr_setor = resultado['df_combinado_mttr_setor']
@@ -2967,6 +2970,7 @@ def grafico():  # Dashboard
 
     lista_mtbf_setor = resultado['df_timeline_mtbf_setor']
     lista_mtbf_maquina = resultado['df_timeline_copia']
+    print(lista_mtbf_maquina)
     lista_disponibilidade_setor = resultado['df_disponibilidade_setor']
     lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
     lista_mttr_setor = resultado['df_combinado_mttr_setor']
