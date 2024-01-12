@@ -12,7 +12,7 @@
     <meta name="author" content="">
 
     {% block title %}
-    <title>SB Admin 2 - Dashboard</title>
+    
     {% endblock %}
 
     <!-- Custom fonts for this template-->    
@@ -28,11 +28,12 @@
     <!-- Custom styles for this page -->
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
 
-      <!-- Custom styles for this template-->
-      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
+    <!-- Custom styles for this template-->
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
+
 
     {% block links %}
-    
+
     {% endblock %}
 
 </head>
@@ -150,7 +151,7 @@
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="/cadastrar52">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Cadastro de Máquinas</span></a>
             </li>

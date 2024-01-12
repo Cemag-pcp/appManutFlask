@@ -26,140 +26,142 @@
   </div>
 </div>
 
-<div class="col-md-4 offset-md-4">
-  <div id ="formulario_abertura" class="card card-body">
-    <div id = 'abertura_titulo' class="row justify-content-center align-items-center mb-3">
-      <h3 style="margin-right: 30px;">Abrir OS</h3><i class="fa-solid fa-circle-info" id="infoIcon" style="margin-top: -7px; cursor: pointer;"></i>
-    </div>  
-    <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+<div class="container-fluid">
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Abrir OS</h6>
+    </div>
+    <div class="card-body">
+      <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
 
-      <div class="form-group">
-        <label for="setor">Setor</label>
-        <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
-          <option value="" selected disabled hidden></option>
-          <option value="Administrativo">Administrativo</option>
-          <option value="Almoxarifado">Almoxarifado</option>
-          <option value="Corte e estamparia">Corte e estamparia</option>
-          <option value="Expedição">Expedição</option>
-          <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
-          <option value="Solda">Solda</option>
-          <option value="Montagem">Montagem</option>
-          <option value="Pintura">Pintura</option>
-          <option value="Carpintaria">Carpintaria</option>
-          <option value="Usinagem">Usinagem</option>  
-          <option value="Serra">Serra</option>
-          <option value="Serralheria">Serralheria</option>
-          <option value="Manutenção">Manutenção</option>
-          <option value="Forjaria">Forjaria</option>
-          <option value="Utilidades">Utilidades</option>
-          <option value="Qualidade">Qualidade</option>
-        </select>
-      </div>
-      
-      <div class="form-group" id="solicitante-select">
-        <label for="solicitante">Solicitante:</label>
-          <select class="form-control" sdata-live-search="true" name="solicitante" id="solicitante" required>
-            <option value="" selected disabled hidden></option>  
-            {% for solicitante in solicitantes %}
-            <option value="{{solicitante[0]}}">{{solicitante[0]}}</option>
-            {% endfor %}
-          </select>
-      </div> 
-      <!-- Se o setor for solda -->
-      <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
-        <label for="Equipamento em falha">Equipamento em falha:</label>
-        <a href="#" onclick="showImageModalOS()"><i class="fa-solid fa-image"></i></a>
-        <select class="form-control" name="falha" id="falha" onchange="verificarFalha()">
-          <option value="" selected disabled hidden></option>  
-          <option value="Máquina de Solda">Máquina de Solda</option>
-          <option value="Monovia">Monovia</option>
-          <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
-          <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
-        </select>
-      </div>      
-      
-      <!-- Se o equipamento em falha for máquina de solda -->
-      <div class="form-group" id="maquina_de_solda" style="display: none;">
-        <label for="Maquina de Solda">Setor da Máquina de Solda:</label>
-        <select class="form-control" sdata-live-search="true" name="solda_maquina" id="solda_maquina">
-            <option value="" selected disabled hidden></option>  
-            <option value="Laterais">Laterais</option>
-            <option value="Eixos">Eixos</option>
-            <option value="Içamento">Içamento</option>
-            <option value="Laterais">Plataforma "Esqueleto"</option>
-            <option value="Eixos">Chassi</option>
-            <option value="Içamento">Tanque</option>
-            <option value="Laterais">Caçamba</option>
-            <option value="Eixos">Serralheria</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="maquina-select">
-        <label for="maquina">Máquina/Local:</label>
-          <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
-            <option value="" selected disabled hidden></option>  
-            {% for maquina in lista_maquinas_monovia %}
-            <option value="{{maquina[0]}}">{{maquina[0]}}</option>
-            {% endfor %}
-          </select>
-      </div>
-      
-      <div class="form-group" id="ferramenta" style="display: none;">
-        <label for="ferramenta">Qual é a ferramenta?</label>
-        <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramentas">
-          <option value="" selected disabled hidden></option>  
-          <option value="Esmerilhadeira">Esmerilhadeira</option>
-          <option value="Tocha">Tocha</option>
-        </select>
-      </div>
-      
-      <div class="form-group" id="codigo_equip" style="display: none;">
-        <label for="codigo_equip">Qual o código que apresenta no equipamento?</label>
-        <textarea id="codigo_equipa" class="form-control" name="codigo_equip" rows="5" cols="39" placeholder="Digite o código..."></textarea>
-      </div>
-      
-      <div class="form-group" id = "descricao">
-        <label for="problema">Descrição:</label>
-        <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
-      </div>
-      
-      <div class="form-row">
         <div class="form-group">
-          <label for="maquina-parada">Máquina parada?</label>
-          <label class="switch">
-            <input type="checkbox" name="maquina-parada" id="maquina-parada">
-            <span class="slider round"></span>
-          </label>
-        </div>
-
-        <div class="form-group">        
-          <label for="risco">Impacto na produção:</label>
-          <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
+          <label for="setor">Setor</label>
+          <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
             <option value="" selected disabled hidden></option>
-            <option>Alto</option>
-            <option>Médio</option>
-            <option>Baixo</option>
+            <option value="Administrativo">Administrativo</option>
+            <option value="Almoxarifado">Almoxarifado</option>
+            <option value="Corte e estamparia">Corte e estamparia</option>
+            <option value="Expedição">Expedição</option>
+            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+            <option value="Solda">Solda</option>
+            <option value="Montagem">Montagem</option>
+            <option value="Pintura">Pintura</option>
+            <option value="Carpintaria">Carpintaria</option>
+            <option value="Usinagem">Usinagem</option>  
+            <option value="Serra">Serra</option>
+            <option value="Serralheria">Serralheria</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Forjaria">Forjaria</option>
+            <option value="Utilidades">Utilidades</option>
+            <option value="Qualidade">Qualidade</option>
           </select>
         </div>
-      </div>
+        
+        <div class="form-group" id="solicitante-select">
+          <label for="solicitante">Solicitante:</label>
+            <select class="form-control" sdata-live-search="true" name="solicitante" id="solicitante" required>
+              <option value="" selected disabled hidden></option>  
+              {% for solicitante in solicitantes %}
+              <option value="{{solicitante[0]}}">{{solicitante[0]}}</option>
+              {% endfor %}
+            </select>
+        </div> 
+        <!-- Se o setor for solda -->
+        <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
+          <label for="Equipamento em falha">Equipamento em falha:</label>
+          <a href="#" onclick="showImageModalOS()"><i class="fa-solid fa-image"></i></a>
+          <select class="form-control" name="falha" id="falha" onchange="verificarFalha()">
+            <option value="" selected disabled hidden></option>  
+            <option value="Máquina de Solda">Máquina de Solda</option>
+            <option value="Monovia">Monovia</option>
+            <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
+            <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
+          </select>
+        </div>      
+        
+        <!-- Se o equipamento em falha for máquina de solda -->
+        <div class="form-group" id="maquina_de_solda" style="display: none;">
+          <label for="Maquina de Solda">Setor da Máquina de Solda:</label>
+          <select class="form-control" sdata-live-search="true" name="solda_maquina" id="solda_maquina">
+              <option value="" selected disabled hidden></option>  
+              <option value="Laterais">Laterais</option>
+              <option value="Eixos">Eixos</option>
+              <option value="Içamento">Içamento</option>
+              <option value="Laterais">Plataforma "Esqueleto"</option>
+              <option value="Eixos">Chassi</option>
+              <option value="Içamento">Tanque</option>
+              <option value="Laterais">Caçamba</option>
+              <option value="Eixos">Serralheria</option>
+          </select>
+        </div>
 
-      <div class="file-upload">
-          <input class="file-upload__input" type="file" name="imagens" id="imagens" multiple accept="image/*">
-          <button class="file-upload__button" type="button">Escolha a(s) foto(s)</button>
+        <div class="form-group" id="maquina-select">
+          <label for="maquina">Máquina/Local:</label>
+            <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
+              <option value="" selected disabled hidden></option>  
+              {% for maquina in lista_maquinas_monovia %}
+              <option value="{{maquina[0]}}">{{maquina[0]}}</option>
+              {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group" id="ferramenta" style="display: none;">
+          <label for="ferramenta">Qual é a ferramenta?</label>
+          <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramentas">
+            <option value="" selected disabled hidden></option>  
+            <option value="Esmerilhadeira">Esmerilhadeira</option>
+            <option value="Tocha">Tocha</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="codigo_equip" style="display: none;">
+          <label for="codigo_equip">Qual o código que apresenta no equipamento?</label>
+          <textarea id="codigo_equipa" class="form-control" name="codigo_equip" rows="5" cols="39" placeholder="Digite o código..."></textarea>
+        </div>
+        
+        <div class="form-group" id = "descricao">
+          <label for="problema">Descrição:</label>
+          <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maquina-parada">Máquina parada?</label>
+            <label class="switch">
+              <input type="checkbox" name="maquina-parada" id="maquina-parada">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="form-group">        
+            <label for="risco">Impacto na produção:</label>
+            <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
+              <option value="" selected disabled hidden></option>
+              <option>Alto</option>
+              <option>Médio</option>
+              <option>Baixo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="file-upload">
+            <input class="file-upload__input" type="file" name="imagens" id="imagens" multiple accept="image/*">
+            <button class="file-upload__button" type="button">Escolha a(s) foto(s)</button>
+            <span class="file-upload__label">Nenhum Arquivo selecionado</span>
+        </div>   
+
+        <div class="file-upload" style="margin-top: 20px;">
+          <input class="file-upload__input" type="file" name="video" id="video" accept="video/*">
+          <button class="file-upload__button" type="button">Escolha o vídeo</button>
           <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-      </div>   
+        </div>
 
-      <div class="file-upload" style="margin-top: 20px;">
-        <input class="file-upload__input" type="file" name="video" id="video" accept="video/*">
-        <button class="file-upload__button" type="button">Escolha o vídeo</button>
-        <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-      </div>
-
-      <button id = 'salvar' class="btn btn-block">
-        Save 
-      </button>
-      
-    </form>
+        <button id = 'salvar' class="btn btn-block">
+          Save 
+        </button>
+        
+      </form>
+    </div>
   </div>
 </div>
 
