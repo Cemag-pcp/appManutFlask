@@ -67,13 +67,17 @@ def calcular_minutos_uteis(row, df):
     # print(row['now'], row['fim'])
 
     # Extraia as datas de início e fim da linha
-    if row['status'] != "Finalizada" and row['parada3'] == 'false' and  row['now'] >= row['datafim']: #and len(ordem_finalizada) > 0: 
-        data_inicio = pd.to_datetime(row['inicio']).replace(tzinfo=None)  # Remova as informações de fuso horário
-        data_fim = row['ultimo_dia_mes'].replace(tzinfo=None)  # Remova as informações de fuso horário
-    else:
+    if row['parada3'] == 'true':
+    # if row['now'] >= row['datafim']: #and len(ordem_finalizada) > 0: 
+    #     data_inicio = pd.to_datetime(row['inicio']).replace(tzinfo=None)  # Remova as informações de fuso horário
+    #     data_fim = row['ultimo_dia_mes'].replace(tzinfo=None)  # Remova as informações de fuso horário
+    # else:
         data_inicio = pd.to_datetime(row['inicio']).replace(tzinfo=None)  # Remova as informações de fuso horário
         data_fim = row['fim'].replace(tzinfo=None)  # Remova as informações de fuso horário
+    else:
+        return 0
 
+    print(data_inicio, data_fim)
     # minutos_uteis = 0
 
     # data_inicio = datetime("2023-12-06 11:14:00")
@@ -280,9 +284,11 @@ def cards(query):
                             password=DB_PASS, host=DB_HOST)
 
     cards = pd.read_sql_query(query, conn)
+
     cards = cards.sort_values(by='n_ordem', ascending=True)
 
     cards = cards.drop_duplicates(subset='id_ordem', keep='last')
+    cards[cards['status'] == 'Em espera'][['id_ordem']]
 
     cards = cards.groupby(['status'])['status'].count()
 
@@ -2617,6 +2623,7 @@ def grafico():  # Dashboard
 
         boleano_historico = True
         todos_meses = None
+        ano = None
 
         conn = psycopg2.connect(
             dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
