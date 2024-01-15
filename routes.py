@@ -3206,9 +3206,9 @@ def plan_52semanas():  # Tabela com as 52 semanas
 
     df_grupos_notna = df_grupos.dropna()
 
-    df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
-    
-    print(df_grupos_notna)
+    df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], float(row['periodicidade'])*30), axis=1)
+        
+    print(df_grupos_notna['proxima_manutencao'])
 
     # df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'], format="%Y-%m-%d")
 
@@ -3317,7 +3317,7 @@ def atividadesGrupo():
     print(df)
 
     try:
-        df['proxima_manutencao'] = df.apply(lambda row: calcular_proxima_data(row['data'], int(row['periodicidade'])*30), axis=1)
+        df['proxima_manutencao'] = df.apply(lambda row: calcular_proxima_data(row['data'], float(row['periodicidade'])*30), axis=1)
         proxima_data = df['proxima_manutencao'][0]
     except Exception as e:
         print(f"Erro ao calcular próxima manutenção: {e}")
@@ -3505,7 +3505,7 @@ def receber_tarefas():
 
     json_tarefas = request.get_json()
 
-    periodicidade = int(json_tarefas['parametros'][0]['periodicidade_grupo'])
+    periodicidade = float(json_tarefas['parametros'][0]['periodicidade_grupo'])
     ultima_manutencao = json_tarefas['parametros'][0]['ultima_manutencao']
     grupo = json_tarefas['parametros'][0]['grupo']
     codigo_maquina = json_tarefas['parametros'][0]['codigo_maquina']
