@@ -1010,7 +1010,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
             2)
-
+        
         df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].groupby('setor').mean()[['MTBF','MTTR','disponibilidade']].reset_index()
         df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
         df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
@@ -2673,13 +2673,12 @@ def grafico():  # Dashboard
 
         mes_inicial = datetime.strptime(mes_inicial, '%d/%m/%Y').date()
         mes_final = datetime.strptime(mes_final, '%d/%m/%Y').date()
-        mes_final += timedelta(days=1)
 
         # Criar uma lista de meses no intervalo
         lista_meses = []
         data_atual = mes_inicial
 
-        while data_atual < mes_final:
+        while data_atual <= mes_final:
             lista_meses.append(data_atual.month)
             data_atual = data_atual.replace(day=1) + timedelta(days=32)
             data_atual = data_atual.replace(day=1)
@@ -2733,7 +2732,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if mes:
-            query += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2753,7 +2752,7 @@ def grafico():  # Dashboard
                """
 
         if mes:
-            query += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if maquinas_importantes:
@@ -2789,7 +2788,7 @@ def grafico():  # Dashboard
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mtbf += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query_mtbf += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_mtbf += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2824,7 +2823,7 @@ def grafico():  # Dashboard
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mttr += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query_mttr += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_mttr += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2857,7 +2856,7 @@ def grafico():  # Dashboard
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_disponibilidade += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query_disponibilidade += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2876,7 +2875,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_area += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query_horas_trabalhada_area += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_area += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2893,7 +2892,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_tipo += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query_horas_trabalhada_tipo += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_tipo += f" AND maquina in ({maquinas_selecionadas})"
 
