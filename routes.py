@@ -1010,7 +1010,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
             2)
-        
+
         df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].groupby('setor').mean()[['MTBF','MTTR','disponibilidade']].reset_index()
         df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
         df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
