@@ -252,7 +252,7 @@ def tempo_os():
     return df_agrupado
 
 
-def cards(query):
+def cards_get(query):
 
     """
     Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
@@ -268,9 +268,7 @@ def cards(query):
                             password=DB_PASS, host=DB_HOST)
 
     cards = pd.read_sql_query(query, conn)
-    cards = cards[cards['id_ordem'] == 837]
-
-    print(cards)
+    # cards = cards[cards['id_ordem'] == 837]
 
     cards = cards.sort_values(by='n_ordem', ascending=True)
 
@@ -281,6 +279,52 @@ def cards(query):
     print(cards)
 
     em_execucao = cards[cards['status'] == 'Em execução'][['id_ordem', 'status','n_ordem']]
+
+    print(em_execucao)
+
+    cards = cards.groupby(['status'])['status'].count()
+
+    # Crie um dicionário para armazenar os resultados
+    status_dict = {}
+    for status, qt_os in cards.items():
+        status_dict[status] = qt_os
+
+    # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
+    lista_qt = [
+        status_dict.get('Em espera', 0),
+        status_dict.get('Aguardando material', 0),
+        status_dict.get('Finalizada', 0),
+        status_dict.get('Em execução', 0),
+        status_dict.get('Aguardando OK', 0)
+    ]
+
+    print(lista_qt)
+
+    return lista_qt
+
+def cards_post(query):
+
+    """
+    Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
+    """
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cards = pd.read_sql_query(query, conn)
+    # cards = cards[cards['id_ordem'] == 837]
+
+    cards['status'] = cards['status'].fillna('Em espera')
+
+    cards = cards.sort_values(by='n_ordem', ascending=True)
+
+    print(cards)
+
+    cards = cards.drop_duplicates(subset='id_ordem', keep='last')
+
+    print(cards)
+
+    em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
 
     print(em_execucao)
 
@@ -327,8 +371,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     # Obtém os dados da tabela
 
     df_timeline = pd.read_sql_query(query_mtbf, conn)
-
-    print(df_timeline)
 
     df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
 
@@ -956,7 +998,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
     df_combinado = df_combinado.drop_duplicates().reset_index(drop=True)
-    print(df_combinado)
 
     if len(df_combinado) > 0:
         print('Entrou')
@@ -2692,7 +2733,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if mes:
-            query += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2712,13 +2753,15 @@ def grafico():  # Dashboard
                """
 
         if mes:
-            query += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if maquinas_importantes:
             query += f" AND maquina in ({maquinas_selecionadas})"
 
-        lista_qt = cards(query)
+        print("Query aqui", query)
+
+        lista_qt = cards_post(query)
 
         """ Finalizando cards """
 
@@ -2746,7 +2789,7 @@ def grafico():  # Dashboard
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mtbf += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query_mtbf += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_mtbf += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2781,7 +2824,7 @@ def grafico():  # Dashboard
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_mttr += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query_mttr += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_mttr += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2814,7 +2857,7 @@ def grafico():  # Dashboard
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
         if mes:
-            query_disponibilidade += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query_disponibilidade += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2833,7 +2876,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_area += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query_horas_trabalhada_area += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_area += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2850,7 +2893,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_tipo += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query_horas_trabalhada_tipo += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_tipo += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2867,7 +2910,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query_horas_trabalhada_setor += f" AND setor in ({setor_selecionado})"
         if mes:
-            query_horas_trabalhada_setor += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'"
+            query_horas_trabalhada_setor += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_setor += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -2940,7 +2983,7 @@ def grafico():  # Dashboard
             WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
             """
 
-    lista_qt = cards(query)
+    lista_qt = cards_get(query)
 
     query_mtbf = (
         """
