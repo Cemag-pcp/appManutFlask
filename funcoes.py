@@ -547,12 +547,17 @@ def gerador_de_semanas_informar_manutencao_diario(grupo,codigo_maquina,maquina,t
 
 # Define a função para calcular a próxima data ajustada
 
-def calcular_proxima_data(data_atual, periodicidade_em_dias=7.5):
+def calcular_proxima_data(data_atual, periodicidade_em_dias):
     periodicidade_em_dias = round(periodicidade_em_dias)
     print(data_atual)
     # data_atual = datetime.strptime(data_atual,'%Y-%m-%d').date()
     dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
-    proxima_data = data_atual + dias_uteis
+    tipo = type(data_atual)
+    if tipo == str:
+        data_atual = datetime.datetime.strptime(data_atual,'%Y-%m-%d').date()
+        proxima_data = data_atual + dias_uteis
+    else:
+        proxima_data = data_atual + dias_uteis
     # proxima_data = datetime.datetime.now().date() - timedelta(3)
     if proxima_data.weekday() == 5 or proxima_data.weekday() == 6 : 
         proxima_data = proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
@@ -562,6 +567,8 @@ def calcular_proxima_data(data_atual, periodicidade_em_dias=7.5):
 def gerar_planejamento_maquinas_preventivas(codigo_maquina,grupo,maquina,
                                             tombamento,classificacao,ultima_manutencao,periodicidade):
 
+    # gerar_planejamento_maquinas_preventivas(codigo,setor,descricao,tombamento,criticidade,manut_inicial,periodicidade)
+    # teste 11 Carpintaria teste 11 teste 11 C 2024-01-15 90
     # codigo_maquina = 'ABC'
     # grupo = 'ABC'
     # maquina = 'ABC'
@@ -620,6 +627,8 @@ def gerar_planejamento_maquinas_preventivas(codigo_maquina,grupo,maquina,
     df_resultado = df_resultado[df_resultado['proxima_manutencao'] < '2025-01-01']
 
     df_resultado['ultima_manutencao'] = pd.to_datetime(df_resultado['ultima_manutencao'])
+
+    print(df_resultado)
 
     return df_resultado
 

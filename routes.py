@@ -3696,7 +3696,7 @@ def cadastro_preventiva():
             print("depois")
 
             df['ultima_manutencao'] = df['ultima_manutencao'].dt.strftime("%Y-%m-%d")
-            df['proxima_manutencao'] = df['proxima_manutencao'].dt.strftime("%Y-%m-%d")
+            df['proxima_manutencao'] = pd.to_datetime(df['proxima_manutencao'], errors='coerce')
             df['periodicidade'] = df['periodicidade'].astype(str)
 
             lista = df.values.tolist()
@@ -3716,6 +3716,7 @@ def cadastro_preventiva():
             else:
 
                 try:
+                    print('entrou')
                     conn = psycopg2.connect(
                         dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
                     cur = conn.cursor(
@@ -3742,10 +3743,12 @@ def cadastro_preventiva():
                     flash("Máquina cadastrada com sucesso", category='sucess')
 
                 except Error as e:
+                    print('Não entrou except')
                     print(
                         f"Ocorreu um erro ao conectar ou executar a consulta no PostgreSQL: {e}")
 
                 finally:
+                    print('entrou no finally')
                     # Fechar o cursor e a conexão com o banco de dados
                     cur.close()
                     conn.close()
@@ -3881,9 +3884,7 @@ def timeline_preventiva(maquina):
     df['maquina'] = df['maquina'].str.strip()
 
     df = df[df['maquina'] == maquina].reset_index(drop=True)
-    # df = df[df['natureza'] == 'Planejada'].reset_index(drop=True)
-
-    df[['dataabertura', 'id_ordem']]
+    df = df[df['natureza'] == 'Planejada'].reset_index(drop=True)
 
     # Limpar a coluna
     for i in range(len(df)):
@@ -3904,11 +3905,15 @@ def timeline_preventiva(maquina):
     # Atualizar os valores de dataabertura para cada ID
     df['dataabertura'] = df['id_ordem'].map(id_data_map)
 
-    df = df.drop_duplicates(subset='id_ordem', keep='last')
+    df = df.sort_values('n_ordem', ascending=True)
 
-    df = df.sort_values('id_ordem', ascending=True)
+    # df = df.drop_duplicates(subset='id_ordem', keep='last')
+
+    print(df.columns)
 
     data = df.values.tolist()
+
+    print(data)
 
     return render_template('user/timeline_preventiva.html', data=data, maquina=maquina)
 
