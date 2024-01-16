@@ -2666,13 +2666,37 @@ def grafico():  # Dashboard
         maquinas = df_maquinas.values.tolist()
 
         setor_selecionado = request.form.getlist('filtro_setor')
+
+        lista_setore_selecionado = setor_selecionado
+
+        if setor_selecionado:
+            setor_selecionado = ', '.join([f"'{setor}'" for setor in setor_selecionado])
+        else:
+            setor_selecionado = None  # Ou qualquer valor padrão que faça sentido no seu caso
+
         # maquina_selecionado = request.form.get('filtro_maquinas')
         mes = request.form.get('datetimes')
-       
-        mes_inicial, mes_final = mes.split(' - ')
 
-        mes_inicial = datetime.strptime(mes_inicial, '%d/%m/%Y').date()
-        mes_final = datetime.strptime(mes_final, '%d/%m/%Y').date()
+        if not mes:
+            mes_inicial_str = '2023-06-22'
+            # Usar o construtor do datetime.date
+            mes_inicial = datetime.date(datetime.strptime(mes_inicial_str, '%Y-%m-%d'))
+            hoje = datetime.now().date()
+            dia_semana_hoje = hoje.weekday()
+            if dia_semana_hoje == 6:  # 5 representa sábado
+                mes_final = datetime.now().date() - timedelta(days=2)
+            elif dia_semana_hoje == 6 or dia_semana_hoje != 0:  # 6 representa domingo
+                mes_final = datetime.now().date() - timedelta(days=1)
+            else:
+                mes_final = datetime.now()
+        else:
+            mes_inicial, mes_final = mes.split(' - ')
+            mes_inicial = datetime.strptime(mes_inicial, '%d/%m/%Y').date()
+            mes_final = datetime.strptime(mes_final, '%d/%m/%Y').date()
+
+        print('data_selecionada ', mes_inicial,mes_final),'2023-06-22 2024-01-15' '/' '2024-01-01 2024-01-15'
+
+        print('setor_selecionado ', setor_selecionado)
 
         # Criar uma lista de meses no intervalo
         lista_meses = []
@@ -2685,53 +2709,15 @@ def grafico():  # Dashboard
 
         mes_inicial = mes_inicial.strftime('%Y-%m-%d')
         mes_final = mes_final.strftime('%Y-%m-%d')
-        
-        maquinas_importantes = request.form.getlist('maquinas-favoritas')
 
-        if maquinas_importantes or len(maquinas) != 0:
-            cur.execute(
-                'SELECT DISTINCT (codigo) FROM tb_planejamento_anual')
-            maquinas_preventivas = cur.fetchall()
-            maquinas_preventivas = [valor[0] for valor in maquinas_preventivas]
-            maquinas_selecionadas = ",".join(
-                [f"'{maquinas}'" for maquinas in maquinas_preventivas])
-
-        cur.execute(
-            'SELECT DISTINCT EXTRACT(MONTH FROM ultima_atualizacao) AS numero_mes FROM tb_ordens;')
-
-        # if mes == 0 or mes[0] == '':
-
-        #     mes = datetime.now().month
-        #     mes = list(range(1, mes + 1))
-        #     todos_meses = 'Todos'
-
-        # mes = list(map(int, mes))
-
-        lista_setore_selecionado = setor_selecionado
-
-        setor_selecionado = ",".join(
-            [f"'{palavra}'" for palavra in setor_selecionado])
-        mes_selecionado = ",".join([f"{mes_}" for mes_ in mes])
-
-        print(mes)
-        # todos_presentes = all(elemento in meses_validos for elemento in mes)
-
-        # if not todos_presentes:
-        #     flash("Escolha um mês válido")
-        #     return redirect(request.url)  # Redirecionar de volta para a página para exibir a mensagem flash
-
-        """ Criando cards """
-
-        if not setor_selecionado or setor_selecionado == '':
-            setor_selecionado = ''
-    
-        # Monta a query base
         query = "SELECT * FROM tb_ordens WHERE 1=1"
+
+        maquinas_importantes = request.form.getlist('maquinas-favoritas')
 
         # Adiciona as condições de filtro se os campos não estiverem vazios
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
-        if mes:
+        if mes_inicial:
             query += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query += f" AND maquina in ({maquinas_selecionadas})"
@@ -2751,7 +2737,7 @@ def grafico():  # Dashboard
                 WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
                """
 
-        if mes:
+        if mes_inicial:
             query += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
@@ -2787,7 +2773,7 @@ def grafico():  # Dashboard
             query_mtbf += f" AND t1.setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
-        if mes:
+        if mes_inicial:
             query_mtbf += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_mtbf += f" AND maquina in ({maquinas_selecionadas})"
@@ -2822,7 +2808,7 @@ def grafico():  # Dashboard
             query_mttr += f" AND t1.setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_mttr += f" AND area_manutencao = '{area_manutencao}'"
-        if mes:
+        if mes_inicial:
             query_mttr += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_mttr += f" AND maquina in ({maquinas_selecionadas})"
@@ -2855,7 +2841,7 @@ def grafico():  # Dashboard
             query_disponibilidade += f" AND  setor in ({setor_selecionado})"
         # if area_manutencao:
         #     query_disponibilidade += f" AND area_manutencao = '{area_manutencao}'"
-        if mes:
+        if mes_inicial:
             query_disponibilidade += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_disponibilidade += f" AND maquina in ({maquinas_selecionadas})"
@@ -2874,7 +2860,7 @@ def grafico():  # Dashboard
 
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
-        if mes:
+        if mes_inicial:
             query_horas_trabalhada_area += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_area += f" AND maquina in ({maquinas_selecionadas})"
@@ -2891,7 +2877,7 @@ def grafico():  # Dashboard
 
         if setor_selecionado:
             query_horas_trabalhada_tipo += f" AND setor in ({setor_selecionado})"
-        if mes:
+        if mes_inicial:
             query_horas_trabalhada_tipo += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_tipo += f" AND maquina in ({maquinas_selecionadas})"
@@ -2908,12 +2894,42 @@ def grafico():  # Dashboard
 
         if setor_selecionado:
             query_horas_trabalhada_setor += f" AND setor in ({setor_selecionado})"
-        if mes:
+        if mes_inicial:
             query_horas_trabalhada_setor += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_setor += f" AND maquina in ({maquinas_selecionadas})"
 
         query_horas_trabalhada_setor += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY setor;"
+            
+
+        if maquinas_importantes or len(maquinas) != 0:
+            cur.execute(
+                'SELECT DISTINCT (codigo) FROM tb_planejamento_anual')
+            maquinas_preventivas = cur.fetchall()
+            maquinas_preventivas = [valor[0] for valor in maquinas_preventivas]
+            maquinas_selecionadas = ",".join(
+                [f"'{maquinas}'" for maquinas in maquinas_preventivas])
+
+        cur.execute(
+            'SELECT DISTINCT EXTRACT(MONTH FROM ultima_atualizacao) AS numero_mes FROM tb_ordens;')
+
+        # if mes == 0 or mes[0] == '':
+
+        #     mes = datetime.now().month
+        #     mes = list(range(1, mes + 1))
+        #     todos_meses = 'Todos'
+
+        # mes = list(map(int, mes))
+
+
+        print(mes)
+        # todos_presentes = all(elemento in meses_validos for elemento in mes)
+
+        # if not todos_presentes:
+        #     flash("Escolha um mês válido")
+        #     return redirect(request.url)  # Redirecionar de volta para a página para exibir a mensagem flash
+
+        """ Criando cards """
 
         resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado,
                                 query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, 
