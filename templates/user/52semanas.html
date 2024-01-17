@@ -2,144 +2,236 @@
 {% block containerFluid %}
 
 <div class='container-fluid'>
-  
-<div class="card shadow mb-4">
-  <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">Planejamento</h6>
+
+  <div class="row">
+
+    <!-- Tabela com máquinas com manutenções planejadas -->
+    <div class="col-md-12 mb-2">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Planejamento</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+              <table class="table table-bordered" id="dataTable12" width="100%" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tombamento</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classificação</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (Dias)</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in data %}
+                    <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
+                      <td data-title="Código">{{ row[0] }}</td>
+                      <td data-title="Tombamento">{{ row[1] }}</td>
+                      <td data-title="Setor">{{ row[2] }}</td>
+                      <td data-title="Descrição">{{ row[3] }}</td>
+                      <td data-title="Classificação">{{ row[4] }}</td>
+                      <td data-title="Periodicidade (Dias)">{{ row[5] }}</td>
+                      <td data-title="Última manutenção">{{ row[6] }}</td>
+                      <td data-title="Próxima manutenção">{{ row[7] }}</td>
+                      <td style="width: 50px;">
+                        <div class="dropdown">
+                            <button style = 'background-color: black;'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                              <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=row[0]) }}" class="btn" target="_blank">
+                                <i class="fas fa-clipboard-list"></i>
+                              </a>
+                              <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
+                                <i class="fas fa-clock"></i>
+                              </a>
+                              <a class="dropdown-item abrir-modal" data-id="{{ row[0] }}" style="cursor: pointer;">
+                                <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
+                            </a>
+                            </div>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
-    <div class="card-body">
-      <div class="table-responsive">
-          <table class="table table-bordered" id="dataTable12" width="100%" cellspacing="0">
+
+  <div class="row">
+
+    <!-- Tabela com grupos de manutenções planejadas -->
+    <div class="col-md-7 mb-2"> 
+      <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Planejamento por grupos de atividade</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable13" width="100%" cellspacing="0">
               <thead>
                 <tr>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tombamento</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classificação</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (Dias)</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Grupo</th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (meses)</th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
                 </tr>
               </thead>
-            <tbody>
-              {% for row in data %}
-                <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
-                    <td style="width: 50px;">
-                      <div class="dropdown">
-                          <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
-                          </button>
-                          <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                            <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=row[0]) }}" class="btn" target="_blank">
-                              <i class="fas fa-clipboard-list"></i>
-                            </a>
-                            <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
-                              <i class="fas fa-clock"></i>
-                            </a>
-                            <a id="dropdown_os" class="dropdown-item" onclick="modalGrupoAtividade('{{ row[0] }}')" style="cursor: pointer;">
-                              <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
-                          </a>
-                          </div>
-                      </div>
-                    </td>                
-                    <td data-title="Código">{{ row[0] }}</td>
-                    <td data-title="Tombamento">{{ row[1] }}</td>
-                    <td data-title="Setor">{{ row[2] }}</td>
-                    <td data-title="Descrição">{{ row[3] }}</td>
-                    <td data-title="Classificação">{{ row[4] }}</td>
-                    <td data-title="Periodicidade (Dias)">{{ row[5] }}</td>
-                    <td data-title="Última manutenção">{{ row[6] }}</td>
-                    <td data-title="Próxima manutenção">{{ row[7] }}</td>
+              <tbody>
+                {% for grupos in df_final_list %}
+                  <tr>
+                    <td><i class="fa-solid fa-caret-right" style="font-size: 20px;"></i> </td>
+                    <td data-title="Código">{{grupos[0]}}</td>
+                    <td data-title="Grupo">{{grupos[1]}}</td>
+                    <td data-title="Última manutenção">{{grupos[2]}}</td>
+                    <td data-title="Periodicidade (meses)">{{grupos[3]}}</td>
+                    <td data-title="Próxima manutenção">{{grupos[4]}}</td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela com histórico de manutenções planejadas -->
+    <div class="col-md-5 mb-2"> 
+      <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Histórico de manutenções planejadas</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable14" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>Ordem</th>
+                  <th>Máquina</th>
+                  <th>Status</th>
+                  <th>Última execução</th>
                 </tr>
-                {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for historico_planejada in dados_historico_planejadas %}
+                  <tr>
+                    <td>{{historico_planejada[2]}}</td>
+                    <td>{{historico_planejada[3]}}</td>
+                    <td>{{historico_planejada[4]}}</td>
+                    <td>{{historico_planejada[1]}}</td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal para listar opções NOVO -->
+
+<div class="modal" tabindex="-1" role="dialog" id="modalGrupoAtividade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Grupo de atividades</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <select name="selectGrupos" id="selectGrupos" class="form-control" style="margin-bottom: 20px; width: 90%;">
+          <option></option>
+        </select>
+        <button class="excluirGrupo" style="background: transparent;border: none;cursor: pointer;">
+          <i class="fa fa-trash" style="cursor: pointer;"></i>
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="criarGrupo">Criar grupo</button>
+        <button type="button" class="btn btn-primary" id="grupoExistente">Entrar no grupo</button>
       </div>
     </div>
   </div>
 </div>
-    <div class="row justify-content-md-center">
-      <div class = "board2" style="overflow-x: auto;">
-        <div id = "titulo" class="row">
-          <h1 class="visao">Planejamento por grupos de atividade</h1>
-        </div>
-        <table id="table3" class="table custom-table table-striped">
-          <thead class="hide-thead">
-            <tr>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Grupo</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (meses)</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for grupos in df_final_list %}
-              <tr class="clickable-row">
-                <td><i class="fa-solid fa-caret-right" style="font-size: 20px;"></i> </td>
-                <td data-title="Código">{{grupos[0]}}</td>
-                <td data-title="Grupo">{{grupos[1]}}</td>
-                <td data-title="Última manutenção">{{grupos[2]}}</td>
-                <td data-title="Periodicidade (meses)">{{grupos[3]}}</td>
-                <td data-title="Próxima manutenção">{{grupos[4]}}</td>
-              </tr>
-              <tr class="expandable-row">
-                {% if grupos[5] == [''] %}
-                <td colspan="6" style="padding: 0;">
-                  <table style="width: 100%;">
-                    <thead>
-                      <tr style="background-color: #626262; color: white;">
-                        <th>Atividades</th>
-                        <th>Responsabilidade</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="background-color: #aeaeae;color: white; font-weight: bold;">
-                            <td><i class="fa-solid fa-ban" style="color: #ff0000;"></i></td>
-                            <td><i class="fa-solid fa-ban" style="color: #ff0000;"></i></td>
-                        </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-                {% else %}
-                <td colspan="6" style="padding: 0;">
-                  <table style="width: 100%;">
-                    <thead>
-                      <tr style="background-color: #626262; color: white;">
-                        <th>Atividades</th>
-                        <th>Responsabilidade</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for i in range(grupos[5]|length) %}
-                          <tr style="background-color: #aeaeae;color: white; font-weight: bold;">
-                              <td>{{ grupos[5][i] }}</td>
-                              <td>{{ grupos[6][i] }}</td>
-                          </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              {% endif %}
-            {% endfor %}
-          </tbody>
-        </table>
+
+<!-- Modal para entrar em um grupo existente NOVO -->
+
+<div class="modal" tabindex="-1" role="dialog" id="modalGrupoExistente">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Grupo de atividades</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-
-
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-4">
+            <label>Periodicidade (meses):</label>
+            <input id="periodicidade_grupo" type="number" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label>Última manutenção do grupo:</label>
+            <input id="ultima_manutencao" value="" type="date" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label>Próxima manutenção:</label>
+            <input type="date" readonly id="proxima_manutencao" class="form-control">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+              <label>Adicionar excel</label>
+              <button id="adicionarArquivo" class="file-upload__button">Adicionar arquivo</button>
+              <button id="remover_todas_atividades"  style="background: transparent;border: none;cursor: pointer;">
+                <i class="fa fa-trash" style="color: red; cursor: pointer;"></i>
+              </button>
+            </div>
+        </div>
+        <div class="row">
+          <table class="table table-striped" id="tableTarefas">
+            <thead>
+                <tr class="cabeçalho">
+                    <th>Atividade</th>
+                    <th>Responsabilidade</th>
+                    <th>Excluir</th>
+                </tr>
+            </thead>
+            <tbody>
+            <!-- Dados serão adicionados aqui dinamicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="criarGrupo">Criar grupo</button>
+        <button type="button" class="btn btn-primary" id="grupoExistente">Entrar no grupo</button>
+      </div>
+    </div>
   </div>
-
 </div>
 
-<!-- Modal para listar opções -->
+<!-- Modal para listar opções
 <div id="modalGrupoAtividade" class="tela" style="display: none;">
   <div class="modal-content3">
-      <span class="close" onclick="closeModalAtividade()">&times;</span> <!-- Botão de fechar -->
+      <span class="close" onclick="closeModalAtividade()">&times;</span> Botão de fechar
     <h4>Grupo de atividades</h4>
     <label for="name_grupo">Grupos</label>
     <div style="display: flex; justify-content: space-around; align-items: baseline;">
@@ -160,7 +252,7 @@
         </div>
       </div>
   </div>
-</div>
+</div>  -->
 
 <div id="modalRenomearGrupo" class="tela" style="display: none;">
   <div class="modal-content3">
@@ -175,7 +267,7 @@
 </div>
 
 <!-- Modal para visualizar tarefas associadas ao grupo selecionado -->
-<div id="modalGrupoExistente" class="tela" style="display: none;">
+<!-- <div id="modalGrupoExistente" class="tela" style="display: none;">
   
   <div class="modal-content3">
       <span class="close" onclick="closeModalGrupo()">&times;</span> 
@@ -213,8 +305,8 @@
             </tr>
         </thead>
         <tbody>
-          <!-- Dados serão adicionados aqui dinamicamente -->
-        </tbody>
+        Dados serão adicionados aqui dinamicamente -->
+        <!-- </tbody>
     </table>
 
     <div class="container">
@@ -224,7 +316,7 @@
       </div>
     </div>
    </div>
-</div>
+</div> --> 
 
 <!-- Modal para inserir arquivo -->
 <div id="modalInserirArquivo" class="tela" style="display: none;">
@@ -251,12 +343,191 @@
 
 <script>
   
+  // Abrir modal grupos de atividades
+
+  $(document).ready(function() {
+
+    // Função para abrir o modal inicial
+    function abrirModalGrupoAtividade(codigoMaquina) {
+      
+      $('.modal-title').text('Grupo de atividades da máquina ' + codigoMaquina);
+      $('#modalGrupoAtividade').modal('show');
+
+    }
+
+    // Função para buscar os grupos de atividades existentes nessa máquina
+    function coletarGrupos(codigo_maquina) {
+
+      $('#selectGrupos').empty();
+
+      // showLoading();
+
+      $.ajax({
+          url: `/preventivas?codigo_maquina=${codigo_maquina}`,
+          type: 'GET',
+          success: function (data) {
+              // Limpar o conteúdo atual do select
+              $('#selectGrupos').empty();
+            
+              // Populando o select com as opções recebidas
+              for (var i = 0; i < data.length; i++) {
+                  $('#selectGrupos').append(`<option value="${data[i]}">${data[i]}</option>`);
+              }
+
+              // hideLoading();
+          },
+          error: function (error) {
+              console.error(error);
+              // hideLoading();
+          }
+      });
+    }
+
+    function popularModalGrupoExistente(dados) {
+    
+      var tabela = $('#tableTarefas tbody');
+      tabela.empty(); // Limpa a tabela antes de popular
+
+      var periodicidade_grupo = $('#periodicidade_grupo');
+      var ultima_manutencao = $('#ultima_manutencao');
+      var proxima_manutencao = $('#proxima_manutencao');
+
+      periodicidade_grupo.val(dados[1][0][1]);
+      ultima_manutencao.val(dados[1][0][0]);
+      proxima_manutencao.val(dados[1][0][2]);
+
+      // Itera sobre os dados e adiciona linhas à tabela
+      for (var i = 0; i < dados[0].length; i++) {
+          var atividade = dados[0][i][3];
+          var responsabilidade = dados[0][i][2];
+          var id_unico = dados[0][i][4];
+
+          // Verifica se atividade é indefinida e atribui uma string vazia se for o caso
+          atividade = (typeof atividade !== 'undefined') ? atividade : '';
+
+          // Verifica se responsabilidade é indefinida e atribui uma string vazia se for o caso
+          responsabilidade = (typeof responsabilidade !== 'undefined') ? responsabilidade : '';
+
+          id_unico = (typeof id_unico !== 'undefined') ? id_unico : '';
+
+          var linha = $(`
+                    <tr>
+                        <td> 
+                            <textarea rows="4" cols="30">${atividade}</textarea>
+                        </td>
+                        <td>  
+                            <select class="form-control">
+                                <option value="${responsabilidade}">${responsabilidade}</option>
+                                <option value="Elétrica">Elétrica</option>
+                                <option value="Mecânica">Mecânica</option>
+                                <option value="Predial">Predial</option>
+                            </select>
+                        </td>
+                        <td>
+                          <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
+                            <i class="fa fa-trash"></i>
+                          </button>
+                        </td>
+                        <td style="display:none">
+                          <input type="number" class="form-control" value="${id_unico}">
+                        </td>
+                    </tr>`);
+
+          // Salva os valores originais como data atributos
+          linha.data('originalAtividade', atividade);
+          linha.data('originalResponsabilidade', responsabilidade);
+          linha.data('originalId_unico',id_unico)
+
+          tabela.append(linha);
+      }
+  
+    // Adicionar um evento de clique ao botão "+" para adicionar uma nova linha
+    $('#modalGrupoExistente').off('click', '.add-row').on('click', '.add-row', function() {
+        const newRow = `<tr>
+                          <td> <textarea rows="4" cols="30"></textarea>
+                          </td>
+                          <td>  <select class="form-control">
+                                  <option value=""></option>
+                                  <option value="Elétrica">Elétrica</option>
+                                  <option value="Mecânica">Mecânica</option>
+                                  <option value="Predial">Predial</option>
+                                </select>
+                          </td>
+                          <td>
+                            <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
+                              <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                      </tr>`;
+
+        // Adicionar a nova linha à tabela
+        $('#tableTarefas tbody').append(newRow);
+    });
+
+    // Exibir o modalGrupoExistente
+    $('#modalGrupoExistente').show();
+
+  }
+
+    function entrarGrupo() {
+      var grupoSelecionado = $('#selectGrupos').val();
+
+      // Fechar o modalGrupoAtividade
+      // closeModalGrupo();
+
+      // showLoading();
+
+      // Chamar a rota no backend para carregar dados associados
+      $.ajax({
+        url: `/atividadesGrupo?codigo_maquina=${window.codigo_maquina}&grupo=${grupoSelecionado}`,
+        type: 'GET',
+        success: function (data) {
+            // Popule o modalGrupoExistente com os dados recebidos
+            $('.modal-title').text("Tarefa do grupo: " + grupoSelecionado);
+            console.log("Dados recebidos:", data);
+            // Verifica se data é um array
+            if (typeof data === 'object' && data !== null) {
+                popularModalGrupoExistente(data);
+            } else {
+                console.error("Os dados recebidos não são um array:", data);
+            }
+            // hideLoading();
+        },
+        error: function (error) {
+            console.error(error);
+            exibirMensagem('aviso', 'Escolha ou crie um grupo válido.');
+            // hideLoading();
+        }
+      });
+    }
+
+    // Ao abrir o modal será carregadas as funções
+    $('.abrir-modal').on('click', function() {
+      var codigoMaquina = $(this).data('id');
+      abrirModalGrupoAtividade(codigoMaquina);
+      coletarGrupos(codigoMaquina);
+    });
+
+    // Ao clicar em Entrar no grupo será carregadas as funções
+    $('#grupoExistente').on('click', function() {
+      var codigoMaquina = $(this).data('id');
+      entrarGrupo();
+      
+    });
+
+  });
+
+
+</script>
+
+<!-- <script>
+  
   // Função para mostrar os grupos disponíveis para aquela máquina
   function coletarGrupos(codigo_maquina) {
 
     $('#selectGrupos').empty();
     
-    showLoading();
+    // showLoading();
 
     $.ajax({
         url: `/preventivas?codigo_maquina=${codigo_maquina}`,
@@ -270,11 +541,11 @@
                 $('#selectGrupos').append(`<option value="${data[i]}">${data[i]}</option>`);
             }
 
-            hideLoading();
+            // hideLoading();
         },
         error: function (error) {
             console.error(error);
-            hideLoading();
+            // hideLoading();
         }
     });
   }
@@ -799,6 +1070,13 @@
       });
   });
 
-</script>
+</script> -->
+
+<!-- Page level plugins -->
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="static/js/demo/datatables-demo.js"></script>
 
 {% endblock %}

@@ -44,6 +44,28 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
 
+def historico_planejadas():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query_historico_preventivas = """select max(n_ordem) as n_ordem_max,datafim,id_ordem,maquina, coalesce(status,'Em espera') as status 
+                                    from tb_ordens 
+                                    where natureza = 'Planejada' and ordem_excluida isnull
+                                    group by status,datafim,id_ordem,maquina
+                                    order by id_ordem,n_ordem_max"""
+
+    data_historico_planejadas = pd.read_sql_query(query_historico_preventivas,conn)
+
+    data_historico_planejadas.drop_duplicates(subset='id_ordem',keep='last',inplace=True)
+    data_historico_planejadas['datafim'] = data_historico_planejadas['datafim'].fillna('-')
+
+    data_historico_planejadas = data_historico_planejadas.values.tolist()
+
+    return data_historico_planejadas
+
+
 def calcular_minutos_uteis(row, df):
 
     """
@@ -301,6 +323,7 @@ def cards_get(query):
     print(lista_qt)
 
     return lista_qt
+
 
 def cards_post(query):
 
@@ -3289,7 +3312,9 @@ def plan_52semanas():  # Tabela com as 52 semanas
 
     df_final_list = df_grouped.values.tolist()
 
-    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas, df_final_list=df_final_list)
+    dados_historico_planejadas = historico_planejadas()
+
+    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas, df_final_list=df_final_list, dados_historico_planejadas=dados_historico_planejadas)
 
 
 @routes_bp.route('/preventivas', methods=['GET'])
@@ -3348,20 +3373,22 @@ def atividadesGrupo():
 
     cur.execute(sql,(codigo_maquina,grupo_selecionado))
     data = cur.fetchall()
+    
+    dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado) 
+    
+    if len(data) > 0:
 
-    print(data)
-   # Use os parâmetros para carregar os dados associados
-    dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)  
-    nova_data = data[0][0].strftime("%Y-%m-%d")
-    periodicidade = data[0][1]
-    df = pd.DataFrame({'data': [nova_data],
-                    'periodicidade': [periodicidade]})
-    df.index = [0]  # Adiciona um índice à primeira linha
+        nova_data = data[0][0].strftime("%Y-%m-%d")
+        periodicidade = data[0][1]
+        df = pd.DataFrame({'data': [nova_data],
+                        'periodicidade': [periodicidade]})
+        df.index = [0]  # Adiciona um índice à primeira linha
 
-    df['data'] = pd.to_datetime(df['data'])
+        df['data'] = pd.to_datetime(df['data'])
 
-    print(df)
-
+    else:
+        data = []
+    
     try:
         df['proxima_manutencao'] = df.apply(lambda row: calcular_proxima_data(row['data'], int(row['periodicidade'])*30), axis=1)
         proxima_data = df['proxima_manutencao'][0]
@@ -3369,9 +3396,11 @@ def atividadesGrupo():
         print(f"Erro ao calcular próxima manutenção: {e}")
         proxima_data = None
 
-    
-    parametros[0].append(formatar_data(proxima_data))
-
+    try:
+        parametros[0].append(formatar_data(proxima_data))
+    except:
+        parametro = []
+        
     # Retorne os dados como JSON
     return jsonify(dados_associados,parametros)
 
@@ -3397,8 +3426,11 @@ def tarefasGrupo(codigo_maquina, grupo_selecionado):
 
     cur.execute(sql)
     parametros = cur.fetchall()
+    if len(parametros) > 0:
+        parametros[0][0] = formatar_data(parametros[0][0])
+    else:
+        parametros = []
 
-    parametros[0][0] = formatar_data(parametros[0][0])
 
     if len(atividades) == 0:
         return [[]],parametros

@@ -43,11 +43,20 @@ $(document).ready(function() {
   $('#dataTable11').DataTable();
 });
 
+// Tabela de planejamento da rota /52semanas
 $(document).ready(function() {
   $('#dataTable12').DataTable();
 });
 
+// Tabela de planejamento de grupos de atividade da rota /52semanas
+$(document).ready(function() {
+  $('#dataTable13').DataTable();
+});
 
-
-
-
+// Tabela de histórico de preventivas /52semanas
+$(document).ready(function() {
+  $('#dataTable14').DataTable({
+    "info": false
+  });
+  
+});
