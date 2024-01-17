@@ -388,6 +388,8 @@
       var tabela = $('#tableTarefas tbody');
       tabela.empty(); // Limpa a tabela antes de popular
 
+      console.log(dados)
+
       var periodicidade_grupo = $('#periodicidade_grupo');
       var ultima_manutencao = $('#ultima_manutencao');
       var proxima_manutencao = $('#proxima_manutencao');
@@ -487,7 +489,8 @@
             console.log("Dados recebidos:", data);
             // Verifica se data é um array
             if (typeof data === 'object' && data !== null) {
-                popularModalGrupoExistente(data);
+                console.log(data);
+                // popularModalGrupoExistente(data);
             } else {
                 console.error("Os dados recebidos não são um array:", data);
             }
@@ -512,7 +515,7 @@
     $('#grupoExistente').on('click', function() {
       var codigoMaquina = $(this).data('id');
       entrarGrupo();
-      
+      $('#modalGrupoExistente').show();
     });
 
   });

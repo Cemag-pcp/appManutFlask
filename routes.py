@@ -3373,39 +3373,44 @@ def atividadesGrupo():
 
     cur.execute(sql,(codigo_maquina,grupo_selecionado))
     data = cur.fetchall()
-    
-    dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado) 
+
+    # Use os parâmetros para carregar os dados associados
+    dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)  
     
     if len(data) > 0:
-
         nova_data = data[0][0].strftime("%Y-%m-%d")
         periodicidade = data[0][1]
-        df = pd.DataFrame({'data': [nova_data],
-                        'periodicidade': [periodicidade]})
-        df.index = [0]  # Adiciona um índice à primeira linha
-
-        df['data'] = pd.to_datetime(df['data'])
-
     else:
-        data = []
+        nova_data = None
+        periodicidade = None
     
+    df = pd.DataFrame({'data': [nova_data],
+                    'periodicidade': [periodicidade]})
+    df.index = [0]  # Adiciona um índice à primeira linha
+
+    df['data'] = pd.to_datetime(df['data'])
+
     try:
-        df['proxima_manutencao'] = df.apply(lambda row: calcular_proxima_data(row['data'], int(row['periodicidade'])*30), axis=1)
+        df['proxima_manutencao'] = df.apply(lambda row: calcular_proxima_data(row['data'], float(row['periodicidade'])*30), axis=1)
         proxima_data = df['proxima_manutencao'][0]
     except Exception as e:
         print(f"Erro ao calcular próxima manutenção: {e}")
         proxima_data = None
 
-    try:
+    print(parametros)
+
+    if len(parametros)>0:
         parametros[0].append(formatar_data(proxima_data))
-    except:
-        parametro = []
-        
+    else:
+        parametros = None
+
+
     # Retorne os dados como JSON
     return jsonify(dados_associados,parametros)
 
 
 # Função de exemplo para obter dados associados a uma máquina e grupo
+
 def tarefasGrupo(codigo_maquina, grupo_selecionado):
     
     """
@@ -3426,17 +3431,14 @@ def tarefasGrupo(codigo_maquina, grupo_selecionado):
 
     cur.execute(sql)
     parametros = cur.fetchall()
+
     if len(parametros) > 0:
         parametros[0][0] = formatar_data(parametros[0][0])
-    else:
-        parametros = []
-
 
     if len(atividades) == 0:
         return [[]],parametros
     else:
         return atividades,parametros
-
 
 @routes_bp.route("/excluir-tarefa", methods=['POST'])
 def excluirTarefa():
