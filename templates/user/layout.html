@@ -30,6 +30,9 @@
 
     <!-- Custom styles for this template-->
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
+    
+    <!-- Overlay -->
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/overlay.css') }}">
 
 
     {% block links %}
@@ -435,6 +438,13 @@
     <script src="static/js/demo/chart-area-demo.js"></script>
     <script src="static/js/demo/chart-pie-demo.js"></script>
     <script src="static/js/senha.js"></script>
+
+    <!-- Script Loading -->
+    <script src="static/js/loading.js"></script>
+
+    <!-- Script Mensagem -->
+    <script src="static/js/mensagem.js"></script>
+
     {% block scripts %}
 
     {% endblock %}

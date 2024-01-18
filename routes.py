@@ -3377,10 +3377,12 @@ def atividadesGrupo():
     # Use os parâmetros para carregar os dados associados
     dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)  
     
-    if len(data) > 0:
+    print(data)
+
+    try:
         nova_data = data[0][0].strftime("%Y-%m-%d")
         periodicidade = data[0][1]
-    else:
+    except:
         nova_data = None
         periodicidade = None
     
@@ -3388,7 +3390,10 @@ def atividadesGrupo():
                     'periodicidade': [periodicidade]})
     df.index = [0]  # Adiciona um índice à primeira linha
 
-    df['data'] = pd.to_datetime(df['data'])
+    try:
+        df['data'] = pd.to_datetime(df['data'])
+    except:
+        pass
 
     try:
         df['proxima_manutencao'] = df.apply(lambda row: calcular_proxima_data(row['data'], float(row['periodicidade'])*30), axis=1)
@@ -3585,6 +3590,8 @@ def receber_tarefas():
 
     json_tarefas = request.get_json()
 
+    print(json_tarefas)
+
     periodicidade = int(json_tarefas['parametros'][0]['periodicidade_grupo'])
     ultima_manutencao = json_tarefas['parametros'][0]['ultima_manutencao']
     grupo = json_tarefas['parametros'][0]['grupo']
@@ -3679,7 +3686,7 @@ def receber_upload():
     # file = r"uploads_atividade/" + file.filename
 
     try:
-        df = pd.read_csv(file, sep=";", encoding='ISO-8859-1')
+        df = pd.read_csv(file, sep=";", encoding='utf-8')
     except pd.errors.ParserError:
         df = pd.read_excel(file)
 
