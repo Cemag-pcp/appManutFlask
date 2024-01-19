@@ -7,6 +7,7 @@
 {% block links %}
 <!-- Custom styles for this page -->
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 {% endblock %}
 
@@ -166,21 +167,95 @@
 </div> -->
 
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Tables</h1>
-    <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
-        For more information about DataTables, please visit the <a target="_blank"
-            href="https://datatables.net">official DataTables documentation</a>.</p>
-
-
     
-    <!-- Tabela com todas OS -->
+    <!-- Tabela e filtros -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <!-- <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6> -->
-            <div class="col-sm-3">
-                <label for="os-filter">OS</label>
-                <input class="form-control" id="os-filter" name="os-filter">
+            <div class="row">
+                <div class="col-sm-2 mb-2">
+                    <label for="os-filter">OS</label>
+                    <input class="form-control" id="os-filter" name="os-filter">
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="execucao-filter">Tipo de Manutenção</label>
+                    <select class="form-control" id="execucao-filter" name="execucao-filter">
+                        <option value="">Todos</option>  
+                        <option value="Não Informado" style="color: transparent;">Não Informado</option>
+                        <option value="Corretiva">Corretiva</option>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Preditiva">Preditiva</option>
+                        <option value="Apoio">Apoio</option>
+                        <option value="Projetos">Projetos</option>
+                        <option value="sesmt">SESMT</option>  
+                        <option value="Corretiva Programada">Corretiva Programada</option>  
+                    </select>
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="execucao-filter">Setor</label>
+                    <select class="form-control" id="setor-filter" name="setor-filter">
+                        <option value="">Todos</option>
+                        <option value="Administrativo">Administrativo</option>
+                        <option value="Almoxarifado">Almoxarifado</option>
+                        <option value="Corte e estamparia">Corte e estamparia</option>
+                        <option value="Expedição">Expedição</option>
+                        <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                        <option value="Solda">Solda</option>
+                        <option value="Montagem">Montagem</option>
+                        <option value="Pintura">Pintura</option>
+                        <option value="Carpintaria">Carpintaria</option>
+                        <option value="Usinagem">Usinagem</option>  
+                        <option value="Serra">Serra</option>
+                        <option value="Serralheria">Serralheria</option>
+                        <option value="Manutenção">Manutenção</option>
+                        <option value="Forjaria">Forjaria</option>
+                        <option value="Utilidades">Utilidades</option>
+                        <option value="Qualidade">Qualidade</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="maquina-filter">OS</label>
+                    <input id="maquina-filter" class="form-control">
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="risco-filter">Risco</label>
+                    <select class="form-control form-control" id="risco-filter" style='padding: .375rem .25rem;' name="risco-filter">
+                        <option value="">Todos</option>
+                        <option>Alto</option>
+                        <option>Médio</option>
+                        <option>Baixo</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="status-filter">Risco</label>
+                    <select class="form-control form-control" id="status-filter" style='padding: .375rem .25rem;' name="status-filter">
+                        <option value="">Todos</option>
+                        <option>Em execução</option>
+                        <option>Finalizada</option>
+                        <option>Aguardando material</option>
+                        <option>Aguardando OK</option>
+                        <option>Em espera</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="natureza-filter">Natureza</label>
+                    <select class="form-control form-control" id="natureza-filter" style='padding: .375rem .25rem;' name="natureza-filter">
+                        <option value="">Todos</option>
+                        <option>OS</option>
+                        <option>Planejada</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="abertura-filter">Natureza</label>
+                    <input id="abertura-filter" class="form-control">
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="maquina-parada-filter">Máquina Parada</label>
+                    <select class="form-control form-control" style='padding: .375rem .25rem;' id="maquina-parada-filter">
+                        <option value="">Todos</option>
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="card-body">
@@ -264,7 +339,7 @@
                                     </button>
 
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <a id="dropdown_os_1" class="dropdown-item dropdown_os" href="/edit/{{ row[11] }}/{{ identificador_selecionado }}/{{ setor_selecionado }}"> 
+                                        <a id="dropdown_os_1" class="dropdown-item dropdown_os" onclick="modalExecucao('{{ row[11] }}')"> 
                                             <i class="fas fa-wrench"></i> 
                                         </a>    
                                         <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 
@@ -306,9 +381,228 @@
             </div>
         </div>
     </div>
+
 </div>
 <!-- /.container-fluid -->
 
+
+<!-- Modal execução -->
+
+<div class="modal fade" data-backdrop="static" id="modalExecucao" tabindex="-1" role="dialog" aria-labelledby="modalExecucaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalExecucaoLabel">Execução</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 700px; overflow-y: auto;">
+                <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label for="setor">Setor:</label>
+                        <input type="text" name="setor" id="setor" value="" class="form-control" readonly="readonly">    
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="setor">Solicitante:</label>
+                        <input id="inputSolicitante" type="text" name="solicitante" value="" class="form-control" readonly="readonly">    
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 mb-2">
+                        <label>Data Abertura:</label>
+                        <input id="dataAbertura" type="text" name="dataAbertura" value="" class="form-control" readonly="readonly">
+                    </div>
+                    <div class="col-sm-4 mb-2">
+                        <label>N° execução:</label>
+                        <input type="text" id="n_ordem" name="n_ordem" value="" class="form-control" readonly="readonly">
+                    </div>
+                    <div class="col-sm-4">
+                        <label>Risco:</label>
+                        <input id="inputRisco" type="text" name="risco" value="" class="form-control" readonly="readonly"> 
+                    </div>
+                </div>
+                <hr>
+                <h6 class="m-0 font-weight-bold text-primary">Máquina</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label for="maquina">Máquina ou Local:</label>
+                        <input type="text" name="maquina" id="maquina"  value="" class="form-control" readonly="readonly">
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="tombamento">Tombamento</label>
+                        <input id="inputTombamento" type="text" name="tombamento" value="" class="form-control" readonly="readonly" >
+                    </div>
+                </div>
+                <div id="camposSolda" style="display: none;">
+                    <div class="row">
+                        <div class="col-sm-6 mb-2">
+                            <div id="equipamento_em_falha">
+                                <label>Equipamento em falha:</label>
+                                <input id="inputEquipamentoEmFalha" type="text" name="equipamento_em_falha" value="" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div id="codigo_equipamento">
+                                <label>Código do Equipamento:</label>
+                                <input id="codigoEquipamento" type="text" name="cod_equipamento" value="" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-2">
+                            <div id="setor_maquina_solda">
+                                <label>Setor da máq. de solda:</label>
+                                <input id="setorMaqSolda" type="text" name="input_setor_maquina_solda" value="" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div id="ferramenta">
+                                <label>Qual ferramenta:</label>
+                                <input id="qual_ferramenta" type="text" name="qual_ferramenta" value="" class="form-control" readonly="readonly">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 mb-2">
+                        <label for="problema">Descrição do usuário:</label>
+                        <textarea id="problema" class="form-control" name="problema" rows="5" cols="41" required readonly="readonly"></textarea >
+                    </div>
+                </div>
+                <div id="camposEte" style="display: none;">
+                    <hr>
+                    <h6 class="m-0 font-weight-bold text-primary">ETE</h6>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3 mb-2">
+                            <label for="pvlye">PVLYE (L)</label>
+                            <input class="form-control" type="text" name="pvlye" value="">
+                        </div>
+                        <div class="col-sm-3 mb-2">
+                            <label for="pa-plus">PA PLUS (L)</label>
+                            <input class="form-control" type="text" name="pa-plus" value="">
+                        </div>
+                        <div class="col-sm-3 mb-2">
+                            <label for="tratamento">Tratamento Eficaz?</label>
+                            <select class="form-control" name="tratamento" id="tratamento" value="">
+                                <option value="" selected disabled hidden></option>
+                                <option>Sim</option>
+                                <option>Não</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="ph-agua">PH Água</label>
+                            <input class="form-control" type="text" name="ph-agua" id="ph-agua" value="">
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h6 class="m-0 font-weight-bold text-primary">Execução</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label>Tipo de manutenção</label>
+                        <select style = 'height: 50px;' class="form-control" name="tipo_manutencao" id="selectTipoManutencao">
+                            <option value="" selected disabled hidden></option>  
+                            <option value="Corretiva">Corretiva</option>
+                            <option value="Preventiva">Preventiva</option>
+                            <option value="Preditiva">Preditiva</option>
+                            <option value="Apoio">Apoio</option>
+                            <option value="Projetos">Projetos</option>
+                            <option value="sesmt">SESMT</option>  
+                            <option value="Corretiva Programada">Corretiva Programada</option>  
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label>Área de manutenção</label>
+                        <select style = 'height: 50px;' class="form-control" name="area_manutencao" id="areaManutencao">
+                            <option value="" selected disabled hidden></option>  
+                            <option value="Predial">Predial</option>
+                            <option value="Mecânica">Mecânica</option>
+                            <option value="Elétrica">Elétrica</option>
+                        </select>  
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label for="statusLista">Data e hora</label>
+                        <input id="data_edit" class="form-control" type="text" name="datetimes" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="operador_label">Operadores</label>
+                        <select class="form-control" id="operador" name="operador" multiple required>
+                            <!-- {% for funcionario in tb_funcionarios %}
+                                <option>{{funcionario[0]}}</option>
+                            {% endfor %} -->
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label for="descmanutencao">Observação da manutenção:</label>
+                        <textarea id="descmanutencao" class="form-control" name="descmanutencao" rows="5" cols="41"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label for="statusLista">Status</label>
+                        <select class="form-control" id="statusLista" name="statusLista">
+                            <option>Aguardando material</option>
+                            <option>Aguardando OK</option>
+                            <option>Em espera</option>
+                            <option>Finalizada</option>
+                            <option>Em execução</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row" id="linhaMaquinaParada" style="display: none;">
+                    <div class="col-sm-12">
+                        <label for="maquina-realmente-parada">Máquina está parada?</label>
+                        <input type="checkbox" name="maquina-parada-1" id="maquina-parada-1" value="true"> 
+                    </div>
+                </div>
+                <div class="row" id="linhaExecucaoFeitaMaquinaParada" style="display: none;">
+                    <div class="col-sm-12">
+                        <label for="execucao-maquina-parada">Execução feita c/ a máquina parada?</label>
+                        <input type="checkbox" name="maquina-parada-2" id="maquina-parada-2" value="true">
+                    </div>
+                </div>
+                <div class="row" id="linhaAposExecucao" style="display: none;">
+                    <div class="col-sm-12">
+                        <label for="apos-execucao-maquina-parada">Após a execução, a máquina está funcionando?</label>
+                        <input type="checkbox" name="maquina-parada-3" id="maquina-parada-3" value="true">
+                    </div>
+                </div>
+                <div class="row" id="linhaLimpezaLocal" style="display: none;"> 
+                    <div class="col-sm-12">
+                        <label for="limpeza">Limpeza no local?</label>
+                        <input type="checkbox" name="limpeza-local" id="limpeza-local" value="true">
+                    </div>
+                </div>
+                <div class="row" id="linhaProtecoes" style="display: none;">
+                    <div class="col-sm-12">
+                        <label for="protec">Proteções?</label>
+                        <input type="checkbox" name="protecao-local" id="protecao-local" value="true">
+                    </div>
+                </div>
+                <div class="row" id="linhaFuncionalidadeEquipamento" style="display: none;">
+                    <div class="col-sm-12">
+                        <label for="funcionalidade">Funcionalidade no equipamento?</label>
+                        <input type="checkbox" name="funcionalidade-equipamento" id="funcionalidade-equipamento" value="true">
+                    </div>
+                </div>
+            </div> 
+            <div class="modal-footer">
+                <button id="salvar_edicao" type="submit" class="btn btn-primary btn-block">Salvar</button>
+                <button id="ok_edicao" type="submit" class="btn btn-primary btn-block" style="display: none;">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal excluir ordem -->
 <div id="modalEnviar" class="modal">
@@ -358,6 +652,9 @@
     </div>
 </div>
 
+<!-- Identificador Logado -->
+
+<div id="identificador_logado" style="display: none;"><input type="text" value="{{identificador_selecionado}}" id="inputIdentificadorLogado"></div>
 
 {% endblock %}
 
@@ -409,70 +706,114 @@ function downloadFilteredData() {
     downloadFilteredCSV(filteredData); // Realiza o download do CSV
 }
 
-// Função para aplicar os filtros na tabela
 function applyFilters() {
+
     // Obtém os valores dos filtros
     var osFilterValue = osFilter.value.toLowerCase();
     var execucaoFilterValue = execucaoFilter.value.toLowerCase();
     var setorFilterValue = setorFilter.value.toLowerCase();
-    var riscoFilterValue = riscoFilter.value.toLowerCase();
     var maquinaFilterValue = maquinaFilter.value.toLowerCase();
+    var riscoFilterValue = riscoFilter.value.toLowerCase();
     var statusFilterValue = statusFilter.value.toLowerCase();
     var naturezaFilterValue = naturezaFilter.value.toLowerCase();
     var aberturaFilterValue = aberturaFilter.value.toLowerCase();
     var maquinaParadaFilterValue = maquinaParadaFilter.value.toLowerCase();
 
-    // Obtém as linhas da tabela
-    var table = document.getElementById('dataTable');
-    var rows = table.getElementsByTagName('tr');
+    // Obtém a tabela
+    var table = $('#dataTable').DataTable();
 
-    var filteredData = [];
+    // Aplica a filtragem para cada coluna
+    table.columns(0).search(osFilterValue).draw();
+    table.columns(1).search(execucaoFilterValue).draw();
+    table.columns(2).search(setorFilterValue).draw();
+    table.columns(3).search(maquinaFilterValue).draw();
+    table.columns(4).search(riscoFilterValue).draw();
+    table.columns(5).search(statusFilterValue).draw();
+    table.columns(6).search(naturezaFilterValue).draw();
+    table.columns(7).search(aberturaFilterValue).draw();
+    table.columns(8).search(maquinaParadaFilterValue).draw();
 
-    // Itera pelas linhas da tabela (começando em 1 para ignorar o cabeçalho)
-    for (var i = 1; i < rows.length; i++) {
-        var row = rows[i];
-        var osValue = row.cells[0].textContent.toLowerCase();
-        var execucaoValue = row.cells[1].textContent.toLowerCase();
-        var setorValue = row.cells[2].textContent.toLowerCase();
-        var maquinaValue = row.cells[3].textContent.toLowerCase();
-        var riscoValue = row.cells[4].textContent.toLowerCase();
-        var statusValue = row.cells[5].textContent.toLowerCase();
-        var naturezaValue = row.cells[6].textContent.toLowerCase();
-        var aberturaValue = row.cells[7].textContent.toLowerCase();
-        var maquinaParadaValue = row.cells[8].querySelector('i');
-
-        // Verifica se a linha corresponde aos filtros
+    // Atualiza a exibição da linha conforme necessário
+    table.rows().every(function () {
         var shouldDisplay =
-            osValue.includes(osFilterValue) &&
-            execucaoValue.includes(execucaoFilterValue) &&
-            setorValue.includes(setorFilterValue) &&
-            maquinaValue.includes(maquinaFilterValue) &&
-            riscoValue.includes(riscoFilterValue) &&
-            statusValue.includes(statusFilterValue) &&
-            naturezaValue.includes(naturezaFilterValue) &&
-            aberturaValue.includes(aberturaFilterValue);
+            this.data()[0].toLowerCase().includes(osFilterValue) &&
+            this.data()[1].toLowerCase().includes(execucaoFilterValue) &&
+            this.data()[2].toLowerCase().includes(setorFilterValue) &&
+            this.data()[3].toLowerCase().includes(maquinaFilterValue) &&
+            this.data()[4].toLowerCase().includes(riscoFilterValue) &&
+            this.data()[5].toLowerCase().includes(statusFilterValue) &&
+            this.data()[6].toLowerCase().includes(naturezaFilterValue) &&
+            this.data()[7].toLowerCase().includes(aberturaFilterValue) &&
+            this.data()[8].toLowerCase().includes(maquinaParadaFilterValue);
 
-        if (maquinaParadaFilterValue === 'true') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check-circle');
-        } else if (maquinaParadaFilterValue === 'false') {
-            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-times-circle');
-        }
-
-        // Se a linha corresponder aos filtros, adiciona os valores ao array de dados filtrados
-        if (shouldDisplay) {
-            var rowData = [];
-            for (var j = 0; j < row.cells.length; j++) {
-                rowData.push(row.cells[j].textContent);
-            }
-            filteredData.push(rowData);
-        }
-
-        // Atualiza a exibição da linha conforme necessário
-        row.style.display = shouldDisplay ? '' : 'none';
-    }
-
-    return filteredData;
+        this.node().style.display = shouldDisplay ? '' : 'none';
+    });
 }
+
+// Função para aplicar os filtros na tabela
+// function applyFilters() {
+//     // Obtém os valores dos filtros
+//     var osFilterValue = osFilter.value.toLowerCase();
+//     var execucaoFilterValue = execucaoFilter.value.toLowerCase();
+//     var setorFilterValue = setorFilter.value.toLowerCase();
+//     var riscoFilterValue = riscoFilter.value.toLowerCase();
+//     var maquinaFilterValue = maquinaFilter.value.toLowerCase();
+//     var statusFilterValue = statusFilter.value.toLowerCase();
+//     var naturezaFilterValue = naturezaFilter.value.toLowerCase();
+//     var aberturaFilterValue = aberturaFilter.value.toLowerCase();
+//     var maquinaParadaFilterValue = maquinaParadaFilter.value.toLowerCase();
+
+//     // Obtém as linhas da tabela
+//     var table = document.getElementById('dataTable');
+//     var rows = table.getElementsByTagName('tr');
+
+//     var filteredData = [];
+
+//     // Itera pelas linhas da tabela (começando em 1 para ignorar o cabeçalho)
+//     for (var i = 1; i < rows.length; i++) {
+//         var row = rows[i];
+//         var osValue = row.cells[0].textContent.toLowerCase();
+//         var execucaoValue = row.cells[1].textContent.toLowerCase();
+//         var setorValue = row.cells[2].textContent.toLowerCase();
+//         var maquinaValue = row.cells[3].textContent.toLowerCase();
+//         var riscoValue = row.cells[4].textContent.toLowerCase();
+//         var statusValue = row.cells[5].textContent.toLowerCase();
+//         var naturezaValue = row.cells[6].textContent.toLowerCase();
+//         var aberturaValue = row.cells[7].textContent.toLowerCase();
+//         var maquinaParadaValue = row.cells[8].querySelector('i');
+
+//         // Verifica se a linha corresponde aos filtros
+//         var shouldDisplay =
+//             osValue.includes(osFilterValue) &&
+//             execucaoValue.includes(execucaoFilterValue) &&
+//             setorValue.includes(setorFilterValue) &&
+//             maquinaValue.includes(maquinaFilterValue) &&
+//             riscoValue.includes(riscoFilterValue) &&
+//             statusValue.includes(statusFilterValue) &&
+//             naturezaValue.includes(naturezaFilterValue) &&
+//             aberturaValue.includes(aberturaFilterValue);
+
+//         if (maquinaParadaFilterValue === 'true') {
+//             shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check-circle');
+//         } else if (maquinaParadaFilterValue === 'false') {
+//             shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-times-circle');
+//         }
+
+//         // Se a linha corresponder aos filtros, adiciona os valores ao array de dados filtrados
+//         if (shouldDisplay) {
+//             var rowData = [];
+//             for (var j = 0; j < row.cells.length; j++) {
+//                 rowData.push(row.cells[j].textContent);
+//             }
+//             filteredData.push(rowData);
+//         }
+
+//         // Atualiza a exibição da linha conforme necessário
+//         row.style.display = shouldDisplay ? '' : 'none';
+//     }
+
+//     return filteredData;
+// }
 // Obtém os elementos de filtro por seus IDs
 var osFilter = document.getElementById('os-filter');
 var execucaoFilter = document.getElementById('execucao-filter');
@@ -703,6 +1044,321 @@ function sortUniqueValues(values) {
             }
         });
     }
+</script>
+
+<!-- Script para mostrar ou esconder perguntas dependendo do login e máquina -->
+<script>
+
+    $(document).ready(function() {
+        
+        // Event handler for status dropdown change
+        $('#statusLista').on('change', function() {
+            var selectedStatus = $(this).val();
+            var nOrdem = parseInt($('#n_ordem').val());
+            var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
+            var maquinas_preventivas = $('#maquinas_preventivas').val();// boolean
+            var identificador_logado = $('.identificador_logado').val();
+    
+            updateToggleVisibility(selectedStatus, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
+        });
+    
+        // Update toggle visibility on page load
+        var selectedStatus = $('#statusLista').val();
+        console.log(selectedStatus);
+        var nOrdem = parseInt($('#n_ordem').val());
+        var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
+        var maquinas_preventivas = $('#maquinas_preventivas').val(); // boolean
+        // var identificador_logado = $('.identificador_logado').val();
+        var identificador_logado = document.getElementById('identificador_logado');
+
+        console.log(identificador_logado)
+        updateToggleVisibility(selectedStatus, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
+    
+    });
+    
+    function updateToggleVisibility(status, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado) {
+        
+        console.log(status, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
+
+        if (status !== 'Aguardando OK' && identificador_logado === "2") {
+            $('#linhaMaquinaParada').hide();
+            $('#linhaExecucaoFeitaMaquinaParada').hide();
+            $('#linhaAposExecucao').hide();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+            $('#ok_edicao').hide();
+        }else if  (maquinaValue === 'ETE' || identificador_logado === "2") {
+            $('#linhaMaquinaParada').hide();
+            $('#linhaExecucaoFeitaMaquinaParada').hide();
+            $('#linhaAposExecucao').hide();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+        }else if (status === 'Finalizada' && maquinas_preventivas === true && nOrdem > 0){
+            $('#linhaMaquinaParada').hide();
+            $('#linhaExecucaoFeitaMaquinaParada').show();
+            $('#linhaAposExecucao').hide();
+            $('#linhaLimpezaLocal').show();
+            $('#linhaProtecoes').show();
+            $('#linhaFuncionalidadeEquipamento').show();
+        }else if (status === 'Aguardando OK'){
+            $('#linhaMaquinaParada').hide();
+            $('#linhaExecucaoFeitaMaquinaParada').hide();
+            $('#linhaAposExecucao').hide();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+            $('#salvar_edicao').hide();
+        }else if (nOrdem === 1 && status === 'Finalizada') {
+            $('#linhaMaquinaParada').hide();
+            $('#linhaExecucaoFeitaMaquinaParada').show();
+            $('#linhaAposExecucao').hide();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+        } else if (nOrdem === 2 && status === 'Finalizada') {
+            $('#linhaMaquinaParada').hide();
+            $('#linhaExecucaoFeitaMaquinaParada').show();
+            $('#linhaAposExecucao').hide();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+        } else if (status === 'Finalizada') {
+            $('#linhaMaquinaParada').hide();
+            $('#linhaExecucaoFeitaMaquinaParada').show();
+            $('#linhaAposExecucao').hide();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+        } else if (nOrdem === 1) {
+            $('#linhaMaquinaParada').show();
+            $('#linhaExecucaoFeitaMaquinaParada').show();
+            $('#linhaAposExecucao').show();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+        } else if (nOrdem === 2) {
+            $('#linhaMaquinaParada').show();
+            $('#linhaExecucaoFeitaMaquinaParada').show();
+            $('#linhaAposExecucao').show();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+        } else {
+            $('#linhaMaquinaParada').show();
+            $('#linhaExecucaoFeitaMaquinaParada').show();
+            $('#linhaAposExecucao').show();
+            $('#linhaLimpezaLocal').hide();
+            $('#linhaProtecoes').hide();
+            $('#linhaFuncionalidadeEquipamento').hide();
+        }
+    }
+
+</script>
+
+<!-- Script para esconder perguntas dependendo do status selecionado -->
+<script>
+
+    var maquinaParadaCheckboxOne = document.getElementById('maquina-parada-1');
+    var maquinaParadaHiddenInputOne = document.querySelector('input[name="maquina-parada-1"][type="hidden"]');
+  
+    maquinaParadaCheckboxOne.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInputOne.value = "true";
+      } else {
+        maquinaParadaHiddenInputOne.value = "false";
+      }
+    });
+
+    var maquinaParadaCheckboxTwo = document.getElementById('maquina-parada-2');
+    var maquinaParadaHiddenInputTwo = document.querySelector('input[name="maquina-parada-2"][type="hidden"]');
+  
+    maquinaParadaCheckboxTwo.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInputTwo.value = "true";
+      } else {
+        maquinaParadaHiddenInputTwo.value = "false";
+      }
+    });
+
+    var maquinaParadaCheckboxThree = document.getElementById('maquina-parada-3');
+    var maquinaParadaHiddenInputThree = document.querySelector('input[name="maquina-parada-3"][type="hidden"]');
+  
+    maquinaParadaCheckboxThree.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInputThree.value = "true";
+      } else {
+        maquinaParadaHiddenInputThree.value = "false";
+      }
+    });
+
+</script>
+
+<!-- Função para formatar data -->
+<script>
+    function converterDataParaFormatoDesejado(dataString) {
+        // Cria um objeto Date a partir da string
+        var data = new Date(dataString);
+
+        // Obtém os componentes da data
+        var dia = data.getDate();
+        var mes = data.getMonth() + 1; // Adiciona 1 porque os meses são indexados a partir de 0
+        var ano = data.getFullYear() % 100; // Obtém os últimos dois dígitos do ano
+
+        // Formata a string com zero à esquerda para garantir dois dígitos para o dia e o mês
+        var formatoDesejado = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano.toString()}`;
+
+        return formatoDesejado;
+    }
+</script>
+
+<!-- Abertura do modal de execução -->
+<script>
+    function modalExecucao(id_ordem) {
+        $.ajax({
+            url: '/dados-ordem-servico',
+            type: 'POST',  // Alterado para POST
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'id_ordem': id_ordem }),  // Enviando um objeto JSON
+            success: function(response) {
+                
+                $('#modalExecucao').modal('show');
+                
+                if (response.setor_values === 'Solda') {
+                    // Se response.setor_values for 'Solda', mostrar a div
+                    $('#camposSolda').show();
+                } else {
+                    // Caso contrário, ocultar a div
+                    $('#camposSolda').hide();
+                }
+
+                if (response.maquina === 'ETE') {
+                    // Se response.setor_values for 'Solda', mostrar a div
+                    $('#camposEte').show();
+                } else {
+                    // Caso contrário, ocultar a div
+                    $('#camposEte').hide();
+                }
+
+                $('#setor').val(response.setor_values);
+                $('#inputSolicitante').val(response.solicitante);
+                $('#dataAbertura').val(converterDataParaFormatoDesejado(response.data_abertura));
+                $('#n_ordem').val(response.n_execucao);
+                $('#maquina').val(response.maquina);
+                $('#inputTombamento').val(response.tombamento);
+                $('#inputEquipamentoEmFalha').val(response.equipamento_em_falha);
+                $('#codigoEquipamento').val(response.codigo_equipamento);
+                $('#setorMaqSolda').val(response.setor_maquina_solda);
+                $('#qual_ferramenta').val(response.qual_ferramenta);
+                $('#inputRisco').val(response.risco);
+                $('#problema').val(response.desc_usuario);
+                
+                // Populando select de tipo de manutencao e area de manutencao
+                var statusTipoManutencao = response.tipo_manutencao;
+                var statusAreaManutencao = response.area_manutencao;
+                var statusSelecionado = response.status;
+
+                // Iterar sobre as opções do select
+                $('#selectTipoManutencao option').each(function() {
+                    // Comparar o valor da opção com o status desejado
+                    if ($(this).val() == statusTipoManutencao) {
+                        // Se houver correspondência, definir a opção como selecionada
+                        $(this).prop('selected', true);
+                    }
+                });
+
+                // Iterar sobre as opções do select
+                $('#areaManutencao option').each(function() {
+                    // Comparar o valor da opção com o status desejado
+                    if ($(this).val() == statusAreaManutencao) {
+                        // Se houver correspondência, definir a opção como selecionada
+                        $(this).prop('selected', true);
+                    }
+                });
+
+                // Iterar sobre as opções do select
+                $('#statusLista option').each(function() {
+                    // Comparar o valor da opção com o status desejado
+                    if ($(this).val() == statusSelecionado) {
+                        // Se houver correspondência, definir a opção como selecionada
+                        $(this).prop('selected', true);
+                    }
+                });
+
+                // Exibir o conteúdo no console
+                var identificadorSelecionado = $('#inputIdentificadorLogado').val()
+
+                updateToggleVisibility(response.status,response.n_execucao,response.maquina,response.preventiva,identificadorSelecionado);
+
+            },
+            error: function(error) {
+                // hideLoading();
+                alert('Ocorreu um erro ao buscar os vídeos');
+                console.log(error);
+            }
+        });
+    }
+
+</script>
+
+<!-- Scripts de datarange  -->
+<script>
+    $(function() {
+        $('input[name="datetimes"]').daterangepicker({
+          timePicker: true,
+          startDate: moment().startOf('hour'),
+          endDate: moment().startOf('hour').add(32, 'hour'),
+          locale: {
+            format: 'DD/MM/YY hh:mm A'
+          }
+        });
+      
+        $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
+          var startDate = picker.startDate;
+          var endDate = picker.endDate;
+      
+          if (endDate.isBefore(startDate)) {
+            alert("A data final não pode ser menor que a data inicial");
+            picker.setEndDate(startDate);
+          }
+        });
+      });
+</script>  
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Função para verificar o estado do botão
+        function verificarEstadoBotao() {
+            var maquinas_preventivas = $('#maquinas_preventivas').val();
+            var status = $('#statusLista').val();
+            var limpeza = $('#limpeza-local').prop('checked');
+            var protecao = $('#protecao-local').prop('checked');
+            var funcionalidade = $('#funcionalidade-equipamento').prop('checked');
+
+            // Habilitar ou desabilitar o botão com base nas condições
+            if (status === 'Finalizada' && limpeza && protecao && funcionalidade && maquinas_preventivas === true) {
+                $('#salvar_edicao').prop('disabled', false);
+            } else if(status === 'Finalizada' && maquinas_preventivas ==='False') {
+              $('#salvar_edicao').prop('disabled', false);
+            } else if(status !== 'Finalizada') {
+                $('#salvar_edicao').prop('disabled', false);
+            } else if(status !== 'Finalizada') {
+              $('#salvar_edicao').prop('disabled', false);
+            } else{
+                $('#salvar_edicao').prop('disabled', true);
+            }
+        }
+
+        // Associar a função ao evento de mudança do statusLista e dos checkboxes
+        $('#statusLista, #limpeza-local, #protecao-local, #funcionalidade-equipamento').change(verificarEstadoBotao);
+
+        // Inicialmente, verificar o estado do botão
+        verificarEstadoBotao();
+    });
 </script>
 
 {% endblock %}

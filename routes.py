@@ -44,6 +44,81 @@ conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
 
+def buscar_dados_os(id_ordem):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select * from tb_ordens where id_ordem = %s order by n_ordem desc limit 1"
+    sql_data_abertura =  """select dataabertura - INTERVAL '3 hours' as dataabertura,solicitante,
+                            equipamento_em_falha,cod_equipamento,setor_maquina_solda,status
+                            from tb_ordens where id_ordem = %s and n_ordem = 0
+                        """
+    sql_tombamento = """select tombamento from tb_ordens
+                        left join tb_maquinas as t2 on t2.codigo = maquina
+                        where id_ordem = %s
+                        limit 1
+                    """
+    sql_maquina_preventiva = """select codigo from tb_maquinas_preventivas where codigo = %s"""
+    
+    # Informações gerais
+    cur.execute(sql,(id_ordem,))
+    data = cur.fetchall()
+    
+    # dataabertura
+    cur.execute(sql_data_abertura,(id_ordem,))
+    dados_dataabertura = cur.fetchall()
+
+    # Tombamento
+    cur.execute(sql_tombamento,(id_ordem,))
+    tombamento = cur.fetchall()
+
+    setor_values = [row['setor'] for row in data][0]
+    solicitante = dados_dataabertura[0]['solicitante']
+    data_abertura = dados_dataabertura[0]['dataabertura']
+    n_execucao = [row['n_ordem'] for row in data][0]+1
+    maquina = [row['maquina'] for row in data][0]
+    tombamento = [row['tombamento'] for row in tombamento][0]
+    equipamento_em_falha = dados_dataabertura[0]['equipamento_em_falha']
+    codigo_equipamento = dados_dataabertura[0]['cod_equipamento']
+    setor_maquina_solda = dados_dataabertura[0]['setor_maquina_solda']
+    risco = [row['risco'] for row in data][0]
+    desc_usuario = [row['problemaaparente'] for row in data][0]
+    status = [row['status'] for row in data][0]
+    tipo_manutencao = [row['tipo_manutencao'] for row in data][0]
+    area_manutencao = [row['area_manutencao'] for row in data][0]
+
+    # Maquina preventiva
+    cur.execute(sql_maquina_preventiva,(maquina,))
+    preventiva = cur.fetchall()
+    
+    if len(preventiva) > 0:
+        preventiva = True
+    else:
+        preventiva = False
+        
+    dados = {
+        'setor_values':setor_values,
+        'solicitante':solicitante,
+        'data_abertura':data_abertura,
+        'n_execucao':n_execucao,
+        'maquina':maquina,
+        'tombamento':tombamento,
+        'equipamento_em_falha':equipamento_em_falha,
+        'codigo_equipamento':codigo_equipamento,
+        'setor_maquina_solda':setor_maquina_solda,
+        'risco':risco,
+        'desc_usuario':desc_usuario,
+        'status':status,
+        'tipo_manutencao':tipo_manutencao,
+        'area_manutencao':area_manutencao,
+        'preventiva':preventiva
+    }
+
+    return dados
+
+
 def historico_planejadas():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -1943,8 +2018,6 @@ def get_employee(id_ordem, identificador_selecionado, setor_selecionado):
     Função para criar uma execução para ordem de serviço
     """
 
-    print(setor_selecionado,identificador_selecionado)
-
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
 
@@ -2056,6 +2129,18 @@ def get_employee(id_ordem, identificador_selecionado, setor_selecionado):
                            area_manutencao=area_manutencao, maquinas=maquinas, pvlye=pvlye, pa_plus=pa_plus,
                            tratamento=tratamento, ph_agua=ph_agua,identificador_selecionado=identificador_selecionado,
                            setor_selecionado=setor_selecionado,preventiva=preventiva)
+
+@routes_bp.route('/dados-ordem-servico', methods=['POST'])
+@login_required
+def dados_ordem_servico():
+    data = request.get_json()
+    
+    data = buscar_dados_os(data['id_ordem'])
+    
+    print(data)
+
+    return jsonify(data)
+
 
 @routes_bp.route('/envio_ok', methods=['POST'])
 @login_required
