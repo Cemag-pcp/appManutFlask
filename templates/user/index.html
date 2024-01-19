@@ -12,115 +12,181 @@
 
 {% block containerFluid %}
 
-<div class="container-fluid">
-    <div>
-        <div class = "board" style="overflow-x: auto;">
-            <div style="display: flex; justify-content: space-between;align-items: center;flex-direction: row-reverse;">
-                <a class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onclick="downloadFilteredData()"><i class="fas fa-download fa-sm text-white-50"></i> Baixar CSV</a>
+<!-- <div class="container-fluid">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <a class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onclick="downloadFilteredData()"><i class="fas fa-download fa-sm text-white-50"></i> Baixar CSV</a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+        </div>
+        <div class="card-body">
+            <div class="col-sm-3">
+                <label for="os-filter">OS</label>
+                <input class="form-control" id="os-filter" name="os-filter">
             </div>
-            <table class="table" style="display: flex; justify-content: space-between;">
-                <thead>
-                  <tr class="container filter-wrapper2 filters">
-                    <th>OS
-                        <input class="form-control form-control" id="os-filter" style='padding: .375rem .25rem;' name="os-filter">
-                    </th>
-                    <th>Tipo de Manutenção
-                        <select class="form-control" id="execucao-filter" name="execucao-filter">
-                            <option value="">Todos</option>  
-                            <option value="Não Informado" style="color: transparent;">Não Informado</option>
-                            <option value="Corretiva">Corretiva</option>
-                            <option value="Preventiva">Preventiva</option>
-                            <option value="Preditiva">Preditiva</option>
-                            <option value="Apoio">Apoio</option>
-                            <option value="Projetos">Projetos</option>
-                            <option value="sesmt">SESMT</option>  
-                            <option value="Corretiva Programada">Corretiva Programada</option>  
-                        </select>
-                    </th>
-                    <th>Setor
-                        <select class="form-control" id="setor-filter" name="setor-filter">
-                          <option value="">Todos</option>
-                          <option value="Administrativo">Administrativo</option>
-                          <option value="Almoxarifado">Almoxarifado</option>
-                          <option value="Corte e estamparia">Corte e estamparia</option>
-                          <option value="Expedição">Expedição</option>
-                          <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
-                          <option value="Solda">Solda</option>
-                          <option value="Montagem">Montagem</option>
-                          <option value="Pintura">Pintura</option>
-                          <option value="Carpintaria">Carpintaria</option>
-                          <option value="Usinagem">Usinagem</option>  
-                          <option value="Serra">Serra</option>
-                          <option value="Serralheria">Serralheria</option>
-                          <option value="Manutenção">Manutenção</option>
-                          <option value="Forjaria">Forjaria</option>
-                          <option value="Utilidades">Utilidades</option>
-                          <option value="Qualidade">Qualidade</option>
-                        </select>
-                    </th>
-                    <th>Máquina
-                        <input id="maquina-filter" class="form-control">
-                    </th>
-                    <th>Risco
-                        <select class="form-control form-control" id="risco-filter" style='padding: .375rem .25rem;' name="risco-filter">
-                            <option value="">Todos</option>
-                            <option>Alto</option>
-                            <option>Médio</option>
-                            <option>Baixo</option>
-                        </select>
-                    </th>
-                    <th>Status
-                        <select class="form-control form-control" id="status-filter" style='padding: .375rem .25rem;' name="status-filter">
-                            <option value="">Todos</option>
-                            <option>Em execução</option>
-                            <option>Finalizada</option>
-                            <option>Aguardando material</option>
-                            <option>Aguardando OK</option>
-                            <option>Em espera</option>
-                        </select>
-                    </th>
-                    <th>Natureza
-                        <select class="form-control form-control" id="natureza-filter" style='padding: .375rem .25rem;' name="natureza-filter">
-                            <option value="">Todos</option>
-                            <option>OS</option>
-                            <option>Planejada</option>
-                        </select>
-                    </th>
+        </div>
+    </div>
+        
+    <div class="row">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Ordem de Serviço</h6>
+            </div>
+            <div class="card-body">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;">OS</th>
+                                    <th style="width: 40px;">Tipo de Manut.</th>
+                                    <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
+                                    <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. ou Local</th>
+                                    <th>Risco</th>
+                                    <th>Status</th>
+                                    <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
+                                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Últ. atualização</th>
+                                    <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
+                                    <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo MO</th>
+                                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
+                                    <th style=" display: none; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descricao</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in list_users %}
+                                <tr>
+                                    <td data-title="OS" class="colunaOs" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[11]}}</td>
+                                    {% if row[17] != '' %}
+                                    <td data-title="Tipo Manutenção" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[17]}}</td>
+                                    {% else %}
+                                    <td data-title="Tipo Manutenção" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap; color: transparent;">Não Informado</td>
+                                    {% endif %}
+                                    <td data-title="Setor" class="colunaSetor" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
+                                    <td data-title="Maquina" class="colunaMaquina" style="padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
+                                    <td data-title="Risco" style="padding-bottom: 0px;">{{row[4]}}</td>
 
-                    <th>Abertura / Hora
-                        <input id="abertura-filter" class="form-control">
-                    </th>
-                    
-                    <th>Máquina Parada
-                        <select class="form-control form-control" style='padding: .375rem .25rem;' id="maquina-parada-filter">
-                            <option value="">Todos</option>
-                            <option value="true">Sim</option>
-                            <option value="false">Não</option>
-                        </select>
-                    </th>
+                                    {% if row[5] == 'Finalizada' %}
+                                    <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <span class="flag-finalizado">Finalizada</span>
+                                    </td>
+                                    {% elif row[5] == 'Em execução' %}
+                                    <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <span class="flag-em-execucao">Em execução</span>
+                                    </td>
+                                    {% elif row[5] == 'Aguardando material' %}
+                                    <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <span class="flag-aguardando">Aguardando material</span>
+                                    </td>
+                                    {% elif row[5] == 'Aguardando OK' %}
+                                    <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <span class="flag-aguardando-OK">Aguardando OK</span>
+                                    </td>
+                                    {% else %}
+                                    <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <span class="flag-em-espera">Em espera</span>
+                                    </td>    
+                                    {% endif %}
 
-                  </tr>
+                                    <td data-title="Natureza" style="padding-bottom: 0px;">{{row[16]}}</td>
+                                    <td data-title="Abertura" style="padding-bottom: 0px;">{{row[20]}}</td>
+                                    
+                                    {% if row[19] == True %}
+                                    <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-check-circle habilitado"></i></td>
+                                    {% else %}
+                                    <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-times-circle desabilitado"></i></td>
+                                    {% endif %}
+                                    <td data-title="Custo MO" style="padding-bottom: 0px;">R$ {{row[37]}}</td>                  
+                                    
+                                    <td data-title="Menu" style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
 
-                </thead>
-            </table>
+                                        <div class="dropup">
 
-            <div class="container-fluid">
+                                            {% if row[36] != "" %}
+                                                <a id="dropdown_os" class="dropdown-foto-video" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                                    <i class="fa-solid fa-video"></i>
+                                                </a>
+                                            {% else %}
+                                                <a></a>
+                                            {% endif %}
 
-                <!-- Page Heading -->
-                <h1 class="h3 mb-2 text-gray-800">Tables</h1>
-                <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
-                    For more information about DataTables, please visit the <a target="_blank"
-                        href="https://datatables.net">official DataTables documentation</a>.</p>
+                                            <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
 
-                <!-- DataTales Example -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Ordem de Serviço</h6>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                <a id="dropdown_os_1" class="dropdown-item dropdown_os" href="/edit/{{ row[11] }}/{{ identificador_selecionado }}/{{ setor_selecionado }}"> 
+                                                    <i class="fas fa-wrench"></i> 
+                                                </a>    
+                                                <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 
+                                                    <i class="fas fa-box"></i> 
+                                                </a>
+                                                <a class = "dropdown-item dropdown_os dropdownsss" href="/timeline/{{row[11]}}" class="btn"> 
+                                                    <i class="fas fa-clock"></i> 
+                                                </a>
+                                                <a class="dropdown-item btn dropdown_os dropdownsss" onclick="abrirModalExclusao('{{ row[11] }}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>  
+                                                <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                                    <i class="fas fa-image"></i> 
+                                                </a>
+                                                <a class="dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
+                                                    <i class="fa-solid fa-file-pdf"></i> 
+                                                </a>
+                                                <a class="dropdown-item dropdown_os dropdownsss" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
+                                                    <i class="fas fa-pencil"></i> 
+                                                </a>
+                                            </div>
+                                            {% if row[37] != "" %}
+                                                <a id="dropdown_os" class="dropdown-foto-video" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                                    <i class="fas fa-image"></i> 
+                                                </a>
+                                                {% else %}
+                                                <a></a>
+                                                {% endif %}
+                                        </div>
+
+                                    </td>
+
+                                    <td data-title="Descricao" style="display: none; padding-bottom: 0px;">{{row[6]}}</td>
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead class="hide-thead">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> -->
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Tables</h1>
+    <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
+        For more information about DataTables, please visit the <a target="_blank"
+            href="https://datatables.net">official DataTables documentation</a>.</p>
+
+
+    
+    <!-- Tabela com todas OS -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <!-- <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6> -->
+            <div class="col-sm-3">
+                <label for="os-filter">OS</label>
+                <input class="form-control" id="os-filter" name="os-filter">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
                         <tr>
                             <th style="width: 30px;">OS</th>
                             <th style="width: 40px;">Tipo de Manut.</th>
@@ -135,7 +201,6 @@
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
                             <th style=" display: none; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descricao</th>
                         </tr>
-
                     </thead>
                     <tbody>
                         {% for row in list_users %}
@@ -238,103 +303,61 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                </div>
-            </div>
-        </div>
-        <!-- <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Office</th>
-                                <th>Age</th>
-                                <th>Start date</th>
-                                <th>Salary</th>
-                            </tr>
-                        </thead>
-                        <tfoot>
-                            <tr>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Office</th>
-                                <th>Age</th>
-                                <th>Start date</th>
-                                <th>Salary</th>
-                            </tr>
-                        </tfoot>
-                        <tbody>
-                            <tr>
-                                <td>Tiger Nixon</td>
-                                <td>System Architect</td>
-                                <td>Edinburgh</td>
-                                <td>61</td>
-                                <td>2011/04/25</td>
-                                <td>$320,800</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-         -->
-    </div>
-
-    <!-- Modal excluir ordem -->
-    <div id="modalEnviar" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span> <!-- Botão de fechar -->
-            <form>
-                <div>
-                    <label for="observacao">Motivo da exclusão da OS:</label>
-                    <textarea id="observacao" rows="4" cols="45" required></textarea>
-                </div>
-                <button class="enviarModal" type="submit" onclick="enviarDadosParaBackend()">Enviar</button>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Modal Imagem -->
-    <div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="imagemModalLabel">Fotos</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Aqui é onde a imagem será exibida -->
-                </div>
             </div>
         </div>
     </div>
-
-    <!-- Modal Vídeo -->
-    <div class="modal fade" data-backdrop="static" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="videoModalLabel">Vídeos</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Aqui é onde o vídeo será exibido -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-
 </div>
+<!-- /.container-fluid -->
+
+
+<!-- Modal excluir ordem -->
+<div id="modalEnviar" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span> <!-- Botão de fechar -->
+        <form>
+            <div>
+                <label for="observacao">Motivo da exclusão da OS:</label>
+                <textarea id="observacao" rows="4" cols="45" required></textarea>
+            </div>
+            <button class="enviarModal" type="submit" onclick="enviarDadosParaBackend()">Enviar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Imagem -->
+<div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagemModalLabel">Fotos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Aqui é onde a imagem será exibida -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Vídeo -->
+<div class="modal fade" data-backdrop="static" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="videoModalLabel">Vídeos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Aqui é onde o vídeo será exibido -->
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}
 
