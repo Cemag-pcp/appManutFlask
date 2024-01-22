@@ -1,6 +1,5 @@
 from datetime import datetime, date
 from datetime import timedelta
-import datetime
 import numpy as np
 from pandas.tseries.offsets import BDay
 import pandas as pd
@@ -549,6 +548,7 @@ def gerador_de_semanas_informar_manutencao_diario(grupo,codigo_maquina,maquina,t
 
 def calcular_proxima_data(data_atual, periodicidade_em_dias):
     dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
+    data_atual = datetime.now()
     proxima_data = data_atual + dias_uteis
     proxima_data = proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
     return proxima_data.strftime("%Y-%m-%d") 
