@@ -56,7 +56,9 @@ $(document).ready(function() {
 // Tabela de histórico de preventivas /52semanas
 $(document).ready(function() {
   $('#dataTable14').DataTable({
-    "info": false
+    "info": false,
+    "aLengthMenu": [10,20,30,50],
+    "iDisplayLength": 10
   });
   
 });

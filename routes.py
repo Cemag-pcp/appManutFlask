@@ -50,7 +50,7 @@ def buscar_dados_os(id_ordem):
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select * from tb_ordens where id_ordem = %s order by n_ordem desc limit 1"
+    sql = "select *, coalesce(status,'Em espera') as status_new from tb_ordens where id_ordem = %s order by n_ordem desc limit 1"
     sql_data_abertura =  """select dataabertura - INTERVAL '3 hours' as dataabertura,solicitante,
                             equipamento_em_falha,cod_equipamento,setor_maquina_solda,status
                             from tb_ordens where id_ordem = %s and n_ordem = 0
@@ -85,7 +85,7 @@ def buscar_dados_os(id_ordem):
     setor_maquina_solda = dados_dataabertura[0]['setor_maquina_solda']
     risco = [row['risco'] for row in data][0]
     desc_usuario = [row['problemaaparente'] for row in data][0]
-    status = [row['status'] for row in data][0]
+    status = [row['status_new'] for row in data][0]
     tipo_manutencao = [row['tipo_manutencao'] for row in data][0]
     area_manutencao = [row['area_manutencao'] for row in data][0]
 
@@ -97,7 +97,7 @@ def buscar_dados_os(id_ordem):
         preventiva = True
     else:
         preventiva = False
-        
+
     dados = {
         'setor_values':setor_values,
         'solicitante':solicitante,
