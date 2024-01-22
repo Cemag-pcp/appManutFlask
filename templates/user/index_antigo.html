@@ -1,0 +1,631 @@
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/button.css') }}">
+{% extends "user/layout.html" %}
+{% block body %}
+
+<style>
+    th, td {
+      text-align: center;
+    }
+</style>
+
+{% with messages = get_flashed_messages()  %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success" role="sucess">
+    <strong>Sucesso!</strong> {{ message }}
+    <button type="button" class="close" data-dismiss="sucess" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div id = "tabela" class="container-fluid">
+    <div class="row justify-content-md-center">
+        <div class = "board" style="overflow-x: auto;">
+            <div id = "titulo">
+                <div id="voltar">
+                    <a href="#" onclick="window.history.back();" class="botao-voltar">
+                      <i class="fas fa-arrow-left"></i>
+                    </a>
+                  </div>
+                <h1 class="visao">Ordem de serviço</h1>
+                <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
+            </div>
+            <div style="display: flex; justify-content: space-between;align-items: center;flex-direction: row-reverse;">
+                <a href="/logout" style="font-size: 20px; color: black;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+                <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button>
+            </div>
+            <table class="table" style="display: flex; justify-content: space-between;">
+                <thead>
+                  <tr class="container filter-wrapper2 filters">
+                    <th>OS
+                        <input class="form-control form-control" id="os-filter" style='padding: .375rem .25rem;' name="os-filter">
+                    </th>
+                    <th>Tipo de Manutenção
+                        <select class="form-control" id="execucao-filter" name="execucao-filter">
+                            <option value="">Todos</option>  
+                            <option value="Não Informado" style="color: transparent;">Não Informado</option>
+                            <option value="Corretiva">Corretiva</option>
+                            <option value="Preventiva">Preventiva</option>
+                            <option value="Preditiva">Preditiva</option>
+                            <option value="Apoio">Apoio</option>
+                            <option value="Projetos">Projetos</option>
+                            <option value="sesmt">SESMT</option>  
+                            <option value="Corretiva Programada">Corretiva Programada</option>  
+                        </select>
+                    </th>
+                    <th>Setor
+                        <select class="form-control" id="setor-filter" name="setor-filter">
+                          <option value="">Todos</option>
+                          <option value="Administrativo">Administrativo</option>
+                          <option value="Almoxarifado">Almoxarifado</option>
+                          <option value="Corte e estamparia">Corte e estamparia</option>
+                          <option value="Expedição">Expedição</option>
+                          <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                          <option value="Solda">Solda</option>
+                          <option value="Montagem">Montagem</option>
+                          <option value="Pintura">Pintura</option>
+                          <option value="Carpintaria">Carpintaria</option>
+                          <option value="Usinagem">Usinagem</option>  
+                          <option value="Serra">Serra</option>
+                          <option value="Serralheria">Serralheria</option>
+                          <option value="Manutenção">Manutenção</option>
+                          <option value="Forjaria">Forjaria</option>
+                          <option value="Utilidades">Utilidades</option>
+                          <option value="Qualidade">Qualidade</option>
+                        </select>
+                    </th>
+                    <th>Máquina
+                        <input id="maquina-filter" class="form-control">
+                    </th>
+                    <th>Risco
+                        <select class="form-control form-control" id="risco-filter" style='padding: .375rem .25rem;' name="risco-filter">
+                            <option value="">Todos</option>
+                            <option>Alto</option>
+                            <option>Médio</option>
+                            <option>Baixo</option>
+                        </select>
+                    </th>
+                    <th>Status
+                        <select class="form-control form-control" id="status-filter" style='padding: .375rem .25rem;' name="status-filter">
+                            <option value="">Todos</option>
+                            <option>Em execução</option>
+                            <option>Finalizada</option>
+                            <option>Aguardando material</option>
+                            <option>Aguardando OK</option>
+                            <option>Em espera</option>
+                        </select>
+                    </th>
+                    <th>Natureza
+                        <select class="form-control form-control" id="natureza-filter" style='padding: .375rem .25rem;' name="natureza-filter">
+                            <option value="">Todos</option>
+                            <option>OS</option>
+                            <option>Planejada</option>
+                        </select>
+                    </th>
+
+                    <th>Abertura / Hora
+                        <input id="abertura-filter" class="form-control">
+                    </th>
+                    
+                    <th>Máquina Parada
+                        <select class="form-control form-control" style='padding: .375rem .25rem;' id="maquina-parada-filter">
+                            <option value="">Todos</option>
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </th>
+
+                  </tr>
+
+                </thead>
+            </table>
+
+            <div class="table">
+                <table id="table1" class="table custom-table table-striped">
+                    <thead class="hide-thead">
+                        <tr>
+                            <th style="width: 30px;">OS</th>
+                            <th style="width: 40px;">Tipo de Manut.</th>
+                            <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
+                            <th style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. ou Local</th>
+                            <th>Risco</th>
+                            <th>Status</th>
+                            <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Natureza</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Últ. atualização</th>
+                            <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
+                            <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo MO</th>
+                            <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
+                            <th style=" display: none; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descricao</th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        {% for row in list_users %}
+                        <tr>
+                            <td data-title="OS" class="colunaOs" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[11]}}</td>
+                            {% if row[17] != '' %}
+                            <td data-title="Tipo Manutenção" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap;">{{row[17]}}</td>
+                            {% else %}
+                            <td data-title="Tipo Manutenção" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap; color: transparent;">Não Informado</td>
+                            {% endif %}
+                            <td data-title="Setor" class="colunaSetor" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
+                            <td data-title="Maquina" class="colunaMaquina" style="padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
+                            <td data-title="Risco" style="padding-bottom: 0px;">{{row[4]}}</td>
+
+                            {% if row[5] == 'Finalizada' %}
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-finalizado">Finalizada</span>
+                            </td>
+                            {% elif row[5] == 'Em execução' %}
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-em-execucao">Em execução</span>
+                            </td>
+                            {% elif row[5] == 'Aguardando material' %}
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-aguardando">Aguardando material</span>
+                            </td>
+                            {% elif row[5] == 'Aguardando OK' %}
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-aguardando-OK">Aguardando OK</span>
+                            </td>
+                            {% else %}
+                            <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span class="flag-em-espera">Em espera</span>
+                            </td>    
+                            {% endif %}
+
+                            <td data-title="Natureza" style="padding-bottom: 0px;">{{row[16]}}</td>
+                            <td data-title="Abertura" style="padding-bottom: 0px;">{{row[20]}}</td>
+                            
+                            {% if row[19] == True %}
+                            <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-check-circle habilitado"></i></td>
+                            {% else %}
+                            <td data-title="Máquina Parada?" style="padding-bottom: 0px;"><i class="fas fa-times-circle desabilitado"></i></td>
+                            {% endif %}
+                            <td data-title="Custo MO" style="padding-bottom: 0px;">R$ {{row[39]}}</td>                  
+                            
+                            <td data-title="Menu" style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
+
+                                <div class="dropup">
+
+                                    {% if row[37] != "" %}
+                                        <a id="dropdown_os" class="dropdown-foto-video" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                            <i class="fa-solid fa-video"></i>
+                                        </a>
+                                    {% else %}
+                                        <a></a>
+                                    {% endif %}
+
+                                    <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <a id="dropdown_os_1" class="dropdown-item dropdown_os" href="/edit/{{ row[11] }}/{{ identificador_selecionado }}/{{ setor_selecionado }}"> 
+                                            <i class="fas fa-wrench"></i> 
+                                        </a>    
+                                        <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 
+                                            <i class="fas fa-box"></i> 
+                                        </a>
+                                        <a class = "dropdown-item dropdown_os dropdownsss" href="/timeline/{{row[11]}}" class="btn"> 
+                                            <i class="fas fa-clock"></i> 
+                                        </a>
+                                        <a class="dropdown-item btn dropdown_os dropdownsss" onclick="abrirModalExclusao('{{ row[11] }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>  
+                                        <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                            <i class="fas fa-image"></i> 
+                                        </a>
+                                        <a class="dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
+                                            <i class="fa-solid fa-file-pdf"></i> 
+                                        </a>
+                                        <a class="dropdown-item dropdown_os dropdownsss" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
+                                            <i class="fas fa-pencil"></i> 
+                                        </a>
+                                    </div>
+                                    {% if row[38] != "" %}
+                                        <a id="dropdown_os" class="dropdown-foto-video" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                            <i class="fas fa-image"></i> 
+                                        </a>
+                                        {% else %}
+                                        <a></a>
+                                        {% endif %}
+                                </div>
+
+                            </td>
+
+                            <td data-title="Descricao" style="display: none; padding-bottom: 0px;">{{row[6]}}</td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal excluir ordem -->
+    <div id="modalEnviar" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span> <!-- Botão de fechar -->
+            <form>
+                <div>
+                    <label for="observacao">Motivo da exclusão da OS:</label>
+                    <textarea id="observacao" rows="4" cols="45" required></textarea>
+                </div>
+                <button class="enviarModal" type="submit" onclick="enviarDadosParaBackend()">Enviar</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Imagem -->
+    <div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagemModalLabel">Fotos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aqui é onde a imagem será exibida -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Vídeo -->
+    <div class="modal fade" data-backdrop="static" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="videoModalLabel">Vídeos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aqui é onde o vídeo será exibido -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+function downloadFilteredCSV(filteredData) {
+    // Adicione uma linha de cabeçalho com os nomes das colunas
+    var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Menu','Descricao'];
+    filteredData.unshift(headerRow);
+    var csvContent = "data:text/csv;charset=utf-8,";
+
+    // Concatena todas as linhas em uma única string
+    for (var i = 0; i < filteredData.length; i++) {
+        var cleanedRow = filteredData[i].map(cleanCSVValue).join(",");
+        csvContent += cleanedRow + "\r\n"; // Usamos "\r\n" para forçar a quebra de linha no formato CSV
+    }
+
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "dados_filtrados.csv");
+    document.body.appendChild(link);
+    link.click();
+}
+
+function cleanCSVValue(value) {
+    // Limpa o valor removendo quebras de linha e espaços extras
+    return value.replace(/[\r\n]+/g, '').trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function downloadFilteredData() {
+    var filteredData = applyFilters(); // Aplica os filtros e obtém os dados filtrados
+    downloadFilteredCSV(filteredData); // Realiza o download do CSV
+}
+
+// Função para aplicar os filtros na tabela
+function applyFilters() {
+    // Obtém os valores dos filtros
+    var osFilterValue = osFilter.value.toLowerCase();
+    var execucaoFilterValue = execucaoFilter.value.toLowerCase();
+    var setorFilterValue = setorFilter.value.toLowerCase();
+    var riscoFilterValue = riscoFilter.value.toLowerCase();
+    var maquinaFilterValue = maquinaFilter.value.toLowerCase();
+    var statusFilterValue = statusFilter.value.toLowerCase();
+    var naturezaFilterValue = naturezaFilter.value.toLowerCase();
+    var aberturaFilterValue = aberturaFilter.value.toLowerCase();
+    var maquinaParadaFilterValue = maquinaParadaFilter.value.toLowerCase();
+
+    // Obtém as linhas da tabela
+    var table = document.getElementById('table1');
+    var rows = table.getElementsByTagName('tr');
+
+    var filteredData = [];
+
+    // Itera pelas linhas da tabela (começando em 1 para ignorar o cabeçalho)
+    for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var osValue = row.cells[0].textContent.toLowerCase();
+        var execucaoValue = row.cells[1].textContent.toLowerCase();
+        var setorValue = row.cells[2].textContent.toLowerCase();
+        var maquinaValue = row.cells[3].textContent.toLowerCase();
+        var riscoValue = row.cells[4].textContent.toLowerCase();
+        var statusValue = row.cells[5].textContent.toLowerCase();
+        var naturezaValue = row.cells[6].textContent.toLowerCase();
+        var aberturaValue = row.cells[7].textContent.toLowerCase();
+        var maquinaParadaValue = row.cells[8].querySelector('i');
+
+        // Verifica se a linha corresponde aos filtros
+        var shouldDisplay =
+            osValue.includes(osFilterValue) &&
+            execucaoValue.includes(execucaoFilterValue) &&
+            setorValue.includes(setorFilterValue) &&
+            maquinaValue.includes(maquinaFilterValue) &&
+            riscoValue.includes(riscoFilterValue) &&
+            statusValue.includes(statusFilterValue) &&
+            naturezaValue.includes(naturezaFilterValue) &&
+            aberturaValue.includes(aberturaFilterValue);
+
+        if (maquinaParadaFilterValue === 'true') {
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-check-circle');
+        } else if (maquinaParadaFilterValue === 'false') {
+            shouldDisplay = shouldDisplay && maquinaParadaValue.classList.contains('fa-times-circle');
+        }
+
+        // Se a linha corresponder aos filtros, adiciona os valores ao array de dados filtrados
+        if (shouldDisplay) {
+            var rowData = [];
+            for (var j = 0; j < row.cells.length; j++) {
+                rowData.push(row.cells[j].textContent);
+            }
+            filteredData.push(rowData);
+        }
+
+        // Atualiza a exibição da linha conforme necessário
+        row.style.display = shouldDisplay ? '' : 'none';
+    }
+
+    return filteredData;
+}
+// Obtém os elementos de filtro por seus IDs
+var osFilter = document.getElementById('os-filter');
+var execucaoFilter = document.getElementById('execucao-filter');
+var setorFilter = document.getElementById('setor-filter');
+var riscoFilter = document.getElementById('risco-filter');
+var maquinaFilter = document.getElementById('maquina-filter');
+var statusFilter = document.getElementById('status-filter');
+var naturezaFilter = document.getElementById('natureza-filter');
+var aberturaFilter = document.getElementById('abertura-filter')
+var maquinaParadaFilter = document.getElementById('maquina-parada-filter');
+
+// Função para preencher o filtro de execução com valores únicos
+function populateExecucaoFilter() {
+    var options = Array.from(new Set(Array.from(document.querySelectorAll('#execucao-filter option')).map(option => option.value)));
+    var sortedValues = sortUniqueValues(options);
+
+    var nonEmptyValues = sortedValues.filter(value => value !== "");
+
+    execucaoFilter.innerHTML = '<option value="">Todos</option>';
+    nonEmptyValues.forEach(value => {
+        execucaoFilter.innerHTML += `<option value="${value}">${value}</option>`;
+    });
+}
+
+// Adiciona event listeners para detectar mudanças nos filtros
+osFilter.addEventListener('input', applyFilters);
+execucaoFilter.addEventListener('change', applyFilters);
+setorFilter.addEventListener('change', applyFilters);
+riscoFilter.addEventListener('change', applyFilters);
+maquinaFilter.addEventListener('input', applyFilters);
+statusFilter.addEventListener('change', applyFilters);
+naturezaFilter.addEventListener('change', applyFilters);
+aberturaFilter.addEventListener('input', applyFilters);
+maquinaParadaFilter.addEventListener('change', applyFilters);
+
+// Chama a função applyFilters inicialmente para exibir a tabela completa
+applyFilters();
+populateExecucaoFilter(); // Preenche o filtro de execução com valores únicos
+
+function sortUniqueValues(values) {
+    return values.sort(function(a, b) {
+        return a.localeCompare(b, 'pt', { sensitivity: 'base' });
+    });
+}
+
+</script>
+
+<script>
+    function abrirModalExclusao(idLinha) {
+      const modalEnviar = document.getElementById('modalEnviar');
+      const observacao = document.getElementById('observacao');
+  
+      // Defina o ID da linha no atributo personalizado do botão "enviarModal"
+      const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
+      enviarModalButton.setAttribute('data-id-linha', idLinha);
+  
+      // Limpe o campo de observação antes de abrir o modal
+      observacao.value = '';
+  
+      // Abra o modal
+      modalEnviar.style.display = 'block';
+    }
+  
+    function enviarDadosParaBackend() {
+      const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
+      const idLinha = enviarModalButton.getAttribute('data-id-linha');
+      const observacao = document.getElementById('observacao').value;
+  
+      // Lógica para enviar os dados para o backend, incluindo o ID da linha e a observação
+      // ...
+  
+      // Feche o modal após enviar os dados
+      const modalEnviar = document.getElementById('modalEnviar');
+      modalEnviar.style.display = 'none';
+    }
+  
+    // Obtém o botão de fechar e adiciona um evento de clique para fechar o modal
+    const closeModalButton = document.querySelector('#modalEnviar .close');
+    closeModalButton.addEventListener('click', () => {
+      const modalEnviar = document.getElementById('modalEnviar');
+      modalEnviar.style.display = 'none';
+    });
+</script>
+
+<script>
+    function enviarDadosParaBackend() {
+        const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
+        const idLinha = enviarModalButton.getAttribute('data-id-linha');
+        const observacao = document.getElementById('observacao').value;
+
+        if (!observacao) {
+            // Exibir uma mensagem de erro ou realizar alguma ação caso o campo esteja vazio
+            alert('Por favor, preencha o campo de observação.');
+            return;
+        }
+
+        const dados = {
+            id: idLinha,
+            texto: observacao
+        };
+
+        fetch('/excluir-ordem', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dados)
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log(data); // Exemplo: imprime a resposta do backend no console
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erro:', error); // Tratamento de erro
+            // Exiba uma mensagem de erro para o usuário
+        });
+
+        const modalEnviar = document.getElementById('modalEnviar');
+        modalEnviar.style.display = 'none';
+    }
+
+</script>
+
+<script>
+    function showImageModal(id_ordem) {
+        showLoading();
+        $.ajax({
+            url: '/visualizar_midias/' + id_ordem,
+            type: 'GET',
+            dataType: 'json', // Adicione esta linha para indicar que o retorno é JSON
+            success: function(response) {
+                var imagens = response.imagens_data;
+                var videos = response.videos_data;
+                var modalBody = '';
+
+                // Iterar sobre todas as imagens e adicionar ao modal
+                for (var i = 0; i < imagens.length; i++) {
+                    var base64Image = imagens[i];
+                    modalBody += '<img src="data:image/png;base64,' + base64Image + '" alt="Imagem" /><br><br>';
+                }
+
+                // Preencher o conteúdo do modal com as imagens e vídeos
+                $('#imagemModal .modal-body').html(modalBody);
+
+                // Exibir o modal
+                $('#imagemModal').modal('show');
+
+                // Ocultar a tela de carregamento após um pequeno atraso (500 milissegundos)
+                setTimeout(function() {
+                    hideLoading(); // Esconde o indicador de carregamento
+                }, 10);
+            },
+            error: function(error) {
+                hideLoading();
+                alert('Essa Ordem de Serviço não contém imagem ou vídeo');
+                console.log(error);
+            }
+        });
+    }
+</script>
+
+<script>
+    // Obtém todas as células da coluna que contém os valores float (índice da coluna, começando em 0)
+    var colunaValores = document.querySelectorAll('#table1 td.coluna-valores');
+
+    // Percorre todas as células da coluna
+    for (var i = 0; i < colunaValores.length; i++) {
+    var valorCelula = colunaValores[i].textContent;
+
+    // Remove caracteres não numéricos (exceto ponto decimal) da string
+    var valorNumerico = valorCelula.replace(/[^\d.-]/g, '');
+
+    // Converte o valor para float
+    var valorFloat = parseFloat(valorNumerico);
+
+    // Verifica se o valor é um número válido
+    if (!isNaN(valorFloat)) {
+        // Formata o valor como moeda
+        var formatoMoeda = valorFloat.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+        });
+
+        // Atualiza o valor da célula com a moeda formatada
+        colunaValores[i].textContent = formatoMoeda;
+    }
+    }
+</script>
+
+<script>
+    function showVideoModal(id_ordem) {
+        showLoading();
+        $.ajax({
+            url: '/visualizar_video/' + id_ordem,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                var videos = response.videos_data;
+                var modalBody = '';
+
+                // Iterar sobre todos os vídeos e adicionar ao modal
+                for (var i = 0; i < videos.length; i++) {
+                    var videoURL = videos[i];
+                    modalBody += '<video controls>';
+                    modalBody += '<source src="' + videoURL + '" type="video/mp4">';
+                    modalBody += 'Seu navegador não suporta o elemento de vídeo.';
+                    modalBody += '</video><br><br>';
+                }
+
+                // Preencher o conteúdo do modal com os vídeos
+                $('#videoModal .modal-body').html(modalBody);
+
+                // Exibir o modal
+                $('#videoModal').modal('show');
+
+                // Ocultar a tela de carregamento após um pequeno atraso (500 milissegundos)
+                setTimeout(function() {
+                    hideLoading();
+                }, 10);
+            },
+            error: function(error) {
+                hideLoading();
+                alert('Ocorreu um erro ao buscar os vídeos');
+                console.log(error);
+            }
+        });
+    }
+</script>
+
+{% endblock %}
