@@ -271,6 +271,8 @@ def cards_get(query):
     cards = pd.read_sql_query(query, conn)
     # cards = cards[cards['id_ordem'] == 837]
 
+    cards['status'] = cards['status'].fillna('Em espera')
+
     cards = cards.sort_values(by='n_ordem', ascending=True)
 
     print(cards)
@@ -279,7 +281,7 @@ def cards_get(query):
 
     print(cards)
 
-    em_execucao = cards[cards['status'] == 'Em execução'][['id_ordem', 'status','n_ordem']]
+    em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
 
     print(em_execucao)
 
@@ -292,11 +294,11 @@ def cards_get(query):
 
     # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
     lista_qt = [
-        status_dict.get('Em espera', 0),
         status_dict.get('Aguardando material', 0),
         status_dict.get('Finalizada', 0),
         status_dict.get('Em execução', 0),
-        status_dict.get('Aguardando OK', 0)
+        status_dict.get('Aguardando OK', 0),
+        status_dict.get('Em espera', 0)
     ]
 
     print(lista_qt)
@@ -338,7 +340,7 @@ def cards_post(query):
 
     # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
     lista_qt = [
-        status_dict.get('Em espera', 0),
+        # status_dict.get('Em espera', 0),
         status_dict.get('Aguardando material', 0),
         status_dict.get('Finalizada', 0),
         status_dict.get('Em execução', 0),
@@ -349,6 +351,47 @@ def cards_post(query):
 
     return lista_qt
 
+def card_post_em_espera(query_em_espera):
+
+    """
+    Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cards = pd.read_sql_query(query_em_espera, conn)
+    # cards = cards[cards['id_ordem'] == 837]
+
+    cards['status'] = cards['status'].fillna('Em espera')
+
+    cards = cards.sort_values(by='n_ordem', ascending=True)
+
+    print(cards)
+
+    cards = cards.drop_duplicates(subset='id_ordem', keep='last')
+
+    print(cards)
+
+    em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
+
+    print(em_execucao)
+
+    cards = cards.groupby(['status'])['status'].count()
+
+    # Crie um dicionário para armazenar os resultados
+    status_dict = {}
+    for status, qt_os in cards.items():
+        status_dict[status] = qt_os
+
+    # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
+    card_em_espera = [
+        status_dict.get('Em espera', 0),
+    ]
+
+    print(card_em_espera)
+
+    return card_em_espera
 
 def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, query_horas_trabalhada_setor, dia_inicial,dia_final,lista_meses):
 
@@ -878,15 +921,10 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     if len(df_combinado) > 0:
         print('Entrou')
-        df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] -
-                                df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
-        df_combinado['MTTR'] = (
-            df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
-        df_combinado['disponibilidade'] = (
-            (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
-
-        disponibilidade_geral_maquina = df_combinado['disponibilidade'].mean().round(
-            2)
+        df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] -df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
+        df_combinado['MTTR'] = (df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
+        df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+        disponibilidade_geral_maquina = df_combinado['disponibilidade'].mean().round(2)
 
         if boleano_historico == True and dia_inicial == []:
             """
@@ -1050,38 +1088,35 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             Se for GET pega todo o histórico e adiciona no atual
             """
             print('Entrou no Boleano')
-            historico_csv = pd.read_csv(
-                "disponibilidade_historico.csv", sep=';')
+            historico_csv = pd.read_csv("disponibilidade_historico.csv", sep=';')
 
             if setor_selecionado:
-                historico_csv = historico_csv[historico_csv['setor']
-                                              == setor_selecionado]
+                historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
 
-            historico_csv['setor'] = historico_csv['setor'].str.split(
-                ' - ').str[0]
-            historico_csv['disponibilidade_historico_media'] = historico_csv['disponibilidade_historico_media'].str.replace(
-                ',', '.').str.replace("%", "").astype(float)
-            df_combinado_disponibilidade = df_combinado.merge(
-                historico_csv, how='outer', on='setor').fillna(100)
-            df_combinado_disponibilidade["disponibilidade_media"] = (
-                df_combinado_disponibilidade["disponibilidade"] + df_combinado_disponibilidade["disponibilidade_historico_media"]) / 2
-            df_combinado_disponibilidade = df_combinado_disponibilidade.drop(columns={
-                                                                             "disponibilidade"})
-            df_combinado_disponibilidade = df_combinado_disponibilidade.rename(
-                columns={"disponibilidade_media": 'disponibilidade'})
+            historico_csv['setor'] = historico_csv['setor'].str.split(' - ').str[0]
+            historico_csv['disponibilidade_historico_media'] = historico_csv['disponibilidade_historico_media'].str.replace(',', '.').str.replace("%", "").astype(float)
 
-            df_combinado_disponibilidade.sort_values(
-                by='disponibilidade', inplace=True)
+            df_disponibilidade_setor = df_combinado.merge(historico_csv, how='outer', on='setor').fillna(100)
+            df_disponibilidade_setor["disponibilidade_media"] = (df_disponibilidade_setor["disponibilidade"] + df_disponibilidade_setor["disponibilidade_historico_media"]) / 2
+            df_disponibilidade_setor = df_disponibilidade_setor.drop(columns={"disponibilidade"})
+            df_disponibilidade_setor = df_disponibilidade_setor.rename(columns={"disponibilidade_media": 'disponibilidade'})
+
+            # Calcular a média da disponibilidade para cada setor
+            df_disponibilidade_setor = df_disponibilidade_setor.groupby('setor')[['MTBF','MTTR','disponibilidade']].mean().reset_index()
+
+            df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
+            df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
+            df_disponibilidade_setor['disponibilidade'] = df_disponibilidade_setor['disponibilidade'].round(2)
+
+            df_disponibilidade_setor.sort_values(by='disponibilidade', inplace=True)
 
             labels = df_disponibilidade_setor['setor'].tolist()  # eixo x
-            # eixo y gráfico 1
             dados_disponibilidade = df_disponibilidade_setor['disponibilidade'].tolist()
 
-            df_disponibilidade_setor = df_disponibilidade_setor[[
-                'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
-            
-            disponibilidade_geral_setor = df_combinado_disponibilidade['disponibilidade'].mean(
-            )
+            disponibilidade_geral_setor = df_disponibilidade_setor['disponibilidade'].mean()
+
+            df_disponibilidade_setor = df_disponibilidade_setor[['setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
+        
 
         else:
             print('Não Entrou no Boleano')
@@ -1218,6 +1253,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     # query_horas_trabalhadas_setor
 
     df_horas_tipo = pd.read_sql_query(query_horas_trabalhada_setor, conn)
+
     # Converter a coluna 'diferenca' para o tipo 'timedelta'
     df_horas_tipo['diferenca'] = pd.to_timedelta(df_horas_tipo['diferenca'])
 
@@ -1268,8 +1304,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline = pd.read_sql_query(query_mtbf, conn)
 
-    df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
-
     if dia_inicial == []:
         df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
         df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
@@ -1295,12 +1329,16 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='maquina')
 
-    qtd_dias_uteis = dias_uteis(lista_meses)
+    if dia_inicial == []:
+        qtd_dias_uteis = dias_uteis(lista_meses)
+    else:
+        qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
 
     df_timeline['MTBF'] = ((df_timeline['carga_trabalhada']) /
                            df_timeline['qtd_manutencao']).round(2)
+    print(df_timeline)
 
     # top_10_maiores_MTBF_lista = top_10_maiores_MTBF[['maquina','qtd_manutencao','carga_trabalhada','MTBF']].values.tolist()
 
@@ -2746,6 +2784,14 @@ def grafico():  # Dashboard
 
         maquinas_importantes = request.form.getlist('maquinas-favoritas')
 
+        if maquinas_importantes or len(maquinas) != 0:
+            cur.execute(
+                'SELECT DISTINCT (codigo) FROM tb_planejamento_anual')
+            maquinas_preventivas = cur.fetchall()
+            maquinas_preventivas = [valor[0] for valor in maquinas_preventivas]
+            maquinas_selecionadas = ",".join(
+                [f"'{maquinas}'" for maquinas in maquinas_preventivas])
+
         # Adiciona as condições de filtro se os campos não estiverem vazios
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
@@ -2776,9 +2822,29 @@ def grafico():  # Dashboard
         if maquinas_importantes:
             query += f" AND maquina in ({maquinas_selecionadas})"
 
-        print("Query aqui", query)
+
+        query_em_espera = """
+                SELECT *
+                FROM tb_ordens
+                WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+               """
+
+        if mes_inicial:
+            query_em_espera += f" AND ultima_atualizacao >= '{mes_inicial}' AND ultima_atualizacao <= '{mes_final}'"
+        if setor_selecionado:
+            query_em_espera += f" AND setor in ({setor_selecionado})"
+        if maquinas_importantes:
+            query_em_espera += f" AND maquina in ({maquinas_selecionadas})"
+
+        print("Query aqui", query_em_espera)
 
         lista_qt = cards_post(query)
+
+        card_em_espera = card_post_em_espera(query_em_espera)
+
+        lista_qt.append(card_em_espera[0])
+
+        print('lista_qt',lista_qt)
 
         """ Finalizando cards """
 
@@ -2932,15 +2998,6 @@ def grafico():  # Dashboard
             query_horas_trabalhada_setor += f" AND maquina in ({maquinas_selecionadas})"
 
         query_horas_trabalhada_setor += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY setor;"
-            
-
-        if maquinas_importantes or len(maquinas) != 0:
-            cur.execute(
-                'SELECT DISTINCT (codigo) FROM tb_planejamento_anual')
-            maquinas_preventivas = cur.fetchall()
-            maquinas_preventivas = [valor[0] for valor in maquinas_preventivas]
-            maquinas_selecionadas = ",".join(
-                [f"'{maquinas}'" for maquinas in maquinas_preventivas])
 
         cur.execute(
             'SELECT DISTINCT EXTRACT(MONTH FROM ultima_atualizacao) AS numero_mes FROM tb_ordens;')
@@ -2995,7 +3052,7 @@ def grafico():  # Dashboard
         disponibilidade_geral_maquina = resultado['disponibilidade_geral_maquina']
         disponibilidade_geral_setor = resultado['disponibilidade_geral_setor']
 
-        return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,
+        return render_template('user/grafico.html', lista_qt=lista_qt,card_em_espera=card_em_espera, setores=setores, itens_filtrados=itens_filtrados,
                                lista_setore_selecionado=lista_setore_selecionado, **context_mtbf_maquina,
                                **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina, **context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
                                **context_mtbf_top10_maquina, **context_disponiblidade_setor, mes=mes, **context_horas_trabalhadas, lista_horas_trabalhadas_setor=lista_horas_trabalhadas_setor,
@@ -3079,9 +3136,15 @@ def grafico():  # Dashboard
     query_horas_trabalhada_setor = """
         SELECT
             setor,
-            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+            (CASE WHEN
+                (SUM(horafim - horainicio) < INTERVAL '0') 
+            THEN 
+                (-SUM(horafim - horainicio)) 
+            ELSE 
+                SUM(horafim - horainicio)
+            END) AS diferenca
         FROM tb_ordens
-        WHERE ordem_excluida ISNULL
+        WHERE ordem_excluida IS NULL
         GROUP BY setor;
         """
     
@@ -3111,13 +3174,11 @@ def grafico():  # Dashboard
     lista_mtbf_setor = resultado['df_timeline_mtbf_setor']
     lista_mtbf_maquina = resultado['df_timeline_copia']
     lista_disponibilidade_setor = resultado['df_disponibilidade_setor']
-    print(lista_disponibilidade_setor)
     lista_disponibilidade_maquina = resultado['df_combinado_disponibilidade']
     lista_mttr_setor = resultado['df_combinado_mttr_setor']
     lista_mttr_maquina = resultado['df_combinado_mttr']
     top_10_maiores_MTBF_lista = resultado['top_10_maiores_MTBF_lista']
     disponibilidade_geral_maquina = resultado['disponibilidade_geral_maquina']
-    print(lista_disponibilidade_maquina)
     disponibilidade_geral_setor = resultado['disponibilidade_geral_setor']
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,

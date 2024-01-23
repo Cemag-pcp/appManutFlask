@@ -9,28 +9,30 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
 
-  <div class="card shadow mb-4">
+<div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Filtros Gráficos</h6>
     </div>
     <div class="card-body">
       <form  action="{{ url_for('routes.grafico') }}" method="POST">
-
-        <label for="filtro_setor">Setor:</label>
-        <select class="selectpicker form-control" name="filtro_setor" multiple title="Selecione o(s) setor(es)..." data-selected-text-format="count > 3">
-
-            {% for setor in setores %}
-            {% if setor[0] in lista_setore_selecionado %}
-            <option value="{{ setor[0] }}" selected>{{ setor[0] }}</option>
-            {% else %}
-            <option value="{{ setor[0] }}">{{ setor[0] }}</option>
-            {% endif %}
-            {% endfor %}
-
-        </select>
-
-        <label for="data_filtro">Mês:</label>
-        <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
+        <div class="row">
+          <div class="col-md-6">
+            <label for="filtro_setor">Setor:</label>
+            <select class="selectpicker form-control" name="filtro_setor" multiple title="Selecione o(s) setor(es)..." data-selected-text-format="count > 3">
+                {% for setor in setores %}
+                {% if setor[0] in lista_setore_selecionado %}
+                <option value="{{ setor[0] }}" selected>{{ setor[0] }}</option>
+                {% else %}
+                <option value="{{ setor[0] }}">{{ setor[0] }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6" >
+            <label for="data_filtro">Mês:</label>
+            <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
+          </div>
+        </div>
         <div style="display: flex;justify-content: flex-end;gap: 20px;align-items: flex-start;margin-top: 20px;">
         <label for="maquinas-favoritas">Máquinas importantes</label>
           <label class="switch">
@@ -47,7 +49,6 @@
     </div>
 </div>
     
-
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Cards</h1>
@@ -64,7 +65,7 @@
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Em Execução</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[3]}}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[2]}}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -82,7 +83,7 @@
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Em Espera</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[0]}}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[4]}}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
@@ -100,7 +101,7 @@
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Finalizada</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[2]}}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[1]}}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -117,7 +118,7 @@
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                             Aguardando Material</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[1]}}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[0]}}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -134,7 +135,7 @@
                   <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                           Aguardando OK</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[4]}}</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[3]}}</div>
                   </div>
                   <div class="col-auto">
                       <i class="fas fa-calendar fa-2x text-gray-300"></i>

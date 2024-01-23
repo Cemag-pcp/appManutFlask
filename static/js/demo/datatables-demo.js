@@ -4,6 +4,10 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
+  $('#dataTable13').DataTable();
+});
+
+$(document).ready(function() {
   $('#dataTable2').DataTable({
     "info":false,
     "aLengthMenu":[4,10],
