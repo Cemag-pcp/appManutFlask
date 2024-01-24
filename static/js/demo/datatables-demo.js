@@ -4,7 +4,11 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-  $('#dataTable13').DataTable();
+  $('#dataTable13').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,15,25,50],
+    "iDisplayLength":10
+  });
 });
 
 $(document).ready(function() {

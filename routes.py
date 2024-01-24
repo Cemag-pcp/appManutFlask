@@ -275,11 +275,7 @@ def cards_get(query):
 
     cards = cards.sort_values(by='n_ordem', ascending=True)
 
-    print(cards)
-
     cards = cards.drop_duplicates(subset='id_ordem', keep='last')
-
-    print(cards)
 
     em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
 
@@ -321,11 +317,7 @@ def cards_post(query):
 
     cards = cards.sort_values(by='n_ordem', ascending=True)
 
-    print(cards)
-
     cards = cards.drop_duplicates(subset='id_ordem', keep='last')
-
-    print(cards)
 
     em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
 
@@ -2756,13 +2748,13 @@ def grafico():  # Dashboard
             # Usar o construtor do datetime.date
             mes_inicial = datetime.date(datetime.strptime(mes_inicial_str, '%Y-%m-%d'))
             hoje = datetime.now().date()
-            dia_semana_hoje = hoje.weekday()
-            if dia_semana_hoje == 6:  # 5 representa sábado
-                mes_final = datetime.now().date() - timedelta(days=2)
-            elif dia_semana_hoje == 6 or dia_semana_hoje != 0:  # 6 representa domingo
-                mes_final = datetime.now().date() - timedelta(days=1)
-            else:
-                mes_final = datetime.now()
+            # dia_semana_hoje = hoje.weekday()
+            # if dia_semana_hoje == 6:  # 5 representa sábado
+            #     mes_final = datetime.now().date() - timedelta(days=2)
+            # elif dia_semana_hoje != 0:  # 6 representa domingo
+            #     mes_final = datetime.now().date() - timedelta(days=1)
+            # else:
+            mes_final = hoje + timedelta(days=1)
         else:
             mes_inicial, mes_final = mes.split(' - ')
             mes_inicial = datetime.strptime(mes_inicial, '%d/%m/%Y').date()
@@ -2836,7 +2828,7 @@ def grafico():  # Dashboard
         if maquinas_importantes:
             query_em_espera += f" AND maquina in ({maquinas_selecionadas})"
 
-        print("Query aqui", query_em_espera)
+        print("Query aqui", query)
 
         lista_qt = cards_post(query)
 
@@ -2951,10 +2943,17 @@ def grafico():  # Dashboard
         query_horas_trabalhada_area = ("""
         SELECT
             area_manutencao,
-            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+            (CASE WHEN
+                (SUM(horafim - horainicio) < INTERVAL '0') 
+            THEN 
+                (-SUM(horafim - horainicio)) 
+            ELSE 
+                SUM(horafim - horainicio)
+            END) AS diferenca
         FROM tb_ordens
-        WHERE 1=1 
+        WHERE 1=1
         """)
+        
 
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
@@ -2965,12 +2964,20 @@ def grafico():  # Dashboard
 
         query_horas_trabalhada_area += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY area_manutencao;"
 
+        print('query_horas_trabalhada_area',query_horas_trabalhada_area)
+
         query_horas_trabalhada_tipo = ("""
         SELECT
             tipo_manutencao,
-            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+            (CASE WHEN
+                (SUM(horafim - horainicio) < INTERVAL '0') 
+            THEN 
+                (-SUM(horafim - horainicio)) 
+            ELSE 
+                SUM(horafim - horainicio)
+            END) AS diferenca
         FROM tb_ordens
-        WHERE 1=1 
+        WHERE 1=1
         """)
 
         if setor_selecionado:
@@ -2985,15 +2992,21 @@ def grafico():  # Dashboard
         query_horas_trabalhada_setor = ("""
         SELECT
             setor,
-            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+            (CASE WHEN
+                (SUM(horafim - horainicio) < INTERVAL '0') 
+            THEN 
+                (-SUM(horafim - horainicio)) 
+            ELSE 
+                SUM(horafim - horainicio)
+            END) AS diferenca
         FROM tb_ordens
-        WHERE 1=1 
+        WHERE ordem_excluida IS NULL
         """)
 
         if setor_selecionado:
             query_horas_trabalhada_setor += f" AND setor in ({setor_selecionado})"
         if mes_inicial:
-            query_horas_trabalhada_setor += f" AND datainicio >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query_horas_trabalhada_setor += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
             query_horas_trabalhada_setor += f" AND maquina in ({maquinas_selecionadas})"
 
@@ -3118,18 +3131,30 @@ def grafico():  # Dashboard
     query_horas_trabalhada_tipo = """
         SELECT
             tipo_manutencao,
-            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+            (CASE WHEN
+                (SUM(horafim - horainicio) < INTERVAL '0') 
+            THEN 
+                (-SUM(horafim - horainicio)) 
+            ELSE 
+                SUM(horafim - horainicio)
+            END) AS diferenca
         FROM tb_ordens
-        WHERE ordem_excluida ISNULL
+        WHERE ordem_excluida IS NULL
         GROUP BY tipo_manutencao;
         """
 
     query_horas_trabalhada_area = """
         SELECT
             area_manutencao,
-            TO_CHAR(SUM(horafim - horainicio), 'HH24:MI:SS') AS diferenca
+            (CASE WHEN
+                (SUM(horafim - horainicio) < INTERVAL '0') 
+            THEN 
+                (-SUM(horafim - horainicio)) 
+            ELSE 
+                SUM(horafim - horainicio)
+            END) AS diferenca
         FROM tb_ordens
-        WHERE ordem_excluida ISNULL
+        WHERE ordem_excluida IS NULL
         GROUP BY area_manutencao;
         """
     
@@ -4218,29 +4243,37 @@ def visualizar_pdf(id_ordem):
     return formulario_os(id_ordem)
 
 
-@routes_bp.route('/maquina-52-semanas/<codigo>')
+@routes_bp.route('/maquina-52-semanas',methods=['POST'])
 @login_required
-def transformar_maquina(codigo):
+def transformar_maquina():
+
+    codigo_maquina = request.get_json()
+
+    print(codigo_maquina)
+
+    # codigo_maquina = codigo_maquina['codigo_maquina']
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo)
+    query = """SELECT * FROM tb_maquinas WHERE codigo = '{}'""".format(codigo_maquina)
 
     cur.execute(query)
     data = cur.fetchall()
 
-    codigo = codigo
+    codigo_maquina = codigo_maquina
     setor = data[0][1]
     descricao = data[0][3]
     tombamento = data[0][4]
+    apelido = data[0][5]
 
     if not tombamento:
         tombamento = ''
 
-    return render_template('user/cadastrar52_existente.html', codigo=codigo,
-                           setor=setor, descricao=descricao, tombamento=tombamento)
+    data = {'codigo':codigo_maquina,'setor':setor,'descricao':descricao,'tombamento':tombamento,'apelido':apelido}
+
+    return jsonify(data)
 
 
 @routes_bp.route('/editar-maquina/<codigo>')

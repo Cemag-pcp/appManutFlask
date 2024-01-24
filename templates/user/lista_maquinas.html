@@ -2,109 +2,132 @@
 {% block containerFluid %}
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Lista de Máquinas</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable13" width="100%" cellspacing="0">
-                        <thead class="hide-thead">
-                            <tr>
-                                <th>Código</th>
-                                <th>Apelido</th>
-                                <th>Tombamento</th>
-                                <th>Setor</th>
-                                <th>Descrição</th>
-                                <th>Preventiva</th>
-                                <th>Menu</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in data %}
-                            <tr>
-                                <td data-title="Código">{{row[0]}}</td>
-                                <td data-title="Apelido">{{row[4]}}</td>
-                                <td data-title="Tombamento">{{row[3]}}</td>
-                                <td data-title="Setor">{{row[1]}}</td>
-                                <td data-title="Descrição">{{row[2]}}</td>
-                                <td data-title="Preventiva">
-                                    {% if  row[5] == 'Y' %}
-                                        <i class="fas fa-check-circle habilitado"></i>
-                                    {% else %}
-                                        <i class="fas fa-times-circle desabilitado"></i>
-                                    {% endif %}
-                                </td>
-                                <!-- <td>
-                                    <button type="button" class="btn btn-primary" onclick="abrirModal('{{ row[0] }}')">Docs</button>
-                                </td> -->                           
-                                <td data-title="Menu" style="padding-bottom: 0px; padding-left: 0; padding-right: 0; padding-top: 8px;">
-                                    <div class="dropup">
-                                        <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
-                                        </button>
-                                        <div class="dropdown-menu" class="dropdown-item" aria-labelledby="dropdownMenu2">
-                                            {% if row[5] == 'Y' %}
-                                            <a id="dropdown_os" class="dropdown-item" href="/editar-maquina-preventiva/{{row[0]}}">
-                                                <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina preventiva" class="icon-tamanho-padrao"> 
-                                            </a>
-                                            {% else %}
-                                            <a id="dropdown_os" class="dropdown-item" href="/maquina-52-semanas/{{row[0]}}">
-                                                <img src="static/icons/manutencao.png" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao"> 
-                                            </a>
-                                            <a id="dropdown_os" class="dropdown-item" href="/editar-maquina/{{row[0]}}">
-                                                <img src="static/icons/editar-codigo.png" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao"> 
-                                            </a>
-                                            {% endif %}
-                                            <!-- Exluir máquina -->
-                                            <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalExclusao('{{ row[0] }}')">
-                                                <i class="fas fa-trash" title="Excluir máquina" id="meu-botao"></i>
-                                            </a>
-                                            <a id="dropdown_os" class="dropdown-item">
-                                                <i class="fa-solid fa-file-lines docIcon" title="Documentos" onclick="modalDocumento('{{ row[0] }}')" style="cursor: pointer;"></i>
-                                            </a>
-                                            <!-- Parar a preventiva da máquina -->
-                                            {% if row[5] == 'Y' %}
-                                            <a id="dropdown_os" class="dropdown-item" href="#" onclick="modalPreventiva('{{ row[0] }}')">
-                                                <img src="static/icons/stop-preventiva.png" alt="Ícone de Manutenção" title="Remover do planejamento anual" class="icon-tamanho-padrao"> 
-                                            </a>
-                                            {% else %}
-                                            <a></a>
-                                            {% endif %}
-                                        </div>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Máquinas Cadastradas</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable13" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Apelido</th>
+                            <th>Tombamento</th>
+                            <th>Setor</th>
+                            <th>Descrição</th>
+                            <th>Preventiva</th>
+                            <th>Menu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            <td data-title="Código">{{row[0]}}</td>
+                            <td data-title="Apelido">{{row[4]}}</td>
+                            <td data-title="Tombamento">{{row[3]}}</td>
+                            <td data-title="Setor">{{row[1]}}</td>
+                            <td data-title="Descrição">{{row[2]}}</td>
+                            <td data-title="Preventiva" style="text-align: center;">
+                                {% if  row[5] == 'Y' %}
+                                    <i class="fas fa-check-circle habilitado" style="color: green; font-size: 20px;"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle desabilitado" style="color: red; font-size: 20px;"></i>
+                                {% endif %}
+                            </td>
+                            <!-- <td>
+                                <button type="button" class="btn btn-primary" onclick="abrirModal('{{ row[0] }}')">Docs</button>
+                            </td> -->                           
+                            <td data-title="Menu">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        {% if row[5] == 'Y' %}
+                                        <a class="dropdown-item" href="/editar-maquina-preventiva/{{row[0]}}">
+                                            Editar informações da máquina preventiva
+                                            <!-- <img src="static/icons/editar-codigo.png" style="width: 30px;" alt="Ícone de Manutenção" title="Editar informações da máquina preventiva" class="icon-tamanho-padrao">  -->
+                                        </a>
+                                        {% else %}
+                                        <a class="dropdown-item" onclick="modal_cadastrar_existentes('{{ row[0] }}')">
+                                            Transformar a manutenção em preventiva
+                                            <!-- <img src="static/icons/manutencao.png" style="width: 30px;" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao">  -->
+                                        </a>
+                                        <a class="dropdown-item" href="/editar-maquina/{{row[0]}}">
+                                            Editar informações da máquina
+                                            <!-- <img src="static/icons/editar-codigo.png" style="width: 30px;" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao">  -->
+                                        </a>
+                                        {% endif %}
+                                        <!-- Exluir máquina -->
+                                        <a class="dropdown-item" href="#" onclick="modalExclusao('{{ row[0] }}')">
+                                            Excluir máquina
+                                            <!-- <i class="fas fa-trash" style="font-size: 30px;" title="Excluir máquina" id="meu-botao"></i> -->
+                                        </a>
+                                        <a class="dropdown-item" href="#" onclick="modalDocumento('{{ row[0] }}')" >
+                                            Inserir documentos
+                                            <!-- <i class="fa-solid fa-file-lines docIcon" style="font-size: 30px;" title="Documentos" style="cursor: pointer;"></i> -->
+                                        </a>
+                                        <!-- Parar a preventiva da máquina -->
+                                        {% if row[5] == 'Y' %}
+                                        <a class="dropdown-item" href="#" onclick="modalPreventiva('{{ row[0] }}')">
+                                            Remover do planejamento anual
+                                            <!-- <img src="static/icons/stop-preventiva.png" style="width: 30px;" alt="Ícone de Manutenção" title="Remover do planejamento anual" class="icon-tamanho-padrao">  -->
+                                        </a>
+                                        {% else %}
+                                        <a></a>
+                                        {% endif %}
                                     </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modal para listar e inserir documentos -->
-<div id="modalDocumento" class="tela" style="display: none;">
-    <div class="modal-content3">
-        <span class="close" onclick="closeModal()">&times;</span> <!-- Botão de fechar -->
-    <h4>Downloads</h4>
-    <div class="file-upload-lista" style="margin-top: 20px;">
-        <!-- Adicione o elemento input com o ID pdfInput1 -->
-        <input type="file" id="pdfInput1" accept=".pdf" style="margin-bottom: 30px;" enctype="multipart/form-data" multiple>
-        <button id="enviar_pdf" onclick="uploadPdf(codigo_maquina)">Enviar</button>
-    </div>
-        <table class="table table-striped" id="pdfTable">
-            <thead>
-                <tr class="cabeçalho">
-                    <th>PDF</th>
-                    <th>Download</th>
-                    <th>Remover</th>
-                </tr>
-            </thead>
-            <tbody id="pdfTableBody"></tbody>
-        </table>
+<div class="modal fade" id="modalDocumento" tabindex="-1" role="dialog" aria-labelledby="modalDocumentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDocumentoLabel">
+                    Documentos
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="input-group">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" accept=".pdf" enctype="multipart/form-data">
+                        <label class="custom-file-label" for="inputGroupFile04" id="inputGroupFile04Label">Escolher Arquivos</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" onclick="uploadPdf(codigo_maquina)" type="button" id="inputGroupFileAddon04">Enviar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="pdfTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>PDF</th>
+                                <th>Download</th>
+                                <th>Remover</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdfTableBody">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -151,14 +174,178 @@
             Esse processo é irreversível.
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
                 <button type="button" class="btn btn-primary" id="btnExcluirPreventiva">Excluir</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal para parar a preventiva da máquina -->
+<div class="modal fade" id="modal_cadastrar_existentes" tabindex="-1" role="dialog" aria-labelledby="modal_cadastrar_existentes_label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_cadastrar_existentes_label">
+                    Cadastro de máquinas
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label for="codigo">Codigo</label>
+                        <input type="text" id="codigo_maquina" class="form-control" style="height: 38px;" name="codigo" required>
+                    </div>
+            
+                    <div class="col-sm-6 mb-2">
+                    <label for="tombamento">Tombamento</label>
+                    <input type="text" class="form-control" style="height: 38px;" name="tombamento" id="tombamento_cadastro_existente">
+                    </div>
+                
+                </div>
+            
+                <div class="row">
+            
+                    <div class="col-sm-6 mb-2">
+                    <label for="descricao">Descrição</label>
+                    <input type="text" class="form-control" id="descricao_cadastro_existente" style="height: 38px;" name="descricao" required>
+                    </div>
+            
+                    <div class="col-sm-6 mb-2">
+                    <label for="apelido">Apelido</label>
+                    <input type="text" class="form-control" style="height: 38px;" id="apelido_cadastro_existente" name="apelido">
+                    </div>
+            
+                </div>
+            
+                <div class="row">
+                    
+                    <div class="col-sm-6 mb-2" style="width: 160px; margin-right: 5px;">         
+                    <label for="setor-label">Setor</label>
+                    <select class="form-control form-control" style="height: 38px;" id="setor_cadastro_existente" name="setor_cadastro_existente" required>
+                        <option id="setor_cadastro_existente"></option>  
+                    </select>
+                    </div>
+            
+                    <div class="form-row" style="margin-left: 20px;">
+                    <div class="col-sm-6 mb-2">
+                        <label for="cadastrar-preventiva">Preventiva</label>
+                        <label class="switch">
+                        <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()" checked>
+                        <span class="slider round"></span>
+                        </label>
+                    </div>
+                    </div>
+                
+                    <div class="col-sm-6 mb-2" style="width: 30px; margin-right: 50px;">  
+                    <label for="criticidade-label">Criticidade</label>              
+                    <select style = 'width: 60px; height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
+                        <option value="" selected disabled hidden></option>  
+                        <option>A</option>
+                        <option>B</option>
+                        <option>C</option>
+                    </select>
+                    </div>
+                    
+                </div>
+            
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                    <label for="manut_inicial">Data inicio</label>
+                    <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" required>
+                    </div>
+            
+                    <div class="col-sm-6 mb-2"> 
+                    <label for="periodicidade-label">Periodicidade</label>               
+                    <select class="form-control form-control" style="height: 38px;" id="periodicidade" name="periodicidade" required>
+                        <option value="" selected disabled hidden></option>  
+                        <option>Semanal</option>
+                        <option>Quinzenal</option>
+                        <option>Mensal</option>
+                        <option>Bimestral</option>
+                        <option>Semestral</option>
+                    </select>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-block">Inserir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Bootstrap core JavaScript-->
+<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+
+<!-- Page level plugins -->
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="static/js/demo/datatables-demo.js"></script>
+
 <script>
+    function modalDocumento(codigo_maquina) {        
+        $('#modalDocumento').modal('show');
+
+        window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
+        
+        listarPdf(); // Chama a função para listar os PDFs associados   
+    }
+
+    function modal_cadastrar_existentes(codigo_maquina) {        
+
+        window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
+        
+        console.log(codigo_maquina);
+
+        $.ajax({
+            type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+            url: '/maquina-52-semanas',  // URL do backend onde irá processar a exclusão da máquina
+            data: JSON.stringify(codigo_maquina),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+            contentType:'application/json',
+            success: function(response) {
+                // Aqui você pode tratar a resposta do servidor, caso necessário
+                console.log(response);
+                
+                $('#codigo_maquina').val(response.codigo);
+                $('#tombamento_cadastro_existente').val(response.tombamento);
+                $('#descricao_cadastro_existente').val(response.descricao);
+                $('#apelido_cadastro_existente').val(response.apelido);
+
+                var setorSelect = $('#setor_cadastro_existente');
+                setorSelect.empty(); // Limpar opções existentes
+                if (response.setor) {
+                    setorSelect.append($('<option>', {
+                        value: response.setor,
+                        text: response.setor
+                    }));
+                }
+
+                $('#modal_cadastrar_existentes').modal('show');
+
+            },
+            error: function(error) {
+                // Caso ocorra algum erro na requisição, você pode tratar aqui
+                console.log('Erro na requisição:', error);
+            }
+            
+        });
+
+    }
+
     function modalExclusao(codigo_maquina) {
         // Exibir o modal
         $('#modalExclusao').modal('show');
@@ -236,24 +423,15 @@
 </script>
 
 <script>
-    
-    function modalDocumento(codigo_maquina) {        
-        var modal = document.getElementById("modalDocumento");
-        modal.style.display = "block";
 
-        window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
-        
-        listarPdf(); // Chama a função para listar os PDFs associados   
-    }
-
-    function closeModal() {
-        var modal = document.getElementById("modalDocumento");
-        modal.style.display = "none";
-    }
+    document.getElementById('inputGroupFile04').addEventListener('change', function(e) {
+            var fileName = e.target.files[0].name;
+            document.getElementById('inputGroupFile04Label').innerHTML = fileName;
+    });
 
     function uploadPdf() {
-    var fileInput = document.getElementById("pdfInput1");
-    var file = fileInput.files[0];
+        var fileInput = document.getElementById("inputGroupFile04");
+        var file = fileInput.files[0];
 
         if (file) {
             var formData = new FormData();
@@ -282,7 +460,10 @@
                     // Coluna para o link de download
                     var downloadCell = newRow.insertCell(1);
                     var downloadLink = document.createElement("a");
-                    downloadLink.href = "link_para_o_arquivo_no_backend"; // Defina o link apropriado
+                    downloadLink.href = response; // Defina o link apropriado
+
+                    downloadCell.style.textAlign = "center"
+
                     var downloadIcon = document.createElement("i");
                     downloadIcon.className = "fas fa-download"; // Classe do ícone de download do Font Awesome
                     downloadCell.classList.add("nome-download-cell");
@@ -293,6 +474,11 @@
                     // Coluna para o botão de remoção
                     var removeCell = newRow.insertCell(2);
                     var removeButton = document.createElement("button");
+
+                    removeButton.className = "btn btn-danger"
+
+                    removeCell.style.textAlign = "center"
+
                     removeButton.textContent = "Remover";
                     removeButton.onclick = function() {
                         pdfTableBody.removeChild(newRow);
@@ -317,7 +503,6 @@
         var requestUrl = `/mostrar_pdf/${window.codigo_maquina}`;
         
         // Fazer uma requisição AJAX
-        showLoading();
         $.ajax({
             url: requestUrl,            
             type: 'GET',
@@ -347,6 +532,8 @@
                     var downloadIcon = document.createElement("i");
                     downloadIcon.className = "fas fa-download"; // Classe do ícone de download do Font Awesome
 
+                    downloadCell.style.textAlign = "center"
+
                     downloadCell.classList.add("nome-download-cell");
                     downloadLink.appendChild(downloadIcon);
 
@@ -354,21 +541,22 @@
 
                     var removeCell = newRow.insertCell(3);
                     var removeButton = document.createElement("button");
-                    
+
+                    removeButton.className = "btn btn-danger"
+
+                    removeCell.style.textAlign = "center"
+
                     removeButton.textContent = "Remover";
                     removeButton.onclick = function() {
                         removerPdf(response.nome_arquivo[index]); // Chamar a função de remoção passando o nome do arquivo
                     };
-                    removeCell.classList.add("remove-cell");
+                    removeCell.classList.add("remove-cell"); //btn btn-danger
                     removeButton.classList.add("remove-button");
                     removeCell.appendChild(removeButton);
                 });
-                
-                hideLoading(); // Mova a chamada para dentro da função success
             },
             
             error: function(error) {
-                hideLoading();
                 console.error('Erro ao obter os URLs dos PDFs: ', error);
             }
         });
@@ -382,7 +570,6 @@
 
     function removerPdf(nomeArquivo) {
         var requestUrl = `/remover_pdf/${window.codigo_maquina}/${encodeURIComponent(nomeArquivo)}`;
-        showLoading();
         $.ajax({
             url: requestUrl,
             type: 'DELETE',
@@ -400,7 +587,6 @@
                 }
 
                 console.log(response.message);
-                hideLoading();
                 // Após remover o PDF, atualize a lista no modal
                 listarPdf();
             },
@@ -475,6 +661,41 @@
             
         });
     }
+</script>
+
+<script>
+    function toggleCampos() {
+      var cadastrarPreventivaCheckbox = document.getElementById("cadastrar-preventiva");
+      var criticidadeSelect = document.getElementById("criticidade");
+      var manutInicialInput = document.getElementById("manut_inicial");
+      var periodicidadeSelect = document.getElementById("periodicidade");
+    
+      if (cadastrarPreventivaCheckbox.checked) {
+        criticidadeSelect.removeAttribute("disabled");
+        manutInicialInput.removeAttribute("disabled");
+        periodicidadeSelect.removeAttribute("disabled");
+      } else {
+        criticidadeSelect.setAttribute("disabled", "disabled");
+        manutInicialInput.setAttribute("disabled", "disabled");
+        periodicidadeSelect.setAttribute("disabled", "disabled");
+      }
+    }
+    
+    // Chamada inicial para garantir que os campos estejam corretamente habilitados/desabilitados ao carregar a página
+    toggleCampos();
+  </script>
+  
+  <script>
+    var maquinaParadaCheckbox = document.getElementById('cadastrar-preventiva');
+    var maquinaParadaHiddenInput = document.querySelector('input[name="cadastrar-preventiva"][type="hidden"]');
+  
+    maquinaParadaCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        maquinaParadaHiddenInput.value = "true";
+      } else {
+        maquinaParadaHiddenInput.value = "false";
+      }
+    });
 </script>
 
 {% endblock %}
