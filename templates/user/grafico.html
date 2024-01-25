@@ -14,7 +14,7 @@
         <h6 class="m-0 font-weight-bold text-primary">Filtros Gráficos</h6>
     </div>
     <div class="card-body">
-      <form  action="{{ url_for('routes.grafico') }}" method="POST">
+      <form  action="{{ url_for('routes.grafico') }}" method="POST" onsubmit="return validateForm()">
         <div class="row">
           <div class="col-md-6">
             <label for="filtro_setor">Setor:</label>
@@ -709,6 +709,44 @@
   };
 </script> -->
 
+<script>
+  function validateForm() {
+    var inputDate = document.getElementById('inputDate1').value;
+  
+    // Verifica se a data está no formato correto
+    if (!isValidDateRange(inputDate)) {
+      alert('Formato de data inválido. Use o formato DD/MM/YYYY - DD/MM/YYYY.');
+      return false; // Impede o envio do formulário
+    }
+  
+    var dateRange = inputDate.split(' - '); // ['02/01/2024', '19/01/2024']
+    var startDateComponents = dateRange[0].split('/');
+    var endDateComponents = dateRange[1].split('/');
+
+    // Cria as datas invertendo os componentes
+    var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
+    var endDate = new Date(endDateComponents[2], endDateComponents[1] - 1, endDateComponents[0]);
+    
+    console.log(dateRange)
+
+    // Define as datas de restrição
+    var minDate = new Date('2023-06-22');
+    var maxDate = new Date();
+  
+    // Verifica se as datas estão dentro do intervalo permitido
+    if (startDate < minDate || endDate > maxDate) {
+      alert('A primeira data não pode ser anterior a 22/06/2023 e a segunda data não pode ser posterior a hoje.');
+      return false; // Impede o envio do formulário
+    }
+  
+    return true; // Permite o envio do formulário
+  }
+  
+  function isValidDateRange(dateRange) {
+    var dateRangePattern = /^\d{2}\/\d{2}\/\d{4} - \d{2}\/\d{2}\/\d{4}$/;
+    return dateRangePattern.test(dateRange);
+  }
+</script>
 
 <script>
   

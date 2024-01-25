@@ -44,32 +44,32 @@
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         {% if row[5] == 'Y' %}
-                                        <a class="dropdown-item" href="/editar-maquina-preventiva/{{row[0]}}">
+                                        <a class="dropdown-item" onclick="modal_editar_maquina_preventiva('{{ row[0] }}')" style="cursor: pointer;">
                                             Editar informações da máquina preventiva
                                             <!-- <img src="static/icons/editar-codigo.png" style="width: 30px;" alt="Ícone de Manutenção" title="Editar informações da máquina preventiva" class="icon-tamanho-padrao">  -->
                                         </a>
                                         {% else %}
-                                        <a class="dropdown-item" onclick="modal_cadastrar_existentes('{{ row[0] }}')">
+                                        <a class="dropdown-item" onclick="modal_cadastrar_existentes('{{ row[0] }}')" style="cursor: pointer;">
                                             Transformar a manutenção em preventiva
                                             <!-- <img src="static/icons/manutencao.png" style="width: 30px;" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao">  -->
                                         </a>
-                                        <a class="dropdown-item" href="/editar-maquina/{{row[0]}}">
+                                        <a class="dropdown-item" onclick="modal_editar_maquina('{{ row[0] }}')" style="cursor: pointer;">
                                             Editar informações da máquina
                                             <!-- <img src="static/icons/editar-codigo.png" style="width: 30px;" alt="Ícone de Manutenção" title="Editar informações da máquina" class="icon-tamanho-padrao">  -->
                                         </a>
                                         {% endif %}
                                         <!-- Exluir máquina -->
-                                        <a class="dropdown-item" href="#" onclick="modalExclusao('{{ row[0] }}')">
+                                        <a class="dropdown-item" onclick="modalExclusao('{{ row[0] }}')">
                                             Excluir máquina
                                             <!-- <i class="fas fa-trash" style="font-size: 30px;" title="Excluir máquina" id="meu-botao"></i> -->
                                         </a>
-                                        <a class="dropdown-item" href="#" onclick="modalDocumento('{{ row[0] }}')" >
+                                        <a class="dropdown-item" onclick="modalDocumento('{{ row[0] }}')" >
                                             Inserir documentos
                                             <!-- <i class="fa-solid fa-file-lines docIcon" style="font-size: 30px;" title="Documentos" style="cursor: pointer;"></i> -->
                                         </a>
                                         <!-- Parar a preventiva da máquina -->
                                         {% if row[5] == 'Y' %}
-                                        <a class="dropdown-item" href="#" onclick="modalPreventiva('{{ row[0] }}')">
+                                        <a class="dropdown-item" onclick="modalPreventiva('{{ row[0] }}')">
                                             Remover do planejamento anual
                                             <!-- <img src="static/icons/stop-preventiva.png" style="width: 30px;" alt="Ícone de Manutenção" title="Remover do planejamento anual" class="icon-tamanho-padrao">  -->
                                         </a>
@@ -180,7 +180,7 @@
     </div>
 </div>
 
-<!-- Modal para parar a preventiva da máquina -->
+<!-- Modal para transformar máquina em preventiva -->
 <div class="modal fade" id="modal_cadastrar_existentes" tabindex="-1" role="dialog" aria-labelledby="modal_cadastrar_existentes_label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -196,12 +196,12 @@
                 <div class="row">
                     <div class="col-sm-6 mb-2">
                         <label for="codigo">Codigo</label>
-                        <input type="text" id="codigo_maquina" class="form-control" style="height: 38px;" name="codigo" required>
+                        <input type="text" id="codigo_maquina" class="form-control" style="height: 38px;" name="codigo" disabled>
                     </div>
             
                     <div class="col-sm-6 mb-2">
                     <label for="tombamento">Tombamento</label>
-                    <input type="text" class="form-control" style="height: 38px;" name="tombamento" id="tombamento_cadastro_existente">
+                    <input type="text" class="form-control" style="height: 38px;" name="tombamento" id="tombamento_cadastro_existente" disabled>
                     </div>
                 
                 </div>
@@ -209,55 +209,50 @@
                 <div class="row">
             
                     <div class="col-sm-6 mb-2">
-                    <label for="descricao">Descrição</label>
-                    <input type="text" class="form-control" id="descricao_cadastro_existente" style="height: 38px;" name="descricao" required>
+                        <label for="descricao">Descrição</label>
+                        <input type="text" class="form-control" id="descricao_cadastro_existente" style="height: 38px;" name="descricao" disabled>
                     </div>
             
                     <div class="col-sm-6 mb-2">
-                    <label for="apelido">Apelido</label>
-                    <input type="text" class="form-control" style="height: 38px;" id="apelido_cadastro_existente" name="apelido">
+                        <label for="apelido">Apelido</label>
+                        <input type="text" class="form-control" style="height: 38px;" id="apelido_cadastro_existente" name="apelido" disabled>
                     </div>
             
                 </div>
             
                 <div class="row">
                     
-                    <div class="col-sm-6 mb-2" style="width: 160px; margin-right: 5px;">         
-                    <label for="setor-label">Setor</label>
-                    <select class="form-control form-control" style="height: 38px;" id="setor_cadastro_existente" name="setor_cadastro_existente" required>
-                        <option id="setor_cadastro_existente"></option>  
-                    </select>
+                    <div class="col-sm-6 mb-2">         
+                        <label for="setor-label">Setor</label>
+                        <select class="form-control form-control" style="height: 38px;" id="setor_cadastro_existente" name="setor_cadastro_existente" disabled>
+                            <option id="setor_cadastro_existente"></option>  
+                        </select>
                     </div>
             
-                    <div class="form-row" style="margin-left: 20px;">
-                    <div class="col-sm-6 mb-2">
+                    <div class="col-sm-6 mb-2" style="margin: auto; text-align: end;">
                         <label for="cadastrar-preventiva">Preventiva</label>
-                        <label class="switch">
-                        <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()" checked>
-                        <span class="slider round"></span>
-                        </label>
-                    </div>
-                    </div>
-                
-                    <div class="col-sm-6 mb-2" style="width: 30px; margin-right: 50px;">  
-                    <label for="criticidade-label">Criticidade</label>              
-                    <select style = 'width: 60px; height: 38px;' class="form-control form-control" id="criticidade" name="criticidade" required>
-                        <option value="" selected disabled hidden></option>  
-                        <option>A</option>
-                        <option>B</option>
-                        <option>C</option>
-                    </select>
+                        <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" style="width: 20px;height: 20px;" onchange="toggleCampos()" checked>
                     </div>
                     
                 </div>
             
                 <div class="row">
-                    <div class="col-sm-6 mb-2">
-                    <label for="manut_inicial">Data inicio</label>
-                    <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" required>
+                    <div class="col-sm-4 mb-2">  
+                        <label for="criticidade-label">Criticidade</label>              
+                        <select class="form-control form-control" id="criticidade" name="criticidade" required>
+                            <option value="" selected disabled hidden></option>  
+                            <option>A</option>
+                            <option>B</option>
+                            <option>C</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-4 mb-2">
+                        <label for="manut_inicial">Data inicio</label>
+                        <input style='height: 38px;' type="date" class="form-control" id="manut_inicial" name="manut_inicial" required>
                     </div>
             
-                    <div class="col-sm-6 mb-2"> 
+                    <div class="col-sm-4 mb-2"> 
                     <label for="periodicidade-label">Periodicidade</label>               
                     <select class="form-control form-control" style="height: 38px;" id="periodicidade" name="periodicidade" required>
                         <option value="" selected disabled hidden></option>  
@@ -273,6 +268,145 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary btn-block">Inserir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar maquina -->
+<div class="modal fade" id="modal_editar_maquina" tabindex="-1" role="dialog" aria-labelledby="modal_editar_maquina_label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_editar_maquina_label">
+                    Editar Máquinas
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label for="codigo">Codigo</label>
+                        <input type="text" class="form-control" style="height: 38px;" id="editar_codigo" name="codigo" required>
+                    </div>
+            
+                    <div class="col-sm-6 mb-2">
+                      <label for="tombamento">Tombamento</label>
+                      <input type="text" class="form-control" style="height: 38px;" id="editar_tombamento" name="editar_tombamento">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 mb-2">
+                        <label for="descricao">Descrição</label>
+                        <input type="text" class="form-control" style="height: 38px;" id="editar_descricao" name="editar_descricao" required>
+                    </div>
+                    <div class="col-sm-4 mb-2">         
+                        <label for="setor-label">Setor</label>
+                        <select class="form-control form-control" style="height: 38px;" id="editar_setor" name="editar_setor" required>
+                            <option value="Administrativo">Administrativo</option>
+                            <option value="Almoxarifado">Almoxarifado</option>
+                            <option value="Corte e estamparia">Corte e estamparia</option>
+                            <option value="Expedição">Expedição</option>
+                            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                            <option value="Solda">Solda</option>
+                            <option value="Montagem">Montagem</option>
+                            <option value="Pintura">Pintura</option>
+                            <option value="Carpintaria">Carpintaria</option>
+                            <option value="Usinagem">Usinagem</option>  
+                            <option value="Serra">Serra</option>
+                            <option value="Serralheria">Serralheria</option>
+                            <option value="Manutenção">Manutenção</option>
+                            <option value="Forjaria">Forjaria</option>
+                            <option value="Utilidades">Utilidades</option> 
+                            <option value="Qualidade">Qualidade</option> 
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mb-2"> 
+                      <label for="apelido">Apelido</label>
+                      <input type="text" class="form-control" style="height: 38px;" id="editar_apelido" name="editar_apelido">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-block">Inserir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar maquina preventiva -->
+<div class="modal fade" id="modal_editar_maquina_preventivas" tabindex="-1" role="dialog" aria-labelledby="modal_editar_maquina_preventivas_label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_editar_maquina_preventivas_label">
+                    Editar Máquinas Preventivas
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label for="codigo">Codigo</label>
+                        <input type="text" class="form-control" style="height: 38px;" id="editar_codigo_preventivas" name="editar_codigo_preventivas">
+                    </div>
+            
+                    <div class="col-sm-6 mb-2">
+                      <label for="periodicidade-label">Periodicidade (dias)</label>               
+                      <input type="number" min="1" class="form-control form-control" style="height: 38px;" id="editar_periodicidade" name="editar_periodicidade">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 mb-2">
+                        <label for="tombamento">Tombamento</label>
+                        <input type="text" class="form-control" style="height: 38px;" id="editar_tombamento_preventivas" name="editar_tombamento_preventivas">
+                    </div>
+                    <div class="col-sm-4 mb-2">         
+                        <label for="setor-label">Setor</label>
+                        <select class="form-control form-control" style="height: 38px;" id="editar_setor_preventivas" name="editar_setor_preventivas">
+                            <option value="Administrativo">Administrativo</option>
+                            <option value="Almoxarifado">Almoxarifado</option>
+                            <option value="Corte e estamparia">Corte e estamparia</option>
+                            <option value="Expedição">Expedição</option>
+                            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                            <option value="Solda">Solda</option>
+                            <option value="Montagem">Montagem</option>
+                            <option value="Pintura">Pintura</option>
+                            <option value="Carpintaria">Carpintaria</option>
+                            <option value="Usinagem">Usinagem</option>  
+                            <option value="Serra">Serra</option>
+                            <option value="Serralheria">Serralheria</option>
+                            <option value="Manutenção">Manutenção</option>
+                            <option value="Forjaria">Forjaria</option>
+                            <option value="Utilidades">Utilidades</option> 
+                            <option value="Qualidade">Qualidade</option> 
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mb-2"> 
+                      <label for="apelido">Apelido</label>
+                      <input type="text" class="form-control" style="height: 38px;" id="editar_apelido_preventivas" name="editar_apelido_preventivas">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-sm-6 mb-2">    
+                        <label for="descricao">Descrição</label>
+                        <input type="text" class="form-control" style="height: 38px;" id="editar_descricao_preventivas" name="editar_descricao_preventivas">     
+                    </div>
+                    
+                    <div class="col-sm-6 mb-2">  
+                      <label for="manut_inicial">Manutenção Inicial</label>
+                      <input style='height: 38px;' type="date" class="form-control" id="editar_manut_inicial" name="editar_manut_inicial">
+                    </div>
+          
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="envio-edicao-maquina-preventiva" class="btn btn-primary btn-block">Inserir</button>
             </div>
         </div>
     </div>
@@ -296,13 +430,16 @@
 <!-- Page level custom scripts -->
 <script src="static/js/demo/datatables-demo.js"></script>
 
-<script>
-    function modalDocumento(codigo_maquina) {        
-        $('#modalDocumento').modal('show');
 
+<!-- Exibição dos Modais -->
+
+<script>
+    function modalDocumento(codigo_maquina) {    
+        
         window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
         
         listarPdf(); // Chama a função para listar os PDFs associados   
+
     }
 
     function modal_cadastrar_existentes(codigo_maquina) {        
@@ -346,6 +483,75 @@
 
     }
 
+    function modal_editar_maquina(codigo_maquina) {        
+
+        window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
+
+        console.log(codigo_maquina);
+
+        $.ajax({
+            type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+            url: '/editar-maquina',  // URL do backend onde irá processar a exclusão da máquina
+            data: JSON.stringify(codigo_maquina),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+            contentType:'application/json',
+            success: function(response) {
+                // Aqui você pode tratar a resposta do servidor, caso necessário
+                console.log(response);
+                
+                $('#editar_codigo').val(response.codigo);
+                $('#editar_tombamento').val(response.tombamento);
+                $('#editar_descricao').val(response.descricao);
+                $('#editar_apelido').val(response.apelido);
+
+                $('#editar_setor').val(response.setor);
+
+                $('#modal_editar_maquina').modal('show');
+
+            },
+            error: function(error) {
+                // Caso ocorra algum erro na requisição, você pode tratar aqui
+                console.log('Erro na requisição:', error);
+            }
+            
+        });
+
+        }
+    
+    function modal_editar_maquina_preventiva(codigo_maquina) {        
+
+        window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
+
+        console.log(codigo_maquina);
+
+        $.ajax({
+            type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+            url: '/editar-maquina-preventiva',  // URL do backend onde irá processar a exclusão da máquina
+            data: JSON.stringify(codigo_maquina),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+            contentType:'application/json',
+            success: function(response) {
+                // Aqui você pode tratar a resposta do servidor, caso necessário
+                console.log(response);
+                
+                $('#editar_codigo_preventivas').val(response.codigo);
+                $('#editar_tombamento_preventivas').val(response.tombamento);
+                $('#editar_descricao_preventivas').val(response.descricao);
+                $('#editar_setor_preventivas').val(response.setor);
+
+                $('#editar_apelido_preventivas').val(response.apelido);
+                $('#editar_periodicidade').val(response.periodicidade);
+                $('#editar_manut_inicial').val(response.manutencao_inicial);
+
+                $('#modal_editar_maquina_preventivas').modal('show');
+
+            },
+            error: function(error) {
+                // Caso ocorra algum erro na requisição, você pode tratar aqui
+                console.log('Erro na requisição:', error);
+            }
+            
+        });
+    }
+
     function modalExclusao(codigo_maquina) {
         // Exibir o modal
         $('#modalExclusao').modal('show');
@@ -381,39 +587,36 @@
             
         });
     }
-</script>
 
-<!-- Script para modal de exclusão de máquina -->
-<script>
-    function modalExclusao(codigo_maquina) {
+    function modalPreventiva(codigo_maquina) {
         // Exibir o modal
-        $('#modalExclusao').modal('show');
+        $('#modalPreventiva').modal('show');
 
         // Armazenar o código da máquina em uma variável
         var codigoMaquina = codigo_maquina;
 
         // Adicionar um evento de clique ao botão "Excluir" do modal
-        $('#btnExcluir').click(function() {
+        $('#btnExcluirPreventiva').click(function() {
             showLoading();
             // Realizar a requisição AJAX para o backend
             $.ajax({
                 type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
-                url: '/excluir-maquina',  // URL do backend onde irá processar a exclusão da máquina
+                url: '/excluir-preventiva',  // URL do backend onde irá processar a exclusão da máquina
                 data: { codigo_maquina: codigoMaquina },  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
                 success: function(response) {
                     // Aqui você pode tratar a resposta do servidor, caso necessário
                     console.log(response);
                     // Fechar o modal após a requisição ser enviada
-                    $('#modalExclusao').modal('hide');
-                    hideLoading();
+                    $('#modalPreventiva').modal('hide');
+                    
                     // Recarregar a página após a exclusão ser concluída
                     location.reload();
+                    hideLoading();
                 },
                 error: function(error) {
                     // Caso ocorra algum erro na requisição, você pode tratar aqui
                     console.log('Erro na requisição:', error);
                     hideLoading();
-                    location.reload();
                 }
                 
             });
@@ -554,6 +757,7 @@
                     removeButton.classList.add("remove-button");
                     removeCell.appendChild(removeButton);
                 });
+                $('#modalDocumento').modal('show');
             },
             
             error: function(error) {
@@ -624,45 +828,6 @@
     }); 
 </script> -->
 
-<!-- Script para modal de exclusão de preventiva de máquina -->
-<script>
-    function modalPreventiva(codigo_maquina) {
-        // Exibir o modal
-        $('#modalPreventiva').modal('show');
-
-        // Armazenar o código da máquina em uma variável
-        var codigoMaquina = codigo_maquina;
-
-        // Adicionar um evento de clique ao botão "Excluir" do modal
-        $('#btnExcluirPreventiva').click(function() {
-            showLoading();
-            // Realizar a requisição AJAX para o backend
-            $.ajax({
-                type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
-                url: '/excluir-preventiva',  // URL do backend onde irá processar a exclusão da máquina
-                data: { codigo_maquina: codigoMaquina },  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
-                success: function(response) {
-                    // Aqui você pode tratar a resposta do servidor, caso necessário
-                    console.log(response);
-                    // Fechar o modal após a requisição ser enviada
-                    $('#modalPreventiva').modal('hide');
-                    
-                    // Recarregar a página após a exclusão ser concluída
-                    location.reload();
-                    hideLoading();
-                },
-                error: function(error) {
-                    // Caso ocorra algum erro na requisição, você pode tratar aqui
-                    console.log('Erro na requisição:', error);
-                    hideLoading();
-                }
-                
-            });
-            
-        });
-    }
-</script>
-
 <script>
     function toggleCampos() {
       var cadastrarPreventivaCheckbox = document.getElementById("cadastrar-preventiva");
@@ -683,9 +848,9 @@
     
     // Chamada inicial para garantir que os campos estejam corretamente habilitados/desabilitados ao carregar a página
     toggleCampos();
-  </script>
+</script>
   
-  <script>
+<script>
     var maquinaParadaCheckbox = document.getElementById('cadastrar-preventiva');
     var maquinaParadaHiddenInput = document.querySelector('input[name="cadastrar-preventiva"][type="hidden"]');
   
@@ -696,6 +861,39 @@
         maquinaParadaHiddenInput.value = "false";
       }
     });
+</script>
+
+<script>
+
+    $("#envio-edicao-maquina-preventiva").click(function () {
+
+        codigo_preventivas = $('#editar_codigo_preventivas').val();
+        tombamento_preventivas = $('#editar_tombamento_preventivas').val();
+        descricao_preventivas = $('#editar_descricao_preventivas').val();
+        setor_preventivas = $('#editar_setor_preventivas').val();
+        apelido_preventivas = $('#editar_apelido_preventivas').val();
+        editar_periodicidade = $('#editar_periodicidade').val();
+        editar_manut_inicial = $('#editar_manut_inicial').val();
+
+        $.ajax({
+            type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+            url: '/editar-maquina',  // URL do backend onde irá processar a exclusão da máquina
+            data: JSON.stringify(data),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+            contentType:'application/json',
+            success: function(response) {
+                // Aqui você pode tratar a resposta do servidor, caso necessário
+                console.log(response);
+                
+
+            },
+            error: function(error) {
+                // Caso ocorra algum erro na requisição, você pode tratar aqui
+                console.log('Erro na requisição:', error);
+            }
+            
+        });
+    });
+
 </script>
 
 {% endblock %}
