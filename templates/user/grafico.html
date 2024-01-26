@@ -712,9 +712,11 @@
 <script>
   function validateForm() {
     var inputDate = document.getElementById('inputDate1').value;
-  
+    
+    console.log(inputDate)
+
     // Verifica se a data está no formato correto
-    if (!isValidDateRange(inputDate)) {
+    if (!isValidDateRange(inputDate) && inputDate !== '') {
       alert('Formato de data inválido. Use o formato DD/MM/YYYY - DD/MM/YYYY.');
       return false; // Impede o envio do formulário
     }
@@ -818,6 +820,13 @@ document.addEventListener("DOMContentLoaded", function() {
 // Bar Chart Example
 var eixo_y = {{ dados_mtbf_maquina | safe }};
 var eixo_x = {{ labels_mtbf_maquina | safe }};
+// Encontrar o valor máximo no array
+let maxValor = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor = Math.ceil(maxValor / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var ctx = document.getElementById("grafico1");
 var myBarChart = new Chart(ctx, {
   type: 'bar',
@@ -858,7 +867,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: 120,
+          max: arredondadoMaxValor,
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -934,7 +943,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: 120,
+          max: Math.max(Math.ceil(eixo_y / 50) * 50),
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1008,7 +1017,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: 120,
+          max: Math.max(Math.ceil(eixo_y / 50) * 50),
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1084,7 +1093,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: 120,
+          max: Math.max(Math.ceil(eixo_y / 50) * 50),
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1161,7 +1170,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: 10,
+          max: Math.max(Math.ceil(eixo_y / 50) * 50),
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1238,7 +1247,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: 100,
+          max: Math.max(Math.ceil(eixo_y / 50) * 50),
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1315,7 +1324,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: 100,
+          max: Math.max(Math.ceil(eixo_y / 50) * 50),
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1421,19 +1430,64 @@ var eixo_x = {{ labels_horas_trabalhadas_setor | safe }};
 var ctx = document.getElementById('grafico9');
 
 var myBarChart = new Chart(ctx, {
-  type: 'doughnut',
+  type: 'bar',
   data: {
     labels: eixo_x,
     datasets: [{
       label: 'MTBF',
-      backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474','#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474','#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474','#4e73df', '#1cc88a', '#36b9cc','#ffd369','#f87474'],
-      hoverBackgroundColor:['#2e59d9', '#17a673', '#2c9faf'],
+      backgroundColor: "#4e73df",
+      hoverBackgroundColor: "#2e59d9",
+      borderColor: "#4e73df",
       data: eixo_y,
     }],
   },
   options: {
     maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 10,
+        right: 25,
+        top: 25,
+        bottom: 0
+      }
+    },
+    scales: {
+      xAxes: [{
+        time: {
+          unit: 'month'
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          maxTicksLimit: 6
+        },
+        maxBarThickness: 25,
+      }],
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          maxTicksLimit: 10,
+          padding: 10,
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2]
+        }
+      }],
+    },
+    legend: {
+      display: false
+    },
     tooltips: {
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
       backgroundColor: "rgb(255,255,255)",
       bodyFontColor: "#858796",
       borderColor: '#dddfeb',
@@ -1443,11 +1497,7 @@ var myBarChart = new Chart(ctx, {
       displayColors: false,
       caretPadding: 10,
     },
-    legend: {
-      display: false
-    },
-    cutoutPercentage: 50,
-  },
+  }
 });
 
 </script>

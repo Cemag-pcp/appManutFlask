@@ -1026,8 +1026,17 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['maquina'] = df_timeline['maquina']
     df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
 
-    df_agrupado_tempo = df_timeline.groupby(
-        ['maquina'])['diferenca'].sum().reset_index()
+    print('555',df_timeline['maquina'].drop_duplicates().tolist() == ['Outros'])
+
+    if df_timeline['maquina'].drop_duplicates().tolist() == ['Outros']:
+        df_agrupado_tempo = df_timeline.groupby('maquina').agg({
+            'diferenca': 'sum',
+            'setor': 'first'  # Ou use a função de agregação desejada para 'setor'
+        }).reset_index()
+    else:
+        df_agrupado_tempo = df_timeline.groupby(
+            ['maquina'])['diferenca'].sum().reset_index()
+        
     df_agrupado_tempo['maquina'] = df_agrupado_tempo['maquina'].str.split(
         ' - ').str[0]
 
@@ -1049,7 +1058,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_maquinas = df_maquinas[['codigo','setor']]
     df_maquinas = df_maquinas.rename(columns={'codigo': 'maquina'})
 
-    df_combinado = df_combinado.merge(df_maquinas, on='maquina')
+    if df_combinado['maquina'].drop_duplicates().tolist() != ['Outros']:
+        df_combinado = df_combinado.merge(df_maquinas, on='maquina')
+
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
     qtd_dias_uteis = dias_uteis(lista_meses)
@@ -1070,6 +1081,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
             2)
 
+        print('666',df_combinado)
+    
         df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].groupby('setor').mean()[['MTBF','MTTR','disponibilidade']].reset_index()
         df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
         df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
@@ -1099,6 +1112,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
             df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
             df_disponibilidade_setor['disponibilidade'] = df_disponibilidade_setor['disponibilidade'].round(2)
+
+            print('2',df_disponibilidade_setor)
 
             df_disponibilidade_setor.sort_values(by='disponibilidade', inplace=True)
 
@@ -4177,9 +4192,9 @@ def lista_maquinas():
     
     cur.execute(""" SELECT 
                         tb_planejamento_anual.codigo,
-                        tb_planejamento_anual.setor,
-                        tb_planejamento_anual.descricao,
-                        tb_planejamento_anual.tombamento,
+                        tb_maquinas.setor,
+                        tb_maquinas.descricao,
+                        tb_maquinas.tombamento,
                         tb_maquinas.apelido
                     FROM tb_planejamento_anual
                     JOIN tb_maquinas ON tb_planejamento_anual.codigo = tb_maquinas.codigo; """)
@@ -4323,120 +4338,125 @@ def envio_editar_maquina_preventiva():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    codigo_inicial = codigo
-    codigo_novo = request.form.get('editar_codigo_preventivas')
-    tombamento = request.form.get('editar_tombamento_preventivas')
-    descricao = request.form.get('editar_descricao_preventivas')
-    setor = request.form.get('editar_setor_preventivas')
-    criticidade = request.form.get('criticidade')
-    periodicidade = request.form.get('periodicidade')
-    manutencao_inicial = request.form.get('manut_inicial')
-    data_formatada = datetime.strptime(
-        manutencao_inicial, "%Y-%m-%d").strftime("%d/%m/%Y")
-    apelido = request.form.get('apelido')
+    data = request.get_json()
 
-    print(codigo_inicial, codigo_novo, tombamento, descricao,
-            setor, criticidade, periodicidade, data_formatada)
+    codigo_maquina = data['codigo_preventivas']
+    tombamento = data['tombamento_preventivas']
+    descricao = data['descricao_preventivas']
+    apelido = data['apelido_preventivas']
 
-    df = gerador_de_semanas_informar_manutencao(
-        setor, codigo_novo, descricao, tombamento, criticidade, data_formatada, periodicidade)
+    print(tombamento,descricao,apelido)
 
-    lista = df.values.tolist()
-    lista = lista[0]
+    # cur.execute("""
+    #             UPDATE tb_maquinas
+    #             SET tombamento=%s,descricao=%s,apelido=%s
+    #             WHERE codigo = %s
+    #             """, (tombamento, descricao, apelido, codigo_maquina))
 
-    print(lista)
+    # conn.commit()
+    # conn.close()
+    
+    return jsonify(codigo_maquina)
 
-    if codigo_novo != codigo_inicial:
+    # df = gerador_de_semanas_informar_manutencao(
+    #     setor, codigo_novo, descricao, tombamento, criticidade, data_formatada, periodicidade)
 
-        query = """SELECT * FROM tb_planejamento_anual WHERE codigo = '{}'""".format(
-            codigo_novo)
-        data = pd.read_sql_query(query, conn)
+    # lista = df.values.tolist()
+    # lista = lista[0]
 
-        if len(data) > 0:
-            flash("Código já cadastrado.", category='error')
-            codigo = codigo_novo
-            conn.close()
+    # print(lista)
 
-            return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
-                                    setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
-                                    manutencao_inicial=manutencao_inicial)
+    # if codigo_novo != codigo_inicial:
 
-        else:
-            """Query para editar a linha do codigo escolhido"""
+    #     query = """SELECT * FROM tb_planejamento_anual WHERE codigo = '{}'""".format(
+    #         codigo_novo)
+    #     data = pd.read_sql_query(query, conn)
 
-            cur.execute("""
-                UPDATE tb_ordens
-                SET maquina=%s, setor=%s
-                WHERE maquina = %s
-                """, (codigo_novo, setor, codigo_inicial))
+    #     if len(data) > 0:
+    #         flash("Código já cadastrado.", category='error')
+    #         codigo = codigo_novo
+    #         conn.close()
 
-            cur.execute("""
-                DELETE FROM tb_planejamento_anual
-                WHERE codigo = '{}'
-                """.format(codigo_inicial))
+    #         return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+    #                                 setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
+    #                                 manutencao_inicial=manutencao_inicial)
 
-            sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-                ','.join(['%s'] * len(lista)))
-            cur.execute(sql_insert, lista)
+    #     else:
+    #         """Query para editar a linha do codigo escolhido"""
 
-            try:
-                cur.execute("""
-                    UPDATE tb_maquinas
-                    SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
-                    WHERE codigo = %s
-                    """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
+    #         cur.execute("""
+    #             UPDATE tb_ordens
+    #             SET maquina=%s, setor=%s
+    #             WHERE maquina = %s
+    #             """, (codigo_novo, setor, codigo_inicial))
 
-                cur.execute("""
-                    UPDATE tb_ordens
-                    SET maquina=%s, setor=%s
-                    WHERE maquina = %s
-                    """, (codigo_novo, setor, codigo_inicial))
+    #         cur.execute("""
+    #             DELETE FROM tb_planejamento_anual
+    #             WHERE codigo = '{}'
+    #             """.format(codigo_inicial))
 
-            except:
-                pass
+    #         sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+    #             ','.join(['%s'] * len(lista)))
+    #         cur.execute(sql_insert, lista)
 
-            conn.commit()
-            conn.close()
+    #         try:
+    #             cur.execute("""
+    #                 UPDATE tb_maquinas
+    #                 SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
+    #                 WHERE codigo = %s
+    #                 """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
 
-        return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
-                                setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
-                                manutencao_inicial=manutencao_inicial, apelido=apelido, periodicidade=periodicidade)
+    #             cur.execute("""
+    #                 UPDATE tb_ordens
+    #                 SET maquina=%s, setor=%s
+    #                 WHERE maquina = %s
+    #                 """, (codigo_novo, setor, codigo_inicial))
 
-    else:
+    #         except:
+    #             pass
 
-        """Query para editar a linha do codigo escolhido"""
+    #         conn.commit()
+    #         conn.close()
 
-        cur.execute("""
-            DELETE FROM tb_planejamento_anual
-            WHERE codigo = '{}'
-            """.format(codigo_inicial))
+        # return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+        #                         setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
+        #                         manutencao_inicial=manutencao_inicial, apelido=apelido, periodicidade=periodicidade)
 
-        sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
-            ','.join(['%s'] * len(lista)))
-        cur.execute(sql_insert, lista)
+    # else:
 
-        try:
-            cur.execute("""
-                UPDATE tb_maquinas
-                SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
-                WHERE codigo = %s
-                """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
+    #     """Query para editar a linha do codigo escolhido"""
 
-            cur.execute("""
-                UPDATE tb_ordens
-                SET maquina=%s, setor=%s
-                WHERE maquina = %s
-                """, (codigo_novo, setor, codigo_inicial))
+    #     cur.execute("""
+    #         DELETE FROM tb_planejamento_anual
+    #         WHERE codigo = '{}'
+    #         """.format(codigo_inicial))
 
-        except:
-            pass
+    #     sql_insert = "INSERT INTO tb_planejamento_anual VALUES ({})".format(
+    #         ','.join(['%s'] * len(lista)))
+    #     cur.execute(sql_insert, lista)
 
-    conn.commit()
-    conn.close()
+    #     try:
+    #         cur.execute("""
+    #             UPDATE tb_maquinas
+    #             SET codigo=%s,tombamento=%s,setor=%s,descricao=%s,apelido=%s
+    #             WHERE codigo = %s
+    #             """, (codigo_novo, tombamento, setor, descricao, apelido, codigo_inicial))
 
-    return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
-                            setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
-                            manutencao_inicial=manutencao_inicial, apelido=apelido, periodicidade=periodicidade)
+    #         cur.execute("""
+    #             UPDATE tb_ordens
+    #             SET maquina=%s, setor=%s
+    #             WHERE maquina = %s
+    #             """, (codigo_novo, setor, codigo_inicial))
+
+    #     except:
+    #         pass
+
+    # conn.commit()
+    # conn.close()
+
+    # return render_template('user/editar_maquina_preventiva.html', codigo=codigo_novo,
+    #                         setor=setor, descricao=descricao, tombamento=tombamento, criticidade=criticidade,
+    #                         manutencao_inicial=manutencao_inicial, apelido=apelido, periodicidade=periodicidade)
 
 
 @routes_bp.route('/editar-maquina-preventiva', methods=['POST'])
@@ -4451,12 +4471,10 @@ def editar_maquina_preventiva():
 
     query = """SELECT 
                 tb_planejamento_anual.codigo,
-                tb_planejamento_anual.tombamento,
-                tb_planejamento_anual.setor,
-                tb_planejamento_anual.descricao,
+                tb_maquinas.tombamento,
+                tb_maquinas.setor,
+                tb_maquinas.descricao,
                 tb_planejamento_anual.classificacao,
-                tb_planejamento_anual.periodicidade,
-                tb_planejamento_anual.ultima_manutencao,
                 tb_maquinas.apelido
             FROM tb_planejamento_anual
             JOIN tb_maquinas ON tb_planejamento_anual.codigo = tb_maquinas.codigo
@@ -4470,14 +4488,7 @@ def editar_maquina_preventiva():
     setor = data[0][2]
     descricao = data[0][3]
     criticidade = data[0][4]
-    periodicidade = data[0][5]
-    manutencao_inicial = data[0][6]
-    apelido = data[0][7]
-    manutencao_inicial = manutencao_inicial.strftime("%d/%m/%Y")
-
-    manutencao_inicial = datetime.strptime(manutencao_inicial, "%d/%m/%Y").strftime("%Y-%m-%d")
-
-    print(manutencao_inicial)
+    apelido = data[0][5]
 
     if not tombamento:
         tombamento = ''
@@ -4485,7 +4496,7 @@ def editar_maquina_preventiva():
         apelido = ''
 
     data = {'codigo':codigo_maquina,'setor':setor,'descricao':descricao,'tombamento':tombamento,'apelido':apelido,
-            'criticidade':criticidade,'periodicidade':periodicidade,'manutencao_inicial':manutencao_inicial}
+            'criticidade':criticidade}
 
     return jsonify(data)
 
