@@ -50,7 +50,7 @@
                                             <!-- <img src="static/icons/editar-codigo.png" style="width: 30px;" alt="Ícone de Manutenção" title="Editar informações da máquina preventiva" class="icon-tamanho-padrao">  -->
                                         </a>
                                         {% else %}
-                                        <a class="dropdown-item" onclick="modal_cadastrar_existentes('{{ row[0] }}')" style="cursor: pointer;">
+                                        <a class="dropdown-item" onclick="modal_transformar_preventiva('{{ row[0] }}')" style="cursor: pointer;">
                                             Transformar a manutenção em preventiva
                                             <!-- <img src="static/icons/manutencao.png" style="width: 30px;" alt="Ícone de Manutenção" title="Transformar a manutenção em preventiva" class="icon-tamanho-padrao">  -->
                                         </a>
@@ -181,11 +181,11 @@
 </div>
 
 <!-- Modal para transformar máquina em preventiva -->
-<div class="modal fade" id="modal_cadastrar_existentes" tabindex="-1" role="dialog" aria-labelledby="modal_cadastrar_existentes_label" aria-hidden="true">
+<div class="modal fade" id="modal_transformar_preventiva" tabindex="-1" role="dialog" aria-labelledby="modal_transformar_preventiva_label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal_cadastrar_existentes_label">
+                <h5 class="modal-title" id="modal_transformar_preventiva_label">
                     Transformar Máquina em Preventiva
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
@@ -197,8 +197,11 @@
                     <strong id="label_maquina_preventiva">Deseja transformar essa máquina em preventiva?</strong>
                 </div>
                 <div style="display: flex;flex-wrap: wrap;">
-                    <div class="col-sm-8 mb-2"></div>
-                    <div class="col-sm-4 mb-2">  
+                    <div class="col-sm-6 mb-2">
+                        <label for="codigo">Codigo</label>
+                        <input type="text" class="form-control" style="height: 38px;" id="transformar_codigo_preventivo" name="transformar_codigo_preventivo" disabled>
+                    </div>
+                    <div class="col-sm-6 mb-2">  
                         <label for="criticidade-label">Criticidade</label>              
                         <select class="form-control form-control" id="transformar_criticidade" name="transformar_criticidade" required>
                             <option value="" selected></option>  
@@ -243,11 +246,11 @@
                 <div class="row">
                     <div class="col-sm-4 mb-2">
                         <label for="descricao">Descrição</label>
-                        <input type="text" class="form-control" style="height: 38px;" id="editar_descricao" name="editar_descricao" required>
+                        <input type="text" class="form-control" style="height: 38px;" id="editar_descricao" name="editar_descricao">
                     </div>
                     <div class="col-sm-4 mb-2">         
                         <label for="setor-label">Setor</label>
-                        <select class="form-control form-control" style="height: 38px;" id="editar_setor" name="editar_setor" required>
+                        <select class="form-control form-control" style="height: 38px;" id="editar_setor" name="editar_setor" disabled>
                             <option value="Administrativo">Administrativo</option>
                             <option value="Almoxarifado">Almoxarifado</option>
                             <option value="Corte e estamparia">Corte e estamparia</option>
@@ -273,7 +276,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary btn-block">Inserir</button>
+                <button id="envio-edicao-maquina" class="btn btn-primary btn-block">Inserir</button>
             </div>
         </div>
     </div>
@@ -375,7 +378,7 @@
 
     }
 
-    function modal_cadastrar_existentes(codigo_maquina) {        
+    function modal_transformar_preventiva(codigo_maquina) {        
 
         window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
         
@@ -383,7 +386,9 @@
 
         $('#label_maquina_preventiva').text("Deseja transforma o código " + codigo_maquina + " em máquina preventiva? Se sim, defina o nível de criticidade da máquina")
 
-        $('#modal_cadastrar_existentes').modal('show');
+        $('#transformar_codigo_preventivo').val(codigo_maquina)
+
+        $('#modal_transformar_preventiva').modal('show');
 
     }
 
@@ -395,7 +400,7 @@
 
         $.ajax({
             type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
-            url: '/editar-maquina',  // URL do backend onde irá processar a exclusão da máquina
+            url: '/modal-editar-maquina',  // URL do backend onde irá processar a exclusão da máquina
             data: JSON.stringify(codigo_maquina),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
             contentType:'application/json',
             success: function(response) {
@@ -429,7 +434,7 @@
 
         $.ajax({
             type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
-            url: '/editar-maquina-preventiva',  // URL do backend onde irá processar a exclusão da máquina
+            url: '/modal-editar-maquina-preventiva',  // URL do backend onde irá processar a exclusão da máquina
             data: JSON.stringify(codigo_maquina),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
             contentType:'application/json',
             success: function(response) {
@@ -465,7 +470,6 @@
 
         // Adicionar um evento de clique ao botão "Excluir" do modal
         $('#btnExcluir').click(function() {
-            showLoading();
             // Realizar a requisição AJAX para o backend
             $.ajax({
                 type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
@@ -476,14 +480,12 @@
                     console.log(response);
                     // Fechar o modal após a requisição ser enviada
                     $('#modalExclusao').modal('hide');
-                    hideLoading();
                     // Recarregar a página após a exclusão ser concluída
                     location.reload();
                 },
                 error: function(error) {
                     // Caso ocorra algum erro na requisição, você pode tratar aqui
                     console.log('Erro na requisição:', error);
-                    hideLoading();
                     location.reload();
                 }
                 
@@ -501,7 +503,6 @@
 
         // Adicionar um evento de clique ao botão "Excluir" do modal
         $('#btnExcluirPreventiva').click(function() {
-            showLoading();
             // Realizar a requisição AJAX para o backend
             $.ajax({
                 type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
@@ -513,14 +514,26 @@
                     // Fechar o modal após a requisição ser enviada
                     $('#modalPreventiva').modal('hide');
                     
-                    // Recarregar a página após a exclusão ser concluída
-                    location.reload();
-                    hideLoading();
+                    var alertSuccess = $('<div class="alert alert-success position-absolute" role="alert">' + codigoMaquina +' não é mais máquina preventiva</div>');
+                    $('#seu-container-de-alertas').append(alertSuccess); // Substitua 'seu-container-de-alertas' pelo ID ou seletor apropriado
+
+                    alertSuccess.css({
+                        'top': '20px',
+                        'transition': 'top 0.5s ease-in-out' // Adiciona uma transição de 0.5 segundos com efeito ease-in-out
+                    });
+
+                    // Aguarda 3 segundos e esconde a mensagem
+                    setTimeout(function () {
+                        alertSuccess.css('top', '-204px'); // Define a posição para esconder a mensagem
+                    }, 1000); // 3000 milissegundos = 3 segundos
+
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
                 },
                 error: function(error) {
                     // Caso ocorra algum erro na requisição, você pode tratar aqui
                     console.log('Erro na requisição:', error);
-                    hideLoading();
                 }
                 
             });
@@ -784,6 +797,50 @@
 
 <script>
 
+    $("#transformar_maquina_preventiva").click(function () {
+
+    var codigo_preventivas = $('#transformar_codigo_preventivo').val();
+    var classificacao = $('#transformar_criticidade').val();
+
+    var data = {
+        codigo_preventivas: codigo_preventivas,
+        classificacao: classificacao
+    };
+
+    $.ajax({
+        type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+        url: '/transformar-maquina',  // URL do backend onde irá processar a exclusão da máquina
+        data: JSON.stringify(data),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+        contentType:'application/json',
+        success: function(response) {
+            // Aqui você pode tratar a resposta do servidor, caso necessário
+            $('#modal_transformar_preventiva').modal('hide');
+
+            var alertSuccess = $('<div class="alert alert-success position-absolute" role="alert">' + codigo_preventivas +' alterada para máquina preventiva com sucesso ✅</div>');
+            $('#seu-container-de-alertas').append(alertSuccess); // Substitua 'seu-container-de-alertas' pelo ID ou seletor apropriado
+
+            alertSuccess.css({
+                'top': '20px',
+                'transition': 'top 0.5s ease-in-out' // Adiciona uma transição de 0.5 segundos com efeito ease-in-out
+            });
+
+            // Aguarda 3 segundos e esconde a mensagem
+            setTimeout(function () {
+                alertSuccess.css('top', '-204px'); // Define a posição para esconder a mensagem
+            }, 1000); // 3000 milissegundos = 3 segundos
+
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        },
+        error: function(error) {
+            // Caso ocorra algum erro na requisição, você pode tratar aqui
+            console.log('Erro na requisição:', error);
+        }
+        
+    });
+    });
+
 
     $("#envio-edicao-maquina-preventiva").click(function () {
 
@@ -823,15 +880,63 @@
                 }, 1000); // 3000 milissegundos = 3 segundos
 
                 setTimeout(function() {
-                    alertSuccess.remove(); // Remover o alert após algum tempo (opcional)
                     location.reload();
-                }, 3000);
+                }, 1000);
             },
             error: function(error) {
                 // Caso ocorra algum erro na requisição, você pode tratar aqui
                 console.log('Erro na requisição:', error);
             }
             
+        });
+    });
+
+
+    $("#envio-edicao-maquina").click(function () {
+
+    var codigo = $('#editar_codigo').val();
+    var tombamento = $('#editar_tombamento').val();
+    var descricao = $('#editar_descricao').val();
+    var apelido = $('#editar_apelido').val();
+
+    var data = {
+        codigo: codigo,
+        tombamento: tombamento,
+        descricao: descricao,
+        apelido: apelido
+    };
+
+    $.ajax({
+        type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+        url: '/envio-edicao-maquina',  // URL do backend onde irá processar a exclusão da máquina
+        data: JSON.stringify(data),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+        contentType:'application/json',
+        success: function(response) {
+            // Aqui você pode tratar a resposta do servidor, caso necessário
+            $('#modal_editar_maquina').modal('hide');
+
+            var alertSuccess = $('<div class="alert alert-success position-absolute" role="alert">Dados da Máquina alterada com sucesso ✅</div>');
+            $('#seu-container-de-alertas').append(alertSuccess); // Substitua 'seu-container-de-alertas' pelo ID ou seletor apropriado
+
+            alertSuccess.css({
+                'top': '20px',
+                'transition': 'top 0.5s ease-in-out' // Adiciona uma transição de 0.5 segundos com efeito ease-in-out
+            });
+
+            // Aguarda 3 segundos e esconde a mensagem
+            setTimeout(function () {
+                alertSuccess.css('top', '-204px'); // Define a posição para esconder a mensagem
+            }, 1000); // 3000 milissegundos = 3 segundos
+
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        },
+        error: function(error) {
+            // Caso ocorra algum erro na requisição, você pode tratar aqui
+            console.log('Erro na requisição:', error);
+        }
+        
         });
     });
 
