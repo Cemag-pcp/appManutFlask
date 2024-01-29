@@ -1,0 +1,520 @@
+{% extends "user/layout.html" %}
+{% block containerFluid %}
+
+{% block voltar %}
+{% endblock %}
+  {% with messages = get_flashed_messages()  %}
+  {% if messages %}
+  {% for message in messages %}
+  <div class="alert-success alert-dismissible fade show" id="alerta_Os" role="alert">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+</div>
+
+<div id="modalEnviar" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h4>Observação</h4>
+    <p>Caso a máquina seja <strong>Paleteiras elétricas</strong>, <strong>Empilhadeiras</strong> ou <strong>Pontes Rolantes</strong>, 
+    a abertura de O.S deve ser feita em "Equipamentos de Movimentação".</p>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Abrir OS</h6>
+    </div>
+    <div class="card-body">
+      <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+
+        <div class="form-group">
+          <label for="setor">Setor</label>
+          <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
+            <option value="" selected disabled hidden></option>
+            <option value="Administrativo">Administrativo</option>
+            <option value="Almoxarifado">Almoxarifado</option>
+            <option value="Corte e estamparia">Corte e estamparia</option>
+            <option value="Expedição">Expedição</option>
+            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+            <option value="Solda">Solda</option>
+            <option value="Montagem">Montagem</option>
+            <option value="Pintura">Pintura</option>
+            <option value="Carpintaria">Carpintaria</option>
+            <option value="Usinagem">Usinagem</option>  
+            <option value="Serra">Serra</option>
+            <option value="Serralheria">Serralheria</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Forjaria">Forjaria</option>
+            <option value="Utilidades">Utilidades</option>
+            <option value="Qualidade">Qualidade</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="solicitante-select">
+          <label for="solicitante">Solicitante:</label>
+            <select class="form-control" sdata-live-search="true" name="solicitante" id="solicitante" required>
+              <option value="" selected disabled hidden></option>  
+              {% for solicitante in solicitantes %}
+              <option value="{{solicitante[0]}}">{{solicitante[0]}}</option>
+              {% endfor %}
+            </select>
+        </div> 
+        <!-- Se o setor for solda -->
+        <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
+          <label for="Equipamento em falha">Equipamento em falha:</label>
+          <a href="#" onclick="showImageModalOS()"><i class="fa-solid fa-image"></i></a>
+          <select class="form-control" name="falha" id="falha" onchange="verificarFalha()">
+            <option value="" selected disabled hidden></option>  
+            <option value="Máquina de Solda">Máquina de Solda</option>
+            <option value="Monovia">Monovia</option>
+            <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
+            <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
+          </select>
+        </div>      
+        
+        <!-- Se o equipamento em falha for máquina de solda -->
+        <div class="form-group" id="maquina_de_solda" style="display: none;">
+          <label for="Maquina de Solda">Setor da Máquina de Solda:</label>
+          <select class="form-control" sdata-live-search="true" name="solda_maquina" id="solda_maquina">
+              <option value="" selected disabled hidden></option>  
+              <option value="Laterais">Laterais</option>
+              <option value="Eixos">Eixos</option>
+              <option value="Içamento">Içamento</option>
+              <option value="Laterais">Plataforma "Esqueleto"</option>
+              <option value="Eixos">Chassi</option>
+              <option value="Içamento">Tanque</option>
+              <option value="Laterais">Caçamba</option>
+              <option value="Eixos">Serralheria</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="maquina-select">
+          <label for="maquina">Máquina/Local:</label>
+            <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
+              <option value="" selected disabled hidden></option>  
+              {% for maquina in lista_maquinas_monovia %}
+              <option value="{{maquina[0]}}">{{maquina[0]}}</option>
+              {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group" id="ferramenta" style="display: none;">
+          <label for="ferramenta">Qual é a ferramenta?</label>
+          <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramentas">
+            <option value="" selected disabled hidden></option>  
+            <option value="Esmerilhadeira">Esmerilhadeira</option>
+            <option value="Tocha">Tocha</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="codigo_equip" style="display: none;">
+          <label for="codigo_equip">Qual o código que apresenta no equipamento?</label>
+          <textarea id="codigo_equipa" class="form-control" name="codigo_equip" rows="5" cols="39" placeholder="Digite o código..."></textarea>
+        </div>
+        
+        <div class="form-group" id = "descricao">
+          <label for="problema">Descrição:</label>
+          <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maquina-parada">Máquina parada?</label>
+            <label class="switch">
+              <input type="checkbox" name="maquina-parada" id="maquina-parada">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="form-group">        
+            <label for="risco">Impacto na produção:</label>
+            <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
+              <option value="" selected disabled hidden></option>
+              <option>Alto</option>
+              <option>Médio</option>
+              <option>Baixo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="file-upload">
+            <input class="file-upload__input" type="file" name="imagens" id="imagens" multiple accept="image/*">
+            <button class="file-upload__button" type="button">Escolha a(s) foto(s)</button>
+            <span class="file-upload__label">Nenhum Arquivo selecionado</span>
+        </div>   
+
+        <div class="file-upload" style="margin-top: 20px;">
+          <input class="file-upload__input" type="file" name="video" id="video" accept="video/*">
+          <button class="file-upload__button" type="button">Escolha o vídeo</button>
+          <span class="file-upload__label">Nenhum Arquivo selecionado</span>
+        </div>
+
+        <button id = 'salvar' class="btn btn-block">
+          Save 
+        </button>
+        
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="imagemModal2" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content2">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imagemModalLabel">Foto</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Aqui é onde a imagem será exibida -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>  
+</div>
+
+<script>
+
+  function showImageModalOS() {
+          showLoading()
+          $.ajax({
+            success: function() {
+              
+              var modalBody = '<img src="static/img/maquinas.png" alt="Foto"/>';
+              
+              // Preencha o conteúdo do modal com a imagem
+              $('#imagemModal2 .modal-body').html(modalBody);
+              
+              // Exiba o modal
+              $('#imagemModal2').modal('show');
+              
+              // Oculta a tela de carregamento após um pequeno atraso (500 milissegundos)
+              setTimeout(function() {
+                  hideLoading(); // Esconde o indicador de carregamento
+              }, 10);
+          },
+          error: function(error) {
+              hideLoading();
+              alert('Essa Ordem de Serviço não contém imagem')
+              console.log(error);
+          }
+          });
+      }
+  
+</script>
+
+<!-- <script>
+  function getFalhas() {
+
+    var falhaSelect = document.getElementById('falha');
+    var maquinaSelect = document.getElementById('maquina');
+    var falhaSelecionado = falhaSelect.value;
+
+    // Limpa as opções atuais do menu de máquinas
+    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
+
+    // Verifica se um setor foi selecionado
+    if (falhaSelecionado !== '') {
+      // Faz uma chamada assíncrona para o servidor Flask
+      showLoading()
+      $.ajax({
+        url: '/falha/' + falhaSelecionado,
+        type: 'GET',
+        success: function(data) {
+          // Atualiza o menu de máquinas com as opções retornadas do servidor
+          for (var i = 0; i < data.length; i++) {
+            var option = document.createElement('option');
+            option.text = data[i];
+            option.value = data[i];
+            maquinaSelect.add(option);
+          }
+          hideLoading();
+        }
+      });
+    }
+  }
+</script> -->
+
+<!-- <script>
+  function getFalhas() {
+
+    var falhaSelect = document.getElementById('falha');
+    var maquinaSelect = document.getElementById('maquina');
+    var falhaSelecionado = falhaSelect.value;
+
+    // Limpa as opções atuais do menu de máquinas
+    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
+
+    // Verifica se um setor foi selecionado
+    if (falhaSelecionado !== '') {
+      // Faz uma chamada assíncrona para o servidor Flask
+      showLoading()
+      $.ajax({
+        url: '/falha/' + falhaSelecionado,
+        type: 'GET',
+        success: function(data) {
+          // Atualiza o menu de máquinas com as opções retornadas do servidor
+          for (var i = 0; i < data.length; i++) {
+            var option = document.createElement('option');
+            option.text = data[i];
+            option.value = data[i];
+            maquinaSelect.add(option);
+          }
+          hideLoading();
+        }
+      });
+    }
+  }
+</script> -->
+
+<script>
+  // Selecionar o elemento do botão de fechar
+  var closeButton = document.querySelector(".modal .close");
+
+  // Selecionar o elemento do modal
+  var modal = document.getElementById("modalEnviar");
+
+  // Função para fechar o modal
+  function fecharModal() {
+    modal.style.display = "none";
+  }
+
+  // Configurar evento de clique para fechar o modal quando o botão de fechar for clicado
+  closeButton.addEventListener("click", fecharModal);
+
+  $(document).ready(function() {
+    // Ao abrir a página, exibir o modal
+    $('#modalEnviar').show();
+
+    // Ao clicar no botão "Fechar" do modal
+    $('#modalEnviar').on('click', '.close', function() {
+      // Esconder o modal
+      $('#modalEnviar').hide();
+    });
+
+    // Ao clicar no ícone, exibir o modal novamente
+    $('#infoIcon').on('click', function() {
+      $('#modalEnviar').show();
+    });
+  });
+
+</script>
+
+<script>
+  function getMaquinasPorSetor() {
+    var setorSelecionado = document.getElementById("setor").value;
+    var maquinaSelect = document.getElementById('maquina-select');
+    var equipamentoEmFalha = document.getElementById("equipamento_em_falha");
+    var falhaSelect = document.getElementById("falha");
+    var ferramentas = document.getElementById("ferramentas");
+    var ferramenta = document.getElementById("ferramenta");
+    var codigoequipamento = document.getElementById("codigo_equip");
+    var maquinaSolda = document.getElementById("maquina_de_solda");
+    var maquinaDeSoldaSelect = document.getElementById("solda_maquina");
+    var horaInicial = document.getElementById("hora-inicial");
+    var horaFinal = document.getElementById("hora-final");
+    var dataEte = document.getElementById("data-ete");
+    var pvlye = document.getElementById("pvlye");
+    var paPlus = document.getElementById("pa-plus");
+    var tratamento = document.getElementById("tratamento");
+    var phgua = document.getElementById("tratamento");
+    
+    if (setorSelecionado === "Solda" || setorSelecionado === "Serralheria") {
+      equipamentoEmFalha.style.display = "block";
+
+      if (setorSelecionado === "Serralheria") {
+        var options = falhaSelect.options;
+        for (var i = 0; i < options.length; i++) {
+          var optionValue = options[i].value;
+          if (optionValue === "Monovia" || optionValue === "SO-RB-01 - ROBÔ - KUKA") {
+            options[i].style.display = "none";
+          } else {
+            options[i].style.display = "block";
+          }
+        }
+        // Reset the selected option if it's hidden
+        if (falhaSelect.value === "Monovia" || falhaSelect.value === "SO-RB-01 - ROBÔ - KUKA") {
+          falhaSelect.value = "";
+        }
+      } else {
+        // Reset the display style of all options
+        var options = falhaSelect.options;
+        for (var i = 0; i < options.length; i++) {
+          options[i].style.display = "block";
+        }
+      }
+    } else {
+      equipamentoEmFalha.style.display = "none";
+      ferramenta.style.display = "none";
+      codigoequipamento.style.display = "none";
+      maquinaSolda.style.display = "none";
+      maquinaSelect.style.display = "block";
+      document.getElementById("maquina_de_solda").style.display = "none";
+      // Redefinir o valor selecionado do select de solda_maquina para vazio
+      falhaSelect.value = 'None'
+      ferramentas.value = 'None'
+    }
+
+    var setorSelect = document.getElementById('setor');
+    var maquinaSelect = document.getElementById('maquina');
+    var setorSelecionado = setorSelect.value;
+
+    // Limpa as opções atuais do menu de máquinas
+    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
+
+    // Verifica se um setor foi selecionado
+    if (setorSelecionado !== '') {
+      if (setorSelecionado === 'Serralheria') {
+        setorSelecionado == 'Solda';
+      }
+      // Faz uma chamada assíncrona para o servidor Flask
+      showLoading()
+      $.ajax({
+        url: '/maquinas/' + setorSelecionado,
+        type: 'GET',
+        success: function(data) {
+          // Atualiza o menu de máquinas com as opções retornadas do servidor
+          for (var i = 0; i < data.length; i++) {
+            var option = document.createElement('option');
+            option.text = data[i];
+            option.value = data[i];
+            maquinaSelect.add(option);
+          }
+          hideLoading();
+        }
+      });
+    }
+  }
+</script>
+
+<script>
+  function verificarCampos() {
+      var setor = document.getElementById("setor").value;
+      var falha = document.getElementById("falha").value;
+      var ferramenta = document.getElementById("ferramentas").value;
+      var codigoEquip = document.getElementById("codigo_equipa");
+  
+      if ((setor === "Solda" || setor === "Serralheria") &&
+          falha === "Ferramentas(esmerilhadeiras; lixadeiras e tochas)" &&
+          ferramenta === "Esmerilhadeira") {
+          codigoEquip.required = true;
+      } else {
+          codigoEquip.required = false;
+      }
+  }
+  
+  document.getElementById("setor").addEventListener("change", verificarCampos);
+  document.getElementById("falha").addEventListener("change", verificarCampos);
+  document.getElementById("ferramentas").addEventListener("change", verificarCampos);
+  </script>
+  
+  
+<!-- Inicialize o Bootstrap Select -->
+<script>
+  $(document).ready(function() {
+    $('#maquina').select2({
+      placeholder: 'Pesquisar máquina',
+      allowClear: true,
+      width: '100%',
+    });
+  });
+
+  $(document).ready(function() {
+    $('#solicitante').select2({
+      placeholder: 'Pesquisar solicitante',
+      allowClear: true,
+      width: '100%',
+    });
+  });
+</script>
+
+<script>
+  var maquinaParadaCheckbox = document.getElementById('maquina-parada');
+  var maquinaParadaHiddenInput = document.querySelector('input[name="maquina-parada"][type="hidden"]');
+
+  maquinaParadaCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+      maquinaParadaHiddenInput.value = "true";
+    } else {
+      maquinaParadaHiddenInput.value = "false";
+    }
+  });
+</script>
+
+<script>
+  function setImpactoProducao() {
+      var setorSelect = document.getElementById("setor");
+      var riscoSelect = document.getElementById("risco");
+
+      if (setorSelect.value === "Administrativo") {
+          riscoSelect.value = "Baixo";
+          riscoSelect.disabled = true; // Desabilita o campo "Risco" para o setor "Administrativo"
+      } else {
+          riscoSelect.disabled = false; // Habilita o campo "Risco" para outros setores
+      }
+  }
+
+  // Adiciona o evento onchange ao campo "Setor"
+  document.getElementById("setor").addEventListener("change", setImpactoProducao);
+
+  // Adiciona o evento onchange ao campo "Risco"
+  document.getElementById("risco").addEventListener("change", function() {
+      var setorSelect = document.getElementById("setor");
+      var riscoSelect = document.getElementById("risco");
+
+      if (setorSelect.value === "Administrativo") {
+          riscoSelect.value = "Baixo";
+      }
+  });
+</script>
+
+<script>
+  function verificarFalha() {
+    var falhaSelecionada = document.getElementById("falha").value;
+    var ferramenta = document.getElementById("ferramenta");
+    var codigoEquip = document.getElementById("codigo_equip");
+    var maquinaSelect = document.getElementById("maquina-select");
+    var maquinaSolda = document.getElementById("maquina_de_solda");
+    var maquinaDropDown = document.getElementById("maquina");
+
+    if (falhaSelecionada === "Ferramentas(esmerilhadeiras; lixadeiras e tochas)") {
+      ferramenta.style.display = "block";
+      codigoEquip.style.display = "block";
+      maquinaSelect.style.display = "none";
+      maquinaSolda.style.display = "none";
+
+      maquinaDropDown.required = false;
+
+    } else if (falhaSelecionada === "SO-RB-01 - ROBÔ - KUKA"){
+      ferramenta.style.display = "none";
+      codigoEquip.style.display = "none";
+      maquinaSelect.style.display = "none";
+      maquinaSolda.style.display = "none";
+
+    } else if (falhaSelecionada === "Máquina de Solda"){
+      ferramenta.style.display = "none";
+      codigoEquip.style.display = "none";
+      maquinaSelect.style.display = "block";
+      maquinaSolda.style.display = "block";
+    
+    } else {
+      ferramenta.style.display = "none";
+      codigoEquip.style.display = "none";
+      maquinaSelect.style.display = "block";
+      maquinaSolda.style.display = "none";
+    }
+  }
+</script>
+
+{% endblock %}
