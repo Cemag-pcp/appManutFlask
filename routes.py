@@ -43,6 +43,101 @@ DB_PASS = "15512332"
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
 
+def dados_para_editar(id_ordem,n_ordem):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select o.*,func.nome,func.matricula,coalesce(status,'Em espera') as status_new from tb_ordens as o left join tb_funcionario as func on ',' || o.operador || ',' like '%%,' || func.matricula || ',%%' where id_ordem = %s and n_ordem = %s"
+    sql_data_abertura =  """select dataabertura - INTERVAL '3 hours' as dataabertura,solicitante,
+                            equipamento_em_falha,cod_equipamento,setor_maquina_solda,status
+                            from tb_ordens where id_ordem = %s and n_ordem = 0
+                        """
+    sql_tombamento = """select tombamento from tb_ordens
+                        left join tb_maquinas as t2 on t2.codigo = maquina
+                        where id_ordem = %s
+                        limit 1
+                    """
+    # sql_maquina_preventiva = """select codigo from tb_maquinas_preventivas where codigo = %s"""
+    
+    # Informações gerais
+    cur.execute(sql,(id_ordem,n_ordem))
+    data = cur.fetchall()
+    
+    # dataabertura
+    cur.execute(sql_data_abertura,(id_ordem,))
+    dados_dataabertura = cur.fetchall()
+
+    # Tombamento
+    cur.execute(sql_tombamento,(id_ordem,))
+    tombamento = cur.fetchall()
+
+    setor_values = [row['setor'] for row in data][0]
+    solicitante = dados_dataabertura[0]['solicitante']
+    data_abertura = dados_dataabertura[0]['dataabertura']
+    n_execucao = [row['n_ordem'] for row in data][0]
+    maquina = [row['maquina'] for row in data][0]
+    tombamento = [row['tombamento'] for row in tombamento][0]
+    equipamento_em_falha = dados_dataabertura[0]['equipamento_em_falha']
+    codigo_equipamento = dados_dataabertura[0]['cod_equipamento']
+    setor_maquina_solda = dados_dataabertura[0]['setor_maquina_solda']
+    risco = [row['risco'] for row in data][0]
+    desc_usuario = [row['problemaaparente'] for row in data][0]
+    status = [row['status_new'] for row in data][0]
+    tipo_manutencao = [row['tipo_manutencao'] for row in data][0]
+    area_manutencao = [row['area_manutencao'] for row in data][0]
+    pvlye = [row['pvlye'] for row in data][0]
+    paplus = [row['pa_plus'] for row in data][0]
+    tratamento = [row['tratamento'] for row in data][0]
+    phagua = [row['ph_agua'] for row in data][0]
+
+    try:
+        operador = [row['matricula'] + " - " + row['nome'] for row in data]
+    except TypeError:
+        operador = ''
+
+    descmanutencao = [row['descmanutencao'] for row in data][0]
+    # data_inicio_fim = [row['datainicio'] for row in data][0]
+    datainicio = [row['datainicio'] for row in data][0]
+    horainicio = [row['horainicio'] for row in data][0]
+    datafim = [row['datafim'] for row in data][0]
+    horafim = [row['horafim'] for row in data][0]
+
+    # Formatando as datas e horas como strings
+    data_inicio_str = datainicio.isoformat()
+    hora_inicio_str = horainicio.strftime('%H:%M')
+    data_fim_str = datafim.isoformat()
+    hora_fim_str = horafim.strftime('%H:%M')
+
+    dados = {
+        'setor_values':setor_values,
+        'solicitante':solicitante,
+        'data_abertura':data_abertura,
+        'n_execucao':n_execucao,
+        'maquina':maquina,
+        'tombamento':tombamento,
+        'equipamento_em_falha':equipamento_em_falha,
+        'codigo_equipamento':codigo_equipamento,
+        'setor_maquina_solda':setor_maquina_solda,
+        'risco':risco,
+        'desc_usuario':desc_usuario,
+        'status':status,
+        'tipo_manutencao':tipo_manutencao,
+        'area_manutencao':area_manutencao,
+        'operador':operador,
+        'descmanutencao':descmanutencao,
+        'pvlye':pvlye,
+        'paplus':paplus,
+        'tratamento':tratamento,
+        'phagua':phagua,
+        'data_inicio': data_inicio_str,
+        'hora_inicio': hora_inicio_str,
+        'data_fim': data_fim_str,
+        'hora_fim': hora_fim_str
+    }
+
+    return dados
 
 def buscar_dados_os(id_ordem):
 
@@ -98,6 +193,18 @@ def buscar_dados_os(id_ordem):
     else:
         preventiva = False
 
+    lista_opcoes = ['Em execução', 'Finalizada', 'Aguardando material']
+
+    opcoes = []
+    opcoes.append(status)
+
+    for opcao in lista_opcoes:
+        opcoes.append(opcao)
+
+    opcoes = list(set(opcoes))
+    opcoes.remove(status)  # Remove o elemento 'c' da lista
+    opcoes.insert(0, status)
+
     dados = {
         'setor_values':setor_values,
         'solicitante':solicitante,
@@ -113,32 +220,25 @@ def buscar_dados_os(id_ordem):
         'status':status,
         'tipo_manutencao':tipo_manutencao,
         'area_manutencao':area_manutencao,
-        'preventiva':preventiva
+        'preventiva':preventiva,
+        'opcoes':opcoes
     }
 
     return dados
 
-
-def historico_planejadas():
-
+def buscar_funcionarios():
+    
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query_historico_preventivas = """select max(n_ordem) as n_ordem_max,datafim,id_ordem,maquina, coalesce(status,'Em espera') as status 
-                                    from tb_ordens 
-                                    where natureza = 'Planejada' and ordem_excluida isnull
-                                    group by status,datafim,id_ordem,maquina
-                                    order by id_ordem,n_ordem_max"""
+    query = """SELECT * FROM tb_funcionario"""
+    tb_funcionarios = pd.read_sql_query(query, conn)
+    tb_funcionarios['matricula_nome'] = tb_funcionarios['matricula'] + \
+        " - " + tb_funcionarios['nome']
+    funcionarios = tb_funcionarios[['matricula_nome']].values.tolist()
 
-    data_historico_planejadas = pd.read_sql_query(query_historico_preventivas,conn)
-
-    data_historico_planejadas.drop_duplicates(subset='id_ordem',keep='last',inplace=True)
-    data_historico_planejadas['datafim'] = data_historico_planejadas['datafim'].fillna('-')
-
-    data_historico_planejadas = data_historico_planejadas.values.tolist()
-
-    return data_historico_planejadas
+    return funcionarios
 
 
 def calcular_minutos_uteis(row, df):
@@ -1771,6 +1871,7 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     """
     Rota para página principal da aplicação, mostrando a tabela principal.
     """
+
     setor_selecionado = session.get('setor')
     identificador_selecionado = session.get('identificador')
 
@@ -1866,147 +1967,264 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     list_users = df.values.tolist()
 
-    return render_template('user/index.html', list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
+    funcionarios = buscar_funcionarios()
+
+    return render_template('user/index.html', funcionarios=funcionarios, list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
 
 
-@routes_bp.route('/add_student', methods=['POST', 'GET'])
-def add_student():  # Criar ordem de serviço
+# @routes_bp.route('/add_student', methods=['POST', 'GET'])
+# def add_student():  # Criar ordem de serviço
 
-    """
-    Rota para criar ordem de serviço
-    """
+#     """
+#     Rota para criar ordem de serviço
+#     """
+
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+#                             password=DB_PASS, host=DB_HOST)
+
+#     if request.method == 'POST':
+
+#         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+#         setor = request.form.get('setor')
+#         maquina = request.form.get('maquina')
+#         problema = request.form.get('problema')
+#         solicitante = request.form.get('solicitante')
+#         dataAbertura = datetime.now()
+#         equipamento_em_falha = request.form.get('falha')
+#         setor_maquina_solda = request.form.get('solda_maquina')
+#         qual_ferramenta = request.form.get('ferramenta')
+#         cod_equipamento = request.form.get('codigo_equip')
+
+#         # if equipamento_em_falha != 'Máquina de Solda':
+#         #     setor_maquina_solda = ''
+#         # if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
+#         #     qual_ferramenta = ''
+#         #     cod_equipamento = ''
+#         # if equipamento_em_falha == 'SO-RB-01 - ROBÔ - KUKA':
+#         #     maquina = ''
+
+#         print(setor)
+#         # print(maquina)
+#         print(qual_ferramenta)
+#         print(equipamento_em_falha)
+#         print(setor_maquina_solda)
+#         print(cod_equipamento)
+
+#         n_ordem = 0
+#         status = 'Em espera'
+
+#         try:
+#             risco = request.form['risco']
+#         except:
+#             risco = 'Baixo'
+
+#         try:
+#             maquina_parada = request.form['maquina-parada']
+
+#         except:
+#             maquina_parada = 'false'
+
+#         if maquina != None:
+#             maquina = maquina.split(" - ")
+#             maquina = maquina[0]
+
+#         # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#         # cur.execute("SELECT MAX(id) FROM tb_ordens")
+#         # maior_valor = cur.fetchone()[0]
+
+#         # try:
+#         #     maior_valor += 1
+#         # except:
+#         #     maior_valor = 0
+
+#         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#         cur.execute("SELECT MAX(id_ordem) FROM tb_ordens")
+#         ultima_os = cur.fetchone()[0]
+
+#         try:
+#             ultima_os = ultima_os+1
+#         except:
+#             ultima_os = 0
+
+#         print(maquina)
+
+#         cur.execute("INSERT INTO tb_ordens (setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+#                     (setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada, solicitante, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, cod_equipamento))
+
+#         imagens = request.files.getlist('imagens')
+
+#         print(len(imagens))
+
+#         if len(imagens) > 0:
+#             for imagem in imagens:
+#                 if imagem.filename != '':
+#                     # Ler os dados da imagem
+#                     imagem_data = imagem.read()
+
+#                     # Abrir a imagem usando a biblioteca Pillow
+#                     image = Image.open(io.BytesIO(imagem_data))
+
+#                     # Converter a imagem para o modo RGB, se necessário
+#                     if image.mode != 'RGB':
+#                         image = image.convert('RGB')
+
+#                     # Redimensionar a imagem para um tamanho desejado
+#                     max_size = (800, 600)
+#                     image.thumbnail(max_size)
+
+#                     # Salvar a imagem com uma qualidade reduzida
+#                     buffer = io.BytesIO()
+#                     image.save(buffer, format='JPEG', quality=80)
+#                     imagem_data_comprimida = buffer.getvalue()
+
+#                     cur = conn.cursor(
+#                         cursor_factory=psycopg2.extras.DictCursor)
+#                     cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)",
+#                                 (ultima_os, imagem_data_comprimida))
+#                     conn.commit()
+
+#             flash('Imagens adicionadas com sucesso!')
+
+#         else:
+#             print('sem imagem')
+
+#         # O input de tipo 'file' é chamado 'imagens', mas agora aceita vídeos também
+#         videos = request.files.getlist('video')
+
+#         for video in videos:
+#             if video.filename != '':
+#                 # Verificar a extensão do arquivo (opcional)
+#                 if allowed_file(video.filename):
+#                     filename = secure_filename(video.filename)
+#                     # video.save(os.path.join(routes_bp.config['UPLOAD_FOLDER'], filename))
+
+#                     # Ler os dados do vídeo como um objeto bytes
+#                     video_data = video.read()
+
+#                     # Inserir os dados do vídeo no banco de dados
+#                     cur.execute(
+#                         "INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (ultima_os, video_data))
+#                     conn.commit()
+
+#         conn.commit()
+#         flash('OS de número {} aberta com sucesso!'.format(ultima_os))
+#         return redirect(url_for('routes.open_os'))
+
+def proxima_os():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute("SELECT MAX(id_ordem) FROM tb_ordens")
+    ultima_os = cur.fetchone()[0]
+    proxima_os = ultima_os+1
+
+    return proxima_os
+
+def salvar_imagem(imagens, os):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    if request.method == 'POST':
+    if not any(imagens):
+        return 'sem video'
+    else:
+        for imagem in imagens:
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            # Ler os dados da imagem
+            imagem_data = imagem.read()
 
-        setor = request.form.get('setor')
-        maquina = request.form.get('maquina')
-        problema = request.form.get('problema')
-        solicitante = request.form.get('solicitante')
-        dataAbertura = datetime.now()
-        equipamento_em_falha = request.form.get('falha')
-        setor_maquina_solda = request.form.get('solda_maquina')
-        qual_ferramenta = request.form.get('ferramenta')
-        cod_equipamento = request.form.get('codigo_equip')
+            # Abrir a imagem usando a biblioteca Pillow
+            image = Image.open(io.BytesIO(imagem_data))
 
-        if equipamento_em_falha != 'Máquina de Solda':
-            setor_maquina_solda = ''
-        if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
-            qual_ferramenta = ''
-            cod_equipamento = ''
-        if equipamento_em_falha == 'SO-RB-01 - ROBÔ - KUKA':
-            maquina = ''
+            # Converter a imagem para o modo RGB, se necessário
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
 
-        print(setor)
-        # print(maquina)
-        print(qual_ferramenta)
-        print(equipamento_em_falha)
-        print(setor_maquina_solda)
-        print(cod_equipamento)
+            # Redimensionar a imagem para um tamanho desejado
+            max_size = (800, 600)
+            image.thumbnail(max_size)
 
-        n_ordem = 0
-        status = 'Em espera'
+            # Salvar a imagem com uma qualidade reduzida
+            buffer = io.BytesIO()
+            image.save(buffer, format='JPEG', quality=80)
+            imagem_data_comprimida = buffer.getvalue()
 
-        try:
-            risco = request.form['risco']
-        except:
-            risco = 'Baixo'
+            cur = conn.cursor(
+                cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)",
+                        (os, imagem_data_comprimida))
+            conn.commit()
+    
 
-        try:
-            maquina_parada = request.form['maquina-parada']
+    return 'sucesso'
 
-        except:
-            maquina_parada = 'false'
+def salvar_video(videos, os):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        if maquina != None:
-            maquina = maquina.split(" - ")
-            maquina = maquina[0]
+    for video in videos:
+        if video.filename != '':
+            # Verificar a extensão do arquivo (opcional)
+            if allowed_file(video.filename):
+                filename = secure_filename(video.filename)
+                # video.save(os.path.join(routes_bp.config['UPLOAD_FOLDER'], filename))
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT MAX(id) FROM tb_ordens")
-        maior_valor = cur.fetchone()[0]
+                # Ler os dados do vídeo como um objeto bytes
+                video_data = video.read()
 
-        try:
-            maior_valor += 1
-        except:
-            maior_valor = 0
+                # Inserir os dados do vídeo no banco de dados
+                cur.execute(
+                    "INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (os, video_data))
+                conn.commit()
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT MAX(id_ordem) FROM tb_ordens")
-        ultima_os = cur.fetchone()[0]
+    return 'sucess'
 
-        try:
-            ultima_os = ultima_os+1
-        except:
-            ultima_os = 0
+@routes_bp.route('/abrir-os', methods=['POST'])
+def abrir_os():
 
-        print(maquina)
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        cur.execute("INSERT INTO tb_ordens (id, setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                    (maior_valor, setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada, solicitante, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, cod_equipamento))
+    setor = request.form.get('inputSetor')
+    maquina = request.form.get('inputMaquinaLocal')
+    problema = request.form.get('problemaAparente')
+    solicitante = request.form.get('inputSolicitante')
+    dataAbertura = datetime.now()
+    equipamento_em_falha = request.form.get('inputEquipamentoFalha')
+    setor_maquina_solda = request.form.get('inputcampoESetorMaquinaSolda')
+    qual_ferramenta = request.form.get('inputFerramenta')
+    cod_equipamento = request.form.get('inputCodigoFerramenta')
+    risco = request.form['inputImpacto']
+    n_ordem = 0
+    status = 'Em espera'
 
-        imagens = request.files.getlist('imagens')
+    if 'checkboxMaquinaParada' in request.form:
+        # O checkbox foi marcado
+        maquina_parada = True
+    else:
+        # O checkbox não foi marcado
+        maquina_parada = False
 
-        # print(len(imagens))
+    # Receber e salvar imagem
+    imagens = request.files.getlist('imagens')
+    salvar_imagem(imagens, proxima_os())
 
-        if len(imagens) > 0:
-            for imagem in imagens:
-                if imagem.filename != '':
-                    # Ler os dados da imagem
-                    imagem_data = imagem.read()
+    # Receber e salvar vídeo
+    videos = request.files.getlist('video')
+    salvar_video(videos, proxima_os())
+    
+    cur.execute("INSERT INTO tb_ordens (setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    (setor, maquina, risco, status, problema, proxima_os(), n_ordem, dataAbertura, maquina_parada, solicitante, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, cod_equipamento))
+    
+    conn.commit()
 
-                    # Abrir a imagem usando a biblioteca Pillow
-                    image = Image.open(io.BytesIO(imagem_data))
-
-                    # Converter a imagem para o modo RGB, se necessário
-                    if image.mode != 'RGB':
-                        image = image.convert('RGB')
-
-                    # Redimensionar a imagem para um tamanho desejado
-                    max_size = (800, 600)
-                    image.thumbnail(max_size)
-
-                    # Salvar a imagem com uma qualidade reduzida
-                    buffer = io.BytesIO()
-                    image.save(buffer, format='JPEG', quality=80)
-                    imagem_data_comprimida = buffer.getvalue()
-
-                    cur = conn.cursor(
-                        cursor_factory=psycopg2.extras.DictCursor)
-                    cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)",
-                                (ultima_os, imagem_data_comprimida))
-                    conn.commit()
-
-            flash('Imagens adicionadas com sucesso!')
-
-        else:
-            print('sem imagem')
-
-        # O input de tipo 'file' é chamado 'imagens', mas agora aceita vídeos também
-        videos = request.files.getlist('video')
-
-        for video in videos:
-            if video.filename != '':
-                # Verificar a extensão do arquivo (opcional)
-                if allowed_file(video.filename):
-                    filename = secure_filename(video.filename)
-                    # video.save(os.path.join(routes_bp.config['UPLOAD_FOLDER'], filename))
-
-                    # Ler os dados do vídeo como um objeto bytes
-                    video_data = video.read()
-
-                    # Inserir os dados do vídeo no banco de dados
-                    cur.execute(
-                        "INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (ultima_os, video_data))
-                    conn.commit()
-
-        conn.commit()
-        flash('OS de número {} aberta com sucesso!'.format(ultima_os))
-        return redirect(url_for('routes.open_os'))
+    return redirect(url_for('routes.open_os'))
 
 
 @routes_bp.route('/edit/<id_ordem>/<identificador_selecionado>/<setor_selecionado>', methods=['POST', 'GET'])
@@ -2137,10 +2355,101 @@ def dados_ordem_servico():
     
     data = buscar_dados_os(data['id_ordem'])
     
+    return jsonify(data)
+
+@routes_bp.route('/dados-editar-ordem', methods=['POST'])
+@login_required
+def dados_editar_ordem():
+    data = request.get_json()
+    print(data)
+    data = dados_para_editar(data['id_ordem'], data['n_ordem'])
+    
     print(data)
 
     return jsonify(data)
 
+def verificar_maquina_preventiva(maquina):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    s = """select codigo from tb_maquinas_preventivas where codigo = %s"""
+    cur.execute(s,(maquina,))
+
+    data = cur.fetchall()
+
+    if len(data) > 0:
+        return True
+    else:
+        return False
+
+@routes_bp.route('/guardar-ordem-editada', methods=['POST'])
+@login_required
+def editar_ordem_banco():
+    
+    dados = request.get_json()
+    print(dados)
+    
+    # setor = dados['setor']
+    maquina = dados['maquina_edicao']
+    risco = dados['inputRisco_edicao']
+    status = dados['statusLista_edicao']
+    # problema = dados['problema']
+    id_ordem = dados['numeroOs']
+    n_execucao = dados['n_ordem_edicao']
+    descmanutencao = dados['descmanutencao_edicao']
+    operador = dados['operador_edicao']
+    inputEquipamentoEmFalha_edicao = dados['inputEquipamentoEmFalha_edicao']
+    codigoEquipamento_edicao = dados['codigoEquipamento_edicao']
+    setorMaqSolda_edicao = dados['setorMaqSolda_edicao']
+    qual_ferramenta_edicao = dados['qual_ferramenta_edicao']
+
+    matriculas_operadores = []
+
+    # Itere sobre a lista
+    for item in operador:
+        # Divida a string usando '-' como separador e pegue a parte antes do hífen
+        partes = item.split('-')
+        if len(partes) > 0:
+            matriculas = partes[0].strip()
+            matriculas_operadores.append(matriculas)
+
+    operador = matriculas_operadores
+
+    operador = ",".join(operador)
+
+    tipo_manutencao = dados['selectTipoManutencao_edicao']
+    datetimes = dados['data_edit_edicao']
+    area_manutencao = dados['areaManutencao_edicao']
+    pvlye = dados['pvlye_edicao']
+    pa_plus = dados['pa-plus_edicao']
+    tratamento = dados['tratamento_edicao']
+    ph_agua = dados['ph-agua_edicao']
+
+    dataAbertura,natureza = buscar_data_abertura_natureza(id_ordem)
+
+    datainicio,horainicio,datafim,horafim = formatar_data_hora(datetimes)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute("""update tb_ordens
+    set maquina=%s, risco=%s, status=%s, datainicio=%s, horainicio=%s,
+        datafim=%s, horafim=%s, descmanutencao=%s,
+        operador=%s, tipo_manutencao=%s, area_manutencao=%s,
+        equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
+        cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
+        where id_ordem = %s and n_ordem = %s""", (maquina,risco,status,datainicio,horainicio,
+                                                  datafim,horafim,descmanutencao,operador,
+                                                  tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
+                                                  setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,
+                                                  pvlye,pa_plus,tratamento,ph_agua,id_ordem,n_execucao))
+
+    conn.commit()
+
+    return 'sucess'
 
 @routes_bp.route('/envio_ok', methods=['POST'])
 @login_required
@@ -2205,17 +2514,17 @@ def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Ins
 
     if request.method == 'POST':
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute(""" 
-            SELECT MAX(id) FROM tb_ordens
-        """)
+        # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # cur.execute(""" 
+        #     SELECT MAX(id) FROM tb_ordens
+        # """)
 
-        ultimo_id = cur.fetchone()[0]
+        # ultimo_id = cur.fetchone()[0]
 
-        try:
-            ultimo_id = ultimo_id+1
-        except:
-            ultimo_id = 0
+        # try:
+        #     ultimo_id = ultimo_id+1
+        # except:
+        #     ultimo_id = 0
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         s = (""" 
@@ -2273,7 +2582,6 @@ def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Ins
 
         maquinas_preventivas = cur.fetchall()
 
-
         if len(maquinas_preventivas) > 0 and status == 'Finalizada':
             status = 'Aguardando OK'
             confirmacao = True
@@ -2326,11 +2634,12 @@ def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Ins
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         cur.execute("""
-            INSERT INTO tb_ordens ( id, setor,maquina,risco,status,problemaaparente,
+            INSERT INTO tb_ordens ( setor,maquina,risco,status,problemaaparente,
                                     datainicio,horainicio,datafim,horafim,id_ordem,n_ordem,
-                                    descmanutencao, operador, natureza, tipo_manutencao, area_manutencao,pvlye,pa_plus,tratamento,ph_agua,confirmacao) 
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (ultimo_id, setor, maquina, risco, status, problema, datainicio, horainicio,
+                                    descmanutencao, operador, natureza, tipo_manutencao,
+                                    area_manutencao,pvlye,pa_plus,tratamento,ph_agua,confirmacao) 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (setor, maquina, risco, status, problema, datainicio, horainicio,
               datafim, horafim, id_ordem, n_ordem, descmanutencao,
               operador, natureza, tipo_manutencao, area_manutencao,
               pvlye, pa_plus, tratamento, ph_agua, confirmacao))
@@ -2344,6 +2653,136 @@ def update_student(id_ordem,identificador_selecionado,setor_selecionado):  # Ins
         conn.commit()
 
         return redirect(url_for('routes.get_employee', id_ordem=id_ordem,identificador_selecionado=identificador_selecionado,setor_selecionado=setor_selecionado))
+
+def buscar_data_abertura_natureza(ordem_id):
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    query_buscar_data_abertura = "select dataabertura,natureza from tb_ordens where id_ordem = %s and n_ordem = 0"
+    
+    cur.execute(query_buscar_data_abertura,(ordem_id,))
+    data = cur.fetchall()
+
+    dataAbertura = [row['dataabertura'] for row in data][0]
+    natureza = [row['natureza'] for row in data][0]
+
+    return dataAbertura,natureza
+
+def formatar_data_hora(datetimes):
+
+    # Divida a string em duas partes: data/hora inicial e data/hora final
+    data_hora_inicial_str, data_hora_final_str = datetimes.split(" - ")
+
+    # Faça o parsing das strings de data e hora
+    data_inicial = datetime.strptime(
+        data_hora_inicial_str, "%d/%m/%Y %H:%M")
+    data_final = datetime.strptime(
+        data_hora_final_str, "%d/%m/%Y %H:%M")
+
+    # Formate as datas e horas no formato desejado
+    datainicio = data_inicial.strftime("%Y-%m-%d")
+    horainicio = data_inicial.strftime("%H:%M:%S")
+    datafim = data_final.strftime("%Y-%m-%d")
+    horafim = data_final.strftime("%H:%M:%S")
+
+    return datainicio,horainicio,datafim,horafim
+
+@routes_bp.route('/executar-ordem', methods=['POST'])
+@login_required
+def executar_ordem():
+
+    dados = request.get_json()
+    
+    setor = dados['setor']
+    maquina = dados['maquina']
+    risco = dados['inputRisco']
+    status = dados['statusLista']
+    problema = dados['problema']
+    id_ordem = dados['numeroOs']
+    n_execucao = dados['n_ordem']
+    descmanutencao = dados['descmanutencao']
+    operador = dados['operador']
+    confirmacao = verificar_maquina_preventiva(maquina)
+    inputEquipamentoEmFalha = dados['inputEquipamentoEmFalha']
+    codigoEquipamento = dados['codigoEquipamento']
+    setorMaqSolda = dados['setorMaqSolda']
+    qual_ferramenta = dados['qual_ferramenta']
+    problemaaparente = dados['problema'] # será usado para descrever o nome do grupo de atividades
+    solicitante = dados['inputSolicitante']
+
+    if status == 'Finalizado' and confirmacao:
+        confirmacao = True
+        status = 'Aguardando OK'
+    else:
+        confirmacao = False
+    
+    matriculas_operadores = []
+
+    # Itere sobre a lista
+    for item in operador:
+        # Divida a string usando '-' como separador e pegue a parte antes do hífen
+        partes = item.split('-')
+        if len(partes) > 0:
+            matriculas = partes[0].strip()
+            matriculas_operadores.append(matriculas)
+
+    operador = matriculas_operadores
+
+    operador = ",".join(operador)
+
+    tipo_manutencao = dados['selectTipoManutencao']
+    datetimes = dados['data_edit']
+    area_manutencao = dados['areaManutencao']
+    pvlye = dados['pvlye']
+    pa_plus = dados['pa-plus']
+    tratamento = dados['tratamento']
+    ph_agua = dados['ph-agua']
+
+    dataAbertura,natureza = buscar_data_abertura_natureza(id_ordem)
+
+    botao1 = dados['maquina-parada-1']
+    botao2 = dados['maquina-parada-2']
+    botao3 = dados['maquina-parada-3']
+    
+    if status == 'Finalizada' or status == 'Aguardando OK':
+        botao3 = 'true'
+    
+    datainicio,horainicio,datafim,horafim = formatar_data_hora(datetimes)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    print(solicitante, tipo_manutencao, problemaaparente)
+
+    if solicitante == 'Automático' and tipo_manutencao == 'Preventiva':
+        cur.execute('update public.tb_grupos_preventivas set ult_manutencao = %s where codigo = %s and grupo = %s', (datafim,maquina,problemaaparente))
+
+    cur.execute("""
+        INSERT INTO tb_ordens (setor,maquina,risco,status,problemaaparente,
+                                dataabertura,datainicio,horainicio,datafim,horafim,id_ordem,n_ordem,
+                                descmanutencao, operador, natureza, tipo_manutencao,
+                                area_manutencao,equipamento_em_falha,setor_maquina_solda, 
+                                qual_ferramenta,cod_equipamento,
+                                pvlye,pa_plus,tratamento,ph_agua,confirmacao) 
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    """, (setor, maquina, risco, status, problema,dataAbertura, datainicio, horainicio,
+            datafim, horafim, id_ordem, n_execucao, descmanutencao,
+            operador, natureza, tipo_manutencao, area_manutencao,inputEquipamentoEmFalha,
+            setorMaqSolda,qual_ferramenta,codigoEquipamento,
+            pvlye, pa_plus, tratamento, ph_agua, confirmacao))
+
+    cur.execute("""
+        INSERT INTO tb_paradas (id_ordem,n_ordem, parada1, parada2, parada3) 
+                VALUES (%s,%s,%s,%s,%s)
+    """, (id_ordem, n_execucao, botao1, botao2, botao3))
+
+    conn.commit()
+
+    return 'sucess'
 
 @routes_bp.route('/editar_ordem/<id_ordem>/<n_ordem>', methods=['POST', 'GET'])
 @login_required
@@ -2512,17 +2951,17 @@ def update_ordem(id_ordem, n_ordem):  # Inserir as edições no banco de dados
 
     if request.method == 'POST':
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute(""" 
-            SELECT MAX(id) FROM tb_ordens
-        """)
+        # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # cur.execute(""" 
+        #     SELECT MAX(id) FROM tb_ordens
+        # """)
 
-        ultimo_id = cur.fetchone()[0]
+        # ultimo_id = cur.fetchone()[0]
 
-        try:
-            ultimo_id = ultimo_id+1
-        except:
-            ultimo_id = 0
+        # try:
+        #     ultimo_id = ultimo_id+1
+        # except:
+        #     ultimo_id = 0
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         s = (""" 
@@ -2627,24 +3066,25 @@ def guardar_ordem_editada(id_ordem, n_ordem):
         return redirect(url_for('routes.Index'))
 
 
-@routes_bp.route('/openOs')
-def open_os():  # Página de abrir OS
+def solicitantes():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """SELECT * FROM tb_matriculas"""
+    query = """SELECT concat(nome_colaborador,' - ',matricula_colaborador) FROM tb_matriculas"""
 
     cur.execute(query)
-    data = cur.fetchall()
-    df_data = pd.DataFrame(data, columns=['id', 'matricula', 'nome'])
+    nomes_solicitantes = cur.fetchall()
 
-    df_data['matricula_nome'] = df_data['matricula'] + " - " + df_data['nome']
+    return nomes_solicitantes
 
-    solicitantes = df_data[['matricula_nome']].values.tolist()
+@routes_bp.route('/openOs')
+def open_os():  # Página de abrir OS
 
-    return render_template("user/openOs.html", solicitantes=solicitantes)
+    nomes_solicitantes = solicitantes()
+
+    return render_template("user/openOs.html", solicitantes=nomes_solicitantes)
 
 
 @login_required
@@ -2660,27 +3100,15 @@ def filtro_maquinas(setor):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """
-        SELECT *
-        FROM (
-            SELECT codigo, descricao, setor FROM tb_maquinas
-            UNION
-            SELECT codigo, descricao, setor FROM tb_planejamento_anual
-            ) as t1
-        WHERE t1.setor = {}
-        """.format("'" + setor + "'")
+        SELECT concat (codigo, ' - ', descricao) FROM tb_maquinas
+        WHERE setor = %s
+        """
 
-    lista_maquinas = pd.read_sql_query(query, conn)
+    cur.execute(query,(setor,))
+    lista_maquinas = cur.fetchall()
+    lista_maquinas.append(["Outros"])
 
-    lista_maquinas['codigo_desc'] = lista_maquinas['codigo'] + \
-        " - " + lista_maquinas['descricao']
-    lista_maquinas = lista_maquinas.dropna(subset=['codigo_desc'])
-    lista_maquinas = lista_maquinas.drop_duplicates(subset=['codigo'])
-
-    lista_maquinas_ = []
-    lista_maquinas_.insert(0, 'Outros')
-    lista_maquinas_.extend(lista_maquinas[['codigo_desc']].values.tolist())
-
-    return jsonify(lista_maquinas_)
+    return jsonify(lista_maquinas)
 
 
 @routes_bp.route('/edit_material/<id_ordem>', methods=['POST', 'GET'])
@@ -2697,15 +3125,15 @@ def get_material(id_ordem):  # Informar material que foi utilizado na ordem de s
 
         # Obtendo o ultimo id
 
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        s = ("""
-            SELECT MAX(id) FROM tb_carrinho
-        """)
-        cur.execute(s)
-        try:
-            max_id = cur.fetchall()[0][0] + 1
-        except:
-            max_id = 0
+        # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # s = ("""
+        #     SELECT MAX(id) FROM tb_carrinho
+        # """)
+        # cur.execute(s)
+        # try:
+        #     max_id = cur.fetchall()[0][0] + 1
+        # except:
+        #     max_id = 0
 
         # Obtém os dados do formulário
         id_ordem = id_ordem
@@ -2713,8 +3141,8 @@ def get_material(id_ordem):  # Informar material que foi utilizado na ordem de s
         quantidade = request.form['quantidade']
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("INSERT INTO tb_carrinho (id, id_ordem, codigo, quantidade) VALUES (%s,%s,%s,%s)",
-                    (max_id, id_ordem, codigo, quantidade))
+        cur.execute("INSERT INTO tb_carrinho (id_ordem, codigo, quantidade) VALUES (%s,%s,%s)",
+                    (id_ordem, codigo, quantidade))
         conn.commit()
 
     # Obtém os dados da tabela
@@ -3228,56 +3656,54 @@ def grafico():  # Dashboard
                            disponibilidade_geral_setor=disponibilidade_geral_setor)
 
 
-@routes_bp.route('/timeline/<id_ordem>', methods=['POST', 'GET'])
+@routes_bp.route('/timeline', methods=['POST'])
 @login_required
-def timeline_os(id_ordem):  # Mostrar o histórico daquela ordem de serviço
+def timeline_os():
 
+    dados = request.get_json()
+    print(dados)
+
+    id_ordem = dados['id_ordem']
+    
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    # Obtém os dados da tabela
-    # s = ("""
-    #     SELECT dataabertura, n_ordem, status, datainicio, datafim, operador, descmanutencao,
-    #         TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-    #         TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-    #     FROM tb_ordens
-    #     WHERE id_ordem = {} AND ordem_excluida IS NULL OR ordem_excluida = FALSE
-    # """).format(int(id_ordem))
 
     s = ("""
         SELECT
             o.dataabertura,
             o.n_ordem,
             o.status,
-            o.datainicio,
-            o.datafim,
             o.operador,
             o.descmanutencao,
-            TO_TIMESTAMP(o.datainicio || ' ' || o.horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-            TO_TIMESTAMP(o.datafim || ' ' || o.horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim,
+			COALESCE(TO_TIMESTAMP(o.datainicio || ' ' || o.horainicio, 'YYYY-MM-DD HH24:MI:SS'), TO_TIMESTAMP(o.dataabertura  - INTERVAL '3 hours' || ' ' || '00:00:00', 'YYYY-MM-DD HH24:MI:SS')) AS inicio,
+			COALESCE(TO_TIMESTAMP(o.datafim || ' ' || o.horafim, 'YYYY-MM-DD HH24:MI:SS'), TO_TIMESTAMP(o.dataabertura  - INTERVAL '3 hours' || ' ' || '00:00:00', 'YYYY-MM-DD HH24:MI:SS')) AS fim,
             func.nome,
             func.matricula,
             func.salario
         FROM tb_ordens as o
-        LEFT JOIN tb_funcionario as func ON o.operador LIKE '%' || func.matricula || ' - ' || func.nome || '%'
+		LEFT JOIN tb_funcionario as func ON ',' || o.operador || ',' LIKE '%,' || func.matricula || ',%'
         WHERE o.id_ordem = {} AND (o.ordem_excluida IS NULL OR o.ordem_excluida = FALSE);
         """).format(int(id_ordem))
+    
+    print(s)
 
     df_timeline = pd.read_sql_query(s, conn)
+    print(df_timeline)
+    
+    # df_timeline['inicio'] = df_timeline['inicio'].apply(lambda x: x.split(' ')[0])
+    # df_timeline['fim'] = df_timeline['fim'].apply(lambda x: x.split(' ')[0])
 
-    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
-    df_timeline['fim'] = df_timeline['fim'].astype(str)
 
-    for i in range(len(df_timeline)):
-        if df_timeline['fim'][i] == 'NaT':
-            df_timeline['fim'][i] = 0
-            df_timeline['inicio'][i] = 0
-        else:
-            pass
+    # for i in range(len(df_timeline)):
+    #     if df_timeline['fim'][i] == 'NaT':
+    #         df_timeline['fim'][i] = 0
+    #         df_timeline['inicio'][i] = 0
+    #     else:
+    #         pass
 
     df_timeline = df_timeline.replace(np.nan, '-')
-
+    
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
         df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
@@ -3294,17 +3720,18 @@ def timeline_os(id_ordem):  # Mostrar o histórico daquela ordem de serviço
 
     df_timeline = df_timeline.sort_values(by='n_ordem', ascending=True)
 
-    if df_timeline['datainicio'][0] == '-':
-        df_timeline['datainicio'][0] = df_timeline['dataabertura'][0]
+    if df_timeline['inicio'][0] == '-':
+        df_timeline['inicio'][0] = df_timeline['dataabertura'][0]
 
     df_final = df_timeline
 
-    if len(df_timeline) > 1:
+    print(df_timeline)
 
+    if len(df_timeline) > 1:
         df_timeline['mesExecucao'] = df_timeline['fim'].dt.month
         df_timeline['anoExecucao'] = df_timeline['fim'].dt.year
         df_timeline['dias_uteis'] = df_timeline.apply(
-            lambda row: calcular_dias_uteis(row['anoExecucao'], row['mesExecucao']), axis=1)
+            lambda row: calcular_dias_uteis(int(row['anoExecucao']), int(row['mesExecucao'])), axis=1)
         df_timeline['horasTotalMes'] = df_timeline['dias_uteis'] * (9*60)
         df_timeline['salario'] = df_timeline['salario'].replace("-", 0)
         df_timeline['salario'] = df_timeline['salario'].astype(float)
@@ -3322,85 +3749,160 @@ def timeline_os(id_ordem):  # Mostrar o histórico daquela ordem de serviço
 
         df_final['diferenca'] = df_final['diferenca'].astype(int)
 
-        totalMinutos = df_final['diferenca'].sum()
-        totalCusto = df_final['proporcional'].sum().round(2)
+        totalMinutos = df_final['diferenca'].sum().tolist()
+        totalCusto = df_final['proporcional'].sum().round(2).tolist()
+
+        print(totalMinutos, totalCusto)
 
         df_final = df_final.iloc[:, 1:]
 
         df_final = df_final.values.tolist()
 
-        return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_final,
-                               totalMinutos=totalMinutos, totalCusto=totalCusto)
+        return jsonify (id_ordem, df_final, totalMinutos, totalCusto)
     else:
         df_final = df_final.iloc[:, 1:]
 
         df_final = df_final.values.tolist()
 
-        return render_template('user/timeline.html', id_ordem=id_ordem, df_timeline=df_final)
+        return jsonify (id_ordem, df_final)
+
+# @routes_bp.route('/52semanas', methods=['GET'])
+# @login_required
+# def plan_52semanas():  # Tabela com as 52 semanas
+
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+#                             password=DB_PASS, host=DB_HOST)
+
+#     s = (""" SELECT * FROM tb_planejamento_anual """)
+
+#     df_maquinas = pd.read_sql_query(s, conn)
+
+#     df_maquinas = df_maquinas.values.tolist()
+
+#     s = (""" select * from tb_grupos_preventivas where excluidos = 'False'""")
+
+#     query = (""" SELECT codigo,grupo,atividade,responsabilidade FROM tb_atividades_preventiva WHERE excluidos = 'False';""")
+
+#     df_grupos = pd.read_sql_query(s, conn)
+
+#     df_atividades = pd.read_sql_query(query, conn)
+    
+#     df_grupos_nan = df_grupos[df_grupos.isna().any(axis=1)]
+#     df_grupos_nan['proxima_manutencao'] = 'À decidir'
+
+#     df_grupos_notna = df_grupos.dropna()
+
+#     df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
+    
+#     print(df_grupos_notna)
+
+#     # df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'], format="%Y-%m-%d")
+
+#     df_grupos_notna = pd.concat([df_grupos_notna,df_grupos_nan])
+
+#     df_grupos_notna['ult_manutencao'] = df_grupos_notna['ult_manutencao'].fillna('À decidir')
+#     df_grupos_notna['periodicidade'] = df_grupos_notna['periodicidade'].fillna('À decidir')
+
+#     df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].astype(str)
+#     df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].apply(lambda x: x.replace(" 00:00:00",""))
+
+#     # Merge das tabelas
+#     df_merged = pd.merge(df_grupos_notna, df_atividades, on=['codigo', 'grupo'], how='left')
+
+#     # Groupby e criar nova coluna 'atividade' com listas de atividades
+#     df_grouped = df_merged.groupby(['codigo', 'grupo']).apply(lambda x: pd.Series({
+#         'ult_manutencao': x['ult_manutencao'].iloc[0],
+#         'periodicidade': x['periodicidade'].iloc[0],
+#         'proxima_manutencao': x['proxima_manutencao'].iloc[0],
+#         'atividade': x['atividade'].fillna('').tolist(),
+#         'responsabilidade': x['responsabilidade'].fillna('').tolist(),
+#     })).reset_index()
+
+#     # Resetar o índice
+#     df_grouped.reset_index(drop=True, inplace=True)
+
+#     df_final_list = df_grouped.values.tolist()
+
+#     dados_historico_planejadas = historico_planejadas()
+
+#     return render_template('user/52semanas.html', data=df_maquinas, df_final_list=df_final_list, dados_historico_planejadas=dados_historico_planejadas)
+
+def tabela_maquinas_preventivas():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    s = (""" SELECT * FROM tb_planejamento_anual """)
+
+    cur.execute(s)
+    tabela_maquinas_preventivas = cur.fetchall()
+
+    return tabela_maquinas_preventivas
+
+@routes_bp.route('/tabela-grupos-preventivas')
+@login_required
+def grupos_preventivas():
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    s = (""" select * from tb_grupos_preventivas where excluidos = 'False' """)
+
+    data = pd.read_sql_query(s, conn)
+
+    # Retirando os grupos que não tem data estabelecida
+    df_grupos_nan = data[data.isna().any(axis=1)]
+    df_grupos_nan['proxima_manutencao'] = 'À decidir'
+    df_grupos_nan.fillna('À decidir',inplace=True)
+    
+    # Grupos que ja tem data estabelecida
+    df_grupos_notna = data.dropna()
+    df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
+
+    df_grupos_notna['proxima_manutencao'] = pd.to_datetime(df_grupos_notna['proxima_manutencao'],format="%Y-%m-%d").dt.strftime("%d/%m/%Y")
+    df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'],format="%Y-%m-%d").dt.strftime("%d/%m/%Y")
+
+    # Juntando os dois grupos
+    grupos_juntos = pd.concat([df_grupos_notna,df_grupos_nan]).values.tolist()
+
+    return jsonify(grupos_juntos)
+
+@routes_bp.route('/tabela-historico-preventivas')
+@login_required
+def historico_planejadas():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query_historico_preventivas = """select max(n_ordem) as n_ordem_max,datafim,id_ordem,maquina, coalesce(status,'Em espera') as status 
+                                    from tb_ordens 
+                                    where natureza = 'Planejada' and ordem_excluida isnull
+                                    group by status,datafim,id_ordem,maquina
+                                    order by id_ordem,n_ordem_max"""
+
+    data_historico_planejadas = pd.read_sql_query(query_historico_preventivas,conn)
+
+    data_historico_planejadas.drop_duplicates(subset='id_ordem',keep='last',inplace=True)
+    # data_historico_planejadas['datafim'] = data_historico_planejadas['datafim'].fillna('-')
+
+    data_historico_planejadas['datafim'] = pd.to_datetime(data_historico_planejadas['datafim'],format="%Y-%m-%d",errors='coerce').dt.strftime("%d/%m/%Y").fillna('-')
+
+    data_historico_planejadas = data_historico_planejadas.values.tolist()
+
+    return jsonify(data_historico_planejadas)
 
 
 @routes_bp.route('/52semanas', methods=['GET'])
 @login_required
-def plan_52semanas():  # Tabela com as 52 semanas
+def plan_52semanas():
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
+    # tabela com máquinas que podem ser criadas grupos de preventiva
+    tabela_maquinas_preventivas_ = tabela_maquinas_preventivas()
 
-    s = (""" SELECT * FROM tb_planejamento_anual """)
-
-    df_maquinas = pd.read_sql_query(s, conn)
-
-    colunas = df_maquinas.columns.tolist()
-    df_maquinas = df_maquinas.values.tolist()
-
-    s = (""" select * from tb_grupos_preventivas where excluidos = 'False'""")
-
-    query = (""" SELECT codigo,grupo,atividade,responsabilidade FROM tb_atividades_preventiva WHERE excluidos = 'False';""")
-
-    df_grupos = pd.read_sql_query(s, conn)
-
-    df_atividades = pd.read_sql_query(query, conn)
-    
-    df_grupos_nan = df_grupos[df_grupos.isna().any(axis=1)]
-    df_grupos_nan['proxima_manutencao'] = 'À decidir'
-
-    df_grupos_notna = df_grupos.dropna()
-
-    df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
-    
-    print(df_grupos_notna)
-
-    # df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'], format="%Y-%m-%d")
-
-    df_grupos_notna = pd.concat([df_grupos_notna,df_grupos_nan])
-
-    df_grupos_notna['ult_manutencao'] = df_grupos_notna['ult_manutencao'].fillna('À decidir')
-    df_grupos_notna['periodicidade'] = df_grupos_notna['periodicidade'].fillna('À decidir')
-
-    df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].astype(str)
-    df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].apply(lambda x: x.replace(" 00:00:00",""))
-
-    # Merge das tabelas
-    df_merged = pd.merge(df_grupos_notna, df_atividades, on=['codigo', 'grupo'], how='left')
-
-    # Groupby e criar nova coluna 'atividade' com listas de atividades
-    df_grouped = df_merged.groupby(['codigo', 'grupo']).apply(lambda x: pd.Series({
-        'ult_manutencao': x['ult_manutencao'].iloc[0],
-        'periodicidade': x['periodicidade'].iloc[0],
-        'proxima_manutencao': x['proxima_manutencao'].iloc[0],
-        'atividade': x['atividade'].fillna('').tolist(),
-        'responsabilidade': x['responsabilidade'].fillna('').tolist(),
-    })).reset_index()
-
-    # Resetar o índice
-    df_grouped.reset_index(drop=True, inplace=True)
-
-    df_final_list = df_grouped.values.tolist()
-
-    dados_historico_planejadas = historico_planejadas()
-
-    return render_template('user/52semanas.html', data=df_maquinas, colunas=colunas, df_final_list=df_final_list, dados_historico_planejadas=dados_historico_planejadas)
-
+    return render_template('user/52semanas.html', tabela_maquinas_preventivas_=tabela_maquinas_preventivas_)
 
 @routes_bp.route('/preventivas', methods=['GET'])
 @login_required
@@ -3418,7 +3920,6 @@ def preventivas():
     opcoes = obter_opcoes_preventivas(codigo_maquina)
 
     return jsonify(opcoes)
-
 
 # Função de exemplo para gerar opções com base no código da máquina
 def obter_opcoes_preventivas(codigo_maquina):
@@ -3441,7 +3942,6 @@ def obter_opcoes_preventivas(codigo_maquina):
         return [[]]
     else:
         return grupos
-
 
 @routes_bp.route('/atividadesGrupo', methods=['GET'])
 @login_required
@@ -3497,7 +3997,6 @@ def atividadesGrupo():
 
     # Retorne os dados como JSON
     return jsonify(dados_associados,parametros)
-
 
 # Função de exemplo para obter dados associados a uma máquina e grupo
 

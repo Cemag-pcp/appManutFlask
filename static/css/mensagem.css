@@ -8,7 +8,7 @@
     width: 200px; /* Ajuste conforme necessário */
     text-align: center;
     transition: top 0.5s ease-in-out; /* Adiciona uma transição suave */
-    z-index: 1000;
+    z-index: 10000;
 }
   
 #mensagem.sucesso {
@@ -19,5 +19,4 @@ color: white;
 #mensagem.aviso {
 background-color: #ff9800;
 color: white;
-}
-  
+} 

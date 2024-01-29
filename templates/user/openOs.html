@@ -1,520 +1,545 @@
-{% extends "user/layout.html" %}
-{% block containerFluid %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block voltar %}
-{% endblock %}
-  {% with messages = get_flashed_messages()  %}
-  {% if messages %}
-  {% for message in messages %}
-  <div class="alert-success alert-dismissible fade show" id="alerta_Os" role="alert">
-    {{ message }}
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-</div>
+<head>
 
-<div id="modalEnviar" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h4>Observação</h4>
-    <p>Caso a máquina seja <strong>Paleteiras elétricas</strong>, <strong>Empilhadeiras</strong> ou <strong>Pontes Rolantes</strong>, 
-    a abertura de O.S deve ser feita em "Equipamentos de Movimentação".</p>
-  </div>
-</div>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-<div class="container-fluid">
-  <div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Abrir OS</h6>
-    </div>
-    <div class="card-body">
-      <form action="{{url_for('routes.add_student')}}" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+    <title>Abertura de Os</title>
 
-        <div class="form-group">
-          <label for="setor">Setor</label>
-          <select class="form-control" id="setor" name="setor" style='padding: .375rem .25rem;' onchange="getMaquinasPorSetor()" required>
-            <option value="" selected disabled hidden></option>
-            <option value="Administrativo">Administrativo</option>
-            <option value="Almoxarifado">Almoxarifado</option>
-            <option value="Corte e estamparia">Corte e estamparia</option>
-            <option value="Expedição">Expedição</option>
-            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
-            <option value="Solda">Solda</option>
-            <option value="Montagem">Montagem</option>
-            <option value="Pintura">Pintura</option>
-            <option value="Carpintaria">Carpintaria</option>
-            <option value="Usinagem">Usinagem</option>  
-            <option value="Serra">Serra</option>
-            <option value="Serralheria">Serralheria</option>
-            <option value="Manutenção">Manutenção</option>
-            <option value="Forjaria">Forjaria</option>
-            <option value="Utilidades">Utilidades</option>
-            <option value="Qualidade">Qualidade</option>
-          </select>
-        </div>
-        
-        <div class="form-group" id="solicitante-select">
-          <label for="solicitante">Solicitante:</label>
-            <select class="form-control" sdata-live-search="true" name="solicitante" id="solicitante" required>
-              <option value="" selected disabled hidden></option>  
-              {% for solicitante in solicitantes %}
-              <option value="{{solicitante[0]}}">{{solicitante[0]}}</option>
-              {% endfor %}
-            </select>
-        </div> 
-        <!-- Se o setor for solda -->
-        <div class="form-group" id="equipamento_em_falha" style="display: none; padding: .375rem .25rem;">
-          <label for="Equipamento em falha">Equipamento em falha:</label>
-          <a href="#" onclick="showImageModalOS()"><i class="fa-solid fa-image"></i></a>
-          <select class="form-control" name="falha" id="falha" onchange="verificarFalha()">
-            <option value="" selected disabled hidden></option>  
-            <option value="Máquina de Solda">Máquina de Solda</option>
-            <option value="Monovia">Monovia</option>
-            <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
-            <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
-          </select>
-        </div>      
-        
-        <!-- Se o equipamento em falha for máquina de solda -->
-        <div class="form-group" id="maquina_de_solda" style="display: none;">
-          <label for="Maquina de Solda">Setor da Máquina de Solda:</label>
-          <select class="form-control" sdata-live-search="true" name="solda_maquina" id="solda_maquina">
-              <option value="" selected disabled hidden></option>  
-              <option value="Laterais">Laterais</option>
-              <option value="Eixos">Eixos</option>
-              <option value="Içamento">Içamento</option>
-              <option value="Laterais">Plataforma "Esqueleto"</option>
-              <option value="Eixos">Chassi</option>
-              <option value="Içamento">Tanque</option>
-              <option value="Laterais">Caçamba</option>
-              <option value="Eixos">Serralheria</option>
-          </select>
-        </div>
+    <!-- Custom fonts for this template-->
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/fontawesome-free/css/all.min.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
 
-        <div class="form-group" id="maquina-select">
-          <label for="maquina">Máquina/Local:</label>
-            <select class="form-control" sdata-live-search="true" name="maquina" id="maquina" required>
-              <option value="" selected disabled hidden></option>  
-              {% for maquina in lista_maquinas_monovia %}
-              <option value="{{maquina[0]}}">{{maquina[0]}}</option>
-              {% endfor %}
-            </select>
-        </div>
-        
-        <div class="form-group" id="ferramenta" style="display: none;">
-          <label for="ferramenta">Qual é a ferramenta?</label>
-          <select class="form-control" sdata-live-search="true" name="ferramenta" id="ferramentas">
-            <option value="" selected disabled hidden></option>  
-            <option value="Esmerilhadeira">Esmerilhadeira</option>
-            <option value="Tocha">Tocha</option>
-          </select>
-        </div>
-        
-        <div class="form-group" id="codigo_equip" style="display: none;">
-          <label for="codigo_equip">Qual o código que apresenta no equipamento?</label>
-          <textarea id="codigo_equipa" class="form-control" name="codigo_equip" rows="5" cols="39" placeholder="Digite o código..."></textarea>
-        </div>
-        
-        <div class="form-group" id = "descricao">
-          <label for="problema">Descrição:</label>
-          <textarea id="problema" class="form-control" name="problema" rows="5" cols="39" required placeholder="Descreva o problema..."></textarea>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label for="maquina-parada">Máquina parada?</label>
-            <label class="switch">
-              <input type="checkbox" name="maquina-parada" id="maquina-parada">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="form-group">        
-            <label for="risco">Impacto na produção:</label>
-            <select class="form-control form-control" id="risco" style='padding: .375rem .25rem;' name="risco" oninput="setImpactoProducao()" required>
-              <option value="" selected disabled hidden></option>
-              <option>Alto</option>
-              <option>Médio</option>
-              <option>Baixo</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="file-upload">
-            <input class="file-upload__input" type="file" name="imagens" id="imagens" multiple accept="image/*">
-            <button class="file-upload__button" type="button">Escolha a(s) foto(s)</button>
-            <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-        </div>   
-
-        <div class="file-upload" style="margin-top: 20px;">
-          <input class="file-upload__input" type="file" name="video" id="video" accept="video/*">
-          <button class="file-upload__button" type="button">Escolha o vídeo</button>
-          <span class="file-upload__label">Nenhum Arquivo selecionado</span>
-        </div>
-
-        <button id = 'salvar' class="btn btn-block">
-          Save 
-        </button>
-        
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="imagemModal2" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content2">
-      <div class="modal-header">
-        <h5 class="modal-title" id="imagemModalLabel">Foto</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Aqui é onde a imagem será exibida -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-      </div>
-    </div>
-  </div>  
-</div>
-
-<script>
-
-  function showImageModalOS() {
-          showLoading()
-          $.ajax({
-            success: function() {
-              
-              var modalBody = '<img src="static/img/maquinas.png" alt="Foto"/>';
-              
-              // Preencha o conteúdo do modal com a imagem
-              $('#imagemModal2 .modal-body').html(modalBody);
-              
-              // Exiba o modal
-              $('#imagemModal2').modal('show');
-              
-              // Oculta a tela de carregamento após um pequeno atraso (500 milissegundos)
-              setTimeout(function() {
-                  hideLoading(); // Esconde o indicador de carregamento
-              }, 10);
-          },
-          error: function(error) {
-              hideLoading();
-              alert('Essa Ordem de Serviço não contém imagem')
-              console.log(error);
-          }
-          });
-      }
-  
-</script>
-
-<!-- <script>
-  function getFalhas() {
-
-    var falhaSelect = document.getElementById('falha');
-    var maquinaSelect = document.getElementById('maquina');
-    var falhaSelecionado = falhaSelect.value;
-
-    // Limpa as opções atuais do menu de máquinas
-    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
-
-    // Verifica se um setor foi selecionado
-    if (falhaSelecionado !== '') {
-      // Faz uma chamada assíncrona para o servidor Flask
-      showLoading()
-      $.ajax({
-        url: '/falha/' + falhaSelecionado,
-        type: 'GET',
-        success: function(data) {
-          // Atualiza o menu de máquinas com as opções retornadas do servidor
-          for (var i = 0; i < data.length; i++) {
-            var option = document.createElement('option');
-            option.text = data[i];
-            option.value = data[i];
-            maquinaSelect.add(option);
-          }
-          hideLoading();
-        }
-      });
-    }
-  }
-</script> -->
-
-<!-- <script>
-  function getFalhas() {
-
-    var falhaSelect = document.getElementById('falha');
-    var maquinaSelect = document.getElementById('maquina');
-    var falhaSelecionado = falhaSelect.value;
-
-    // Limpa as opções atuais do menu de máquinas
-    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
-
-    // Verifica se um setor foi selecionado
-    if (falhaSelecionado !== '') {
-      // Faz uma chamada assíncrona para o servidor Flask
-      showLoading()
-      $.ajax({
-        url: '/falha/' + falhaSelecionado,
-        type: 'GET',
-        success: function(data) {
-          // Atualiza o menu de máquinas com as opções retornadas do servidor
-          for (var i = 0; i < data.length; i++) {
-            var option = document.createElement('option');
-            option.text = data[i];
-            option.value = data[i];
-            maquinaSelect.add(option);
-          }
-          hideLoading();
-        }
-      });
-    }
-  }
-</script> -->
-
-<script>
-  // Selecionar o elemento do botão de fechar
-  var closeButton = document.querySelector(".modal .close");
-
-  // Selecionar o elemento do modal
-  var modal = document.getElementById("modalEnviar");
-
-  // Função para fechar o modal
-  function fecharModal() {
-    modal.style.display = "none";
-  }
-
-  // Configurar evento de clique para fechar o modal quando o botão de fechar for clicado
-  closeButton.addEventListener("click", fecharModal);
-
-  $(document).ready(function() {
-    // Ao abrir a página, exibir o modal
-    $('#modalEnviar').show();
-
-    // Ao clicar no botão "Fechar" do modal
-    $('#modalEnviar').on('click', '.close', function() {
-      // Esconder o modal
-      $('#modalEnviar').hide();
-    });
-
-    // Ao clicar no ícone, exibir o modal novamente
-    $('#infoIcon').on('click', function() {
-      $('#modalEnviar').show();
-    });
-  });
-
-</script>
-
-<script>
-  function getMaquinasPorSetor() {
-    var setorSelecionado = document.getElementById("setor").value;
-    var maquinaSelect = document.getElementById('maquina-select');
-    var equipamentoEmFalha = document.getElementById("equipamento_em_falha");
-    var falhaSelect = document.getElementById("falha");
-    var ferramentas = document.getElementById("ferramentas");
-    var ferramenta = document.getElementById("ferramenta");
-    var codigoequipamento = document.getElementById("codigo_equip");
-    var maquinaSolda = document.getElementById("maquina_de_solda");
-    var maquinaDeSoldaSelect = document.getElementById("solda_maquina");
-    var horaInicial = document.getElementById("hora-inicial");
-    var horaFinal = document.getElementById("hora-final");
-    var dataEte = document.getElementById("data-ete");
-    var pvlye = document.getElementById("pvlye");
-    var paPlus = document.getElementById("pa-plus");
-    var tratamento = document.getElementById("tratamento");
-    var phgua = document.getElementById("tratamento");
+    <!-- Custom styles for this template-->
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
     
-    if (setorSelecionado === "Solda" || setorSelecionado === "Serralheria") {
-      equipamentoEmFalha.style.display = "block";
-
-      if (setorSelecionado === "Serralheria") {
-        var options = falhaSelect.options;
-        for (var i = 0; i < options.length; i++) {
-          var optionValue = options[i].value;
-          if (optionValue === "Monovia" || optionValue === "SO-RB-01 - ROBÔ - KUKA") {
-            options[i].style.display = "none";
-          } else {
-            options[i].style.display = "block";
-          }
-        }
-        // Reset the selected option if it's hidden
-        if (falhaSelect.value === "Monovia" || falhaSelect.value === "SO-RB-01 - ROBÔ - KUKA") {
-          falhaSelect.value = "";
-        }
-      } else {
-        // Reset the display style of all options
-        var options = falhaSelect.options;
-        for (var i = 0; i < options.length; i++) {
-          options[i].style.display = "block";
-        }
-      }
-    } else {
-      equipamentoEmFalha.style.display = "none";
-      ferramenta.style.display = "none";
-      codigoequipamento.style.display = "none";
-      maquinaSolda.style.display = "none";
-      maquinaSelect.style.display = "block";
-      document.getElementById("maquina_de_solda").style.display = "none";
-      // Redefinir o valor selecionado do select de solda_maquina para vazio
-      falhaSelect.value = 'None'
-      ferramentas.value = 'None'
-    }
-
-    var setorSelect = document.getElementById('setor');
-    var maquinaSelect = document.getElementById('maquina');
-    var setorSelecionado = setorSelect.value;
-
-    // Limpa as opções atuais do menu de máquinas
-    maquinaSelect.innerHTML = '<option value="" selected disabled hidden></option>';
-
-    // Verifica se um setor foi selecionado
-    if (setorSelecionado !== '') {
-      if (setorSelecionado === 'Serralheria') {
-        setorSelecionado == 'Solda';
-      }
-      // Faz uma chamada assíncrona para o servidor Flask
-      showLoading()
-      $.ajax({
-        url: '/maquinas/' + setorSelecionado,
-        type: 'GET',
-        success: function(data) {
-          // Atualiza o menu de máquinas com as opções retornadas do servidor
-          for (var i = 0; i < data.length; i++) {
-            var option = document.createElement('option');
-            option.text = data[i];
-            option.value = data[i];
-            maquinaSelect.add(option);
-          }
-          hideLoading();
-        }
-      });
-    }
-  }
-</script>
-
-<script>
-  function verificarCampos() {
-      var setor = document.getElementById("setor").value;
-      var falha = document.getElementById("falha").value;
-      var ferramenta = document.getElementById("ferramentas").value;
-      var codigoEquip = document.getElementById("codigo_equipa");
-  
-      if ((setor === "Solda" || setor === "Serralheria") &&
-          falha === "Ferramentas(esmerilhadeiras; lixadeiras e tochas)" &&
-          ferramenta === "Esmerilhadeira") {
-          codigoEquip.required = true;
-      } else {
-          codigoEquip.required = false;
-      }
-  }
-  
-  document.getElementById("setor").addEventListener("change", verificarCampos);
-  document.getElementById("falha").addEventListener("change", verificarCampos);
-  document.getElementById("ferramentas").addEventListener("change", verificarCampos);
-  </script>
-  
-  
-<!-- Inicialize o Bootstrap Select -->
-<script>
-  $(document).ready(function() {
-    $('#maquina').select2({
-      placeholder: 'Pesquisar máquina',
-      allowClear: true,
-      width: '100%',
-    });
-  });
-
-  $(document).ready(function() {
-    $('#solicitante').select2({
-      placeholder: 'Pesquisar solicitante',
-      allowClear: true,
-      width: '100%',
-    });
-  });
-</script>
-
-<script>
-  var maquinaParadaCheckbox = document.getElementById('maquina-parada');
-  var maquinaParadaHiddenInput = document.querySelector('input[name="maquina-parada"][type="hidden"]');
-
-  maquinaParadaCheckbox.addEventListener('change', function() {
-    if (this.checked) {
-      maquinaParadaHiddenInput.value = "true";
-    } else {
-      maquinaParadaHiddenInput.value = "false";
-    }
-  });
-</script>
-
-<script>
-  function setImpactoProducao() {
-      var setorSelect = document.getElementById("setor");
-      var riscoSelect = document.getElementById("risco");
-
-      if (setorSelect.value === "Administrativo") {
-          riscoSelect.value = "Baixo";
-          riscoSelect.disabled = true; // Desabilita o campo "Risco" para o setor "Administrativo"
-      } else {
-          riscoSelect.disabled = false; // Habilita o campo "Risco" para outros setores
-      }
-  }
-
-  // Adiciona o evento onchange ao campo "Setor"
-  document.getElementById("setor").addEventListener("change", setImpactoProducao);
-
-  // Adiciona o evento onchange ao campo "Risco"
-  document.getElementById("risco").addEventListener("change", function() {
-      var setorSelect = document.getElementById("setor");
-      var riscoSelect = document.getElementById("risco");
-
-      if (setorSelect.value === "Administrativo") {
-          riscoSelect.value = "Baixo";
-      }
-  });
-</script>
-
-<script>
-  function verificarFalha() {
-    var falhaSelecionada = document.getElementById("falha").value;
-    var ferramenta = document.getElementById("ferramenta");
-    var codigoEquip = document.getElementById("codigo_equip");
-    var maquinaSelect = document.getElementById("maquina-select");
-    var maquinaSolda = document.getElementById("maquina_de_solda");
-    var maquinaDropDown = document.getElementById("maquina");
-
-    if (falhaSelecionada === "Ferramentas(esmerilhadeiras; lixadeiras e tochas)") {
-      ferramenta.style.display = "block";
-      codigoEquip.style.display = "block";
-      maquinaSelect.style.display = "none";
-      maquinaSolda.style.display = "none";
-
-      maquinaDropDown.required = false;
-
-    } else if (falhaSelecionada === "SO-RB-01 - ROBÔ - KUKA"){
-      ferramenta.style.display = "none";
-      codigoEquip.style.display = "none";
-      maquinaSelect.style.display = "none";
-      maquinaSolda.style.display = "none";
-
-    } else if (falhaSelecionada === "Máquina de Solda"){
-      ferramenta.style.display = "none";
-      codigoEquip.style.display = "none";
-      maquinaSelect.style.display = "block";
-      maquinaSolda.style.display = "block";
+    <!-- Laebl flutuante -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/label-floating.css') }}">
     
-    } else {
-      ferramenta.style.display = "none";
-      codigoEquip.style.display = "none";
-      maquinaSelect.style.display = "block";
-      maquinaSolda.style.display = "none";
-    }
-  }
-</script>
+    <!-- Dropdown input list -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
 
-{% endblock %}
+</head>
+
+<body class="bg-gradient-primary">
+
+    <div class="container-fluid h-100">
+        
+        <div class="row">
+            <!-- <div class="card mx-auto text-center o-hidden border-0 shadow-lg my-5"> -->
+            <div class="card mx-auto o-hidden border-0 shadow-lg my-5">
+                <form method="POST" action="{{url_for('routes.abrir_os')}}" enctype="multipart/form-data">
+                    <div class="card-header text-center">
+                        <h1 class="h4 text-gray-900">Abertura de OS</h1>
+                        <a href="#" data-toggle="modal" data-target="#informativo">
+                            <i class="fas fa-question-circle"></i>
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-5">
+                            <h6 class="m-0 font-weight-bold text-primary mb-4">Informações gerais</h6>
+                            <hr>
+                            <div class="text-center">
+                                <!-- Setor -->
+                                <div class="row mb-4">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="dropdown" id="dropdown-setor">
+                                            <div class="label-float">
+                                                <input type="text" class="dropdown-input form-control" name="inputSetor" id="inputSetor" placeholder=" " required>
+                                                <label>Setor</label>
+                                            </div>
+                                            <ul class="dropdown-list" id="listSetor">
+                                                <li>Administrativo</li>
+                                                <li>Almoxarifado</li>
+                                                <li>Corte e estamparia</li>
+                                                <li>Expedição</li>
+                                                <li>Equipamentos de Movimentação</li>
+                                                <li>Solda</li>
+                                                <li>Montagem</li>
+                                                <li>Pintura</li>
+                                                <li>Carpintaria</li>
+                                                <li>Usinagem</li>  
+                                                <li>Serra</li>
+                                                <li>Serralheria</li>
+                                                <li>Manutenção</li>
+                                                <li>Forjaria</li>
+                                                <li>Utilidades</li>
+                                                <li>Qualidade</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Solicitante-->
+                                <div class="row mb-4">
+                                    <div class="col-sm-12">
+                                        <div class="dropdown" id="dropdown-Solicitante">
+                                            <div class="label-float">
+                                                <input type="text" class="dropdown-input form-control" name="inputSolicitante" id="inputSolicitante" placeholder=" " required>
+                                                <label>Solicitante</label>
+                                            </div>
+                                            <ul class="dropdown-list" id="listSolicitante">
+                                                {% for solicitante in solicitantes %}
+                                                    <li>{{solicitante[0]}}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h6 class="m-0 font-weight-bold text-primary mb-4">Especificações</h6>
+                            <hr>
+                            <div class="text-center">
+                                <!-- Equipamento em falha se o setor for Solda -->
+                                <div class="row mb-4" id="campoEquipamentoEmFalha" style="display: none;">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="dropdown" id="dropdown-EquipamentoFalha">
+                                            <div class="label-float">
+                                                <input type="text" class="dropdown-input form-control" name="inputEquipamentoFalha" id="inputEquipamentoFalha" placeholder=" ">
+                                                <label>Equipamento em falha</label>
+                                            </div>
+                                            <ul class="dropdown-list" id="listEquipamentoFalha">
+                                                <li>Máquina de Solda</li>
+                                                <li>Monovia</li>
+                                                <li>Ferramentas</li>
+                                                <li>SO-RB-01 - ROBÔ - KUKA</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Ferramenta -->
+                                <div class="row mb-4" id="campoFerramenta" style="display: none;">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="dropdown" id="dropdown-Ferramenta">
+                                            <div class="label-float">
+                                                <input type="text" class="dropdown-input form-control" name="inputFerramenta" id="inputFerramenta" placeholder=" ">
+                                                <label>Qual ferramenta?</label>
+                                            </div>
+                                            <ul class="dropdown-list" id="listFerramenta">
+                                                <li>Esmerilhadeira</li>
+                                                <li>Tocha</li>
+                                            </ul>
+                                        </div>
+                                    </div> 
+                                </div>
+                                <!-- Máquina ou Local -->
+                                <div class="row mb-4" id="campoMaquinaLocal">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="dropdown" id="dropdown-MaquinaLocal">
+                                            <div class="label-float">
+                                                <input type="text" class="dropdown-input form-control" name="inputMaquinaLocal" id="inputMaquinaLocal" placeholder=" " required>
+                                                <label>Máquina ou local</label>
+                                            </div>
+                                            <ul class="dropdown-list" id="listMaquinaLocal">
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Setor da máquina de solda se o equipamento for máquina de solda -->
+                                <div class="row mb-4" id="campoSetorMaquinaSolda" style="display: none;">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="dropdown" id="dropdown-campoESetorMaquinaSolda">
+                                            <div class="label-float">
+                                                <input type="text" class="dropdown-input form-control" name="inputcampoESetorMaquinaSolda" id="inputcampoESetorMaquinaSolda" placeholder=" ">
+                                                <label>Setor da máquina de solda</label>
+                                            </div>
+                                            <ul class="dropdown-list" id="listcampoESetorMaquinaSolda">
+                                                <li>Laterais</li>
+                                                <li>Eixos</li>
+                                                <li>Içamentos</li>
+                                                <li>Plataforma "Esqueleto"</li>
+                                                <li>Chassi</li>
+                                                <li>Tanque</li>
+                                                <li>Caçamba</li>
+                                                <li>Serralheria</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Ferramenta se o equipamento for ferramentas -->
+                                <div class="row mb-4" id="campoCodigoFerramenta" style="display: none;">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="dropdown" id="dropdown-campocampoCodigoFerramenta">
+                                            <div class="label-float">
+                                                <input type="text" class="dropdown-input form-control" name="inputCodigoFerramenta" id="inputCodigoFerramenta" placeholder=" ">
+                                                <label>Código da ferramenta</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small id="emailHelp" class="form-text text-muted">
+                                        Onde encontrar o código da ferramenta.
+                                        <a href="#" data-toggle="modal" data-target="#encontrarCodigoFerramenta">
+                                            <i class="fas fa-question-circle"></i>
+                                        </a>
+                                    </small>
+                                </div>                            
+                                <!-- Descrição -->
+                                <div class="row mb-4">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="dropdown">
+                                            <div class="label-float-textarea">
+                                                <textarea class="dropdown-input form-control" name="problemaAparente" id="problemaAparente" cols="20" rows="3" placeholder=" " required></textarea>
+                                                <label>Descrição</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Máquina parada e impacto na producao -->
+                                <div class="row mb-4">
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="dropdown" id="checkbox-maquinaParada">
+                                            <div class="label-float">
+                                                <input type="checkbox" id="checkboxMaquinaParada" name="checkboxMaquinaParada" class="dropdown-input form-control" placeholder=" ">
+                                                <label>Máquina parada?</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="dropdown" id="checkbox-maquinaParada">
+                                            <div class="label-float">
+                                                <input type="text" name="inputImpacto" class="dropdown-input form-control" id="inputImpacto" placeholder=" " required>
+                                                <label>Impacto na produção</label>
+                                            </div>
+                                            <ul class="dropdown-list" id="listaImpacto">
+                                                <li>Alto</li>
+                                                <li>Baixo</li>
+                                                <li>Médio</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                            <h6 class="m-0 font-weight-bold text-primary mb-4">Anexos</h6>
+                            <hr>
+                            <div class="text-center">
+                                <!-- Foto -->
+                                <div class="row mb-4">
+                                    <div class="col-sm-12 mb-4">
+                                        <div class="label-float">
+                                            <input class="form-control" type="file" name="imagens" id="imagens" placeholder=" " multiple accept="image/*">
+                                            <!-- <input class="file-upload__input" type="file" name="imagens" id="imagens" multiple accept="image/*"> -->
+                                            <label>Foto</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Vídeo -->
+                                <div class="row">
+                                    <div class="col-sm-12 mb-4">
+                                        <div class="label-float">
+                                            <input class="form-control" type="file" name="video" id="video" placeholder=" " accept="video/*">
+                                            <label>Vídeo</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="submit" class="btn btn-success">Enviar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal com imagem mostrando onde encontrar o código na ferramenta -->
+    <div class="modal fade" id="encontrarCodigoFerramenta" tabindex="-1" role="dialog" aria-labelledby="encontrarCodigoFerramentaLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="encontrarCodigoFerramentalLabel">Onde encontrar o código da ferramenta</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <img class="card-img-top" src="static/img/maquinas.png" alt="Foto">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="informativo" tabindex="-1" role="dialog" aria-labelledby="informativoLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="informativoLabel">Informação importante!</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Caso a máquina seja <strong>Paleteiras elétricas</strong>, <strong>Empilhadeiras</strong> ou <strong>Pontes Rolantes</strong>, 
+                    a abertura de O.S deve ser feita em "Equipamentos de Movimentação".</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="static/vendor/jquery/jquery.min.js"></script>
+    <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="static/js/sb-admin-2.min.js"></script>
+
+    <!-- Script para inputlist -->    
+    <script>
+        
+        function configurarDropdown(inputId, listId) {
+            var inputDropdown = document.getElementById(inputId);
+            var listaDropdown = document.getElementById(listId);
+
+            inputDropdown.addEventListener('focus', function() {
+                if (inputDropdown.readOnly) {
+                    listaDropdown.style.display = 'none';
+                } else {
+                    listaDropdown.style.display = 'block';
+                }
+                
+            });
+
+            inputDropdown.addEventListener('blur', function() {
+                // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
+                setTimeout(function() {
+                    listaDropdown.style.display = 'none';
+                }, 200);
+            });
+
+            listaDropdown.addEventListener('click', function(event) {
+                if (event.target.tagName === 'LI') {
+                    inputDropdown.value = event.target.textContent;
+                    
+                    // if (event.target.textContent === 'Solda') {
+                    //     document.getElementById('campoEquipamentoEmFalha').style.display = 'block';
+                    //     document.getElementById('campoMaquinaLocal').style.display = 'none';
+                    // } else {
+                    //     document.getElementById('campoMaquinaLocal').style.display = 'block';
+                    //     document.getElementById('campoEquipamentoEmFalha').style.display = 'none';
+                    // }
+
+                    // if (event.target.textContent === 'Máquina de Solda') {
+                    //     document.getElementById('campoSetorMaquinaSolda').style.display = 'block';
+                    //     document.getElementById('campoMaquinaLocal').style.display = 'block';
+                    // } else {
+                    //     // document.getElementById('campoSetorMaquinaSolda').style.display = 'block';
+                    // }
+
+                    // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+                    setTimeout(function() {
+                        listaDropdown.style.display = 'none';
+                    }, 100);
+                }
+            });
+
+            inputDropdown.addEventListener('input', function() {
+                var input = this.value.trim().toLowerCase();
+                var itens = listaDropdown.getElementsByTagName('li');
+
+                for (var i = 0; i < itens.length; i++) {
+                    var textoItem = itens[i].textContent.toLowerCase();
+                    var itemVisivel = textoItem.indexOf(input) > -1;
+                    itens[i].style.display = itemVisivel ? 'block' : 'none';
+                }
+
+                listaDropdown.style.display = 'block';
+            });
+        }
+
+        configurarDropdown('inputSetor', 'listSetor');
+        configurarDropdown('inputSolicitante', 'listSolicitante');
+        configurarDropdown('inputMaquinaLocal', 'listMaquinaLocal');
+        configurarDropdown('inputEquipamentoFalha', 'listEquipamentoFalha');
+        configurarDropdown('inputcampoESetorMaquinaSolda', 'listcampoESetorMaquinaSolda');
+        configurarDropdown('inputFerramenta', 'listFerramenta');
+        configurarDropdown('inputImpacto', 'listaImpacto');
+
+    </script>
+
+    <!-- Script para mostrar maquinas de acordo com o setor selecionado -->
+    <script>
+        var inputDropdown = document.getElementById('inputSetor');
+        var listaDropdown = document.getElementById('listSetor');
+        var listaMaquinasLocais = document.getElementById('listMaquinaLocal');
+        var inputMaquinasLocais = document.getElementById('inputMaquinaLocal');
+        
+        var inputEquipamentoFalha= document.getElementById('inputEquipamentoFalha');
+        
+        listaDropdown.addEventListener('click', function(event) {
+            if (event.target.tagName === 'LI') {
+                inputDropdown.value = event.target.textContent;
+                                
+                $.ajax({
+                    url: '/maquinas/' + event.target.textContent,
+                    type: 'GET',
+                    success: function(data) {
+                        // Atualiza o menu de máquinas com as opções retornadas do servidor
+                        console.log(data);
+                        // Adiciona os itens à lista
+
+                        listaMaquinasLocais.innerHTML = '';
+                        inputMaquinasLocais.value = '';
+                        inputEquipamentoFalha.value = ''
+
+                        data.forEach(function(item) {
+                            var li = document.createElement('li');
+                            li.textContent = item;
+                            listaMaquinasLocais.appendChild(li);
+                        });
+                    }
+                });
+
+            
+                // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+                setTimeout(function() {
+                    listaDropdown.style.display = 'none';
+                }, 100);
+            }
+        });
+
+    </script>
+
+    <!-- Script para liberar campos caso a setor seja solda -->
+    <script>
+
+        var listaDropdown = document.getElementById('listSetor');
+        var inputDropdown = document.getElementById('inputSetor');
+
+        listaDropdown.addEventListener('click', function(event) {
+            if (event.target.tagName === 'LI') {
+                inputDropdown.value = event.target.textContent;
+                
+                if (event.target.textContent === 'Solda') {
+                    document.getElementById('campoEquipamentoEmFalha').style.display = 'block';
+                    document.getElementById('campoMaquinaLocal').style.display = 'none';
+                    document.getElementById('inputEquipamentoFalha').required = true;
+                    // document.getElementById('campoFerramenta').style.display = 'block';
+                    document.getElementById('campoSetorMaquinaSolda').style.display = 'none';
+                    
+                } else {
+                    document.getElementById('campoMaquinaLocal').style.display = 'block';
+                    document.getElementById('campoEquipamentoEmFalha').style.display = 'none';
+                    document.getElementById('inputEquipamentoFalha').required = false;
+                    document.getElementById('campoEquipamentoEmFalha').style.display = 'none';
+                    document.getElementById('campoSetorMaquinaSolda').style.display = 'none';
+                    document.getElementById('campoFerramenta').style.display = 'none';
+                }
+                
+                if (event.target.textContent === 'Administrativo') {
+                    document.getElementById('inputImpacto').value = 'Baixo';
+                    document.getElementById('inputImpacto').readOnly = true;
+                    document.getElementById('checkboxMaquinaParada').disabled = true;
+                    document.getElementById('listaImpacto').required = true;
+                   
+                } else {
+                    document.getElementById('inputImpacto').value = '';
+                    document.getElementById('inputImpacto').readOnly = false;
+                    document.getElementById('checkboxMaquinaParada').disabled = false;
+                    document.getElementById('listaImpacto').required = false;
+                }
+
+                console.log(event.target.textContent);
+
+                // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+                setTimeout(function() {
+                    listaDropdown.style.display = 'none';
+                }, 100);
+            }
+        });
+
+    </script>
+
+    <!-- Script para liberar campos do equipamento em falha -->
+    <script>
+
+        var listaDropdown = document.getElementById('listEquipamentoFalha');
+        var inputDropdown = document.getElementById('inputEquipamentoFalha');
+
+        // var inputEquipamentoFalha = document.getElementById("inputEquipamentoFalha");
+        var inputFerramenta = document.getElementById('inputFerramenta');
+        var inputcampoESetorMaquinaSolda = document.getElementById('inputcampoESetorMaquinaSolda');
+        var inputCodigoFerramenta = document.getElementById('inputCodigoFerramenta');
+        var inputMaquinaLocal = document.getElementById('inputMaquinaLocal');
+
+        listaDropdown.addEventListener('click', function(event) {
+            if (event.target.tagName === 'LI') {
+                inputDropdown.value = event.target.textContent;
+
+                // inputEquipamentoFalha.value = '';
+                inputFerramenta.value = '';
+                inputcampoESetorMaquinaSolda.value = '';
+                inputCodigoFerramenta.value = '';
+                inputMaquinaLocal.value = '';
+
+                if (event.target.textContent === 'Máquina de Solda') {
+                    document.getElementById('campoSetorMaquinaSolda').style.display = 'block';
+                    document.getElementById('campoMaquinaLocal').style.display = 'block';
+                    document.getElementById('inputcampoESetorMaquinaSolda').required = true;
+                } else {
+                    document.getElementById('campoMaquinaLocal').style.display = 'none';
+                    document.getElementById('campoSetorMaquinaSolda').style.display = 'none';
+                    document.getElementById('inputcampoESetorMaquinaSolda').required = false;
+                    
+                }
+
+                if (event.target.textContent === 'Ferramentas') {
+                    document.getElementById('campoCodigoFerramenta').style.display = 'block';
+                    document.getElementById('campoFerramenta').style.display = 'block';
+                    document.getElementById('inputMaquinaLocal').required = false;
+                    document.getElementById('inputFerramenta').required = true;
+                    document.getElementById('inputCodigoFerramenta').required = true;
+                    
+                } else {
+                    document.getElementById('campoCodigoFerramenta').style.display = 'none';
+                    document.getElementById('campoFerramenta').style.display = 'none';
+                    document.getElementById('inputMaquinaLocal').required = true;
+                    document.getElementById('inputFerramenta').required = false;
+                    document.getElementById('inputCodigoFerramenta').required = false;
+
+                }
+
+                if (event.target.textContent === 'Monovia') {
+                    document.getElementById('campoMaquinaLocal').style.display = 'block';
+                    document.getElementById('inputMaquinaLocal').required = false;
+                } else {
+                    document.getElementById('inputMaquinaLocal').required = true;
+                    // document.getElementById('campoMaquinaLocal').style.display = 'none';
+                }
+
+                console.log(event.target.textContent);
+
+                // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+                setTimeout(function() {
+                    listaDropdown.style.display = 'none';
+                }, 100);
+            }
+        });
+
+    </script>
+
+    <!-- Modal de informativo para exibir assim que carregar a página -->
+    <script>
+        $(document).ready(function() {
+            $('#informativo').modal('show');
+        });
+    </script>
+
+
+</body>
+
+</html>
