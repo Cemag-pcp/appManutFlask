@@ -83,7 +83,7 @@
             <div class="form-group">
               <label for="cadastrar-preventiva">Preventiva</label>
               <label class="switch">
-                <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva" onchange="toggleCampos()">
+                <input type="checkbox" name="cadastrar-preventiva" id="cadastrar-preventiva">
                 <span class="slider round"></span>
               </label>
             </div>
@@ -122,28 +122,20 @@
 </div>
 
 <script>
+  
   function toggleCampos() {
-    var cadastrarPreventivaCheckbox = document.getElementById("cadastrar-preventiva");
-    var criticidadeSelect = document.getElementById("criticidade");
-    var manutInicialInput = document.getElementById("manut_inicial");
-    var periodicidadeSelect = document.getElementById("periodicidade");
-  
-    if (cadastrarPreventivaCheckbox.checked) {
-      criticidadeSelect.removeAttribute("disabled");
-      manutInicialInput.removeAttribute("disabled");
-      periodicidadeSelect.removeAttribute("disabled");
-    } else {
-      criticidadeSelect.setAttribute("disabled", "disabled");
-      manutInicialInput.setAttribute("disabled", "disabled");
-      periodicidadeSelect.setAttribute("disabled", "disabled");
-    }
+    console.log(checkboxHabilitarPreventiva);
   }
-  
+
+  document.getElementById('cadastrar-preventiva').addEventListener('change', function() {
+    var checkboxHabilitarPreventiva = $('#cadastrar-preventiva').is(':checked');
+  });
+
   // Chamada inicial para garantir que os campos estejam corretamente habilitados/desabilitados ao carregar a página
   toggleCampos();
 </script>
 
-<script>
+<!-- <script>
   var maquinaParadaCheckbox = document.getElementById('cadastrar-preventiva');
   var maquinaParadaHiddenInput = document.querySelector('input[name="cadastrar-preventiva"][type="hidden"]');
 
@@ -154,6 +146,6 @@
       maquinaParadaHiddenInput.value = "false";
     }
   });
-</script>
+</script> -->
 
 {% endblock %}

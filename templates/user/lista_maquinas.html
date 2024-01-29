@@ -1,11 +1,24 @@
 {% extends "user/layout.html" %}
+
+{% block links %}
+
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/mensagem.css') }}">
+
+{% endblock %}
+
 {% block containerFluid %}
 
 <div class="container-fluid">
     <div id="seu-container-de-alertas"></div>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Lista de Máquinas Cadastradas</h6>
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h6 class="m-0 font-weight-bold text-primary">Tabela com máquinas cadastradas</h6>
+                <a id="buttonCadastrarMaquina" href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                    <i class="fas fa-plus fa-sm text-white-50"></i>
+                    Cadastrar máquina
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -348,9 +361,102 @@
     </div>
 </div>
 
+<!-- Modal de cadastro de máquina -->
+<div class="modal fade" data-backdrop="static" id="modalCadastrarMaquina" tabindex="-1" role="dialog" aria-labelledby="modalCadastrarMaquinaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cadastrarMaquina">Cadastrar máquina</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label for="labelCodigoCadastrarMaquina">Código:</label>
+                        <input type="text" name="inputCodigoCadastrarMaquina" id="inputCodigoCadastrarMaquina" value="" class="form-control">    
+                        <small id="helperSucessInputCodigoCadastrarMaquina" class="form-text text-muted" style="display: none;">
+                            Código disponível!
+                            <i style="color: green;" class="fas fa-check fa-sm"></i>
+                        </small>
+                        <small  id="helperDangerInputCodigoCadastrarMaquina" class="form-text text-muted" style="display: none;">
+                            Código já existe!
+                            <i style="color: red;" class="fas fa-ban fa-sm"></i>
+                        </small>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="labelTombamentoCadastrarMaquina">Tombamento:</label>
+                        <input id="inputTombamentoCadastrarMaquina" type="text" name="inputTombamentoCadastrarMaquina" value="" class="form-control">    
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label for="labelDescricaoCadastrarMaquina">Descrição:</label>
+                        <input type="text" name="inputDescricaoCadastrarMaquina" id="inputDescricaoCadastrarMaquina" value="" class="form-control">    
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="labelApelidoCadastrarMaquina">Apelido:</label>
+                        <input id="inputApelidoCadastrarMaquina" type="text" name="inputApelidoCadastrarMaquina" value="" class="form-control">    
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-sm-6 mb-2">
+                        <label for="labelSetorCadastrarMaquina">Setor:</label>
+                        <select class="form-control" id="selectSetorCadastrarMaquina" name="selectSetorCadastrarMaquina">
+                            <option value="" selected disabled hidden></option>  
+                            <option>Administrativo</option>
+                            <option>Corte e estamparia</option>
+                            <option>Solda</option>
+                            <option>Montagem</option>
+                            <option>Pintura</option>
+                            <option>Carpintaria</option>
+                            <option>Almoxarifado</option>
+                            <option>Usinagem</option>
+                            <option>Manutenção</option>
+                            <option>Forjaria</option>
+                            <option>Serra</option>
+                            <option>Corte</option>
+                            <option>Serralheria</option>
+                            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                            <option>Qualidade</option>
+                        </select>
+                    </div>
+                </div>
+                <h6 class="m-0 font-weight-bold text-primary">Preventiva</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="habilitar-preventiva">Habilitar planejamento</label>
+                        <input class="form-control" type="checkbox" name="habilitar-preventiva" id="habilitar-preventiva" onchange="toggleCampos()">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="criticidade">Criticidade</label>
+                        <select class="form-control" name="criticidade" id="criticidade" disabled>
+                            <option>A</option>
+                            <option>B</option>
+                            <option>C</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cadastrar_maquina" type="submit" class="btn btn-primary btn-block">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mensagem"></div>
+
 {% endblock %}
 
 {% block scripts %}
+
+<!-- Script de mensagem -->
+<script src="static/js/mensagem.js"></script>
 
 <!-- Bootstrap core JavaScript-->
 <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -368,7 +474,6 @@
 
 
 <!-- Exibição dos Modais -->
-
 <script>
     function modalDocumento(codigo_maquina) {    
         
@@ -762,27 +867,26 @@
 
 <script>
     function toggleCampos() {
-      var cadastrarPreventivaCheckbox = document.getElementById("cadastrar-preventiva");
-      var criticidadeSelect = document.getElementById("criticidade");
-      var manutInicialInput = document.getElementById("manut_inicial");
-      var periodicidadeSelect = document.getElementById("periodicidade");
-    
-      if (cadastrarPreventivaCheckbox.checked) {
-        criticidadeSelect.removeAttribute("disabled");
-        manutInicialInput.removeAttribute("disabled");
-        periodicidadeSelect.removeAttribute("disabled");
-      } else {
-        criticidadeSelect.setAttribute("disabled", "disabled");
-        manutInicialInput.setAttribute("disabled", "disabled");
-        periodicidadeSelect.setAttribute("disabled", "disabled");
-      }
+      
+        var checkboxHabilitarPreventiva = $('#habilitar-preventiva').is(':checked') ;
+
+        if (checkboxHabilitarPreventiva === true) {
+            document.getElementById('criticidade').disabled = false;
+        }
+        else {
+            document.getElementById('criticidade').disabled = true;
+        }
+
+        return checkboxHabilitarPreventiva;
+
     }
     
     // Chamada inicial para garantir que os campos estejam corretamente habilitados/desabilitados ao carregar a página
     toggleCampos();
+
 </script>
   
-<script>
+<!-- <script>
     var maquinaParadaCheckbox = document.getElementById('cadastrar-preventiva');
     var maquinaParadaHiddenInput = document.querySelector('input[name="cadastrar-preventiva"][type="hidden"]');
   
@@ -793,7 +897,7 @@
         maquinaParadaHiddenInput.value = "false";
       }
     });
-</script>
+</script> -->
 
 <script>
 
@@ -941,5 +1045,123 @@
     });
 
 </script>
+
+<!-- Modal para cadastrar máquina nova -->
+<script>
+
+    document.getElementById('buttonCadastrarMaquina').addEventListener('click', function(e) {
+
+        $('#modalCadastrarMaquina').modal('show');
+
+    });
+
+    // Botão de cadastrar
+
+    function enviarCadastroMaquina(codigo_diponivel) {
+
+        if (codigo_diponivel) {
+
+            const codigo = document.getElementById('inputCodigoCadastrarMaquina').value;
+            
+            if (codigo.trim() === '') {
+                exibirMensagem('aviso','Preencha o campo de código!')
+                return;
+            }
+
+
+            data = {
+                'codigo': document.getElementById('inputCodigoCadastrarMaquina').value,
+                'tombamento': document.getElementById('inputTombamentoCadastrarMaquina').value,
+                'descricao': document.getElementById('inputDescricaoCadastrarMaquina').value,
+                'apelido': document.getElementById('inputApelidoCadastrarMaquina').value,
+                'setor': document.getElementById('selectSetorCadastrarMaquina').value,
+                'preventiva': toggleCampos(),
+                'criticidade': document.getElementById('criticidade').value
+            };
+            
+            
+            $.ajax({
+                type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+                url: '/cadastrar-maquina',  // URL do backend onde irá processar a exclusão da máquina
+                data: JSON.stringify(data),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+                contentType:'application/json',
+                success: function() {
+                    exibirMensagem('sucesso','Máquina cadastrada!')
+                    $('#modalCadastrarMaquina').modal('hide');
+                    
+                    $('#inputCodigoCadastrarMaquina').val('');
+                    $('#inputTombamentoCadastrarMaquina').val('');
+                    $('#inputDescricaoCadastrarMaquina').val('');
+                    $('#inputApelidoCadastrarMaquina').val('');
+                    $('#selectSetorCadastrarMaquina').val('');
+
+                    $('#helperDangerInputCodigoCadastrarMaquina').hide()
+                    $('#helperSucessInputCodigoCadastrarMaquina').hide()
+
+                },
+                error: function(error) {
+                    // Caso ocorra algum erro na requisição, você pode tratar aqui
+                    console.log('Erro na requisição:', error);
+                }
+
+                
+            });
+        
+        } else {
+            console.log(codigo_diponivel)
+        }
+
+
+    };
+
+</script>
+
+<!-- Verificador de código existente -->
+<script>
+
+    document.getElementById('inputCodigoCadastrarMaquina').addEventListener('input', function() {
+        var codigo = this.value;
+
+        const button = document.getElementById('cadastrar_maquina');
+
+        $.ajax({
+            type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
+            url: '/verificar-codigo-existente',  // URL do backend onde irá processar a exclusão da máquina
+            data: JSON.stringify(codigo),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
+            contentType:'application/json',
+            success: function(response) {
+                console.log(response);
+
+                if (codigo === '') {
+                    $('#helperDangerInputCodigoCadastrarMaquina').hide()
+                    $('#helperSucessInputCodigoCadastrarMaquina').hide()
+
+                } else {
+                    if (response === 'Código disponível') {
+                        $('#helperSucessInputCodigoCadastrarMaquina').show()
+                        $('#helperDangerInputCodigoCadastrarMaquina').hide()
+                    } else {
+                        $('#helperDangerInputCodigoCadastrarMaquina').show()
+                        $('#helperSucessInputCodigoCadastrarMaquina').hide()
+                    }
+                }
+               
+            },
+            error: function(error) {
+                // Caso ocorra algum erro na requisição, você pode tratar aqui
+                console.log('Erro na requisição:', error);
+            }
+            
+        });
+
+        document.getElementById('cadastrar_maquina').addEventListener('click', function() {
+            enviarCadastroMaquina(codigo_diponivel); 
+        });
+
+        console.log(codigo)
+    });
+
+</script>
+
 
 {% endblock %}

@@ -823,18 +823,16 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['fim'] = df_timeline['fim'].astype(str)
 
     df_timeline = df_timeline.dropna()
-
     
-    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
     # Crie uma nova coluna 'mes' usando o atributo .dt.month
-    df_timeline['mes'] = df_timeline['datafim'].dt.month
+    df_timeline['mes'] = df_timeline['fim'].dt.month
 
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     df_timeline['now'] = datetime.now()
     df_timeline['mes_hoje'] = datetime.now().month
-
-    df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(lista_meses)
+    # df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(lista_meses)
 
     try:
         df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
@@ -951,9 +949,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline = df_timeline.dropna()
 
-    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
     # Crie uma nova coluna 'mes' usando o atributo .dt.month
-    df_timeline['mes'] = df_timeline['datafim'].dt.month
+    df_timeline['mes'] = df_timeline['fim'].dt.month
 
     df_timeline['now'] = datetime.now()
     df_timeline['mes_hoje'] = datetime.now().month
@@ -2050,146 +2048,6 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     funcionarios = buscar_funcionarios()
 
     return render_template('user/index.html', funcionarios=funcionarios, list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
-
-
-# @routes_bp.route('/add_student', methods=['POST', 'GET'])
-# def add_student():  # Criar ordem de serviço
-
-#     """
-#     Rota para criar ordem de serviço
-#     """
-
-#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-#                             password=DB_PASS, host=DB_HOST)
-
-#     if request.method == 'POST':
-
-#         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-#         setor = request.form.get('setor')
-#         maquina = request.form.get('maquina')
-#         problema = request.form.get('problema')
-#         solicitante = request.form.get('solicitante')
-#         dataAbertura = datetime.now()
-#         equipamento_em_falha = request.form.get('falha')
-#         setor_maquina_solda = request.form.get('solda_maquina')
-#         qual_ferramenta = request.form.get('ferramenta')
-#         cod_equipamento = request.form.get('codigo_equip')
-
-#         # if equipamento_em_falha != 'Máquina de Solda':
-#         #     setor_maquina_solda = ''
-#         # if equipamento_em_falha != 'Ferramentas(esmerilhadeiras; lixadeiras e tochas)':
-#         #     qual_ferramenta = ''
-#         #     cod_equipamento = ''
-#         # if equipamento_em_falha == 'SO-RB-01 - ROBÔ - KUKA':
-#         #     maquina = ''
-
-#         print(setor)
-#         # print(maquina)
-#         print(qual_ferramenta)
-#         print(equipamento_em_falha)
-#         print(setor_maquina_solda)
-#         print(cod_equipamento)
-
-#         n_ordem = 0
-#         status = 'Em espera'
-
-#         try:
-#             risco = request.form['risco']
-#         except:
-#             risco = 'Baixo'
-
-#         try:
-#             maquina_parada = request.form['maquina-parada']
-
-#         except:
-#             maquina_parada = 'false'
-
-#         if maquina != None:
-#             maquina = maquina.split(" - ")
-#             maquina = maquina[0]
-
-#         # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#         # cur.execute("SELECT MAX(id) FROM tb_ordens")
-#         # maior_valor = cur.fetchone()[0]
-
-#         # try:
-#         #     maior_valor += 1
-#         # except:
-#         #     maior_valor = 0
-
-#         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#         cur.execute("SELECT MAX(id_ordem) FROM tb_ordens")
-#         ultima_os = cur.fetchone()[0]
-
-#         try:
-#             ultima_os = ultima_os+1
-#         except:
-#             ultima_os = 0
-
-#         print(maquina)
-
-#         cur.execute("INSERT INTO tb_ordens (setor, maquina, risco,status, problemaaparente, id_ordem, n_ordem ,dataabertura, maquina_parada,solicitante,equipamento_em_falha,setor_maquina_solda,qual_ferramenta, cod_equipamento) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-#                     (setor, maquina, risco, status, problema, ultima_os, n_ordem, dataAbertura, maquina_parada, solicitante, equipamento_em_falha, setor_maquina_solda, qual_ferramenta, cod_equipamento))
-
-#         imagens = request.files.getlist('imagens')
-
-#         print(len(imagens))
-
-#         if len(imagens) > 0:
-#             for imagem in imagens:
-#                 if imagem.filename != '':
-#                     # Ler os dados da imagem
-#                     imagem_data = imagem.read()
-
-#                     # Abrir a imagem usando a biblioteca Pillow
-#                     image = Image.open(io.BytesIO(imagem_data))
-
-#                     # Converter a imagem para o modo RGB, se necessário
-#                     if image.mode != 'RGB':
-#                         image = image.convert('RGB')
-
-#                     # Redimensionar a imagem para um tamanho desejado
-#                     max_size = (800, 600)
-#                     image.thumbnail(max_size)
-
-#                     # Salvar a imagem com uma qualidade reduzida
-#                     buffer = io.BytesIO()
-#                     image.save(buffer, format='JPEG', quality=80)
-#                     imagem_data_comprimida = buffer.getvalue()
-
-#                     cur = conn.cursor(
-#                         cursor_factory=psycopg2.extras.DictCursor)
-#                     cur.execute("INSERT INTO tb_imagens (id_ordem, imagem) VALUES (%s,%s)",
-#                                 (ultima_os, imagem_data_comprimida))
-#                     conn.commit()
-
-#             flash('Imagens adicionadas com sucesso!')
-
-#         else:
-#             print('sem imagem')
-
-#         # O input de tipo 'file' é chamado 'imagens', mas agora aceita vídeos também
-#         videos = request.files.getlist('video')
-
-#         for video in videos:
-#             if video.filename != '':
-#                 # Verificar a extensão do arquivo (opcional)
-#                 if allowed_file(video.filename):
-#                     filename = secure_filename(video.filename)
-#                     # video.save(os.path.join(routes_bp.config['UPLOAD_FOLDER'], filename))
-
-#                     # Ler os dados do vídeo como um objeto bytes
-#                     video_data = video.read()
-
-#                     # Inserir os dados do vídeo no banco de dados
-#                     cur.execute(
-#                         "INSERT INTO tb_videos_ordem_servico (id_ordem, video) VALUES (%s, %s)", (ultima_os, video_data))
-#                     conn.commit()
-
-#         conn.commit()
-#         flash('OS de número {} aberta com sucesso!'.format(ultima_os))
-#         return redirect(url_for('routes.open_os'))
 
 def proxima_os():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -3299,12 +3157,6 @@ def grafico():  # Dashboard
             # Usar o construtor do datetime.date
             mes_inicial = datetime.date(datetime.strptime(mes_inicial_str, '%Y-%m-%d'))
             hoje = datetime.now().date()
-            # dia_semana_hoje = hoje.weekday()
-            # if dia_semana_hoje == 6:  # 5 representa sábado
-            #     mes_final = datetime.now().date() - timedelta(days=2)
-            # elif dia_semana_hoje != 0:  # 6 representa domingo
-            #     mes_final = datetime.now().date() - timedelta(days=1)
-            # else:
             mes_final = hoje + timedelta(days=1)
         else:
             mes_inicial, mes_final = mes.split(' - ')
@@ -3412,8 +3264,6 @@ def grafico():  # Dashboard
 
         if setor_selecionado:
             query_mtbf += f" AND t1.setor in ({setor_selecionado})"
-        # if area_manutencao:
-        #     query_mtbf += f" AND area_manutencao = '{area_manutencao}'"
         if mes_inicial:
             query_mtbf += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
         if maquinas_importantes:
@@ -3457,8 +3307,6 @@ def grafico():  # Dashboard
         query_mttr += " AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS') as t3 INNER JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem and t3.n_ordem = t4.n_ordem;;"
 
         print(query_mttr)
-
-        """Finalizando MTTR por máquina e setor"""
 
         query_disponibilidade = ("""
             SELECT t1.*, t2.parada3
@@ -3505,7 +3353,6 @@ def grafico():  # Dashboard
         WHERE 1=1
         """)
         
-
         if setor_selecionado:
             query_horas_trabalhada_area += f" AND setor in ({setor_selecionado})"
         if mes_inicial:
@@ -3566,22 +3413,6 @@ def grafico():  # Dashboard
         cur.execute(
             'SELECT DISTINCT EXTRACT(MONTH FROM ultima_atualizacao) AS numero_mes FROM tb_ordens;')
 
-        # if mes == 0 or mes[0] == '':
-
-        #     mes = datetime.now().month
-        #     mes = list(range(1, mes + 1))
-        #     todos_meses = 'Todos'
-
-        # mes = list(map(int, mes))
-
-
-        print(mes)
-        # todos_presentes = all(elemento in meses_validos for elemento in mes)
-
-        # if not todos_presentes:
-        #     flash("Escolha um mês válido")
-        #     return redirect(request.url)  # Redirecionar de volta para a página para exibir a mensagem flash
-
         """ Criando cards """
 
         resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado,
@@ -3630,8 +3461,6 @@ def grafico():  # Dashboard
     mes = datetime.now().month
     mes = list(range(1, mes + 1))
 
-    print(mes)
-
     boleano_historico = True
     setor_selecionado = None
 
@@ -3653,10 +3482,12 @@ def grafico():  # Dashboard
 
     query_mttr = (
         """
-        SELECT datafim, maquina, n_ordem, setor,
+        SELECT t1.id_ordem,t1.n_ordem,t1.setor,t1.maquina,
             TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-        FROM tb_ordens 
+            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim,
+            parada3
+        FROM tb_ordens as t1
+        left join tb_paradas as t2 on t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
@@ -3724,8 +3555,6 @@ def grafico():  # Dashboard
         GROUP BY setor;
         """
     
-    print("Mes aqui ",mes)
-
     resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado,
                             query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area,
                             query_horas_trabalhada_setor,[],[], mes)
@@ -3903,67 +3732,6 @@ def timeline_os():
         df_final = df_final.values.tolist()
 
         return jsonify (id_ordem, df_final)
-
-# @routes_bp.route('/52semanas', methods=['GET'])
-# @login_required
-# def plan_52semanas():  # Tabela com as 52 semanas
-
-#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-#                             password=DB_PASS, host=DB_HOST)
-
-#     s = (""" SELECT * FROM tb_planejamento_anual """)
-
-#     df_maquinas = pd.read_sql_query(s, conn)
-
-#     df_maquinas = df_maquinas.values.tolist()
-
-#     s = (""" select * from tb_grupos_preventivas where excluidos = 'False'""")
-
-#     query = (""" SELECT codigo,grupo,atividade,responsabilidade FROM tb_atividades_preventiva WHERE excluidos = 'False';""")
-
-#     df_grupos = pd.read_sql_query(s, conn)
-
-#     df_atividades = pd.read_sql_query(query, conn)
-    
-#     df_grupos_nan = df_grupos[df_grupos.isna().any(axis=1)]
-#     df_grupos_nan['proxima_manutencao'] = 'À decidir'
-
-#     df_grupos_notna = df_grupos.dropna()
-
-#     df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
-    
-#     print(df_grupos_notna)
-
-#     # df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'], format="%Y-%m-%d")
-
-#     df_grupos_notna = pd.concat([df_grupos_notna,df_grupos_nan])
-
-#     df_grupos_notna['ult_manutencao'] = df_grupos_notna['ult_manutencao'].fillna('À decidir')
-#     df_grupos_notna['periodicidade'] = df_grupos_notna['periodicidade'].fillna('À decidir')
-
-#     df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].astype(str)
-#     df_grupos_notna['proxima_manutencao'] = df_grupos_notna['proxima_manutencao'].apply(lambda x: x.replace(" 00:00:00",""))
-
-#     # Merge das tabelas
-#     df_merged = pd.merge(df_grupos_notna, df_atividades, on=['codigo', 'grupo'], how='left')
-
-#     # Groupby e criar nova coluna 'atividade' com listas de atividades
-#     df_grouped = df_merged.groupby(['codigo', 'grupo']).apply(lambda x: pd.Series({
-#         'ult_manutencao': x['ult_manutencao'].iloc[0],
-#         'periodicidade': x['periodicidade'].iloc[0],
-#         'proxima_manutencao': x['proxima_manutencao'].iloc[0],
-#         'atividade': x['atividade'].fillna('').tolist(),
-#         'responsabilidade': x['responsabilidade'].fillna('').tolist(),
-#     })).reset_index()
-
-#     # Resetar o índice
-#     df_grouped.reset_index(drop=True, inplace=True)
-
-#     df_final_list = df_grouped.values.tolist()
-
-#     dados_historico_planejadas = historico_planejadas()
-
-#     return render_template('user/52semanas.html', data=df_maquinas, df_final_list=df_final_list, dados_historico_planejadas=dados_historico_planejadas)
 
 def tabela_maquinas_preventivas():
 
@@ -4596,6 +4364,39 @@ def cadastro_preventiva():
             return render_template('user/cadastrar52.html')
 
     return render_template('user/cadastrar52.html')
+
+@routes_bp.route('/verificar-codigo-existente', methods=['POST'])
+def verificar_codigo_existente():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    codigo = request.get_json()
+
+    print(codigo)
+
+    cur.execute('select codigo from tb_maquinas where codigo = %s', (codigo,))
+
+    data = cur.fetchall()
+
+    if len(data)>0:
+        return jsonify({'codigo_existente':True})
+    else:
+        return jsonify({'codigo_existente':False})
+
+@routes_bp.route('/cadastrar-maquina', methods=['POST'])
+@login_required
+def cadastrar_maquina():
+
+    dados = request.get_json()
+
+    if dados['preventiva']:
+        print('insert nas duas tabelas')
+    else:
+        print('insert apenas em 1 tabela')
+
+    return 'sucess'
 
 
 @routes_bp.route('/testes_envio_pdf/<codigo_maquina>', methods=['POST'])
