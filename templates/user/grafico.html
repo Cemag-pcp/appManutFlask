@@ -904,6 +904,12 @@ var myBarChart = new Chart(ctx, {
 var eixo_y = {{ dados_mtbf_top10_maquina | safe }};
 var eixo_x = {{ labels_mtbf_top10_maquina | safe }};
 var ctx = document.getElementById("grafico1top10");
+let maxValor2 = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor2 = Math.ceil(maxValor2 / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var myBarChart = new Chart(ctx, {
   type: 'bar',
   data: {
@@ -943,7 +949,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          max: arredondadoMaxValor2,
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -978,6 +984,12 @@ var myBarChart = new Chart(ctx, {
 var eixo_y = {{ dados_mtbf_setor | safe }};
 var eixo_x = {{ labels_mtbf_setor | safe }};
 var ctx = document.getElementById('grafico2');
+let maxValor3 = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor3 = Math.ceil(maxValor3 / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var myBarChart = new Chart(ctx, {
   type: 'bar',
   data: {
@@ -1017,7 +1029,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          max: arredondadoMaxValor3,
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1054,6 +1066,12 @@ var myBarChart = new Chart(ctx, {
 var eixo_y = {{ dados_mttr_maquina | safe }};
 var eixo_x = {{ labels_mttr_maquina | safe }};
 var ctx = document.getElementById('grafico3');
+let maxValor4 = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor4 = Math.ceil(maxValor4 / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var myBarChart = new Chart(ctx, {
   type: 'bar',
   data: {
@@ -1093,7 +1111,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          max: arredondadoMaxValor4,
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1130,7 +1148,12 @@ var myBarChart = new Chart(ctx, {
 var eixo_y = {{ dados_mttr_setor | safe }};
 var eixo_x = {{ labels_mttr_setor | safe }};
 var ctx = document.getElementById('grafico4');
-
+let maxValor5 = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor5 = Math.ceil(maxValor5 / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var myBarChart = new Chart(ctx, {
   type: 'bar',
   data: {
@@ -1170,7 +1193,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          max: arredondadoMaxValor5,
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1207,7 +1230,12 @@ var myBarChart = new Chart(ctx, {
 var eixo_y = {{ dados_disponibilidade_maquina | safe }};
 var eixo_x = {{ labels_disponibilidade_maquina | safe }};
 var ctx = document.getElementById('grafico5');
-
+let maxValor6 = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor6 = Math.ceil(maxValor6 / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var myBarChart = new Chart(ctx, {
   type: 'bar',
   data: {
@@ -1247,7 +1275,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          max: arredondadoMaxValor6,
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1284,7 +1312,12 @@ var myBarChart = new Chart(ctx, {
 var eixo_y = {{ dados_disponibilidade_setor | safe }};
 var eixo_x = {{ labels_disponibilidade_setor | safe }};
 var ctx = document.getElementById('grafico6');
-
+let maxValor7 = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor7 = Math.ceil(maxValor7 / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var myBarChart = new Chart(ctx, {
   type: 'bar',
   data: {
@@ -1324,7 +1357,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          max: arredondadoMaxValor7,
           maxTicksLimit: 10,
           padding: 10,
         },
@@ -1428,7 +1461,12 @@ var myBarChart = new Chart(ctx, {
 var eixo_y = {{ dados_horas_trabalhadas_setor | safe }};
 var eixo_x = {{ labels_horas_trabalhadas_setor | safe }};
 var ctx = document.getElementById('grafico9');
-
+let maxValor8 = Math.max(...eixo_y);
+// Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+let arredondadoMaxValor8 = Math.ceil(maxValor8 / 100) * 100;
+if (eixo_y == NaN) {
+  eixo_y = 500
+}
 var myBarChart = new Chart(ctx, {
   type: 'bar',
   data: {
@@ -1468,7 +1506,7 @@ var myBarChart = new Chart(ctx, {
       yAxes: [{
         ticks: {
           min: 0,
-          max: Math.max(Math.ceil(eixo_y / 50) * 50),
+          max: arredondadoMaxValor8,
           maxTicksLimit: 10,
           padding: 10,
         },
