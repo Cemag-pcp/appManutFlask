@@ -1,0 +1,108 @@
+.label-float{
+position: relative;
+padding-top: 13px;
+
+}
+
+.label-float input{
+/* border: 0; */
+border-bottom: 2px solid lightgrey;
+border-top: 0;
+border-right: 0;
+border-left: 0;
+outline: none;
+min-width: 180px;
+font-size: 16px;
+transition: all .3s ease-out;
+-webkit-transition: all .3s ease-out;
+-moz-transition: all .3s ease-out;
+/* -webkit-appearance:none; */
+border-radius:0;
+}
+
+.label-float input:focus{
+border-bottom: 2px solid #3951b2;
+}
+
+.label-float input::placeholder{
+color:transparent;
+}
+
+.label-float label{
+pointer-events: none;
+position: absolute;
+top: -10px;
+left: 6px;
+margin-top: 23px;
+transition: all .3s ease-out;
+-webkit-transition: all .3s ease-out;
+-moz-transition: all .3s ease-out;
+}
+
+.label-float input:required:invalid + label{
+color: red;
+}
+.label-float input:focus:required:invalid{
+border-bottom: 2px solid red;
+}
+.label-float input:required:invalid + label:before{
+content: '*';
+}
+.label-float input:focus + label,
+.label-float input:not(:placeholder-shown) + label{
+font-size: 13px;
+margin-top: 0;
+color: #3951b2;
+}
+
+/* Text area */
+
+.label-float-textarea {
+    position: relative;
+    padding-top: 13px;
+}
+
+.label-float-textarea textarea {
+    border: 2px solid lightgrey;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    outline: none;
+    min-width: 180px;
+    font-size: 16px;
+    transition: all .3s ease-out;
+    -webkit-transition: all .3s ease-out;
+    -moz-transition: all .3s ease-out;
+    border-radius: 0;
+    resize: none; /* Evita que o usuário redimensione o textarea manualmente */
+}
+
+.label-float-textarea textarea:focus {
+    border: 2px solid #3951b2;
+}
+
+.label-float-textarea label {
+    pointer-events: none;
+    position: absolute;
+    top: -10px;
+    left: 6px;
+    margin-top: 23px;
+    transition: all .3s ease-out;
+    -webkit-transition: all .3s ease-out;
+    -moz-transition: all .3s ease-out;
+}
+
+.label-float-textarea textarea:focus + label,
+.label-float-textarea textarea:not(:placeholder-shown) + label {
+    font-size: 13px;
+    margin-top: 0;
+    color: #3951b2;
+}
+
+.label-float-textarea textarea:required:invalid {
+    border: 2px solid red;
+}
+
+.label-float-textarea textarea:required:invalid + label:before {
+    content: '*';
+}

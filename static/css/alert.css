@@ -1,0 +1,45 @@
+#alertBox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1500;
+    padding: 20px;
+    text-align: center;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+#successAlert {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1500; /* Ajuste o z-index conforme necessário */
+    padding: 20px;
+    text-align: center;
+    background-color: #28a745; /* Cor de fundo verde para um alerta de sucesso */
+    color: #fff; /* Cor do texto */
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
