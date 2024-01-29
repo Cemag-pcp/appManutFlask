@@ -1,412 +1,378 @@
 {% extends "user/layout.html" %}
+
+{% block links %}
+
+
+
+{% endblock %}
+
 {% block containerFluid %}
 
 <div class='container-fluid'>
-  
-<div class="card shadow mb-4">
-  <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">Planejamento</h6>
-  </div>
-    <div class="card-body">
-      <div class="table-responsive">
-          <table class="table table-bordered" id="dataTable12" width="100%" cellspacing="0">
+
+
+  <div class="row">
+
+    <!-- Tabela com grupos de manutenções planejadas -->
+    <div class="col-md-12 mb-2"> 
+      <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Planejamento por grupos de atividade</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable13" width="100%" cellspacing="0">
               <thead>
                 <tr>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tombamento</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Setor</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descrição</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classificação</th>
-                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (Dias)</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Grupo</th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (meses)</th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
                 </tr>
               </thead>
-            <tbody>
-              {% for row in data %}
-                <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
-                    <td style="width: 50px;">
-                      <div class="dropdown">
-                          <button style = 'background-color: rgb(255, 255, 255,0);'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
-                          </button>
-                          <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                            <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=row[0]) }}" class="btn" target="_blank">
-                              <i class="fas fa-clipboard-list"></i>
+              <tbody class="tbodyTable13">
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <!-- Tabela com máquinas que podem ser criadas grupo -->
+    <div class="col-md-5 mb-2">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Máquinas preventivas</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+              <table class="table table-bordered" id="dataTable12" width="100%" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classificação</th>
+                    <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for maquina in tabela_maquinas_preventivas_ %}
+                    <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
+                      <td data-title="Código">{{ maquina[0] }}</td>
+                      <td data-title="Classificação">{{ maquina[1] }}</td>
+                      <td style="width: 50px;">
+                        <div class="dropdown">
+                            <button style = 'background-color: black;'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                              <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=maquina[0]) }}" class="btn" target="_blank">
+                                <i class="fas fa-clipboard-list"></i>
+                              </a>
+                              <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{maquina[0]}}" class="btn">
+                                <i class="fas fa-clock"></i>
+                              </a>
+                              <a class="dropdown-item abrir-modal" data-id="{{ maquina[0] }}" style="cursor: pointer;">
+                                <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
                             </a>
-                            <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{row[0]}}" class="btn">
-                              <i class="fas fa-clock"></i>
-                            </a>
-                            <a id="dropdown_os" class="dropdown-item" onclick="modalGrupoAtividade('{{ row[0] }}')" style="cursor: pointer;">
-                              <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
-                          </a>
-                          </div>
-                      </div>
-                    </td>                
-                    <td data-title="Código">{{ row[0] }}</td>
-                    <td data-title="Tombamento">{{ row[1] }}</td>
-                    <td data-title="Setor">{{ row[2] }}</td>
-                    <td data-title="Descrição">{{ row[3] }}</td>
-                    <td data-title="Classificação">{{ row[4] }}</td>
-                    <td data-title="Periodicidade (Dias)">{{ row[5] }}</td>
-                    <td data-title="Última manutenção">{{ row[6] }}</td>
-                    <td data-title="Próxima manutenção">{{ row[7] }}</td>
+                            </div>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela com histórico de manutenções planejadas -->
+    <div class="col-md-7 mb-2"> 
+      <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Histórico de manutenções planejadas</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable14" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>Ordem</th>
+                  <th>Máquina</th>
+                  <th>Status</th>
+                  <th>Última execução</th>
                 </tr>
-                {% endfor %}
+              </thead>
+              <tbody class="tbodyTable14">
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+</div>
+
+<!-- Modal para listar opções de grupos disponíveis ou criar grupo NOVO -->
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalGrupoAtividade" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Grupo de atividades</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-9">
+            <select name="selectGrupos" id="selectGrupos" class="form-control" style="margin-bottom: 20px; width: 100%;">
+              <option></option>
+            </select>
+          </div>
+          <div class="col-sm-3">
+            <button class="excluirGrupo form-control" style="background: transparent; border: none; cursor: pointer;">
+              <i class="fa fa-trash" style="cursor: pointer;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="criarGrupo">Criar grupo</button>
+        <button type="button" class="btn btn-primary" id="grupoExistente">Entrar no grupo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para entrar em um grupo existente NOVO -->
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalGrupoExistente" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Grupo de atividades</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="height: 660px; overflow-y: auto;">
+        <div class="row mb-2">
+          <div class="col-md-5">
+            <label>Periodicidade (meses):</label>
+            <input id="periodicidade_grupo" type="number" class="form-control">
+          </div>
+          <div class="col-md-7">
+            <label>Última manutenção do grupo:</label>
+            <input id="ultima_manutencao" value="" type="date" class="form-control">
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-md-12">
+            <label>Próxima manutenção:</label>
+            <input type="date" readonly id="proxima_manutencao" class="form-control">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <label>Adicionar excel</label>
+            <!-- <button id="adicionarArquivo" class="file-upload__button">Adicionar arquivo</button>
+            <button id="remover_todas_atividades"  style="background: transparent;border: none;cursor: pointer;">
+              <i class="fa fa-trash" style="color: red; cursor: pointer;"></i>
+            </button> -->
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <button class="btn btn-outline-secondary" type="button" id="enviarArquivo">Enviar</button>
+              </div>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="inputFile" onchange="atualizarNomeArquivo()">
+                <label class="custom-file-label" for="inputFile">Escolha o arquivo</label>
+              </div>
+              <div class="input-group-append">
+                <a href="{{ url_for('routes.download_modelo_excel') }}" download>
+                  <button class="btn btn-outline-secondary">Modelo</button>
+                </a>
+                <!-- <button class="btn btn-outline-secondary" type="button">Modelo</button> -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <table class="table table-striped" id="tableTarefas">
+            <thead>
+                <tr class="cabeçalho">
+                    <th>Atividade</th>
+                    <th>Responsabilidade</th>
+                    <th>Excluir</th>
+                </tr>
+            </thead>
+            <tbody>
+            <!-- Dados serão adicionados aqui dinamicamente -->
             </tbody>
           </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: block;">
+        <div class="row justify-content-between">
+          <div class="col-4">
+            <button class="add-row form-control" id="botao_add_linha">+</button>
+          </div>
+          <div class="col-4">
+            <button class="salvar_tarefa form-control" id="salvar_tarefa">Salvar</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-    <div class="row justify-content-md-center">
-      <div class = "board2" style="overflow-x: auto;">
-        <div id = "titulo" class="row">
-          <h1 class="visao">Planejamento por grupos de atividade</h1>
-        </div>
-        <table id="table3" class="table custom-table table-striped">
-          <thead class="hide-thead">
-            <tr>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Código</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Grupo</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (meses)</th>
-              <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for grupos in df_final_list %}
-              <tr class="clickable-row">
-                <td><i class="fa-solid fa-caret-right" style="font-size: 20px;"></i> </td>
-                <td data-title="Código">{{grupos[0]}}</td>
-                <td data-title="Grupo">{{grupos[1]}}</td>
-                <td data-title="Última manutenção">{{grupos[2]}}</td>
-                <td data-title="Periodicidade (meses)">{{grupos[3]}}</td>
-                <td data-title="Próxima manutenção">{{grupos[4]}}</td>
-              </tr>
-              <tr class="expandable-row">
-                {% if grupos[5] == [''] %}
-                <td colspan="6" style="padding: 0;">
-                  <table style="width: 100%;">
-                    <thead>
-                      <tr style="background-color: #626262; color: white;">
-                        <th>Atividades</th>
-                        <th>Responsabilidade</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="background-color: #aeaeae;color: white; font-weight: bold;">
-                            <td><i class="fa-solid fa-ban" style="color: #ff0000;"></i></td>
-                            <td><i class="fa-solid fa-ban" style="color: #ff0000;"></i></td>
-                        </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-                {% else %}
-                <td colspan="6" style="padding: 0;">
-                  <table style="width: 100%;">
-                    <thead>
-                      <tr style="background-color: #626262; color: white;">
-                        <th>Atividades</th>
-                        <th>Responsabilidade</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for i in range(grupos[5]|length) %}
-                          <tr style="background-color: #aeaeae;color: white; font-weight: bold;">
-                              <td>{{ grupos[5][i] }}</td>
-                              <td>{{ grupos[6][i] }}</td>
-                          </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              {% endif %}
-            {% endfor %}
-          </tbody>
-        </table>
+
+<!-- Modal para criar grupo NOVO -->
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalRenomearGrupo" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Criar novo grupo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-
-
-  </div>
-
-</div>
-
-<!-- Modal para listar opções -->
-<div id="modalGrupoAtividade" class="tela" style="display: none;">
-  <div class="modal-content3">
-      <span class="close" onclick="closeModalAtividade()">&times;</span> <!-- Botão de fechar -->
-    <h4>Grupo de atividades</h4>
-    <label for="name_grupo">Grupos</label>
-    <div style="display: flex; justify-content: space-around; align-items: baseline;">
-      <select name="selectGrupos" id="selectGrupos" class="form-control" style="margin-bottom: 20px; width: 90%;">
-        <option></option>
-      </select>
-      <button class="excluirGrupo" style="background: transparent;border: none;cursor: pointer;">
-        <i class="fa fa-trash" style="cursor: pointer;"></i>
-      </button>
-    </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <button id="criarGrupo" class="file-upload__button" style="width: 80%;">Criar grupo</button>  
-        </div>
-        <div class="form-group">
-          <button id="grupoExistente" class="file-upload__button" style="width: 80%;">Entrar</button>
-        </div>
+      <div class="modal-body">
+        <label for="renomearGrupo">Nome do Grupo</label>
+        <input type="text" id="renomearGrupo" class="form-control">
       </div>
-  </div>
-</div>
-
-<div id="modalRenomearGrupo" class="tela" style="display: none;">
-  <div class="modal-content3">
-      <span class="close" onclick="closeModalRenomear()">&times;</span> <!-- Botão de fechar -->
-    <h4>Defina um nome para o grupo</h4>
-    <label for="name_grupo">Nome do Grupo</label>
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-      <input type="text" id="renomearGrupo" class="form-control">
-      <button class="file-upload__button" id="nomear_grupo">Nomear Grupo</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal para visualizar tarefas associadas ao grupo selecionado -->
-<div id="modalGrupoExistente" class="tela" style="display: none;">
-  
-  <div class="modal-content3">
-      <span class="close" onclick="closeModalGrupo()">&times;</span> 
-    <h4 class="modal-title"></h4>
-
-    <div class="form-row-preventivas">
-      <div class="form-preventiva">
-        <label>Periodicidade (meses):</label>
-        <input id="periodicidade_grupo" type="number" class="form-control">
-      </div>
-      <div class="form-preventiva">
-        <label>Última manutenção do grupo:</label>
-        <input id="ultima_manutencao" value="" type="date" class="form-control">
-      </div>
-      <div class="form-preventiva">
-        <label>Próxima manutenção:</label>
-        <input type="date" readonly id="proxima_manutencao" class="form-control">
-      </div>
-      <div class="form-preventiva">
-        <label>Adicionar excel</label>
-        <div style="display: flex; justify-content: space-between; align-items: center;">  
-          <button id="adicionarArquivo" class="file-upload__button">Adicionar arquivo</button>
-          <button id="remover_todas_atividades"  style="background: transparent;border: none;cursor: pointer;">
-            <i class="fa fa-trash" style="color: red; cursor: pointer;"></i>
-          </button>
-        </div>
+      <div class="modal-footer">
+        <button class="form-control" id="nomear_grupo">Nomear Grupo</button>
       </div>
     </div>
-    <table class="table table-striped" id="tableTarefas">
-        <thead>
-            <tr class="cabeçalho">
-                <th>Atividade</th>
-                <th>Responsabilidade</th>
-                <th>Excluir</th>
-            </tr>
-        </thead>
-        <tbody>
-          <!-- Dados serão adicionados aqui dinamicamente -->
-        </tbody>
-    </table>
-
-    <div class="container">
-      <div class="form-row">
-        <button class="add-row" id="botao_add_linha">+</button></td>
-        <button class="salvar_tarefa" id="salvar_tarefa">Salvar</button></td>
-      </div>
-    </div>
-   </div>
-</div>
-
-<!-- Modal para inserir arquivo -->
-<div id="modalInserirArquivo" class="tela" style="display: none;">
-  <div class="modal-content3">
-      <span class="close" onclick="closeModalInserirArquivo()">&times;</span> <!-- Botão de fechar -->
-    <h4>Inserir Arquivo</h4>
-    <a href="{{ url_for('routes.download_modelo_excel') }}" download>
-      <button class="file-upload__button" style="font-size: 14px; margin-top: 20px;">Baixar Excel Modelo</button>
-    </a>
-
-    <form id="fileForm" enctype="multipart/form-data">
-      <input id="fileSelect" style="text-overflow: ellipsis;margin-top: 20px;margin-bottom: 20px;width: 300px;" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-      <button type="button" class="salvar_tarefa" onclick="uploadFile()">Salvar</button>
-    </form>
-
   </div>
 </div>
 
 <div id="mensagem"></div>
 
+<div id="overlay"></div>
+<div class="spinner-grow text-dark" role="status" id="spinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+  <span class="sr-only">Loading...</span>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 
+<!-- Scripts para modais e botões dentro dos modais -->
 <script>
   
-  // Função para mostrar os grupos disponíveis para aquela máquina
-  function coletarGrupos(codigo_maquina) {
+  // Abrir modal grupos de atividades
+  $(document).ready(function() {
 
-    $('#selectGrupos').empty();
-    
-    showLoading();
+    // Função para buscar os grupos de atividades existentes nessa máquina
+    function coletarGrupos(codigo_maquina) {
 
-    $.ajax({
-        url: `/preventivas?codigo_maquina=${codigo_maquina}`,
-        type: 'GET',
-        success: function (data) {
-            // Limpar o conteúdo atual do select
-            $('#selectGrupos').empty();
-          
-            // Populando o select com as opções recebidas
-            for (var i = 0; i < data.length; i++) {
-                $('#selectGrupos').append(`<option value="${data[i]}">${data[i]}</option>`);
-            }
+      $('#selectGrupos').empty();
 
-            hideLoading();
-        },
-        error: function (error) {
-            console.error(error);
-            hideLoading();
-        }
-    });
-  }
+      showLoading();
 
-  // Função para abrir o modalGrupoAtividade e enviar dados para o backend
-  function modalGrupoAtividade(codigo_maquina) {        
-      var modal = document.getElementById("modalGrupoAtividade");
-      modal.style.display = "block";
+      $.ajax({
+          url: `/preventivas?codigo_maquina=${codigo_maquina}`,
+          type: 'GET',
+          success: function (data) {
+              // Limpar o conteúdo atual do select
+              $('#selectGrupos').empty();
+            
+              // Populando o select com as opções recebidas
+              for (var i = 0; i < data.length; i++) {
+                  $('#selectGrupos').append(`<option value="${data[i]}">${data[i]}</option>`);
+              }
 
-      window.codigo_maquina = codigo_maquina; // Definir o código de máquina na variável global
-        
-      coletarGrupos(codigo_maquina);
-  }
+              $('.modal-title').text('Grupo de atividades da máquina ' + codigo_maquina);
+              $('#modalGrupoAtividade').modal('show');
 
-  // Função para lidar com o clique no botão "Entrar"
-  function entrarGrupo() {
-    var grupoSelecionado = $('#selectGrupos').val();
-
-    // Fechar o modalGrupoAtividade
-    closeModalGrupo();
-
-    showLoading();
-
-    // Chamar a rota no backend para carregar dados associados
-    $.ajax({
-        url: `/atividadesGrupo?codigo_maquina=${window.codigo_maquina}&grupo=${grupoSelecionado}`,
-        type: 'GET',
-        success: function (data) {
-            // Popule o modalGrupoExistente com os dados recebidos
-            $('.modal-title').text("Tarefa do grupo: " + grupoSelecionado);
-            console.log("Dados recebidos:", data);
-             // Verifica se data é um array
-            if (typeof data === 'object' && data !== null) {
-                popularModalGrupoExistente(data);
-            } else {
-                console.error("Os dados recebidos não são um array:", data);
-            }
-            hideLoading();
-        },
-        error: function (error) {
-            console.error(error);
-            exibirMensagem('aviso', 'Escolha ou crie um grupo válido.');
-            hideLoading();
-        }
-    });
-  }
-
-  // Função para fechar o modal
-  function closeModalGrupo() {
-    var modal = document.getElementById("modalGrupoExistente");
-    modal.style.display = "none";
-    
-  }
-
-  function closeModalAtividade() {
-    var modal = document.getElementById("modalGrupoAtividade");
-    modal.style.display = "none";
-    $('#modalGrupoExistente').off('click', '.add-row');
-  }
-
-  function closeModalRenomear() {
-    var modal = document.getElementById("modalRenomearGrupo");
-    modal.style.display = "none";
-    $('#modalRenomearGrupo').hide();
-  }
-
-  $('#grupoExistente').on('click', function() {
-    entrarGrupo();
-  });
-
-  function popularModalGrupoExistente(dados) {
-    
-    var tabela = $('#tableTarefas tbody');
-    tabela.empty(); // Limpa a tabela antes de popular
-
-    var periodicidade_grupo = $('#periodicidade_grupo');
-    var ultima_manutencao = $('#ultima_manutencao');
-    var proxima_manutencao = $('#proxima_manutencao');
-
-    periodicidade_grupo.val(dados[1][0][1]);
-    ultima_manutencao.val(dados[1][0][0]);
-    proxima_manutencao.val(dados[1][0][2]);
-
-    // Itera sobre os dados e adiciona linhas à tabela
-    for (var i = 0; i < dados[0].length; i++) {
-        var atividade = dados[0][i][3];
-        var responsabilidade = dados[0][i][2];
-        var id_unico = dados[0][i][4];
-
-        // Verifica se atividade é indefinida e atribui uma string vazia se for o caso
-        atividade = (typeof atividade !== 'undefined') ? atividade : '';
-
-        // Verifica se responsabilidade é indefinida e atribui uma string vazia se for o caso
-        responsabilidade = (typeof responsabilidade !== 'undefined') ? responsabilidade : '';
-
-        id_unico = (typeof id_unico !== 'undefined') ? id_unico : '';
-
-        var linha = $(`
-                  <tr>
-                      <td> 
-                          <textarea rows="4" cols="30">${atividade}</textarea>
-                      </td>
-                      <td>  
-                          <select class="form-control">
-                              <option value="${responsabilidade}">${responsabilidade}</option>
-                              <option value="Elétrica">Elétrica</option>
-                              <option value="Mecânica">Mecânica</option>
-                              <option value="Predial">Predial</option>
-                          </select>
-                      </td>
-                      <td>
-                        <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                      </td>
-                      <td style="display:none">
-                        <input type="number" class="form-control" value="${id_unico}">
-                      </td>
-                  </tr>`);
-
-        // Salva os valores originais como data atributos
-        linha.data('originalAtividade', atividade);
-        linha.data('originalResponsabilidade', responsabilidade);
-        linha.data('originalId_unico',id_unico)
-
-        tabela.append(linha);
+              hideLoading();
+          },
+          error: function (error) {
+              console.error(error);
+              hideLoading();
+          }
+      });
     }
+
+    // Função para popular o modal de atividades
+    function popularModalGrupoExistente(dados) {
+    
+      var tabela = $('#tableTarefas tbody');
+      tabela.empty(); // Limpa a tabela antes de popular
+
+      console.log(dados)
+
+      var periodicidade_grupo = $('#periodicidade_grupo');
+      var ultima_manutencao = $('#ultima_manutencao');
+      var proxima_manutencao = $('#proxima_manutencao');
+
+      periodicidade_grupo.val(dados[1][0][1]);
+      ultima_manutencao.val(dados[1][0][0]);
+      proxima_manutencao.val(dados[1][0][2]);
+
+      // Itera sobre os dados e adiciona linhas à tabela
+      for (var i = 0; i < dados[0].length; i++) {
+          var atividade = dados[0][i][3];
+          var responsabilidade = dados[0][i][2];
+          var id_unico = dados[0][i][4];
+
+          // Verifica se atividade é indefinida e atribui uma string vazia se for o caso
+          atividade = (typeof atividade !== 'undefined') ? atividade : '';
+
+          // Verifica se responsabilidade é indefinida e atribui uma string vazia se for o caso
+          responsabilidade = (typeof responsabilidade !== 'undefined') ? responsabilidade : '';
+
+          id_unico = (typeof id_unico !== 'undefined') ? id_unico : '';
+
+          var linha = $(`
+                    <tr>
+                        <td> 
+                            <textarea rows="4" cols="30" class="form-control">${atividade}</textarea>
+                        </td>
+                        <td>  
+                            <select class="form-control">
+                                <option value="${responsabilidade}">${responsabilidade}</option>
+                                <option value="Elétrica">Elétrica</option>
+                                <option value="Mecânica">Mecânica</option>
+                                <option value="Predial">Predial</option>
+                            </select>
+                        </td>
+                        <td>
+                          <button class="excluirTarefa" style="background: transparent;border: none;cursor: pointer;">
+                            <i class="fa fa-trash"></i>
+                          </button>
+                        </td>
+                        <td style="display:none">
+                          <input type="number" class="form-control" value="${id_unico}">
+                        </td>
+                    </tr>`);
+
+          // Salva os valores originais como data atributos
+          linha.data('originalAtividade', atividade);
+          linha.data('originalResponsabilidade', responsabilidade);
+          linha.data('originalId_unico',id_unico)
+
+          tabela.append(linha);
+      }
   
     // Adicionar um evento de clique ao botão "+" para adicionar uma nova linha
     $('#modalGrupoExistente').off('click', '.add-row').on('click', '.add-row', function() {
         const newRow = `<tr>
-                          <td> <textarea rows="4" cols="30"></textarea>
+                          <td> <textarea rows="4" cols="30" class="form-control"></textarea>
                           </td>
                           <td>  <select class="form-control">
                                   <option value=""></option>
@@ -426,379 +392,496 @@
         $('#tableTarefas tbody').append(newRow);
     });
 
-    // Exibir o modalGrupoExistente
-    $('#modalGrupoExistente').show();
+    
 
   }
 
-  // Função para lidar com o clique no botão "criarGrupo"
-  function criarGrupo() {
+    // Função para entrar no modal de atividades e popular
+    function entrarGrupo(codigo_maquina) {
+      var grupoSelecionado = $('#selectGrupos').val();
+      
+      if (grupoSelecionado === '') {
+        exibirMensagem('aviso', 'Escolha um grupo válido.')
+        return;
+      }
 
-    let codigo_maquina = window.codigo_maquina;
-    let nome_grupo = $("#renomearGrupo").val();
-    
-    showLoading();
-    // Chamar a rota no backend para carregar dados associados
-    $.ajax({
-        url: `/criar-grupo`,
-        type: 'POST',
-        data: JSON.stringify({ codigo_maquina: codigo_maquina, nome_grupo:nome_grupo }),  // Converte os dados para JSON
-        contentType: 'application/json',
+      console.log(codigo_maquina);
+      // Fechar o modalGrupoAtividade
+      // closeModalGrupo();
+
+      showLoading();
+
+      // Chamar a rota no backend para carregar dados associados
+      $.ajax({
+        url: `/atividadesGrupo?codigo_maquina=${codigo_maquina}&grupo=${grupoSelecionado}`,
+        type: 'GET',
         success: function (data) {
-          console.log(data)
-          hideLoading();
-          if(data === 'Grupo já existente'){
-            exibirMensagem('aviso','Nome de grupo já existente')
-            return
-          }
-          modalGrupoAtividade(codigo_maquina)
+            // Popule o modalGrupoExistente com os dados recebidos
+            $('.modal-title').text(codigo_maquina + ' - ' + grupoSelecionado);
+            console.log("Dados recebidos:", data);
+            // Verifica se data é um array
+            if (typeof data === 'object' && data !== null) {
+                console.log(data);
+                popularModalGrupoExistente(data);
+            } else {
+                console.error("Os dados recebidos não são um array:", data);
+            }
+
+            hideLoading();
+            
+            // Exibir o modalGrupoExistente
+            $('#modalGrupoExistente').modal('show');
         },
         error: function (error) {
             console.error(error);
+            exibirMensagem('aviso', 'Escolha ou crie um grupo válido.');
             hideLoading();
         }
-    });
-  }
+      });
+    }
 
-  $('#nomear_grupo').on('click',function() {
+    // Função para lidar com o clique no botão "criarGrupo"
+    function criarGrupo(codigo_maquina) {
 
-    criarGrupo();
-    $('#modalRenomearGrupo').hide()
+      // let codigo_maquina = window.codigo_maquina;
+      let nome_grupo = $("#renomearGrupo").val();
+      
+      if (nome_grupo === '') {
+        exibirMensagem('aviso','Escolha um nome válido');
+        return;
+      }
 
-  })
+      console.log(nome_grupo);
 
-  $('#criarGrupo').on('click', function() {
-
-    $('#renomearGrupo').val("")
-    $('#modalRenomearGrupo').show();
-    
-  });
-
-  function salvarTarefas(grupo) {
-
-    showLoading();
-
-    var dadosTabela = [];
-    var codigo_maquina = window.codigo_maquina;
-
-    var periodicidade_grupo = $('#periodicidade_grupo').val();
-    var ultima_manutencao = $('#ultima_manutencao').val();
-
-    var parametros = [];
-    parametros.push({
-      periodicidade_grupo: periodicidade_grupo,
-      ultima_manutencao: ultima_manutencao,
-      grupo: grupo,
-      codigo_maquina: codigo_maquina,
-    });
-
-    if (periodicidade_grupo !== '' && ultima_manutencao !== '') {
-
-      // Itera sobre as linhas da tabela
-      $('#tableTarefas tbody tr').each(function () {
-          var linha = $(this);
-          var atividade = linha.find('textarea').val();
-          var responsabilidade = linha.find('select').val();
-          var id_unico = linha.find('input').val();
-
-          var atividadeAntiga = linha.data('originalAtividade');
-          var responsabilidadeAntiga = linha.data('originalResponsabilidade');
-
-          if (atividadeAntiga === undefined) {
-            atividadeAntiga = '';
+      showLoading();
+      // Chamar a rota no backend para carregar dados associados
+      $.ajax({
+          url: `/criar-grupo`,
+          type: 'POST',
+          data: JSON.stringify({ codigo_maquina:codigo_maquina, nome_grupo:nome_grupo }),  // Converte os dados para JSON
+          contentType: 'application/json',
+          success: function (data) {
+            console.log(data)
+            hideLoading();
+            if(data === 'Grupo já existente'){
+              exibirMensagem('aviso','Nome de grupo já existente')
+              return
+            }
+            modalGrupoAtividade(codigo_maquina)
+          },
+          error: function (error) {
+              console.error(error);
+              hideLoading();
           }
+      });
+    }
 
-          if (responsabilidadeAntiga === undefined) {
-            responsabilidadeAntiga = '';
-          }
+    // Função para abrir o modalGrupoAtividade e enviar dados para o backend
+    function modalGrupoAtividade(codigo_maquina) {        
+      $('modalGrupoAtividade').modal('show');
+      coletarGrupos(codigo_maquina);
+    }
 
-          if (
-            atividade !== linha.data('originalAtividade') ||
-            responsabilidade !== linha.data('originalResponsabilidade') ||
-            id_unico !== linha.data('originalId_unico')
-          ) {
-            // Adiciona a classe "alterada" à linha
-            linha.addClass('alterada');
+    // Função para salvar as tarefas
+    function salvarTarefas(grupo, codigo_maquina) {
 
-            // Adiciona os dados da linha ao array
-            dadosTabela.push({
-              atividade: atividade,
-              responsabilidade: responsabilidade,
-              id_unico:id_unico,
-              codigo_maquina: codigo_maquina,
-              grupo: grupo,
-              atividadeAntiga: atividadeAntiga,
-              responsabilidadeAntiga: responsabilidadeAntiga
-            })
+      showLoading();
 
-          } 
+      var dadosTabela = [];
+
+      var periodicidade_grupo = $('#periodicidade_grupo').val();
+      var ultima_manutencao = $('#ultima_manutencao').val();
+
+      var parametros = [];
+      parametros.push({
+        periodicidade_grupo: periodicidade_grupo,
+        ultima_manutencao: ultima_manutencao,
+        grupo: grupo,
+        codigo_maquina: codigo_maquina,
       });
 
-      // Adiciona tanto dadosTabela quanto parametros ao objeto
-      var dadosEnviar = {
-        dadosTabela: dadosTabela,
-        parametros: parametros,
-      };
+      if (periodicidade_grupo !== '' && ultima_manutencao !== '') {
 
-      // Chama a rota no backend para enviar os dados
-      $.ajax({
+        // Itera sobre as linhas da tabela
+        $('#tableTarefas tbody tr').each(function () {
+            var linha = $(this);
+            var atividade = linha.find('textarea').val();
+            var responsabilidade = linha.find('select').val();
+            var id_unico = linha.find('input').val();
+
+            var atividadeAntiga = linha.data('originalAtividade');
+            var responsabilidadeAntiga = linha.data('originalResponsabilidade');
+
+            if (atividadeAntiga === undefined) {
+              atividadeAntiga = '';
+            }
+
+            if (responsabilidadeAntiga === undefined) {
+              responsabilidadeAntiga = '';
+            }
+
+            if (
+              atividade !== linha.data('originalAtividade') ||
+              responsabilidade !== linha.data('originalResponsabilidade') ||
+              id_unico !== linha.data('originalId_unico')
+            ) {
+              // Adiciona a classe "alterada" à linha
+              linha.addClass('alterada');
+
+              // Adiciona os dados da linha ao array
+              dadosTabela.push({
+                atividade: atividade,
+                responsabilidade: responsabilidade,
+                id_unico:id_unico,
+                codigo_maquina: codigo_maquina,
+                grupo: grupo,
+                atividadeAntiga: atividadeAntiga,
+                responsabilidadeAntiga: responsabilidadeAntiga
+              })
+
+            } 
+        });
+
+        // Adiciona tanto dadosTabela quanto parametros ao objeto
+        var dadosEnviar = {
+          dadosTabela: dadosTabela,
+          parametros: parametros,
+        };
+
+        // Chama a rota no backend para enviar os dados
+        $.ajax({
           url: '/receber-tarefas',
           type: 'POST',
           data: JSON.stringify(dadosEnviar),
           contentType: 'application/json',
           success: function (data) {
             exibirMensagem('sucesso', 'Tarefas salvas com sucesso.');
-            entrarGrupo();
+            entrarGrupo(codigo_maquina);
             hideLoading();
           },
           error: function (error) {
             exibirMensagem('aviso', 'Por favor, preencha todos os campos.');
             hideLoading();
           }
-      });
+        });
 
-    } else {
-      exibirMensagem('aviso', 'Por favor, preencha todos os campos.');
-      hideLoading();
-    }
-
-  
-  }
-
-  // Adiciona um evento de clique ao botão dentro do modal
-  $('#salvar_tarefa').on('click', function () {
-    
-    var grupo = $('#selectGrupos').val();
-    
-    salvarTarefas(grupo);
-
-  });
-
-  function exibirMensagem(tipo, texto) {
-    var mensagemElement = document.getElementById('mensagem');
-
-    // Define o texto da mensagem
-    mensagemElement.innerText = texto;
-
-    // Define a classe de estilo com base no tipo
-    mensagemElement.className = 'sucesso';
-    if (tipo === 'aviso') {
-      mensagemElement.className = 'aviso';
-    }
-
-    // Exibe a mensagem
-    mensagemElement.style.top = '20px'; // Define a posição para exibir a mensagem
-
-    // Aguarda 3 segundos e esconde a mensagem
-    setTimeout(function () {
-      mensagemElement.style.top = '-204px'; // Define a posição para esconder a mensagem
-    }, 3000); // 3000 milissegundos = 3 segundos
-  }
-
-  function uploadFile() {
-    
-    var grupoSelecionado = $('#selectGrupos').val();
-    var codigo_maquina = window.codigo_maquina;
-
-    var fileInput = document.getElementById('fileSelect');
-    var file = fileInput.files[0];
-
-    var formData = new FormData();
-    formData.append('file', file);
-    formData.append('grupoSelecionado', grupoSelecionado);
-    formData.append('codigo_maquina', codigo_maquina);
-
-    $.ajax({
-        url: '/receber-upload',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(data) {
-            if(data === 'Colunas do arquivo não correspondem ao modelo'){
-              alert('Colunas do arquivo não correspondem ao modelo')
-            } else if(data === 'Código de máquina inválido'){
-              alert('Código de máquina inválido')
-            }  else {
-              closeModalInserirArquivo();
-              var grupo = $('#selectGrupos').val();
-              salvarTarefas(grupo);
-            }
-        },
-        error: function(error) {
-            console.error('Error:', error);
-        }
-    });
-  }
-
-  function closeModalInserirArquivo() {
-    var modal = document.getElementById("modalInserirArquivo");
-    modal.style.display = "none";
-  }
-
-  function modalInserirArquivo(codigo_maquina) {        
-    // Definir o código de máquina na variável global
-    window.codigo_maquina = codigo_maquina;
-    
-    // Exibir o modal
-    var modal = document.getElementById("modalInserirArquivo");
-    modal.style.display = "block";
-    
-  }
-
-  $('#adicionarArquivo').on('click', function(){
-
-    var periodicidade_grupo = $('#periodicidade_grupo').val();
-    var ultima_manutencao = $('#ultima_manutencao').val();
-
-    if (periodicidade_grupo === '' || ultima_manutencao === '') {
-      exibirMensagem('aviso', 'Por favor, preencha os campos de periodicidade e data.');
-      return;
-    }
-    else {
-      modalInserirArquivo(codigo_maquina);
-    }
-    
-  })
-
-  // Adicionar tratamento de evento para o botão de excluir
-  $('#tableTarefas tbody').on('click', '.excluirTarefa', function() {
-      var linha = $(this).closest('tr');
-      var atividade = linha.find('textarea').val();
-      var responsabilidade = linha.find('select').val();
-      var idDaLinha = linha.find('input').val(); // Substitua 'id' pelo nome da propriedade que armazena a identificação única da linha
-      window.codigo_maquina = codigo_maquina; 
-      var grupoSelecionado = $('#selectGrupos').val();
-
-      console.log(idDaLinha)
-
-      if(idDaLinha === undefined){
-        linha.remove();
-        return
+      } else {
+        exibirMensagem('aviso', 'Por favor, preencha todos os campos.');
+        hideLoading();
       }
 
+    }
+
+    // Função para inputar arquivo
+    function uploadFile(codigo_maquina) {
+      
       showLoading();
 
-      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+      var grupoSelecionado = $('#selectGrupos').val();
+
+      var fileInput = document.getElementById('inputFile');
+      var file = fileInput.files[0];
+
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('grupoSelecionado', grupoSelecionado);
+      formData.append('codigo_maquina', codigo_maquina);
+
       $.ajax({
+          url: '/receber-upload',
           type: 'POST',
-          url: 'excluir-tarefa',
-          contentType: 'application/json',
-          data: JSON.stringify({
-                idDaLinha: idDaLinha,
-                atividade: atividade,
-                responsabilidade: responsabilidade,
-                grupoSelecionado: grupoSelecionado,
-                codigo_maquina: codigo_maquina
-        }),
-        success: function(data) {
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function(data) {
+              hideLoading();
+              if(data === 'Colunas do arquivo não correspondem ao modelo'){
+                alert('Colunas do arquivo não correspondem ao modelo.')
+              } else if(data === 'Código de máquina inválido'){
+                alert('Código de máquina inválido dentro do arquivo.')
+              }  else {
+                var grupo = $('#selectGrupos').val();
+                salvarTarefas(grupo);
+              }
+          },
+          error: function(error) {
+              console.error('Error:', error);
+              alert('Utilize um arquivo válido.')
+              hideLoading();
+          }
+      });
+    }
+
+    // Ao abrir o modal será carregadas as funções
+    $('.abrir-modal').on('click', function() {
+      var codigoMaquina = $(this).data('id');
+      // abrirModalGrupoAtividade(codigoMaquina);
+      coletarGrupos(codigoMaquina);
+
+      // Ao clicar em Entrar no grupo será carregadas as funções
+      $('#grupoExistente').on('click', function() {
+        entrarGrupo(codigoMaquina);
+        
+      });
+
+      $('#criarGrupo').on('click', function() {
+        $('#modalRenomearGrupo').modal('show');
+        
+      });
+
+      $('#nomear_grupo').on('click', function() {
+        criarGrupo(codigoMaquina);
+        $('#modalRenomearGrupo').hide()
+
+      });
+
+      $('#salvar_tarefa').on('click', function() {
+        var grupo = $('#selectGrupos').val();
+        salvarTarefas(grupo, codigoMaquina);
+
+      });
+
+      $('#tableTarefas tbody').on('click', '.excluirTarefa', function() {
+        
+        showLoading();
+
+        var linha = $(this).closest('tr');
+        var atividade = linha.find('textarea').val();
+        var responsabilidade = linha.find('select').val();
+        var idDaLinha = linha.find('input').val(); // Substitua 'id' pelo nome da propriedade que armazena a identificação única da linha
+        var grupoSelecionado = $('#selectGrupos').val();
+
+        console.log(codigoMaquina,linha,atividade,responsabilidade,idDaLinha,grupoSelecionado);
+
+        if(idDaLinha === undefined){
+          linha.remove();
+          return
+        }
+
+        // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+        $.ajax({
+            type: 'POST',
+            url: 'excluir-tarefa',
+            contentType: 'application/json',
+            data: JSON.stringify({
+              idDaLinha: idDaLinha,
+              atividade: atividade,
+              responsabilidade: responsabilidade,
+              grupoSelecionado: grupoSelecionado,
+              codigo_maquina: codigoMaquina
+            }),
+          success: function(data) {
             // A resposta do backend foi bem-sucedida, remova a linha da tabela
             linha.remove();
             hideLoading();
             exibirMensagem('sucesso','Tarefa excluída com sucesso.')
-        },
-        error: function(err) {
+          },
+          error: function(err) {
             console.error('Erro ao excluir do banco de dados:', err);
             // Adicione aqui a lógica para lidar com erros, se necessário
             hideLoading();
-        }
-      });
-  });
-
-    // Adicionar tratamento de evento para o botão de excluir
-    $('#remover_todas_atividades').on('click', function() {
-      window.codigo_maquina = codigo_maquina; 
-      var grupoSelecionado = $('#selectGrupos').val();
-
-      resultado = confirm('Clique "Ok" se realmente deseja excluir TODAS as atividades do grupo ' + grupoSelecionado)
-
-      if(resultado == false){
-        return
-      }
-
-      var linhas = $('#tableTarefas tbody tr');
-
-      if (linhas.length === 0) {
-          // Se não houver linhas, não há nada a fazer
-          return;
-      }
-
-      showLoading();
-
-      // Crie um array para armazenar os IDs das linhas a serem removidas
-      var idsParaRemover = [];
-
-      // Percorra todas as linhas e obtenha os IDs
-      linhas.each(function() {
-          var linha = $(this);
-          var idDaLinha = linha.find('input').val();
-
-          if (idDaLinha !== undefined) {
-              idsParaRemover.push(idDaLinha);
           }
-
-          // Remova a linha da tabela (não espera pela resposta do backend)
-          linha.remove();
+        });
       });
 
-      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
-      $.ajax({
-          type: 'POST',
-          url: 'excluir-tarefa',
-          contentType: 'application/json',
-          data: JSON.stringify({
-                grupoSelecionado: grupoSelecionado,
-                codigo_maquina: codigo_maquina
-        }),
-        success: function(data) {
-            hideLoading();
-            exibirMensagem('sucesso','Tarefa excluída com sucesso.')
-        },
-        error: function(err) {
-            console.error('Erro ao excluir do banco de dados:', err);
-            // Adicione aqui a lógica para lidar com erros, se necessário
-            hideLoading();
+      $('.excluirGrupo').on('click', function() {
+
+        var grupoSelecionado = $('#selectGrupos').val();
+
+        resultado = confirm('Clique "Ok" se realmente deseja excluir o grupo ' + grupoSelecionado)
+
+        if(resultado == false){
+          return;
         }
+
+        dadosExcluir = {codigo_maquina:codigoMaquina,
+                        grupoSelecionado:grupoSelecionado}
+
+        showLoading();
+
+        // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
+        $.ajax({
+            type: 'POST',
+            url: 'excluir-grupo',
+            contentType: 'application/json',
+            data: JSON.stringify(dadosExcluir),
+          success: function(data) {
+              console.log('entrou no success')
+              coletarGrupos(codigoMaquina);
+              hideLoading();
+              exibirMensagem('sucesso','Grupo excluído com sucesso.')
+          },
+          error: function(err) {
+              console.error('Erro ao excluir do banco de dados:', err);
+              // Adicione aqui a lógica para lidar com erros, se necessário
+              hideLoading();
+          }
+        });
+        });
+
+      $('#enviarArquivo').on('click', function() {
+        uploadFile(codigoMaquina);
       });
-  });
 
-  $('.excluirGrupo').on('click', function() {
+    });
 
-      var grupoSelecionado = $('#selectGrupos').val();
-
-      resultado = confirm('Clique "Ok" se realmente deseja excluir o grupo ' + grupoSelecionado)
-
-      if(resultado == false){
-        return
-      }
-    
-      console.log(codigo_maquina,grupoSelecionado)
-
-      dadosExcluir = {codigo_maquina:codigo_maquina,
-                      grupoSelecionado:grupoSelecionado}
-
-      showLoading();
-
-      // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
-      $.ajax({
-          type: 'POST',
-          url: 'excluir-grupo',
-          contentType: 'application/json',
-          data: JSON.stringify(dadosExcluir),
-        success: function(data) {
-            console.log('entrou no success')
-            coletarGrupos(codigo_maquina);
-            hideLoading();
-            exibirMensagem('sucesso','Grupo excluído com sucesso.')
-        },
-        error: function(err) {
-            console.error('Erro ao excluir do banco de dados:', err);
-            // Adicione aqui a lógica para lidar com erros, se necessário
-            hideLoading();
-        }
-      });
   });
 
 </script>
+
+<!-- Script para barrar input de arquivo caso não tenha periodicidade ou data de ultima manutenção preenchida -->
+<script>
+  $(document).ready(function() {
+    
+    // Ao clicar em Entrar no grupo será carregadas as funções
+    $('#inputFile').on('click', function() {
+        
+      var periodicidade = $('#periodicidade_grupo').val();
+      var ultima_manutencao = $('#ultima_manutencao').val();
+
+      console.log(periodicidade, ultima_manutencao);
+
+      if (periodicidade === '' | ultima_manutencao === '') {
+        exibirMensagem('aviso', 'Preencha os campos obrigatórios.');
+        console.log('barrou');
+        return false;
+      }
+        
+      console.log('passou');
+
+    });
+
+  });
+</script>
+
+<!-- Script para atualizar label do nome do arquivo no input file -->
+<script>
+  function atualizarNomeArquivo() {
+    var arquivoInput = document.getElementById('inputFile');
+    var nomeArquivoLabel = document.querySelector('.custom-file-label');
+
+    if (arquivoInput.files.length > 0) {
+      var nomeArquivo = arquivoInput.files[0].name;
+      nomeArquivoLabel.innerText = nomeArquivo;
+    } else {
+      nomeArquivoLabel.innerText = 'Escolha o arquivo';
+    }
+  }
+</script>
+
+<!-- <script src="static/js/formatar-data.js"></script> -->
+
+<!-- Page level plugins -->
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.25/sorting/date-uk.js"></script>
+
+<!-- <script src="static/vendor/datatables/jquery.dataTables.min.js"></script> -->
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+
+<!-- Populando tabela de grupos -->
+<script>
+  // Função para popular a tabela
+function popularTabelaMaquinasPreventivas(data) {
+    $('#dataTable13').DataTable().destroy();
+
+    var tabelaBody = $('.tbodyTable13');
+
+    // Limpa o conteúdo existente na tabela
+    tabelaBody.empty();
+
+    // Itera sobre os dados e adiciona as linhas à tabela
+    data.forEach(function (item) {
+
+        // var formattedDate = moment(item[3], "YYYY-MM-DD").format("DD/MM/YYYY");
+
+        tabelaBody.append(
+            '<tr>' +
+            '<td>' + item[1] + '</td>' +
+            '<td>' + item[2] + '</td>' +
+            '<td>' + item[3] + '</td>' + // Use the formatted date
+            '<td>' + item[4] + '</td>' +
+            '<td>' + item[6] + '</td>' +
+            '</tr>'
+        );
+    });
+    
+    // Inicializa o DataTable
+    $('#dataTable13').DataTable({
+      columnDefs: [
+        { type: 'date-uk', targets: [2,4] }
+      ]
+    });
+}
+
+// Faz a requisição AJAX para obter os dados
+$.ajax({
+    url: '/tabela-grupos-preventivas',
+    type: 'GET',
+    dataType: 'json',
+    success: function (data) {
+        console.log(data);
+        // Chama a função para popular a tabela
+        popularTabelaMaquinasPreventivas(data);
+    },
+    error: function (error) {
+        console.log('Erro na requisição AJAX:', error);
+    }
+});
+
+</script>
+
+<!-- Populando histórico de grupos -->
+<script>
+
+  // Função para popular a tabela
+  function popularTabelaHistorico(data) {
+      $('#dataTable14').DataTable().destroy();
+
+      var tabelaBody = $('.tbodyTable14');
+
+      // Limpa o conteúdo existente na tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e adiciona as linhas à tabela
+      data.forEach(function (item) {
+        tabelaBody.append(
+          '<tr>' +
+          '<td>' + item[2] + '</td>' +
+          '<td>' + item[3] + '</td>' +
+          '<td>' + item[4] + '</td>' +
+          '<td>' + item[1] + '</td>' +
+          '</tr>'
+        );
+    });
+    $('#dataTable14').DataTable({
+      columnDefs: [
+        { type: 'date-uk', targets: 3 }
+      ]
+    });
+
+  }
+
+  // Faz a requisição AJAX para obter os dados
+  $.ajax({
+      url: '/tabela-historico-preventivas',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+          console.log(data);
+          // Chama a função para popular a tabela
+          popularTabelaHistorico(data);
+      },
+      error: function (error) {
+          console.log('Erro na requisição AJAX:', error);
+      }
+  });
+</script>
+
+<!-- Page level custom scripts -->
+<script src="static/js/demo/datatables-demo.js"></script>
+
 
 {% endblock %}
