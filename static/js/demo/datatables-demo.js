@@ -92,11 +92,12 @@ $(document).ready(function() {
   });
 });
 
+// Máquinas preventivas
 $(document).ready(function() {
   $('#dataTable12').DataTable({
     "info":false,
-    "aLenthMenu":[4,10],
-    "iDisplayLength":4
+    "aLenthMenu":[10,15],
+    "iDisplayLength":10
   });
 });
 

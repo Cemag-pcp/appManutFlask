@@ -67,22 +67,22 @@
                       <td data-title="Classificação">{{ maquina[1] }}</td>
                       <td style="width: 50px;">
                         <div class="dropdown">
-                            <button style = 'background-color: black;'class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa-sharp fa-solid fa-ellipsis-vertical"></i>
+                            <button class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-plus"></i>
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                              <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=maquina[0]) }}" class="btn" target="_blank">
-                                <i class="fas fa-clipboard-list"></i>
-                              </a>
-                              <a id = 'dropdown_os' class = "dropdown-item" href="/timeline-preventiva/{{maquina[0]}}" class="btn">
-                                <i class="fas fa-clock"></i>
-                              </a>
-                              <a class="dropdown-item abrir-modal" data-id="{{ maquina[0] }}" style="cursor: pointer;">
-                                <i class="fa-solid fa-file-lines docIcon" title="Documentos"></i>
-                            </a>
+                                <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=maquina[0]) }}" class="btn">
+                                    <i class="fas fa-clipboard-list"></i> Visualizar PDF
+                                </a>
+                                <!-- <a id='dropdown_os' class="dropdown-item" href="/timeline-preventiva/{{maquina[0]}}" class="btn">
+                                    <i class="fas fa-clock"></i> Ver Timeline
+                                </a> -->
+                                <a class="dropdown-item abrir-modal" data-id="{{ maquina[0] }}" style="cursor: pointer;">
+                                    <i class="fas fa-file" title="Documentos"></i> Criar grupo
+                                </a>
                             </div>
                         </div>
-                      </td>
+                    </td>
                     </tr>
                     {% endfor %}
                 </tbody>

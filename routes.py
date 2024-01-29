@@ -4080,9 +4080,7 @@ def receber_tarefas():
 
     json_tarefas = request.get_json()
 
-    print(json_tarefas)
-
-    periodicidade = int(json_tarefas['parametros'][0]['periodicidade_grupo'])
+    periodicidade = float(json_tarefas['parametros'][0]['periodicidade_grupo'])
     ultima_manutencao = json_tarefas['parametros'][0]['ultima_manutencao']
     grupo = json_tarefas['parametros'][0]['grupo']
     codigo_maquina = json_tarefas['parametros'][0]['codigo_maquina']
@@ -4385,16 +4383,41 @@ def verificar_codigo_existente():
     else:
         return jsonify({'codigo_existente':False})
 
+def adicionar_maquina(dados):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute('insert into public.tb_maquinas (setor,codigo,descricao,tombamento,apelido) values(%s,%s,%s,%s,%s)',(dados['setor'],dados['codigo'],dados['descricao'],
+                                                                                                                     dados['tombamento'],dados['apelido']))
+
+    conn.commit()
+
+    return 'sucess'
+
+def adicionar_maquina_preventiva(dados):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute('insert into public.tb_planejamento_anual (codigo,classificacao) values(%s,%s)',(dados['codigo'],dados['criticidade']))
+
+    conn.commit()
+
+    return 'sucess'
+
 @routes_bp.route('/cadastrar-maquina', methods=['POST'])
 @login_required
 def cadastrar_maquina():
 
     dados = request.get_json()
+    
+    adicionar_maquina(dados)
 
     if dados['preventiva']:
-        print('insert nas duas tabelas')
-    else:
-        print('insert apenas em 1 tabela')
+        adicionar_maquina_preventiva(dados)
 
     return 'sucess'
 

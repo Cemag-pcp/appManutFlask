@@ -450,6 +450,7 @@
 </div>
 
 <div id="mensagem"></div>
+<div><input style="display: none;" id="booleanCadastroMaquina"></div>
 
 {% endblock %}
 
@@ -1059,7 +1060,10 @@
 
     function enviarCadastroMaquina(codigo_diponivel) {
 
-        if (codigo_diponivel) {
+        if (codigo_diponivel === 'true') {
+            exibirMensagem('aviso','Escolha um código válido')
+            return;
+        } else {
 
             const codigo = document.getElementById('inputCodigoCadastrarMaquina').value;
             
@@ -1067,7 +1071,6 @@
                 exibirMensagem('aviso','Preencha o campo de código!')
                 return;
             }
-
 
             data = {
                 'codigo': document.getElementById('inputCodigoCadastrarMaquina').value,
@@ -1078,8 +1081,7 @@
                 'preventiva': toggleCampos(),
                 'criticidade': document.getElementById('criticidade').value
             };
-            
-            
+                  
             $.ajax({
                 type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
                 url: '/cadastrar-maquina',  // URL do backend onde irá processar a exclusão da máquina
@@ -1107,8 +1109,6 @@
                 
             });
         
-        } else {
-            console.log(codigo_diponivel)
         }
 
 
@@ -1123,42 +1123,44 @@
         var codigo = this.value;
 
         const button = document.getElementById('cadastrar_maquina');
-
+    
         $.ajax({
             type: 'POST',  // Método da requisição (pode ser GET, POST, etc.)
             url: '/verificar-codigo-existente',  // URL do backend onde irá processar a exclusão da máquina
             data: JSON.stringify(codigo),  // Dados a serem enviados para o servidor (nesse caso, o código da máquina)
             contentType:'application/json',
             success: function(response) {
-                console.log(response);
+                console.log(response.codigo_existente);
 
                 if (codigo === '') {
                     $('#helperDangerInputCodigoCadastrarMaquina').hide()
                     $('#helperSucessInputCodigoCadastrarMaquina').hide()
 
                 } else {
-                    if (response === 'Código disponível') {
-                        $('#helperSucessInputCodigoCadastrarMaquina').show()
-                        $('#helperDangerInputCodigoCadastrarMaquina').hide()
-                    } else {
+                    if (response.codigo_existente) {
                         $('#helperDangerInputCodigoCadastrarMaquina').show()
                         $('#helperSucessInputCodigoCadastrarMaquina').hide()
+                    } else {
+                        $('#helperSucessInputCodigoCadastrarMaquina').show()
+                        $('#helperDangerInputCodigoCadastrarMaquina').hide()
                     }
-                }
-               
+                }      
+
+                $('#booleanCadastroMaquina').val(response.codigo_existente);      
+                console.log($('#booleanCadastroMaquina').val());
             },
             error: function(error) {
                 // Caso ocorra algum erro na requisição, você pode tratar aqui
                 console.log('Erro na requisição:', error);
             }
             
-        });
+        });  
+    
+    });
 
-        document.getElementById('cadastrar_maquina').addEventListener('click', function() {
-            enviarCadastroMaquina(codigo_diponivel); 
-        });
-
-        console.log(codigo)
+    document.getElementById('cadastrar_maquina').addEventListener('click', function() {
+        var booleanCadastro = $('#booleanCadastroMaquina').val();  
+        enviarCadastroMaquina(booleanCadastro); 
     });
 
 </script>
