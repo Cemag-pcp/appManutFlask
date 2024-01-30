@@ -26,6 +26,9 @@
     <!-- Dropdown input list -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
 
+    <!-- Mensagem -->
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/mensagem.css') }}">
+
 </head>
 
 <body class="bg-gradient-primary">
@@ -35,7 +38,7 @@
         <div class="row">
             <!-- <div class="card mx-auto text-center o-hidden border-0 shadow-lg my-5"> -->
             <div class="card mx-auto o-hidden border-0 shadow-lg my-5">
-                <form method="POST" action="{{url_for('routes.abrir_os')}}" enctype="multipart/form-data">
+                <form id="formularioEnviarOs" method="POST" action="{{url_for('routes.abrir_os')}}" enctype="multipart/form-data">
                     <div class="card-header text-center">
                         <h1 class="h4 text-gray-900">Abertura de OS</h1>
                         <a href="#" data-toggle="modal" data-target="#informativo">
@@ -241,7 +244,7 @@
                         </div>
                     </div>
                     <div class="card-footer text-center">
-                        <button type="submit" class="btn btn-success">Enviar</button>
+                        <button id="btnEnviar" type="submit" class="btn btn-success">Enviar</button>
                     </div>
                 </form>
             </div>
@@ -288,6 +291,8 @@
         </div>
     </div>
 
+    <div id="mensagem"></div>
+
     <!-- Bootstrap core JavaScript-->
     <script src="static/vendor/jquery/jquery.min.js"></script>
     <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -298,56 +303,102 @@
     <!-- Custom scripts for all pages-->
     <script src="static/js/sb-admin-2.min.js"></script>
 
+    <script src="static/js/mensagem.js"></script>
+
     <!-- Script para inputlist -->    
     <script>
         
+        // function configurarDropdown(inputId, listId) {
+        //     var inputDropdown = document.getElementById(inputId);
+        //     var listaDropdown = document.getElementById(listId);
+
+        //     inputDropdown.addEventListener('focus', function() {
+        //         if (inputDropdown.readOnly) {
+        //             listaDropdown.style.display = 'none';
+        //         } else {
+        //             listaDropdown.style.display = 'block';
+        //         }
+                
+        //     });
+
+        //     inputDropdown.addEventListener('blur', function() {
+        //         // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
+        //         setTimeout(function() {
+        //             listaDropdown.style.display = 'none';
+        //         }, 200);
+        //     });
+
+        //     listaDropdown.addEventListener('click', function(event) {
+        //         if (event.target.tagName === 'LI') {
+        //             inputDropdown.value = event.target.textContent;
+                    
+        //             // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+        //             setTimeout(function() {
+        //                 listaDropdown.style.display = 'none';
+        //             }, 100);
+        //         }
+        //     });
+
+        //     inputDropdown.addEventListener('input', function() {
+        //         var input = this.value.trim().toLowerCase();
+        //         var itens = listaDropdown.getElementsByTagName('li');
+
+        //         for (var i = 0; i < itens.length; i++) {
+        //             var textoItem = itens[i].textContent.toLowerCase();
+        //             var itemVisivel = textoItem.indexOf(input) > -1;
+        //             itens[i].style.display = itemVisivel ? 'block' : 'none';
+        //         }
+
+        //         listaDropdown.style.display = 'block';
+        //     });
+        // }
+
+        // configurarDropdown('inputSetor', 'listSetor');
+        // configurarDropdown('inputSolicitante', 'listSolicitante');
+        // configurarDropdown('inputMaquinaLocal', 'listMaquinaLocal');
+        // configurarDropdown('inputEquipamentoFalha', 'listEquipamentoFalha');
+        // configurarDropdown('inputcampoESetorMaquinaSolda', 'listcampoESetorMaquinaSolda');
+        // configurarDropdown('inputFerramenta', 'listFerramenta');
+        // configurarDropdown('inputImpacto', 'listaImpacto');
+
         function configurarDropdown(inputId, listId) {
             var inputDropdown = document.getElementById(inputId);
             var listaDropdown = document.getElementById(listId);
+            var itens = listaDropdown.getElementsByTagName('li');
+            var valorAnterior = "";
 
-            inputDropdown.addEventListener('focus', function() {
+            inputDropdown.addEventListener('focus', function () {
                 if (inputDropdown.readOnly) {
                     listaDropdown.style.display = 'none';
                 } else {
                     listaDropdown.style.display = 'block';
                 }
-                
             });
 
-            inputDropdown.addEventListener('blur', function() {
+            inputDropdown.addEventListener('blur', function () {
                 // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
-                setTimeout(function() {
+                setTimeout(function () {
+                    if (!correspondeAItem()) {
+                        // Se o valor não corresponder a um item na lista, redefina para o valor anterior
+                        inputDropdown.value = valorAnterior;
+                    }
                     listaDropdown.style.display = 'none';
                 }, 200);
             });
 
-            listaDropdown.addEventListener('click', function(event) {
+            listaDropdown.addEventListener('click', function (event) {
                 if (event.target.tagName === 'LI') {
-                    inputDropdown.value = event.target.textContent;
-                    
-                    // if (event.target.textContent === 'Solda') {
-                    //     document.getElementById('campoEquipamentoEmFalha').style.display = 'block';
-                    //     document.getElementById('campoMaquinaLocal').style.display = 'none';
-                    // } else {
-                    //     document.getElementById('campoMaquinaLocal').style.display = 'block';
-                    //     document.getElementById('campoEquipamentoEmFalha').style.display = 'none';
-                    // }
-
-                    // if (event.target.textContent === 'Máquina de Solda') {
-                    //     document.getElementById('campoSetorMaquinaSolda').style.display = 'block';
-                    //     document.getElementById('campoMaquinaLocal').style.display = 'block';
-                    // } else {
-                    //     // document.getElementById('campoSetorMaquinaSolda').style.display = 'block';
-                    // }
+                    valorAnterior = event.target.textContent;
+                    inputDropdown.value = valorAnterior;
 
                     // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
-                    setTimeout(function() {
+                    setTimeout(function () {
                         listaDropdown.style.display = 'none';
                     }, 100);
                 }
             });
 
-            inputDropdown.addEventListener('input', function() {
+            inputDropdown.addEventListener('input', function () {
                 var input = this.value.trim().toLowerCase();
                 var itens = listaDropdown.getElementsByTagName('li');
 
@@ -357,8 +408,23 @@
                     itens[i].style.display = itemVisivel ? 'block' : 'none';
                 }
 
-                listaDropdown.style.display = 'block';
+                // Exiba a lista apenas se houver correspondência com os itens
+                var correspondenciaItens = Array.from(itens).some(function (item) {
+                    var textoItem = item.textContent.toLowerCase();
+                    var itemVisivel = textoItem.includes(input);
+                    item.style.display = itemVisivel ? 'block' : 'none';
+                    return itemVisivel;
+                });
+
+                listaDropdown.style.display = correspondenciaItens ? 'block' : 'none';
             });
+
+            function correspondeAItem() {
+                var input = inputDropdown.value.trim().toLowerCase();
+                return Array.from(itens).some(function (item) {
+                    return item.textContent.toLowerCase() === input;
+                });
+            }
         }
 
         configurarDropdown('inputSetor', 'listSetor');
@@ -368,6 +434,8 @@
         configurarDropdown('inputcampoESetorMaquinaSolda', 'listcampoESetorMaquinaSolda');
         configurarDropdown('inputFerramenta', 'listFerramenta');
         configurarDropdown('inputImpacto', 'listaImpacto');
+
+
 
     </script>
 
@@ -539,6 +607,28 @@
         });
     </script>
 
+    <!-- Mensagem caso o nome do setor esteja em branco -->
+    <script>
+        document.getElementById('inputMaquinaLocal').addEventListener('click', function(){
+            var setorEscolhido = document.getElementById("inputSetor").value;
+            
+            if (setorEscolhido === '') {
+                console.log('escolha o setor');
+                exibirMensagem('aviso','Escolha o setor')
+            } 
+            
+        })
+    </script>
+
+    <!-- Desabilita o botão ao enviar o formulário e habilita novamente após o envio ser realizado com sucesso -->
+    <script>
+        $(document).ready(function () {
+            $("#formularioEnviarOs").submit(function () {
+                $("#btnEnviar").prop("disabled", true); // Desabilita o botão ao enviar o formulário
+                return true; // Permite a submissão do formulário
+            });
+        });
+    </script>
 
 </body>
 

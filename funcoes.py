@@ -547,8 +547,9 @@ def gerador_de_semanas_informar_manutencao_diario(grupo,codigo_maquina,maquina,t
 # Define a função para calcular a próxima data ajustada
 
 def calcular_proxima_data(data_atual, periodicidade_em_dias):
-    dias_uteis = pd.offsets.BDay(periodicidade_em_dias)  # Considera dias úteis (BDay)
-    data_atual = datetime.now()
+
+    dias_uteis = pd.offsets.BDay(round(periodicidade_em_dias))  # Considera dias úteis (BDay)
+    # data_atual = datetime.now()
     proxima_data = data_atual + dias_uteis
     # proxima_data = proxima_data + timedelta(days=(7 - proxima_data.weekday()) % 7)  # Ajusta para segunda-feira
     return proxima_data.strftime("%Y-%m-%d") 

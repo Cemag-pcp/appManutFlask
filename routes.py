@@ -2020,6 +2020,9 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     df['ultima_atualizacao'] = df['ultima_atualizacao'] - timedelta(hours=3)
     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime(
         "%Y-%m-%d %H:%M:%S")
+    
+    # .dt.strftime("%d/%m/%Y")
+
     df.reset_index(drop=True, inplace=True)
 
     for i in range(len(df)):
@@ -2042,7 +2045,6 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
     df = pd.merge(df, df_custos, how='left', on='id_ordem')
 
     df['proporcional'] = df['proporcional'].fillna(0)
-
     list_users = df.values.tolist()
 
     funcionarios = buscar_funcionarios()
@@ -3765,7 +3767,7 @@ def grupos_preventivas():
     
     # Grupos que ja tem data estabelecida
     df_grupos_notna = data.dropna()
-    df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], int(row['periodicidade'])*30), axis=1)
+    df_grupos_notna['proxima_manutencao'] = df_grupos_notna.apply(lambda row: calcular_proxima_data(row['ult_manutencao'], float(row['periodicidade'])*30), axis=1)
 
     df_grupos_notna['proxima_manutencao'] = pd.to_datetime(df_grupos_notna['proxima_manutencao'],format="%Y-%m-%d").dt.strftime("%d/%m/%Y")
     df_grupos_notna['ult_manutencao'] = pd.to_datetime(df_grupos_notna['ult_manutencao'],format="%Y-%m-%d").dt.strftime("%d/%m/%Y")
@@ -4896,7 +4898,7 @@ def excluir_maquina():
         conn.commit()
         conn.close()
 
-        flash("Máquina excluída com sucesso", category='sucess')
+        # flash("Máquina excluída com sucesso", category='sucess')
 
         return 'Dados recebidos com sucesso!'
 
@@ -4922,7 +4924,7 @@ def excluir_preventiva():
         conn.commit()
         conn.close()
 
-        flash("Máquina excluída com sucesso", category='sucess')
+        # flash("Máquina excluída com sucesso", category='sucess')
 
         return 'Dados recebidos com sucesso!'
 

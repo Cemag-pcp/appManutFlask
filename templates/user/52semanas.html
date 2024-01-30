@@ -2,14 +2,11 @@
 
 {% block links %}
 
-
-
 {% endblock %}
 
 {% block containerFluid %}
 
 <div class='container-fluid'>
-
 
   <div class="row">
 
@@ -62,27 +59,27 @@
                 </thead>
                 <tbody>
                   {% for maquina in tabela_maquinas_preventivas_ %}
-                    <tr id="linhas_52semanas" style="text-overflow: ellipsis; white-space: nowrap;">
+                    <tr>
                       <td data-title="Código">{{ maquina[0] }}</td>
                       <td data-title="Classificação">{{ maquina[1] }}</td>
                       <td style="width: 50px;">
                         <div class="dropdown">
-                            <button class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=maquina[0]) }}" class="btn">
-                                    <i class="fas fa-clipboard-list"></i> Visualizar PDF
-                                </a>
-                                <!-- <a id='dropdown_os' class="dropdown-item" href="/timeline-preventiva/{{maquina[0]}}" class="btn">
-                                    <i class="fas fa-clock"></i> Ver Timeline
-                                </a> -->
-                                <a class="dropdown-item abrir-modal" data-id="{{ maquina[0] }}" style="cursor: pointer;">
-                                    <i class="fas fa-file" title="Documentos"></i> Criar grupo
-                                </a>
-                            </div>
+                          <button class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-plus"></i>
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            <a id="dropdown_os" class="dropdown-item" href="{{ url_for('routes.mostrar_pdf', codigo_maquina=maquina[0]) }}" class="btn">
+                              <i class="fas fa-clipboard-list"></i> Visualizar PDF
+                            </a>
+                            <!-- <a id='dropdown_os' class="dropdown-item" href="/timeline-preventiva/{{maquina[0]}}" class="btn">
+                              <i class="fas fa-clock"></i> Ver Timeline
+                            </a> -->
+                            <a class="dropdown-item abrir-modal" data-id="{{ maquina[0] }}" style="cursor: pointer;">
+                              <i class="fas fa-file" title="Documentos"></i> Criar grupo
+                            </a>
+                          </div>
                         </div>
-                    </td>
+                      </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -119,7 +116,6 @@
     </div>
 
   </div>
-
 
 </div>
 
@@ -780,7 +776,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
-
 <!-- Populando tabela de grupos -->
 <script>
   // Função para popular a tabela
@@ -810,6 +805,7 @@ function popularTabelaMaquinasPreventivas(data) {
     
     // Inicializa o DataTable
     $('#dataTable13').DataTable({
+      order: [[4, 'asc']],
       columnDefs: [
         { type: 'date-uk', targets: [2,4] }
       ]
@@ -857,6 +853,7 @@ $.ajax({
         );
     });
     $('#dataTable14').DataTable({
+      order: [[3, 'desc']],
       columnDefs: [
         { type: 'date-uk', targets: 3 }
       ]
