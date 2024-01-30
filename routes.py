@@ -605,14 +605,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline = pd.read_sql_query(query_mtbf, conn)
 
-    if dia_inicial == []:
-        df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
-        df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
-        df_timeline['mes'] = df_timeline['dataabertura'].dt.month
-    else:
-        df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
-        # Crie uma nova coluna 'mes' usando o atributo .dt.month
-        df_timeline['mes'] = df_timeline['datafim'].dt.month
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    # Crie uma nova coluna 'mes' usando o atributo .dt.month
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
 
     # mes_hoje = datetime.today().month - 1
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
@@ -627,10 +622,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='maquina')
 
-    if dia_inicial == []:
-        qtd_dias_uteis = dias_uteis(lista_meses)
-    else:
-        qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
+    qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
 
@@ -648,18 +640,19 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     if len(df_timeline) > 0:
 
-        if boleano_historico == True and dia_inicial == []:
+        if boleano_historico == True:
 
             """
             Se for GET pega todo o histórico e adiciona no atual
             """
+            
             historico_csv = pd.read_csv("mtbf_historico.csv", sep=';')
             historico_csv["historico_mtbf_decimal"] = historico_csv["historico_mtbf"].apply(
                 convert_time_to_decimal)
 
-            if setor_selecionado:
-                historico_csv = historico_csv[historico_csv['setor']
-                                              == setor_selecionado]
+            # if setor_selecionado:
+            #     historico_csv = historico_csv[historico_csv['setor']
+            #                                   == setor_selecionado]
 
             historico_csv['maquina'] = historico_csv['maquina'].str.split(
                 ' - ').str[0]
@@ -672,6 +665,12 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             df_timeline = df_timeline.rename(
                 columns={"MTBF_final": 'MTBF'}).round(2)
             df_timeline.sort_values("MTBF", inplace=True)
+            media_qtd_manutencao = df_timeline['qtd_manutencao'][df_timeline['qtd_manutencao'] != 0].mean()
+
+            # Substitui os valores 0 em qtd_manutencao pela média calculada
+            df_timeline['qtd_manutencao'] = df_timeline['qtd_manutencao'].replace(0,round(media_qtd_manutencao))
+
+            df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
 
             grafico1_maquina = df_timeline['maquina'].tolist()  # eixo x
             grafico1_mtbf = df_timeline['MTBF'].tolist()  # eixo y gráfico 1
@@ -712,15 +711,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     # df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
 
-    if dia_inicial == []:
-        df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
-        df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
-        # Crie uma nova coluna 'mes' usando o atributo .dt.month
-        df_timeline['mes'] = df_timeline['dataabertura'].dt.month
-    else:
-        df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
-        # Crie uma nova coluna 'mes' usando o atributo .dt.month
-        df_timeline['mes'] = df_timeline['datafim'].dt.month
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    # Crie uma nova coluna 'mes' usando o atributo .dt.month
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
 
     # mes_hoje = datetime.today().month - 1
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
@@ -734,10 +727,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['qtd_manutencao'] = df_timeline['setor'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='setor')
 
-    if dia_inicial == []:
-        qtd_dias_uteis = dias_uteis(lista_meses)
-    else:
-        qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
+    qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
 
@@ -761,10 +751,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
                 convert_time_to_decimal)
             historico_csv = historico_csv.groupby(
                 ['setor']).sum().reset_index()
-
-            if setor_selecionado:
-                historico_csv = historico_csv[historico_csv['setor']
-                                              == setor_selecionado]
 
             df_timeline_mtbf_setor = df_timeline_mtbf_setor.merge(
                 historico_csv, how='outer', on='setor').fillna(0)
@@ -885,10 +871,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         if df_combinado['apelido'][i] == '':
             df_combinado['apelido'][i] = df_combinado['maquina_y'][i]
 
-    if dia_inicial == []:
-        qtd_dias_uteis = dias_uteis(lista_meses)
-    else:
-        qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
+    qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
@@ -956,8 +939,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['now'] = datetime.now()
     df_timeline['mes_hoje'] = datetime.now().month
 
-    df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(lista_meses)
-
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
     try:
@@ -985,10 +966,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
-    if dia_inicial == []:
-        qtd_dias_uteis = dias_uteis(lista_meses)
-    else:
-        qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
+    qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
 
@@ -1049,8 +1027,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline['now'] = datetime.now()
     df_timeline['mes_hoje'] = datetime.now().month
-
-    df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(lista_meses)
     
     # df_timeline = df_timeline.drop_duplicates(subset=['id_ordem','n_ordem'])
 
@@ -1114,7 +1090,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
         df_combinado['disponibilidade'] = ((df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
         disponibilidade_geral_maquina = df_combinado['disponibilidade'].mean().round(2)
 
-        if boleano_historico == True and dia_inicial == []:
+        if boleano_historico == True:
             """
             Se for GET pega todo o histórico e adiciona no atual
             """
@@ -1222,8 +1198,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['maquina'] = df_timeline['maquina']
     df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
 
-    print('555',df_timeline['maquina'].drop_duplicates().tolist() == ['Outros'])
-
     if df_timeline['maquina'].drop_duplicates().tolist() == ['Outros']:
         df_agrupado_tempo = df_timeline.groupby('maquina').agg({
             'diferenca': 'sum',
@@ -1276,15 +1250,13 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
         disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
             2)
-
-        print('666',df_combinado)
     
         df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].groupby('setor').mean()[['MTBF','MTTR','disponibilidade']].reset_index()
         df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
         df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
         df_disponibilidade_setor['disponibilidade'] = df_disponibilidade_setor['disponibilidade'].round(2)
 
-        if boleano_historico == True and dia_inicial == []:
+        if boleano_historico == True:
             """
             Se for GET pega todo o histórico e adiciona no atual
             """
@@ -1507,15 +1479,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline = pd.read_sql_query(query_mtbf, conn)
 
-    if dia_inicial == []:
-        df_timeline = df_timeline[df_timeline['n_ordem'] == 0]
-        df_timeline['dataabertura'] = pd.to_datetime(df_timeline['dataabertura'])
-        # Crie uma nova coluna 'mes' usando o atributo .dt.month
-        df_timeline['mes'] = df_timeline['dataabertura'].dt.month
-    else:
-        df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
-        # Crie uma nova coluna 'mes' usando o atributo .dt.month
-        df_timeline['mes'] = df_timeline['datafim'].dt.month
+    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+    # Crie uma nova coluna 'mes' usando o atributo .dt.month
+    df_timeline['mes'] = df_timeline['datafim'].dt.month
 
     # mes_hoje = datetime.today().month - 1
     # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
@@ -1532,10 +1498,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='maquina')
 
-    if dia_inicial == []:
-        qtd_dias_uteis = dias_uteis(lista_meses)
-    else:
-        qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
+    qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
 
@@ -1547,7 +1510,7 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     if len(df_timeline) > 0:
 
-        if boleano_historico == True and dia_inicial == []:
+        if boleano_historico == True:
             """
             Se for GET pega todo o histórico e adiciona no atual
             """
@@ -1555,9 +1518,9 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
             historico_csv["historico_mtbf_decimal"] = historico_csv["historico_mtbf"].apply(
                 convert_time_to_decimal)
 
-            if setor_selecionado:
-                historico_csv = historico_csv[historico_csv['setor']
-                                              == setor_selecionado]
+            # if setor_selecionado:
+            #     historico_csv = historico_csv[historico_csv['setor']
+            #                                   == setor_selecionado]
 
             historico_csv['maquina'] = historico_csv['maquina'].str.split(
                 ' - ').str[0]
@@ -1571,6 +1534,12 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
                 columns={"MTBF_final": 'MTBF'}).round(2)
             df_timeline = df_timeline.iloc[:10]
             df_timeline.sort_values("MTBF", inplace=True)
+            media_qtd_manutencao = df_timeline['qtd_manutencao'][df_timeline['qtd_manutencao'] != 0].mean()
+
+            # Substitui os valores 0 em qtd_manutencao pela média calculada
+            df_timeline['qtd_manutencao'] = df_timeline['qtd_manutencao'].replace(0,round(media_qtd_manutencao))
+
+            df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
 
             grafico1_top10_maquina = df_timeline['maquina'].tolist()  # eixo x
             # eixo y gráfico 1
@@ -3477,7 +3446,7 @@ def grafico():  # Dashboard
 
     query_mtbf = (
         """
-        SELECT maquina, n_ordem, id_ordem, dataabertura, setor
+        SELECT maquina, n_ordem, id_ordem, datafim, setor
         FROM tb_ordens
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
@@ -3493,23 +3462,24 @@ def grafico():  # Dashboard
         WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
     """)
 
-    query_disponibilidade = ("""
+    query_disponibilidade = (
+        """
         SELECT t1.*, t2.parada3
-            FROM (
-                SELECT
-					datafim, 
-					maquina, 
-					n_ordem,
-					setor,
-                    status,
-                    id_ordem,
-                    TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-                    TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-                FROM
-                    tb_ordens
-                WHERE
-                    1=1
-                AND (ordem_excluida IS NULL OR ordem_excluida = FALSE)) AS t1 JOIN tb_paradas t2 ON t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem
+        FROM (
+            SELECT
+                datafim, 
+                maquina, 
+                n_ordem,
+                setor,
+                status,
+                id_ordem,
+                TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+                TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+            FROM
+                tb_ordens
+            WHERE
+                1=1
+            AND (ordem_excluida IS NULL OR ordem_excluida = FALSE)) AS t1 JOIN tb_paradas t2 ON t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem
     """)
 
     query_horas_trabalhada_tipo = """
@@ -3557,9 +3527,12 @@ def grafico():  # Dashboard
         GROUP BY setor;
         """
     
+    data_inicial = datetime(2022,8,1).date() # Data Inicial do Histórico do MTBF
+    data_fim = datetime.now().date() # Data Final do Histórico do MTBF,sempre hoje
+
     resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado,
                             query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area,
-                            query_horas_trabalhada_setor,[],[], mes)
+                            query_horas_trabalhada_setor,data_inicial,data_fim, mes)
 
     context_mtbf_maquina = resultado['context_mtbf_maquina']
     context_mttr_maquina = resultado['context_mttr_maquina']

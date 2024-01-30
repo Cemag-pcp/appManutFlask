@@ -178,8 +178,8 @@
             <thead>
                 <tr>
                     <td>Máquina</td>
-                    <td>Quantidade</td>
-                    <td>Carga</td>
+                    <td>Qtd. OS</td>
+                    <td>H.Trabalhadas</td>
                     <td>MTBF</td>
                 </tr>
             </thead>
@@ -1068,9 +1068,9 @@ var eixo_x = {{ labels_mttr_maquina | safe }};
 var ctx = document.getElementById('grafico3');
 let maxValor4 = Math.max(...eixo_y);
 // Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
-let arredondadoMaxValor4 = Math.ceil(maxValor4 / 100) * 100;
+let arredondadoMaxValor4 = Math.ceil(maxValor4 / 50) * 50;
 if (eixo_y == NaN) {
-  eixo_y = 500
+  eixo_y = 100
 }
 var myBarChart = new Chart(ctx, {
   type: 'bar',
@@ -1150,9 +1150,9 @@ var eixo_x = {{ labels_mttr_setor | safe }};
 var ctx = document.getElementById('grafico4');
 let maxValor5 = Math.max(...eixo_y);
 // Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
-let arredondadoMaxValor5 = Math.ceil(maxValor5 / 100) * 100;
+let arredondadoMaxValor5 = Math.ceil(maxValor5 / 50) * 50;
 if (eixo_y == NaN) {
-  eixo_y = 500
+  eixo_y = 100
 }
 var myBarChart = new Chart(ctx, {
   type: 'bar',
