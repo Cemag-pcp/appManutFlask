@@ -119,7 +119,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered d-none d-sm-table" id="dataTable4343" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th style="width: 30px;">OS</th>
@@ -232,6 +232,65 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <div class="d-sm-none">
+                    {% for row in list_users %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="m-0 font-weight-bold text-primary">{{row[11]}}</h5>
+                            <p class="card-text">Tipo de Manutenção: {% if row[17] != '' %}{{row[17]}}{% else %}<span style="color: transparent;">Não Informado</span>{% endif %}</p>
+                            <p class="card-text">Setor: {{row[2]}}</p>
+                            <p class="card-text">Máquina: {{row[3]}}</td>
+                            <div class="row">
+                                <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
+                                    <!-- <button class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> -->
+                                    <a class="dropdown-item dropdown_os dropdownsss" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                    <!-- </button> -->
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <a id="dropdown_os_1" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[11] }}')"> 
+                                            <i class="fas fa-wrench"></i> Execução
+                                        </a>
+                                        <!-- <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 
+                                            <i class="fas fa-box"></i> 
+                                        </a> -->
+                                        <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" onclick="modalTimeline('{{ row[11] }}')" class="btn"> 
+                                            <i class="fas fa-clock"></i> Histórico 
+                                        </a>
+                                        <!-- <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                            <i class="fas fa-image"></i> 
+                                        </a> -->
+                                        <!-- <a class="dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
+                                        <i class="far fa-file-pdf"></i> Arquivo
+                                        </a> -->
+                                        <!-- <a class="dropdown-item dropdown_os dropdownsss" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
+                                            <i class="fas fa-pencil"></i> 
+                                        </a> -->
+                                    </div>
+                                </div>
+                                {% if row[38] != '' %}
+                                <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
+                                    
+                                    <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                        <i class="fas fa-image"></i> 
+                                    </a>
+                                    
+                                </div>
+                                {% endif %}
+                                {% if row[37] != '' %}
+                                <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
+                                    
+                                    <a class="dropdown-item dropdown_os dropdownsss" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                        <i class="fas fa-camera-retro"></i>
+                                    </a>
+                                    
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
