@@ -449,18 +449,17 @@ def tempo_os():
 
     return df_agrupado
 
-
 def cards_get(query):
 
     """
     Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
     """
     
-    query = """
-        SELECT *
-        FROM tb_ordens
-        WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
-        """
+    # query = """
+    #     SELECT *
+    #     FROM tb_ordens
+    #     WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+    #     """
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -468,17 +467,17 @@ def cards_get(query):
     cards = pd.read_sql_query(query, conn)
     # cards = cards[cards['id_ordem'] == 837]
 
-    cards['status'] = cards['status'].fillna('Em espera')
+    # cards['status'] = cards['status'].fillna('Em espera')
 
-    cards = cards.sort_values(by='n_ordem', ascending=True)
+    # cards = cards.sort_values(by='n_ordem', ascending=True)
 
-    cards = cards.drop_duplicates(subset='id_ordem', keep='last')
+    # cards = cards.drop_duplicates(subset='id_ordem', keep='last')
 
-    em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
+    # em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
 
-    print(em_execucao)
+    # print(em_execucao)
 
-    cards = cards.groupby(['status'])['status'].count()
+    cards = cards.groupby(['status_atualizado'])['status_atualizado'].count()
 
     # Crie um dicionário para armazenar os resultados
     status_dict = {}
@@ -494,10 +493,7 @@ def cards_get(query):
         status_dict.get('Em espera', 0)
     ]
 
-    print(lista_qt)
-
     return lista_qt
-
 
 def cards_post(query):
 
@@ -511,17 +507,15 @@ def cards_post(query):
     cards = pd.read_sql_query(query, conn)
     # cards = cards[cards['id_ordem'] == 837]
 
-    cards['status'] = cards['status'].fillna('Em espera')
+    # cards['status'] = cards['status'].fillna('Em espera')
 
-    cards = cards.sort_values(by='n_ordem', ascending=True)
+    # cards = cards.sort_values(by='n_ordem', ascending=True)
 
-    cards = cards.drop_duplicates(subset='id_ordem', keep='last')
+    # cards = cards.drop_duplicates(subset='id_ordem', keep='last')
 
-    em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
+    # em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status_atualizado','n_ordem']]
 
-    print(em_execucao)
-
-    cards = cards.groupby(['status'])['status'].count()
+    cards = cards.groupby(['status_atualizado'])['status_atualizado'].count()
 
     # Crie um dicionário para armazenar os resultados
     status_dict = {}
@@ -534,54 +528,49 @@ def cards_post(query):
         status_dict.get('Aguardando material', 0),
         status_dict.get('Finalizada', 0),
         status_dict.get('Em execução', 0),
-        status_dict.get('Aguardando OK', 0)
+        status_dict.get('Aguardando OK', 0),
+        status_dict.get('Em espera', 0)
     ]
 
     print(lista_qt)
 
     return lista_qt
 
-def card_post_em_espera(query_em_espera):
+# def card_post_em_espera(query_em_espera):
 
-    """
-    Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
-    """
+#     """
+#     Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
+#     """
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+#                             password=DB_PASS, host=DB_HOST)
 
-    cards = pd.read_sql_query(query_em_espera, conn)
-    # cards = cards[cards['id_ordem'] == 837]
+#     cards = pd.read_sql_query(query_em_espera, conn)
+#     # cards = cards[cards['id_ordem'] == 837]
 
-    cards['status'] = cards['status'].fillna('Em espera')
+#     # cards['status'] = cards['status'].fillna('Em espera')
 
-    cards = cards.sort_values(by='n_ordem', ascending=True)
+#     # cards[cards['id_ordem'] == 1185]
 
-    print(cards)
+#     # cards = cards.sort_values(by='n_ordem', ascending=True)
 
-    cards = cards.drop_duplicates(subset='id_ordem', keep='last')
+#     # cards = cards.drop_duplicates(subset='id_ordem', keep='last')
 
-    print(cards)
+#     em_execucao = cards[cards['status_atualizado'] == 'Em espera'][['id_ordem', 'status_atualizado','n_ordem']]
 
-    em_execucao = cards[cards['status'] == 'Em espera'][['id_ordem', 'status','n_ordem']]
+#     cards = cards.groupby(['status_atualizado'])['status_atualizado'].count()
 
-    print(em_execucao)
+#     # Crie um dicionário para armazenar os resultados
+#     status_dict = {}
+#     for status, qt_os in cards.items():
+#         status_dict[status] = qt_os
 
-    cards = cards.groupby(['status'])['status'].count()
+#     # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
+#     card_em_espera = [
+#         status_dict.get('Em espera', 0),
+#     ]
 
-    # Crie um dicionário para armazenar os resultados
-    status_dict = {}
-    for status, qt_os in cards.items():
-        status_dict[status] = qt_os
-
-    # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
-    card_em_espera = [
-        status_dict.get('Em espera', 0),
-    ]
-
-    print(card_em_espera)
-
-    return card_em_espera
+#     return card_em_espera
 
 def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area, query_horas_trabalhada_setor, dia_inicial,dia_final,lista_meses):
 
@@ -3176,41 +3165,44 @@ def grafico():  # Dashboard
 
         # Monta a query base
         query = """
-                SELECT *
+                SELECT DISTINCT ON (id_ordem) *,
+                    COALESCE(status, 'Em espera') AS status_atualizado
                 FROM tb_ordens
                 WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
                """
 
         if mes_inicial:
-            query += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'::date + 1"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if maquinas_importantes:
             query += f" AND maquina in ({maquinas_selecionadas})"
 
+        query += " ORDER BY id_ordem, n_ordem DESC;"
 
-        query_em_espera = """
-                SELECT *
-                FROM tb_ordens
-                WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
-               """
+        # query_em_espera = """
+        #         SELECT DISTINCT ON (id_ordem) *,
+        #             COALESCE(status, 'Em espera') AS status_atualizado
+        #         FROM tb_ordens
+        #         WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)                
+        #        """
 
-        if mes_inicial:
-            query_em_espera += f" AND ultima_atualizacao >= '{mes_inicial}' AND ultima_atualizacao <= '{mes_final}'"
-        if setor_selecionado:
-            query_em_espera += f" AND setor in ({setor_selecionado})"
-        if maquinas_importantes:
-            query_em_espera += f" AND maquina in ({maquinas_selecionadas})"
+        # if mes_inicial:
+        #     query_em_espera += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'::date + 1"
+        # if setor_selecionado:
+        #     query_em_espera += f" AND setor in ({setor_selecionado})"
+        # if maquinas_importantes:
+        #     query_em_espera += f" AND maquina in ({maquinas_selecionadas})"
 
-        print("Query aqui", query)
+        # query_em_espera += " ORDER BY id_ordem, n_ordem DESC;"
+
+        # print("Query aqui", query_em_espera)
 
         lista_qt = cards_post(query)
 
-        card_em_espera = card_post_em_espera(query_em_espera)
+        # card_em_espera = card_post_em_espera(query_em_espera)
 
-        lista_qt.append(card_em_espera[0])
-
-        print('lista_qt',lista_qt)
+        # lista_qt.append(card_em_espera[0])
 
         """ Finalizando cards """
 
@@ -3418,7 +3410,7 @@ def grafico():  # Dashboard
         disponibilidade_geral_maquina = resultado['disponibilidade_geral_maquina']
         disponibilidade_geral_setor = resultado['disponibilidade_geral_setor']
 
-        return render_template('user/grafico.html', lista_qt=lista_qt,card_em_espera=card_em_espera, setores=setores, itens_filtrados=itens_filtrados,
+        return render_template('user/grafico.html', lista_qt=lista_qt, setores=setores, itens_filtrados=itens_filtrados,
                                lista_setore_selecionado=lista_setore_selecionado, **context_mtbf_maquina,
                                **context_mtbf_setor, **context_mttr_maquina, **context_mttr_setor, **context_disponiblidade_maquina, **context_horas_trabalhadas_area, **context_horas_trabalhadas_tipo,
                                **context_mtbf_top10_maquina, **context_disponiblidade_setor, mes=mes, **context_horas_trabalhadas, lista_horas_trabalhadas_setor=lista_horas_trabalhadas_setor,
@@ -3437,10 +3429,12 @@ def grafico():  # Dashboard
 
     # Monta a query base
     query = """
-            SELECT *
+            SELECT DISTINCT ON (id_ordem) *,
+            COALESCE(status, 'Em espera') AS status_atualizado
             FROM tb_ordens
             WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
-            """
+            ORDER BY id_ordem, n_ordem DESC;
+        """
 
     lista_qt = cards_get(query)
 

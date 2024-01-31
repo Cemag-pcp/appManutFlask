@@ -13,6 +13,7 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/cores-status.css') }}">
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/imagem-modal.css') }}">
+<link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css" rel="stylesheet" />
 
 {% endblock %}
 
@@ -748,6 +749,7 @@
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
 <!-- Page level custom scripts -->
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
 
 <!-- Bootstrap core JavaScript-->
@@ -783,6 +785,7 @@
     function downloadFilteredData() {
         var filteredData = applyFilters(); // Aplica os filtros e obtém os dados filtrados
         console.log(filteredData);
+        // downloadFilteredCSV(filteredData)
     }
 
     function applyFilters() {
@@ -802,7 +805,15 @@
 
         // Obtém a tabela
         var table = $('#dataTable').DataTable({
-            order: [[7, 'desc']]
+            order: [[7, 'desc']],
+            // responsive: true,
+            // columnDefs: [
+            //     { responsivePriority: 1, targets: 9 },
+            //     { responsivePriority: 10001, targets: 10 },
+            //     { responsivePriority: 2, targets: 7 },
+            //     // { responsivePriority: 3, targets: 5 },
+            // ]
+
         });
 
         // Aplica a filtragem para cada coluna
