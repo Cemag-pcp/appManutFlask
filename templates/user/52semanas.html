@@ -278,8 +278,6 @@
 
       $('#selectGrupos').empty();
 
-      showLoading();
-
       $.ajax({
           url: `/preventivas?codigo_maquina=${codigo_maquina}`,
           type: 'GET',
@@ -295,11 +293,9 @@
               $('.modal-title').text('Grupo de atividades da máquina ' + codigo_maquina);
               $('#modalGrupoAtividade').modal('show');
 
-              hideLoading();
           },
           error: function (error) {
               console.error(error);
-              hideLoading();
           }
       });
     }
@@ -387,9 +383,7 @@
         // Adicionar a nova linha à tabela
         $('#tableTarefas tbody').append(newRow);
     });
-
-    
-
+    $('#enviarArquivo').prop('disabled', false);
   }
 
     // Função para entrar no modal de atividades e popular
@@ -404,8 +398,6 @@
       console.log(codigo_maquina);
       // Fechar o modalGrupoAtividade
       // closeModalGrupo();
-
-      showLoading();
 
       // Chamar a rota no backend para carregar dados associados
       $.ajax({
@@ -423,7 +415,6 @@
                 console.error("Os dados recebidos não são um array:", data);
             }
 
-            hideLoading();
             
             // Exibir o modalGrupoExistente
             $('#modalGrupoExistente').modal('show');
@@ -431,7 +422,6 @@
         error: function (error) {
             console.error(error);
             exibirMensagem('aviso', 'Escolha ou crie um grupo válido.');
-            hideLoading();
         }
       });
     }
@@ -449,7 +439,6 @@
 
       console.log(nome_grupo);
 
-      showLoading();
       // Chamar a rota no backend para carregar dados associados
       $.ajax({
           url: `/criar-grupo`,
@@ -458,7 +447,6 @@
           contentType: 'application/json',
           success: function (data) {
             console.log(data)
-            hideLoading();
             if(data === 'Grupo já existente'){
               exibirMensagem('aviso','Nome de grupo já existente')
               return
@@ -467,7 +455,6 @@
           },
           error: function (error) {
               console.error(error);
-              hideLoading();
           }
       });
     }
@@ -570,8 +557,6 @@
 
     // Função para inputar arquivo
     function uploadFile(codigo_maquina) {
-      
-      showLoading();
 
       var grupoSelecionado = $('#selectGrupos').val();
 
@@ -590,20 +575,18 @@
           processData: false,
           contentType: false,
           success: function(data) {
-              hideLoading();
               if(data === 'Colunas do arquivo não correspondem ao modelo'){
                 alert('Colunas do arquivo não correspondem ao modelo.')
               } else if(data === 'Código de máquina inválido'){
                 alert('Código de máquina inválido dentro do arquivo.')
               }  else {
                 var grupo = $('#selectGrupos').val();
-                salvarTarefas(grupo);
+                salvarTarefas(grupo,codigo_maquina);
               }
           },
           error: function(error) {
               console.error('Error:', error);
               alert('Utilize um arquivo válido.')
-              hideLoading();
           }
       });
     }
@@ -622,14 +605,19 @@
         
       });
 
+      $('#enviarArquivo').on('click', function() {
+        console.log(codigoMaquina);
+        uploadFile(codigoMaquina);
+        $('#enviarArquivo').prop('disabled', true);
+      });
+
       $('#criarGrupo').on('click', function() {
         $('#modalRenomearGrupo').modal('show');
-        
       });
 
       $('#nomear_grupo').on('click', function() {
         criarGrupo(codigoMaquina);
-        $('#modalRenomearGrupo').hide()
+        $('#modalRenomearGrupo').modal('hide');
 
       });
 
@@ -640,8 +628,6 @@
       });
 
       $('#tableTarefas tbody').on('click', '.excluirTarefa', function() {
-        
-        showLoading();
 
         var linha = $(this).closest('tr');
         var atividade = linha.find('textarea').val();
@@ -671,13 +657,11 @@
           success: function(data) {
             // A resposta do backend foi bem-sucedida, remova a linha da tabela
             linha.remove();
-            hideLoading();
             exibirMensagem('sucesso','Tarefa excluída com sucesso.')
           },
           error: function(err) {
             console.error('Erro ao excluir do banco de dados:', err);
             // Adicione aqui a lógica para lidar com erros, se necessário
-            hideLoading();
           }
         });
       });
@@ -695,8 +679,6 @@
         dadosExcluir = {codigo_maquina:codigoMaquina,
                         grupoSelecionado:grupoSelecionado}
 
-        showLoading();
-
         // Fazer uma chamada AJAX para o backend para excluir a entrada no banco de dados
         $.ajax({
             type: 'POST',
@@ -706,23 +688,15 @@
           success: function(data) {
               console.log('entrou no success')
               coletarGrupos(codigoMaquina);
-              hideLoading();
               exibirMensagem('sucesso','Grupo excluído com sucesso.')
           },
           error: function(err) {
               console.error('Erro ao excluir do banco de dados:', err);
               // Adicione aqui a lógica para lidar com erros, se necessário
-              hideLoading();
           }
         });
         });
 
-    });
-
-
-    $('#enviarArquivo').on('click', function() {
-      // uploadFile(codigoMaquina);
-      console.log(codigoMaquina);
     });
 
   });

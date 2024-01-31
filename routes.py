@@ -4144,7 +4144,7 @@ def receber_upload():
     # file = r"uploads_atividade/" + file.filename
 
     try:
-        df = pd.read_csv(file, sep=";", encoding='utf-8')
+        df = pd.read_csv(file, sep=";", encoding='ISO-8859-1')
     except pd.errors.ParserError:
         df = pd.read_excel(file)
 
@@ -4152,7 +4152,7 @@ def receber_upload():
     df.columns = df.columns.str.replace('ï»¿', '')
 
     colunas_esperadas = ['codigo_maquina', 'responsabilidade', 'atividade']  # Substitua com as colunas reais
-    print(df.columns)
+    
 
     # Verificar se as colunas do DataFrame coincidem com as colunas esperadas
     if set(df.columns) != set(colunas_esperadas):
@@ -4164,11 +4164,11 @@ def receber_upload():
 
     df_list = df.values.tolist()
 
+    print(df_list)
+
     for row in df_list:       
 
         codigo_maquina_grupo = row[0]
-        print(codigo_maquina)
-        print(codigo_maquina_grupo)
         if codigo_maquina != codigo_maquina_grupo:
             return 'Código de máquina inválido'
         grupo = row[1]
