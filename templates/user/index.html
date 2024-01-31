@@ -18,11 +18,18 @@
 
 {% block containerFluid %}
 
+<!-- <button id = 'baixar_csv' onclick="downloadFilteredData()">Baixar CSV<i class="fa-solid fa-download" style="margin-left: 10px;"></i></button> -->
+
 <div class="container-fluid">
     
     <!-- Tabela e filtros -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1></h1>
+                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                        class="fas fa-download fa-sm text-white-50"></i> Download</a>
+            </div>
             <div class="row">
                 <div class="col-sm-2 mb-2">
                     <label for="os-filter">OS</label>
@@ -432,19 +439,19 @@
                 <div class="row" id="linhaLimpezaLocal" style="display: none;"> 
                     <div class="col-sm-12">
                         <label for="limpeza">Limpeza no local?</label>
-                        <input type="checkbox" name="limpeza-local" id="limpeza-local" value="true">
+                        <input type="checkbox" name="limpeza-local" id="limpeza-local" value="true"><small style="display: inline;" class="form-text text-muted"> Obrigatório</small>
                     </div>
                 </div>
                 <div class="row" id="linhaProtecoes" style="display: none;">
                     <div class="col-sm-12">
                         <label for="protec">Proteções?</label>
-                        <input type="checkbox" name="protecao-local" id="protecao-local" value="true">
+                        <input type="checkbox" name="protecao-local" id="protecao-local" value="true"><small style="display: inline;" class="form-text text-muted"> Obrigatório</small>
                     </div>
                 </div>
                 <div class="row" id="linhaFuncionalidadeEquipamento" style="display: none;">
                     <div class="col-sm-12">
-                        <label for="funcionalidade">Funcionalidade no equipamento?</label>
-                        <input type="checkbox" name="funcionalidade-equipamento" id="funcionalidade-equipamento" value="true">
+                        <label for="funcionalidade">Funcionalidade do equipamento?</label>
+                        <input type="checkbox" name="funcionalidade-equipamento" id="funcionalidade-equipamento" value="true"><small style="display: inline;" class="form-text text-muted"> Obrigatório</small>
                     </div>
                 </div>
             </div> 
@@ -1031,8 +1038,8 @@
             var selectedStatus = $(this).val();
             var nOrdem = parseInt($('#n_ordem').val());
             var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
-            var maquinas_preventivas = $('#maquinas_preventivas').val();// boolean
-            var identificador_logado = $('.identificador_logado').val();
+            var maquinas_preventivas = $('#inputMaquinasPreventivas').val();// boolean
+            var identificador_logado = $('#inputIdentificadorLogado').val();
     
             updateToggleVisibility(selectedStatus, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
         });
@@ -1042,9 +1049,9 @@
         console.log(selectedStatus);
         var nOrdem = parseInt($('#n_ordem').val());
         var maquinaValue = $('#maquina').val(); // Obter o valor da máquina
-        var maquinas_preventivas = $('#maquinas_preventivas').val(); // boolean
+        var maquinas_preventivas = $('#inputMaquinasPreventivas').val(); // boolean
         // var identificador_logado = $('.identificador_logado').val();
-        var identificador_logado = document.getElementById('identificador_logado');
+        var identificador_logado = $('#inputIdentificadorLogado').val();
 
         updateToggleVisibility(selectedStatus, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
     
@@ -1052,6 +1059,9 @@
     
     function updateToggleVisibility(status, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado) {
         
+        var maquinas_preventivas = document.getElementById('inputMaquinasPreventivas').value;
+        var identificador_logado = $('#inputIdentificadorLogado').val();
+
         console.log(status, nOrdem, maquinaValue,maquinas_preventivas,identificador_logado);
 
         if (status !== 'Aguardando OK' && identificador_logado === "2") {
@@ -1069,7 +1079,7 @@
             $('#linhaLimpezaLocal').hide();
             $('#linhaProtecoes').hide();
             $('#linhaFuncionalidadeEquipamento').hide();
-        }else if (status === 'Finalizada' && maquinas_preventivas === true && nOrdem > 0){
+        }else if (status === 'Finalizada' && maquinas_preventivas === 'true' && nOrdem > 0){
             $('#linhaMaquinaParada').hide();
             $('#linhaExecucaoFeitaMaquinaParada').show();
             $('#linhaAposExecucao').hide();
