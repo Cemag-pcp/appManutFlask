@@ -23,9 +23,6 @@ function showLoading() {
   $('#overlay').show();
   $('#spinner').show();
   // Adicione aqui sua lógica ou chamadas de AJAX, por exemplo
-  setTimeout(function() {
-    hideLoading();
-  }, 3000); // Tempo em milissegundos (3 segundos no exemplo)
 }
 
 function hideLoading() {
