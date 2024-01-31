@@ -611,8 +611,6 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='maquina')
 
-    print("diass:",dia_inicial,dia_final)
-
     qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
@@ -3082,7 +3080,7 @@ def grafico():  # Dashboard
 
     if request.method == 'POST':
 
-        boleano_historico = True
+        boleano_historico = None
         todos_meses = None
 
         conn = psycopg2.connect(
@@ -3167,20 +3165,32 @@ def grafico():  # Dashboard
 
         # Monta a query base
         query = """
-                SELECT DISTINCT ON (id_ordem) *,
-                    COALESCE(status, 'Em espera') AS status_atualizado
-                FROM tb_ordens
-                WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+                WITH RankedOrders AS (
+                    SELECT
+                        *,
+                        ROW_NUMBER() OVER (PARTITION BY id_ordem ORDER BY n_ordem DESC) AS rn,
+                        COALESCE(status, 'Em espera') as status_atualizado
+                    FROM
+                        tb_ordens)
+
+                    SELECT
+                        *
+                    FROM
+                    RankedOrders
+                    WHERE
+                    rn = 1
+                    AND (ordem_excluida IS NULL OR ordem_excluida = FALSE)
                """
 
         if mes_inicial:
+            # query += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'::date + 1"
             query += f" AND ultima_atualizacao BETWEEN '{mes_inicial}' AND '{mes_final}'::date + 1"
         if setor_selecionado:
             query += f" AND setor in ({setor_selecionado})"
         if maquinas_importantes:
             query += f" AND maquina in ({maquinas_selecionadas})"
 
-        query += " ORDER BY id_ordem, n_ordem DESC;"
+        # query += " ORDER BY id_ordem, n_ordem DESC;"
 
         # query_em_espera = """
         #         SELECT DISTINCT ON (id_ordem) *,
@@ -3201,7 +3211,7 @@ def grafico():  # Dashboard
         # print("Query aqui", query_em_espera)
 
         lista_qt = cards_post(query)
-
+        print(query)
         # card_em_espera = card_post_em_espera(query_em_espera)
 
         # lista_qt.append(card_em_espera[0])
@@ -3230,7 +3240,7 @@ def grafico():  # Dashboard
         if setor_selecionado:
             query_mtbf += f" AND t1.setor in ({setor_selecionado})"
         if mes_inicial:
-            query_mtbf += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'"
+            query_mtbf += f" AND datafim >= '{mes_inicial}' AND datafim <= '{mes_final}'::date + 1"
         if maquinas_importantes:
             query_mtbf += f" AND maquina in ({maquinas_selecionadas})"
 
