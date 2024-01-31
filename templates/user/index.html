@@ -27,7 +27,7 @@
         <div class="card-header py-3">
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
                 <h1></h1>
-                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                <a onclick="downloadFilteredData()" href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                         class="fas fa-download fa-sm text-white-50"></i> Download</a>
             </div>
             <div class="row">
@@ -782,7 +782,7 @@
 
     function downloadFilteredData() {
         var filteredData = applyFilters(); // Aplica os filtros e obtém os dados filtrados
-        downloadFilteredCSV(filteredData); // Realiza o download do CSV
+        console.log(filteredData);
     }
 
     function applyFilters() {
@@ -831,6 +831,11 @@
 
             this.node().style.display = shouldDisplay ? '' : 'none';
         });
+
+        var visibleRows = table.rows({ search: 'applied' }).data().toArray();
+
+        // Retorna os dados filtrados
+        return visibleRows;
     }
 
     // Obtém os elementos de filtro por seus IDs

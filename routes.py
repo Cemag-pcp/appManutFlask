@@ -2621,11 +2621,11 @@ def executar_ordem():
     problemaaparente = dados['problema'] # será usado para descrever o nome do grupo de atividades
     solicitante = dados['inputSolicitante']
 
-    if status == 'Finalizado' and confirmacao:
-        confirmacao = True
-        status = 'Aguardando OK'
-    else:
-        confirmacao = False
+    # if status == 'Finalizado' and confirmacao:
+    #     confirmacao = True
+    #     status = 'Aguardando OK'
+    # else:
+    #     confirmacao = False
     
     matriculas_operadores = []
 
@@ -4054,6 +4054,7 @@ def receber_tarefas():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     json_tarefas = request.get_json()
+    print(json_tarefas)
 
     periodicidade = float(json_tarefas['parametros'][0]['periodicidade_grupo'])
     ultima_manutencao = json_tarefas['parametros'][0]['ultima_manutencao']

@@ -608,6 +608,8 @@
       });
     }
 
+    var codigoMaquina; // Declaração da variável no escopo mais amplo
+
     // Ao abrir o modal será carregadas as funções
     $('.abrir-modal').on('click', function() {
       var codigoMaquina = $(this).data('id');
@@ -715,10 +717,12 @@
         });
         });
 
-      $('#enviarArquivo').on('click', function() {
-        uploadFile(codigoMaquina);
-      });
+    });
 
+
+    $('#enviarArquivo').on('click', function() {
+      // uploadFile(codigoMaquina);
+      console.log(codigoMaquina);
     });
 
   });
