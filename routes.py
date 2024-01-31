@@ -611,6 +611,8 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
     df_timeline['qtd_manutencao'] = df_timeline['maquina'].map(contagem)
     df_timeline = df_timeline.drop_duplicates(subset='maquina')
 
+    print("diass:",dia_inicial,dia_final)
+
     qtd_dias_uteis = dias_uteis_inicial_final(dia_inicial,dia_final)
 
     df_timeline['carga_trabalhada'] = qtd_dias_uteis * 9
@@ -3112,8 +3114,8 @@ def grafico():  # Dashboard
         mes = request.form.get('datetimes')
 
         if not mes:
-            mes_inicial_str = '2023-06-22'
-            boleano_historico = False
+            mes_inicial_str = '2022-08-01' # Data Inicial do Histórico do MTBF
+            # mes_inicial_str = datetime(2022,8,1).date() # Data Inicial do Histórico do MTBF
             # Usar o construtor do datetime.date
             mes_inicial = datetime.date(datetime.strptime(mes_inicial_str, '%Y-%m-%d'))
             hoje = datetime.now().date()
