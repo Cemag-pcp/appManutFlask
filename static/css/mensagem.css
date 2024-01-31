@@ -20,3 +20,11 @@ color: white;
 background-color: #ff9800;
 color: white;
 } 
+
+@media (max-width: 767px) { /* Tamanho da tela de celular */
+    .daterangepicker {
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, 20%) !important;
+    }
+}
