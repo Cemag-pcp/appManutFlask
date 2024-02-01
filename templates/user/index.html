@@ -806,14 +806,13 @@
         // Obtém a tabela
         var table = $('#dataTable').DataTable({
             order: [[7, 'desc']],
-            // responsive: true,
-            // columnDefs: [
-            //     { responsivePriority: 1, targets: 9 },
-            //     { responsivePriority: 10001, targets: 10 },
-            //     { responsivePriority: 2, targets: 7 },
-            //     // { responsivePriority: 3, targets: 5 },
-            // ]
-
+            responsive: true,
+            columnDefs: [
+                // { responsivePriority: 10001, targets: 0 },
+                { responsivePriority: 10001, targets: 1 },
+                // { responsivePriority: 1, targets: 3 },
+                { responsivePriority: 1, targets: -2 },
+            ]
         });
 
         // Aplica a filtragem para cada coluna
