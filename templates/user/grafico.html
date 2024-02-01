@@ -68,7 +68,7 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[2]}}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        <i class="fa-solid fa-play fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[4]}}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                      <i class="fa-solid fa-hourglass-start fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -104,7 +104,7 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[1]}}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                      <i class="fa-solid fa-clipboard-check fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -121,7 +121,7 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[0]}}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        <i class="fa-solid fa-business-time fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -129,16 +129,16 @@
     </div>
 
     <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-danger shadow h-100 py-2">
+      <div class="card border-left-info shadow h-100 py-2">
           <div class="card-body">
               <div class="row no-gutters align-items-center">
                   <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                          Aguardando OK</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[3]}}</div>
+                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                          Disponibilidade Geral</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{disponibilidade_geral_setor}}%</div>
                   </div>
                   <div class="col-auto">
-                      <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                      <i class="fa-solid fa-globe fa-2x text-gray-300"></i>
                   </div>
               </div>
           </div>
@@ -635,22 +635,6 @@
                 </table>
             </div>
         </div>
-        <div class="col-xl-12 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Disponibilidade Geral</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{disponibilidade_geral_setor}}%</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
   </div>
 </div>
@@ -685,6 +669,7 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
+<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>

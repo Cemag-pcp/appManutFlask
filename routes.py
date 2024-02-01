@@ -105,10 +105,18 @@ def dados_para_editar(id_ordem,n_ordem):
     horafim = [row['horafim'] for row in data][0]
 
     # Formatando as datas e horas como strings
-    data_inicio_str = datainicio.isoformat()
-    hora_inicio_str = horainicio.strftime('%H:%M')
-    data_fim_str = datafim.isoformat()
-    hora_fim_str = horafim.strftime('%H:%M')
+    try:
+        data_inicio_str = datainicio.isoformat()
+        hora_inicio_str = horainicio.strftime('%H:%M')
+        data_fim_str = datafim.isoformat()
+        hora_fim_str = horafim.strftime('%H:%M')
+    except:
+        data_inicio_str = datetime.now().date().isoformat()
+        horainicio = "00:00"
+        hora_inicio_str = horainicio
+        data_fim_str = datetime.now().date().isoformat()
+        horafim = "00:00"
+        hora_fim_str = horafim
 
     dados = {
         'setor_values':setor_values,
@@ -2018,7 +2026,9 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     funcionarios = buscar_funcionarios()
 
-    return render_template('user/index.html', funcionarios=funcionarios, list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
+    nomes_solicitantes = solicitantes()
+
+    return render_template('user/index.html', funcionarios=funcionarios, nomes_solicitantes=nomes_solicitantes,list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
 
 def proxima_os():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,

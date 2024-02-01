@@ -27,7 +27,7 @@
         <div class="card-header py-3">
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
                 <h1></h1>
-                <a onclick="downloadFilteredData()" href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                <a onclick="downloadFilteredData()" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                         class="fas fa-download fa-sm text-white-50"></i> Download</a>
             </div>
             <div class="row">
@@ -182,18 +182,18 @@
                                 <div class="row">
                                     <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
                                         <!-- <button class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> -->
-                                        <a class="dropdown-item dropdown_os dropdownsss" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
+                                        <a class="dropdown-item dropdownsss" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
                                             <i class="fas fa-plus"></i>
                                         </a>
                                         <!-- </button> -->
                                         <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                            <a id="dropdown_os_1" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[11] }}')"> 
+                                            <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[11] }}')"> 
                                                 <i class="fas fa-wrench"></i> Execução
                                             </a>
                                             <!-- <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 
                                                 <i class="fas fa-box"></i> 
                                             </a> -->
-                                            <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" onclick="modalTimeline('{{ row[11] }}')" class="btn"> 
+                                            <a class = "dropdown-item dropdownsss" style="cursor: pointer;" onclick="modalTimeline('{{ row[11] }}')" class="btn"> 
                                                 <i class="fas fa-clock"></i> Histórico 
                                             </a>
                                             <!-- <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
@@ -210,7 +210,7 @@
                                     {% if row[38] != '' %}
                                     <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
                                         
-                                        <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                        <a class="dropdown-item dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                             <i class="fas fa-image"></i> 
                                         </a>
                                         
@@ -219,7 +219,7 @@
                                     {% if row[37] != '' %}
                                     <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
                                         
-                                        <a class="dropdown-item dropdown_os dropdownsss" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                        <a class="dropdown-item dropdownsss" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
                                             <i class="fas fa-camera-retro"></i>
                                         </a>
                                         
@@ -503,11 +503,32 @@
                 <div class="row">
                     <div class="col-sm-6 mb-2">
                         <label for="setor">Setor:</label>
-                        <input type="text" name="setor" id="setor_edicao" value="" class="form-control" disabled>    
+                        <select class="form-control" style="height: 38px;" id="setor_edicao" name="setor_edicao" disabled>
+                            <option value="Administrativo">Administrativo</option>
+                            <option value="Almoxarifado">Almoxarifado</option>
+                            <option value="Corte e estamparia">Corte e estamparia</option>
+                            <option value="Expedição">Expedição</option>
+                            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                            <option value="Solda">Solda</option>
+                            <option value="Montagem">Montagem</option>
+                            <option value="Pintura">Pintura</option>
+                            <option value="Carpintaria">Carpintaria</option>
+                            <option value="Usinagem">Usinagem</option>  
+                            <option value="Serra">Serra</option>
+                            <option value="Serralheria">Serralheria</option>
+                            <option value="Manutenção">Manutenção</option>
+                            <option value="Forjaria">Forjaria</option>
+                            <option value="Utilidades">Utilidades</option> 
+                            <option value="Qualidade">Qualidade</option> 
+                        </select>  
                     </div>
                     <div class="col-sm-6">
                         <label for="setor">Solicitante:</label>
-                        <input id="inputSolicitante_edicao" type="text" name="solicitante" value="" class="form-control" disabled>    
+                        <select class="form-control" id="inputSolicitante_edicao">
+                            {% for solicitante in nomes_solicitantes %}
+                                <option>{{solicitante[0]}}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
                 <div class="row">
@@ -521,7 +542,12 @@
                     </div>
                     <div class="col-sm-4">
                         <label>Risco:</label>
-                        <input id="inputRisco_edicao" type="text" name="risco" value="" class="form-control"> 
+                        <select class="form-control form-control" id="inputRisco_edicao" style='padding: .375rem .25rem;' name="risco">
+                            <option value="" selected disabled hidden></option>
+                            <option>Alto</option>
+                            <option>Médio</option>
+                            <option>Baixo</option>
+                          </select>
                     </div>
                 </div>
                 <hr>
@@ -604,69 +630,71 @@
                         </div>
                     </div>
                 </div>
-                <hr>
-                <h6 class="m-0 font-weight-bold text-primary">Execução</h6>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-6 mb-2">
-                        <label>Tipo de manutenção</label>
-                        <select style = 'height: 50px;' class="form-control" name="tipo_manutencao" id="selectTipoManutencao_edicao">
-                            <option value="" selected disabled hidden></option>  
-                            <option value="Corretiva">Corretiva</option>
-                            <option value="Preventiva">Preventiva</option>
-                            <option value="Preditiva">Preditiva</option>
-                            <option value="Apoio">Apoio</option>
-                            <option value="Projetos">Projetos</option>
-                            <option value="sesmt">SESMT</option>  
-                            <option value="Corretiva Programada">Corretiva Programada</option>  
-                        </select>
-                        <small id="selectTipoManutencao_edicao" class="form-text text-muted">Obrigatório</small>
+                <div id="campo_execucao" style="display: none;">
+                  <hr>
+                  <h6 class="m-0 font-weight-bold text-primary">Execução</h6>
+                  <hr>
+                    <div class="row">
+                        <div class="col-sm-6 mb-2">
+                            <label>Tipo de manutenção</label>
+                            <select style = 'height: 50px;' class="form-control" name="tipo_manutencao" id="selectTipoManutencao_edicao">
+                                <option value="" selected disabled hidden></option>  
+                                <option value="Corretiva">Corretiva</option>
+                                <option value="Preventiva">Preventiva</option>
+                                <option value="Preditiva">Preditiva</option>
+                                <option value="Apoio">Apoio</option>
+                                <option value="Projetos">Projetos</option>
+                                <option value="sesmt">SESMT</option>  
+                                <option value="Corretiva Programada">Corretiva Programada</option>  
+                            </select>
+                            <small id="selectTipoManutencao_edicao" class="form-text text-muted">Obrigatório</small>
+                        </div>
+                        <div class="col-sm-6">
+                            <label>Área de manutenção</label>
+                            <select style = 'height: 50px;' class="form-control" name="area_manutencao" id="areaManutencao_edicao">
+                                <option value="" selected disabled hidden></option>  
+                                <option value="Predial">Predial</option>
+                                <option value="Mecânica">Mecânica</option>
+                                <option value="Elétrica">Elétrica</option>
+                            </select>  
+                            <small id="areaManutencao_edicao" class="form-text text-muted">Obrigatório</small>
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <label>Área de manutenção</label>
-                        <select style = 'height: 50px;' class="form-control" name="area_manutencao" id="areaManutencao_edicao">
-                            <option value="" selected disabled hidden></option>  
-                            <option value="Predial">Predial</option>
-                            <option value="Mecânica">Mecânica</option>
-                            <option value="Elétrica">Elétrica</option>
-                        </select>  
-                        <small id="areaManutencao_edicao" class="form-text text-muted">Obrigatório</small>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label for="statusLista">Data e hora</label>
+                            <input id="data_edit_edicao" class="form-control" type="text" name="datetimes" />
+                            <small id="data_edit_edicao" class="form-text text-muted">Obrigatório</small>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="operador_label">Operadores</label>
+                            <!-- <select class="form-control" id="operador" name="operador" multiple required> -->
+                            <select class="form-control js-example-basic-multiple" multiple="multiple" style="width: 100%" id="operador_edicao">
+                                {% for funcionario in funcionarios %}
+                                    <option>{{funcionario[0]}}</option>
+                                {% endfor %}
+                            </select>
+                            <small id="operador_edicao" class="form-text text-muted">Obrigatório</small>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <label for="statusLista">Data e hora</label>
-                        <input id="data_edit_edicao" class="form-control" type="text" name="datetimes" />
-                        <small id="data_edit_edicao" class="form-text text-muted">Obrigatório</small>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label for="descmanutencao_edicao">Observação da manutenção:</label>
+                            <textarea id="descmanutencao_edicao" class="form-control" name="descmanutencao" rows="5" cols="41"></textarea>
+                            <small id="descmanutencao_edicao" class="form-text text-muted">Obrigatório</small>
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <label for="operador_label">Operadores</label>
-                        <!-- <select class="form-control" id="operador" name="operador" multiple required> -->
-                        <select class="form-control js-example-basic-multiple" multiple="multiple" style="width: 100%" id="operador_edicao">
-                            {% for funcionario in funcionarios %}
-                                <option>{{funcionario[0]}}</option>
-                            {% endfor %}
-                        </select>
-                        <small id="operador_edicao" class="form-text text-muted">Obrigatório</small>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <label for="descmanutencao_edicao">Observação da manutenção:</label>
-                        <textarea id="descmanutencao_edicao" class="form-control" name="descmanutencao" rows="5" cols="41"></textarea>
-                        <small id="descmanutencao_edicao" class="form-text text-muted">Obrigatório</small>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <label for="statusLista">Status</label>
-                        <select class="form-control" id="statusLista_edicao" name="statusLista">
-                            <option>Aguardando material</option>
-                            <option>Aguardando OK</option>
-                            <option>Em espera</option>
-                            <option>Finalizada</option>
-                            <option>Em execução</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label for="statusLista">Status</label>
+                            <select class="form-control" id="statusLista_edicao" name="statusLista">
+                                <option>Aguardando material</option>
+                                <option>Aguardando OK</option>
+                                <option>Em espera</option>
+                                <option>Finalizada</option>
+                                <option>Em execução</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div> 
@@ -719,7 +747,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="overflow-x: auto;">
                 <!-- Aqui é onde o vídeo será exibido -->
             </div>
         </div>
@@ -757,18 +785,18 @@
 
     function downloadFilteredCSV(filteredData) {
         // Adicione uma linha de cabeçalho com os nomes das colunas
-        var headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Menu','Descricao'];
+        let headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Descricao'];
         filteredData.unshift(headerRow);
-        var csvContent = "data:text/csv;charset=utf-8,";
+        let csvContent = "data:text/csv;charset=utf-8,";
 
         // Concatena todas as linhas em uma única string
-        for (var i = 0; i < filteredData.length; i++) {
-            var cleanedRow = filteredData[i].map(cleanCSVValue).join(",");
+        for (let i = 0; i < filteredData.length; i++) {
+            let cleanedRow = filteredData[i].map(cleanCSVValue).join(",");
             csvContent += cleanedRow + "\r\n"; // Usamos "\r\n" para forçar a quebra de linha no formato CSV
         }
 
-        var encodedUri = encodeURI(csvContent);
-        var link = document.createElement("a");
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", "dados_filtrados.csv");
         document.body.appendChild(link);
@@ -776,13 +804,38 @@
     }
 
     function cleanCSVValue(value) {
-        // Limpa o valor removendo quebras de linha e espaços extras
-        return value.replace(/[\r\n]+/g, '').trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (typeof value === 'string') {
+            return value.replace(/[\r\n]+/g, '').trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        } else {
+            return value; 
+        }
+    }
+
+    function formatDataForDownload(filteredData) {
+        // Modifica os dados conforme necessário
+        let formattedData = filteredData.map(function(row) {
+            // Remove a coluna row[9]
+            row.splice(9, 1);
+
+            return [
+                row[0], row[1], row[2], row[3], row[4], row[6], row[7],
+                row[5].replace(/<[^>]+>/g, ''), // Remove tags HTML
+                row[8].includes('desabilitado') ? false : true,
+                row[9]
+            ];
+        });
+
+        return formattedData;
     }
 
     function downloadFilteredData() {
-        var filteredData = applyFilters(); // Aplica os filtros e obtém os dados filtrados
+        let filteredData = applyFilters(); // Aplica os filtros e obtém os dados filtrados
         console.log(filteredData);
+        
+        // Modifica os dados filtrados conforme necessário antes de fazer o download
+        let formattedData = formatDataForDownload(filteredData);
+
+        downloadFilteredCSV(formattedData);
     }
 
     function applyFilters() {
@@ -790,18 +843,18 @@
         $('#dataTable').DataTable().destroy();
 
         // Obtém os valores dos filtros
-        var osFilterValue = osFilter.value.toLowerCase();
-        var execucaoFilterValue = execucaoFilter.value.toLowerCase();
-        var setorFilterValue = setorFilter.value.toLowerCase();
-        var maquinaFilterValue = maquinaFilter.value.toLowerCase();
-        var riscoFilterValue = riscoFilter.value.toLowerCase();
-        var statusFilterValue = statusFilter.value.toLowerCase();
-        var naturezaFilterValue = naturezaFilter.value.toLowerCase();
-        var aberturaFilterValue = aberturaFilter.value.toLowerCase();
-        // var maquinaParadaFilterValue = maquinaParadaFilter.value.toLowerCase();
+        let osFilterValue = osFilter.value.toLowerCase();
+        let execucaoFilterValue = execucaoFilter.value.toLowerCase();
+        let setorFilterValue = setorFilter.value.toLowerCase();
+        let maquinaFilterValue = maquinaFilter.value.toLowerCase();
+        let riscoFilterValue = riscoFilter.value.toLowerCase();
+        let statusFilterValue = statusFilter.value.toLowerCase();
+        let naturezaFilterValue = naturezaFilter.value.toLowerCase();
+        let aberturaFilterValue = aberturaFilter.value.toLowerCase();
+        // let maquinaParadaFilterValue = maquinaParadaFilter.value.toLowerCase();
 
         // Obtém a tabela
-        var table = $('#dataTable').DataTable({
+        let table = $('#dataTable').DataTable({
             order: [[7, 'desc']]
         });
 
@@ -818,7 +871,7 @@
 
         // Atualiza a exibição da linha conforme necessário
         table.rows().every(function () {
-            var shouldDisplay =
+            let shouldDisplay =
                 this.data()[0].toLowerCase().includes(osFilterValue) &&
                 this.data()[1].toLowerCase().includes(execucaoFilterValue) &&
                 this.data()[2].toLowerCase().includes(setorFilterValue) &&
@@ -832,35 +885,22 @@
             this.node().style.display = shouldDisplay ? '' : 'none';
         });
 
-        var visibleRows = table.rows({ search: 'applied' }).data().toArray();
+        let visibleRows = table.rows({ search: 'applied' }).data().toArray();
 
         // Retorna os dados filtrados
         return visibleRows;
     }
 
     // Obtém os elementos de filtro por seus IDs
-    var osFilter = document.getElementById('os-filter');
-    var execucaoFilter = document.getElementById('execucao-filter');
-    var setorFilter = document.getElementById('setor-filter');
-    var riscoFilter = document.getElementById('risco-filter');
-    var maquinaFilter = document.getElementById('maquina-filter');
-    var statusFilter = document.getElementById('status-filter');
-    var naturezaFilter = document.getElementById('natureza-filter');
-    var aberturaFilter = document.getElementById('abertura-filter')
-    // var maquinaParadaFilter = document.getElementById('maquina-parada-filter');
-
-    // Função para preencher o filtro de execução com valores únicos
-    function populateExecucaoFilter() {
-        var options = Array.from(new Set(Array.from(document.querySelectorAll('#execucao-filter option')).map(option => option.value)));
-        var sortedValues = sortUniqueValues(options);
-
-        var nonEmptyValues = sortedValues.filter(value => value !== "");
-
-        execucaoFilter.innerHTML = '<option value="">Todos</option>';
-        nonEmptyValues.forEach(value => {
-            execucaoFilter.innerHTML += `<option value="${value}">${value}</option>`;
-        });
-    }
+    let osFilter = document.getElementById('os-filter');
+    let execucaoFilter = document.getElementById('execucao-filter');
+    let setorFilter = document.getElementById('setor-filter');
+    let riscoFilter = document.getElementById('risco-filter');
+    let maquinaFilter = document.getElementById('maquina-filter');
+    let statusFilter = document.getElementById('status-filter');
+    let naturezaFilter = document.getElementById('natureza-filter');
+    let aberturaFilter = document.getElementById('abertura-filter')
+    // let maquinaParadaFilter = document.getElementById('maquina-parada-filter');
 
     // Adiciona event listeners para detectar mudanças nos filtros
     osFilter.addEventListener('input', applyFilters);
@@ -880,6 +920,19 @@
     function sortUniqueValues(values) {
         return values.sort(function(a, b) {
             return a.localeCompare(b, 'pt', { sensitivity: 'base' });
+        });
+    }
+
+        // Função para preencher o filtro de execução com valores únicos
+    function populateExecucaoFilter() {
+        let options = Array.from(new Set(Array.from(document.querySelectorAll('#execucao-filter option')).map(option => option.value)));
+        let sortedValues = sortUniqueValues(options);
+
+        let nonEmptyValues = sortedValues.filter(value => value !== "");
+
+        execucaoFilter.innerHTML = '<option value="">Todos</option>';
+        nonEmptyValues.forEach(value => {
+            execucaoFilter.innerHTML += `<option value="${value}">${value}</option>`;
         });
     }
 
@@ -1544,6 +1597,15 @@
                 $("#operador").val([]).change(); // Define o valor do select para vazio
 
                 document.getElementById('numeroOrdem_edicao').innerText = id_ordem;
+
+                if (response.n_execucao === 0){
+                    $('#campo_execucao').hide()
+                    $('#setor_edicao').prop('disabled',false)
+                    $('#inputSolicitante_edicao').prop('disabled',false)
+                    $('#maquina_edicao').prop('disabled',false)
+                } else {
+                    $('#campo_execucao').show()
+                }
                 
                 if (response.setor_values === 'Solda') {
                     // Se response.setor_values for 'Solda', mostrar a div
