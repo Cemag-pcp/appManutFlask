@@ -4,7 +4,6 @@ import pandas as pd
 from datetime import date,timedelta,datetime
 from pandas.tseries.offsets import BMonthEnd,MonthEnd,BDay
 import numpy as np
-from funcoes import calcular_proxima_data
 import datetime
 
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
@@ -12,18 +11,62 @@ DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
 
-def geral():
-    
-    DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
-    DB_NAME = "postgres"
-    DB_USER = "postgres"
-    DB_PASS = "15512332"
+def calcular_proxima_data(data_atual, periodicidade_em_dias):
+
+    dias_uteis = pd.offsets.BDay(round(periodicidade_em_dias))  # Considera dias úteis (BDay)
+    proxima_data = data_atual + dias_uteis
+    return proxima_data.strftime("%Y-%m-%d") 
+
+def abertura_15_dias():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """select distinct *, periodicidade*30 as periodicidade_em_dias from tb_grupos_preventivas where ult_manutencao is not null"""
+    query = """select *, periodicidade*30 as periodicidade_em_dias from tb_grupos_preventivas where ult_manutencao is not null and excluidos = false and periodicidade > 1"""
+
+    cur.execute(query)
+    data = cur.fetchall()
+
+    df_data = pd.DataFrame(data)
+
+    df_data['proxima_manutencao'] = ''
+    
+    for row in range(len(df_data)):
+        
+        ultima_manutencao = df_data[3][row]
+        periodicidade = df_data[6][row]
+
+        proxima_manutencao = calcular_proxima_data(ultima_manutencao, round(periodicidade))
+
+        df_data['proxima_manutencao'][row] = proxima_manutencao
+
+    hoje_string = date.today()
+    quinze_dias = calcular_proxima_data(hoje_string,15)
+
+    proxima_manutencao_ = df_data[df_data['proxima_manutencao'] == quinze_dias]
+
+    # proxima_manutencao_ = proxima_manutencao_.drop_duplicates(subset=1) 
+
+    # maquinas = ['PredT.Mec','PredVa.Mec','UT-SE-00','PredT.Ele','UT-SE-01','UT-SE-02']
+    # grupos = ['15 Dias','2 Meses','6 Meses','15 Dias','6 Meses','6 Meses']
+
+    if len(proxima_manutencao_) > 0:
+
+        for index, row in proxima_manutencao_.iterrows():
+        # for maquina,grupo in zip(maquinas, grupos):
+            maquina = row[1]
+            grupo = row[2]
+            # atividades = buscar_atividades(maquina,grupo)
+            criar_ordem(maquina, grupo)
+
+def abertura_7_dias():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """select *, periodicidade*30 as periodicidade_em_dias from tb_grupos_preventivas where ult_manutencao is not null and excluidos = false and periodicidade < 1"""
 
     cur.execute(query)
     data = cur.fetchall()
@@ -42,24 +85,22 @@ def geral():
         df_data['proxima_manutencao'][row] = proxima_manutencao
 
     hoje_string = date.today()
-    quinze_dias = calcular_proxima_data(hoje_string,15)
+    sete_dias = calcular_proxima_data(hoje_string,5)
 
-    proxima_manutencao_ = df_data[df_data['proxima_manutencao'] == quinze_dias]
-    proxima_manutencao_ = proxima_manutencao_.drop_duplicates(subset=1)
+    proxima_manutencao_ = df_data[df_data['proxima_manutencao'] == sete_dias]
+    # proxima_manutencao_ = proxima_manutencao_.drop_duplicates(subset=1) 
+
+    # maquinas = ['PredT.Mec','PredVa.Mec','UT-SE-00','PredT.Ele','UT-SE-01','UT-SE-02']
+    # grupos = ['15 Dias','2 Meses','6 Meses','15 Dias','6 Meses','6 Meses']
 
     if len(proxima_manutencao_) > 0:
 
         for index, row in proxima_manutencao_.iterrows():
+        # for maquina,grupo in zip(maquinas, grupos):
             maquina = row[1]
             grupo = row[2]
-            atividades = buscar_atividades(maquina,grupo)
+            # atividades = buscar_atividades(maquina,grupo)
             criar_ordem(maquina, grupo)
-            
-    with open('funcionamento-preventiva.txt', 'a') as arquivo:
-
-        # Escreve no arquivo
-        arquivo.write('rodou: ' + quinze_dias + '\n')
-        arquivo.write(proxima_manutencao_.to_csv(index=False))
 
 def formatar_data(data):
     
@@ -134,3 +175,6 @@ def criar_ordem(maquina, grupo):
   # Certifique-se de cometer as alterações e fechar a conexão
   conn.commit()
   conn.close()
+
+abertura_15_dias()
+abertura_7_dias()

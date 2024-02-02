@@ -206,6 +206,9 @@
                                             <!-- <a class="dropdown-item dropdown_os dropdownsss" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
                                                 <i class="fas fa-pencil"></i> 
                                             </a> -->
+                                            <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" onclick="modalExcluirOrdem('{{ row[11] }}')" class="btn"> 
+                                                <i class="fas fa-trash"></i> Excluir 
+                                            </a>
                                         </div>
                                     </div>
                                     {% if row[38] != '' %}
@@ -680,9 +683,9 @@
 </div>
 
 <!-- Modal excluir ordem -->
-<div id="modalEnviar" class="modal">
+<!-- <div id="modalEnviar" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span> <!-- Botão de fechar -->
+        <span class="close">&times;</span> 
         <form>
             <div>
                 <label for="observacao">Motivo da exclusão da OS:</label>
@@ -690,6 +693,28 @@
             </div>
             <button class="enviarModal" type="submit" onclick="excluirOrdem()">Enviar</button>
         </form>
+    </div>
+</div> -->
+
+<!-- Modal excluir ordem 2.0 -->
+
+<div class="modal fade" data-backdrop="static" id="modalExcluirOrdem" tabindex="-1" role="dialog" aria-labelledby="modalExcluirOrdemLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="m-0 font-weight-bold text-primary">Excluir ordem</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="observacaoExcluirOrdem">Motivo da exclusão da OS:</label>
+                <textarea class="form-control" id="observacaoExcluirOrdem" rows="4" cols="45" required></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="buttonExcluirOrdem" class="btn btn-success" type="submit" onclick="excluirOrdem()">Enviar</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -896,6 +921,57 @@
 </script>
 
 <script>
+    function modalExcluirOrdem(id_ordem) {
+        $('#modalExcluirOrdem').modal('show');
+        
+        document.getElementById('buttonExcluirOrdem').addEventListener('click', function() {
+
+            showLoading();
+
+            var observacaoExclusao = document.getElementById('observacaoExcluirOrdem').value;
+
+            if (!observacaoExclusao) {
+                // Exibir uma mensagem de erro ou realizar alguma ação caso o campo esteja vazio
+                exibirMensagem('aviso','Por favor, preencha o campo de observação.');
+                hideLoading();
+                return;
+            }
+
+            const dados = {
+                id: id_ordem,
+                texto: observacaoExclusao
+            };
+
+            $.ajax({
+                type: 'POST', // ou 'GET' dependendo do seu backend
+                url: 'excluir-ordem',
+                data: JSON.stringify(dados),
+                contentType: 'application/json',
+                success: function(response) {
+                    // Trata a resposta do servidor, se necessário
+                    console.log(response);
+                    exibirMensagem('sucesso','Salvo.')
+
+                    $('#modalExcluirOrdem').modal('hide');
+                    
+                    location.reload();
+
+                    hideLoading();
+                },
+                error: function(error) {
+                    // Trata erros aqui
+                    hideLoading();
+                    console.error('Erro na requisição AJAX:', error);
+                    exibirMensagem('aviso','Preencha todos os campos obrigatórios.');
+                    
+                }
+            });
+
+        }); 
+    }
+</script>
+
+<!-- <script>
     function excluirOrdem(id_ordem) {
         const enviarModalButton = document.querySelector('#modalEnviar .enviarModal');
         const idLinha = enviarModalButton.getAttribute('data-id-linha');
@@ -933,7 +1009,7 @@
         modalEnviar.style.display = 'none';
     }
 
-</script>
+</script> -->
 
 <script>    
     function showImageModal(id_ordem) {
@@ -1777,5 +1853,6 @@
         
     });
 </script>
+
 
 {% endblock %}
