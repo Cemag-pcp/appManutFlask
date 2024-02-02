@@ -1278,13 +1278,14 @@
 <script>
     $(function() {
         $('input[name="datetimes"]').daterangepicker({
-          timePicker: true,
-          timePicker24Hour: true,
-          startDate: moment().startOf('hour'),
-          endDate: moment().startOf('hour').add(32, 'hour'),
-          locale: {
+            parentEl: '#modalExecucao',
+            timePicker: true,
+            timePicker24Hour: true,
+            startDate: moment().startOf('hour'),
+            endDate: moment().startOf('hour').add(32, 'hour'),
+            locale: {
             format: 'DD/MM/YYYY H:mm'
-          }
+            }
         });
       
         $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
