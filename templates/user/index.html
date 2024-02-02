@@ -13,6 +13,7 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/cores-status.css') }}">
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/imagem-modal.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
 
 {% endblock %}
 
@@ -182,7 +183,7 @@
                                 <div class="row">
                                     <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
                                         <!-- <button class="btn" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> -->
-                                        <a class="dropdown-item dropdownsss" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
+                                        <a id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
                                             <i class="fas fa-plus"></i>
                                         </a>
                                         <!-- </button> -->
@@ -193,16 +194,16 @@
                                             <!-- <a class = "dropdown-item dropdown_os dropdownsss" href="/edit_material/{{row[11]}}" class="btn"> 
                                                 <i class="fas fa-box"></i> 
                                             </a> -->
-                                            <a class = "dropdown-item dropdownsss" style="cursor: pointer;" onclick="modalTimeline('{{ row[11] }}')" class="btn"> 
+                                            <a class = "dropdown-item" style="cursor: pointer;" onclick="modalTimeline('{{ row[11] }}')" class="btn"> 
                                                 <i class="fas fa-clock"></i> Histórico 
                                             </a>
-                                            <!-- <a class="dropdown-item dropdown_os dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                            <!-- <a class="dropdown-item dropdown_os" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                                 <i class="fas fa-image"></i> 
                                             </a> -->
-                                            <!-- <a class="dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
+                                            <!-- <a class="dropdown-item dropdown_os" style="cursor: pointer;" href="/visualizar_pdf/{{row[11]}}" target="_blank">
                                             <i class="far fa-file-pdf"></i> Arquivo
                                             </a> -->
-                                            <!-- <a class="dropdown-item dropdown_os dropdownsss" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
+                                            <!-- <a class="dropdown-item dropdown_os" href="/editar_ordem_inicial/{{row[11]}}/{{0}}"> 
                                                 <i class="fas fa-pencil"></i> 
                                             </a> -->
                                         </div>
@@ -210,7 +211,7 @@
                                     {% if row[38] != '' %}
                                     <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
                                         
-                                        <a class="dropdown-item dropdownsss" title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
+                                        <a title='Imagem' style="cursor: pointer;" onclick="showImageModal('{{ row[11] }}')">
                                             <i class="fas fa-image"></i> 
                                         </a>
                                         
@@ -219,7 +220,7 @@
                                     {% if row[37] != '' %}
                                     <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
                                         
-                                        <a class="dropdown-item dropdownsss" title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
+                                        <a title='Video' style="cursor: pointer;" onclick="showVideoModal('{{ row[11] }}')">
                                             <i class="fas fa-camera-retro"></i>
                                         </a>
                                         
@@ -502,25 +503,28 @@
                 <hr>
                 <div class="row">
                     <div class="col-sm-6 mb-2">
-                        <label for="setor">Setor:</label>
-                        <select class="form-control" style="height: 38px;" id="setor_edicao" name="setor_edicao" disabled>
-                            <option value="Administrativo">Administrativo</option>
-                            <option value="Almoxarifado">Almoxarifado</option>
-                            <option value="Corte e estamparia">Corte e estamparia</option>
-                            <option value="Expedição">Expedição</option>
-                            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
-                            <option value="Solda">Solda</option>
-                            <option value="Montagem">Montagem</option>
-                            <option value="Pintura">Pintura</option>
-                            <option value="Carpintaria">Carpintaria</option>
-                            <option value="Usinagem">Usinagem</option>  
-                            <option value="Serra">Serra</option>
-                            <option value="Serralheria">Serralheria</option>
-                            <option value="Manutenção">Manutenção</option>
-                            <option value="Forjaria">Forjaria</option>
-                            <option value="Utilidades">Utilidades</option> 
-                            <option value="Qualidade">Qualidade</option> 
-                        </select>  
+                        <div class="dropdown" style="width: 100%;">
+                            <label>Setor</label>
+                            <input type="text" class="dropdown-input form-control" name="setor_edicao" id="setor_edicao" placeholder=" " required>
+                            <ul class="dropdown-list" id="listSetorEdicao">
+                                <li>Administrativo</li>
+                                <li>Almoxarifado</li>
+                                <li>Corte e estamparia</li>
+                                <li>Expedição</li>
+                                <li>Equipamentos de Movimentação</li>
+                                <li>Solda</li>
+                                <li>Montagem</li>
+                                <li>Pintura</li>
+                                <li>Carpintaria</li>
+                                <li>Usinagem</li>  
+                                <li>Serra</li>
+                                <li>Serralheria</li>
+                                <li>Manutenção</li>
+                                <li>Forjaria</li>
+                                <li>Utilidades</li>
+                                <li>Qualidade</li>
+                            </ul>
+                        </div> 
                     </div>
                     <div class="col-sm-6">
                         <label for="setor">Solicitante:</label>
@@ -555,12 +559,16 @@
                 <hr>
                 <div class="row">
                     <div class="col-sm-6 mb-2">
-                        <label for="maquina">Máquina ou Local:</label>
-                        <input type="text" name="maquina" id="maquina_edicao"  value="" class="form-control" disabled>
+                        <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
+                            <label>Máquina ou local</label>
+                            <input type="text" class="dropdown-input form-control" name="maquina_edicao" id="maquina_edicao" placeholder=" " required disabled> 
+                            <ul class="dropdown-list" id="listMaquinaLocalEdicao">
+                            </ul>
+                        </div>
                     </div>
                     <div class="col-sm-6">
                         <label for="tombamento">Tombamento</label>
-                        <input id="inputTombamento_edicao" type="text" name="tombamento" value="" class="form-control" readonly="readonly" >
+                        <input id="inputTombamento_edicao" type="text" name="inputTombamento_edicao" value="" class="form-control">
                     </div>
                 </div>
                 <div id="camposSolda_edicao" style="display: none;">
@@ -568,7 +576,13 @@
                         <div class="col-sm-6 mb-2">
                             <div id="equipamento_em_falha_edicao">
                                 <label>Equipamento em falha:</label>
-                                <input id="inputEquipamentoEmFalha_edicao" type="text" name="equipamento_em_falha" value="" class="form-control">
+                                <select class="form-control" name="inputEquipamentoEmFalha_edicao" id="inputEquipamentoEmFalha_edicao">
+                                    <option value="" selected disabled hidden></option>  
+                                    <option value="Máquina de Solda">Máquina de Solda</option>
+                                    <option value="Monovia">Monovia</option>
+                                    <option value="Ferramentas(esmerilhadeiras; lixadeiras e tochas)">Ferramentas</option>
+                                    <option value="SO-RB-01 - ROBÔ - KUKA">SO-RB-01 - ROBÔ - KUKA</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -630,36 +644,36 @@
                         </div>
                     </div>
                 </div>
-                <div id="campo_execucao" style="display: none;">
-                  <hr>
-                  <h6 class="m-0 font-weight-bold text-primary">Execução</h6>
-                  <hr>
-                    <div class="row">
-                        <div class="col-sm-6 mb-2">
-                            <label>Tipo de manutenção</label>
-                            <select style = 'height: 50px;' class="form-control" name="tipo_manutencao" id="selectTipoManutencao_edicao">
-                                <option value="" selected disabled hidden></option>  
-                                <option value="Corretiva">Corretiva</option>
-                                <option value="Preventiva">Preventiva</option>
-                                <option value="Preditiva">Preditiva</option>
-                                <option value="Apoio">Apoio</option>
-                                <option value="Projetos">Projetos</option>
-                                <option value="sesmt">SESMT</option>  
-                                <option value="Corretiva Programada">Corretiva Programada</option>  
-                            </select>
-                            <small id="selectTipoManutencao_edicao" class="form-text text-muted">Obrigatório</small>
-                        </div>
-                        <div class="col-sm-6">
-                            <label>Área de manutenção</label>
-                            <select style = 'height: 50px;' class="form-control" name="area_manutencao" id="areaManutencao_edicao">
-                                <option value="" selected disabled hidden></option>  
-                                <option value="Predial">Predial</option>
-                                <option value="Mecânica">Mecânica</option>
-                                <option value="Elétrica">Elétrica</option>
-                            </select>  
-                            <small id="areaManutencao_edicao" class="form-text text-muted">Obrigatório</small>
-                        </div>
+                <hr>
+                <h6 class="m-0 font-weight-bold text-primary">Execução</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label>Tipo de manutenção</label>
+                        <select class="form-control" name="tipo_manutencao" id="selectTipoManutencao_edicao">
+                            <option value="" selected disabled hidden></option>  
+                            <option value="Corretiva">Corretiva</option>
+                            <option value="Preventiva">Preventiva</option>
+                            <option value="Preditiva">Preditiva</option>
+                            <option value="Apoio">Apoio</option>
+                            <option value="Projetos">Projetos</option>
+                            <option value="sesmt">SESMT</option>  
+                            <option value="Corretiva Programada">Corretiva Programada</option>  
+                        </select>
+                        <small id="selectTipoManutencao_edicao" class="form-text text-muted">Obrigatório</small>
                     </div>
+                    <div class="col-sm-6">
+                        <label>Área de manutenção</label>
+                        <select class="form-control" name="area_manutencao" id="areaManutencao_edicao">
+                            <option value="" selected disabled hidden></option>  
+                            <option value="Predial">Predial</option>
+                            <option value="Mecânica">Mecânica</option>
+                            <option value="Elétrica">Elétrica</option>
+                        </select>  
+                        <small id="areaManutencao_edicao" class="form-text text-muted">Obrigatório</small>
+                    </div>
+                </div>
+                <div id="campo_execucao" style="display: none;">
                     <div class="row">
                         <div class="col-sm-6">
                             <label for="statusLista">Data e hora</label>
@@ -1577,9 +1591,10 @@
         });
     }
 
-    function itensParaEditar(id_ordem,n_ordem) {
+    var maquina_edicao;
+    var setor_edicao;
 
-        showLoading();
+    function itensParaEditar(id_ordem,n_ordem) {
 
         $.ajax({
             url: '/dados-editar-ordem',
@@ -1587,7 +1602,7 @@
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({ 'id_ordem': id_ordem, 'n_ordem': n_ordem }),  // Enviando um objeto JSON
-            success: function(response) {
+            success: function(response,maquinas) {
 
                 $('#modalEdicaoExecucao').modal('show');
 
@@ -1605,6 +1620,15 @@
                     $('#maquina_edicao').prop('disabled',false)
                 } else {
                     $('#campo_execucao').show()
+                    $('#setor_edicao').prop('disabled',true)
+                    $('#inputSolicitante_edicao').prop('disabled',true)
+                    $('#maquina_edicao').prop('disabled',true)
+                    $('#inputRisco_edicao').prop('disabled',true)
+                    $('#inputEquipamentoEmFalha_edicao').prop('disabled',true)
+                    $('#inputTombamento_edicao').prop('disabled',true)
+                    $('#codigoEquipamento_edicao').prop('disabled',true)
+                    $('#setorMaqSolda_edicao').prop('disabled',true)
+                    $('#qual_ferramenta_edicao').prop('disabled',true)
                 }
                 
                 if (response.setor_values === 'Solda') {
@@ -1625,10 +1649,12 @@
                 }
 
                 $('#setor_edicao').val(response.setor_values);
+                setor_edicao = response.setor_values;
                 $('#inputSolicitante_edicao').val(response.solicitante);
                 $('#dataAbertura_edicao').val(formatarDataBr(response.data_abertura));
                 $('#n_ordem_edicao').val(response.n_execucao);
                 $('#maquina_edicao').val(response.maquina);
+                maquina_edicao = response.maquina;
                 $('#inputTombamento_edicao').val(response.tombamento);
                 $('#inputEquipamentoEmFalha_edicao').val(response.equipamento_em_falha);
                 $('#codigoEquipamento_edicao').val(response.codigo_equipamento);
@@ -1716,11 +1742,8 @@
 
                 updateToggleVisibility(response.status,response.n_execucao,response.maquina,response.preventiva,identificadorSelecionado);
 
-                hideLoading();
-
             },
             error: function(error) {
-                hideLoading();
                 alert('Ocorreu um erro ao buscar os vídeos');
                 console.log(error);
             }
@@ -1739,11 +1762,6 @@
         var areaManutencao =  document.getElementById('areaManutencao_edicao').value;
         var observacao =  document.getElementById('descmanutencao_edicao').value;
         var operadorSelecionado = $('#operador_edicao option:selected').length;
-
-        if (tipoManutencao === '' | areaManutencao === '' | observacao === '' | operadorSelecionado === 0) {
-            exibirMensagem('aviso','Preencha todos os campos obrigatórios.');
-            return;
-        }
 
         // Lista de IDs dos elementos que são checkboxes
         // var idsCheckboxes = [
@@ -1828,5 +1846,128 @@
         
     });
 </script>
+
+<script>
+
+    function configurarDropdownIndex(inputId, listId) {
+        var inputDropdown = document.getElementById(inputId);
+        var listaDropdown = document.getElementById(listId);
+        var itens = listaDropdown.getElementsByTagName('li');
+        var valorAnterior = "";
+
+        inputDropdown.addEventListener('focus', function () {
+            if (inputDropdown.readOnly) {
+                listaDropdown.style.display = 'none';
+            } else {
+                listaDropdown.style.display = 'block';
+            }
+        });
+
+        inputDropdown.addEventListener('blur', function () {
+            // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
+            setTimeout(function () {
+                if (!correspondeAItem()) {
+                    // Se o valor não corresponder a um item na lista, redefina para o valor anterior
+                    if(inputDropdown.value !== maquina_edicao){
+                        inputDropdown.value = valorAnterior;
+                    }else if(inputDropdown.value !== setor_edicao) {
+                        inputDropdown.value = valorAnterior;
+                    } else {
+                        inputDropdown.value = maquina_edicao;
+                    }
+                } 
+                listaDropdown.style.display = 'none';
+            }, 200);
+        });
+
+        listaDropdown.addEventListener('click', function (event) {
+            if (event.target.tagName === 'LI') {
+                valorAnterior = event.target.textContent;
+                inputDropdown.value = valorAnterior;
+
+                // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+                setTimeout(function () {
+                    listaDropdown.style.display = 'none';
+                }, 100);
+            }
+        });
+
+        inputDropdown.addEventListener('input', function () {
+            var input = this.value.trim().toLowerCase();
+            var itens = listaDropdown.getElementsByTagName('li');
+
+            for (var i = 0; i < itens.length; i++) {
+                var textoItem = itens[i].textContent.toLowerCase();
+                var itemVisivel = textoItem.indexOf(input) > -1;
+                itens[i].style.display = itemVisivel ? 'block' : 'none';
+            }
+
+            // Exiba a lista apenas se houver correspondência com os itens
+            var correspondenciaItens = Array.from(itens).some(function (item) {
+                var textoItem = item.textContent.toLowerCase();
+                var itemVisivel = textoItem.includes(input);
+                item.style.display = itemVisivel ? 'block' : 'none';
+                return itemVisivel;
+            });
+
+            listaDropdown.style.display = correspondenciaItens ? 'block' : 'none';
+        });
+
+        function correspondeAItem() {
+            var input = inputDropdown.value.trim().toLowerCase();
+            return Array.from(itens).some(function (item) {
+                return item.textContent.toLowerCase() === input;
+            });
+        }
+    }
+
+    configurarDropdownIndex('maquina_edicao', 'listMaquinaLocalEdicao');
+    configurarDropdownIndex('setor_edicao', 'listSetorEdicao');
+ 
+</script>
+
+<!-- Script para mostrar maquinas de acordo com o setor selecionado -->
+<script>
+    var inputDropdown = document.getElementById('setor_edicao');
+    var listaDropdown = document.getElementById('listSetorEdicao');
+    var listaMaquinasLocais = document.getElementById('listMaquinaLocalEdicao');
+    var inputMaquinasLocais = document.getElementById('maquina_edicao');
+    var listaHistorico = document.getElementById('listaHistorico');
+    
+    listaDropdown.addEventListener('click', function(event) {
+        if (event.target.tagName === 'LI') {
+            inputDropdown.value = event.target.textContent;
+
+            $.ajax({
+                url: '/maquinas/' + event.target.textContent,
+                type: 'GET',
+                success: function(data) {
+                    // Atualiza o menu de máquinas com as opções retornadas do servidor
+                    console.log(data);
+                    // Adiciona os itens à lista
+                    console.log(maquina_edicao);
+
+                    listaMaquinasLocais.innerHTML = '';
+                    
+                    inputMaquinasLocais = '';
+
+                    data.forEach(function(item) {
+                        var li = document.createElement('li');
+                        li.textContent = item;
+                        listaMaquinasLocais.appendChild(li);
+                    });
+                }
+            });
+
+        
+            // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+            setTimeout(function() {
+                listaDropdown.style.display = 'none';
+            }, 100);
+        }
+    });
+
+</script>
+
 
 {% endblock %}

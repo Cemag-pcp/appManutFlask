@@ -2354,19 +2354,26 @@ def editar_ordem_banco():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    cur.execute("""update tb_ordens
-    set maquina=%s, risco=%s, status=%s, datainicio=%s, horainicio=%s,
-        datafim=%s, horafim=%s, descmanutencao=%s,
-        operador=%s, tipo_manutencao=%s, area_manutencao=%s,
-        equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
-        cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
-        where id_ordem = %s and n_ordem = %s""", (maquina,risco,status,datainicio,horainicio,
-                                                  datafim,horafim,descmanutencao,operador,
-                                                  tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
-                                                  setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,
-                                                  pvlye,pa_plus,tratamento,ph_agua,id_ordem,n_execucao))
+    # if n_execucao == 0:
+    #     cur.execute("""update tb_ordens
+    #     set maquina=%s, risco=%s, descmanutencao=%s, tipo_manutencao=%s, area_manutencao=%s, 
+    #     equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
+    #     cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
+    #     where id_ordem = %s""", (maquina,risco,descmanutencao,tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
+    #                             setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,pvlye,
+    #                             pa_plus,tratamento,ph_agua,id_ordem))
+    # else:
+    #     cur.execute("""update tb_ordens
+    #     set maquina=%s, risco=%s, status=%s, datainicio=%s, horainicio=%s,
+    #         datafim=%s, horafim=%s, descmanutencao=%s,
+    #         operador=%s,equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
+    #         cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
+    #         where id_ordem = %s and n_ordem = %s""", (maquina,risco,status,datainicio,horainicio,
+    #                                                 datafim,horafim,descmanutencao,operador,inputEquipamentoEmFalha_edicao,
+    #                                                 setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,
+    #                                                 pvlye,pa_plus,tratamento,ph_agua,id_ordem,n_execucao))
 
-    conn.commit()
+    # conn.commit()
 
     return 'sucess'
 
