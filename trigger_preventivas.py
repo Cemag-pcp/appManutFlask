@@ -14,46 +14,52 @@ DB_PASS = "15512332"
 
 def geral():
     
-  DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
-  DB_NAME = "postgres"
-  DB_USER = "postgres"
-  DB_PASS = "15512332"
+    DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
+    DB_NAME = "postgres"
+    DB_USER = "postgres"
+    DB_PASS = "15512332"
 
-  conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                          password=DB_PASS, host=DB_HOST)
-  cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-  query = """select distinct *, periodicidade*30 as periodicidade_em_dias from tb_grupos_preventivas where ult_manutencao is not null"""
+    query = """select distinct *, periodicidade*30 as periodicidade_em_dias from tb_grupos_preventivas where ult_manutencao is not null"""
 
-  cur.execute(query)
-  data = cur.fetchall()
+    cur.execute(query)
+    data = cur.fetchall()
 
-  df_data = pd.DataFrame(data)
+    df_data = pd.DataFrame(data)
 
-  df_data['proxima_manutencao'] = ''
+    df_data['proxima_manutencao'] = ''
 
-  for row in range(len(df_data)):
-      
-      ultima_manutencao = df_data[3][row]
-      periodicidade = df_data[6][row]
+    for row in range(len(df_data)):
+        
+        ultima_manutencao = df_data[3][row]
+        periodicidade = df_data[6][row]
 
-      proxima_manutencao = calcular_proxima_data(ultima_manutencao, round(periodicidade))
+        proxima_manutencao = calcular_proxima_data(ultima_manutencao, round(periodicidade))
 
-      df_data['proxima_manutencao'][row] = proxima_manutencao
+        df_data['proxima_manutencao'][row] = proxima_manutencao
 
-  hoje_string = date.today().strftime("%Y-%m-%d")
+    hoje_string = date.today()
+    quinze_dias = calcular_proxima_data(hoje_string,15)
 
-  proxima_manutencao_hoje = df_data[df_data['proxima_manutencao'] == hoje_string]
-  proxima_manutencao_hoje = proxima_manutencao_hoje.drop_duplicates(subset=1)
+    proxima_manutencao_ = df_data[df_data['proxima_manutencao'] == quinze_dias]
+    proxima_manutencao_ = proxima_manutencao_.drop_duplicates(subset=1)
 
-  if len(proxima_manutencao_hoje) > 0:
+    if len(proxima_manutencao_) > 0:
 
-      for index, row in proxima_manutencao_hoje.iterrows():
-          maquina = row[1]
-          grupo = row[2]
-          atividades = buscar_atividades(maquina,grupo)
-          criar_ordem(maquina, grupo)
+        for index, row in proxima_manutencao_.iterrows():
+            maquina = row[1]
+            grupo = row[2]
+            atividades = buscar_atividades(maquina,grupo)
+            criar_ordem(maquina, grupo)
+            
+    with open('funcionamento-preventiva.txt', 'a') as arquivo:
 
+        # Escreve no arquivo
+        arquivo.write('rodou: ' + quinze_dias + '\n')
+        arquivo.write(proxima_manutencao_.to_csv(index=False))
 
 def formatar_data(data):
     
@@ -62,7 +68,6 @@ def formatar_data(data):
     """
 
     return data.strftime("%Y-%m-%d") if isinstance(data, date) else data
-
 
 def buscar_atividades(maquina,grupo):
 
@@ -81,7 +86,6 @@ def buscar_atividades(maquina,grupo):
     atividades = '\n'.join(atividades_lista)
 
     return atividades
-
 
 def criar_ordem(maquina, grupo):
 
