@@ -3781,114 +3781,114 @@ def historico_planejadas():
 
     return jsonify(data_historico_planejadas)
 
-@routes_bp.route('/tabela-ordens-inicial')
-@login_required
-def tabela_ordens_inicial():
+# @routes_bp.route('/tabela-ordens-inicial')
+# @login_required
+# def tabela_ordens_inicial():
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+#                             password=DB_PASS, host=DB_HOST)
+#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    s = (""" select DISTINCT t7.*, t8.id_ordem as contem_imagem
-            from (
-                select t5.*, t6.id_ordem as contem_video
-                from(
-                    select t3.*, t4.parada1,t4.parada2,t4.parada3
-                    from(
-                        SELECT DISTINCT t1.total, t2.* 
-                        FROM (
-                            SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
-                            FROM tb_carrinho
-                            JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
-                            GROUP BY tb_carrinho.id_ordem
-                            ) t1
-                        RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
-                    ) as t3
-                    LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
-                    ORDER BY t3.id_ordem
-                ) as t5
-                LEFT JOIN tb_videos_ordem_servico t6 on t5.id_ordem = t6.id_ordem
-                ) as t7
-            LEFT JOIN tb_imagens t8 on t7.id_ordem = t8.id_ordem;
-         """)
+#     s = (""" select DISTINCT t7.*, t8.id_ordem as contem_imagem
+#             from (
+#                 select t5.*, t6.id_ordem as contem_video
+#                 from(
+#                     select t3.*, t4.parada1,t4.parada2,t4.parada3
+#                     from(
+#                         SELECT DISTINCT t1.total, t2.* 
+#                         FROM (
+#                             SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+#                             FROM tb_carrinho
+#                             JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+#                             GROUP BY tb_carrinho.id_ordem
+#                             ) t1
+#                         RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
+#                     ) as t3
+#                     LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
+#                     ORDER BY t3.id_ordem
+#                 ) as t5
+#                 LEFT JOIN tb_videos_ordem_servico t6 on t5.id_ordem = t6.id_ordem
+#                 ) as t7
+#             LEFT JOIN tb_imagens t8 on t7.id_ordem = t8.id_ordem;
+#          """)
 
-    df = pd.read_sql_query(s, conn)
-    df = df.sort_values(by='id_ordem').reset_index(drop=True)
+#     df = pd.read_sql_query(s, conn)
+#     df = df.sort_values(by='id_ordem').reset_index(drop=True)
 
-    df = df[df['ordem_excluida'] != True].reset_index(drop=True)
+#     df = df[df['ordem_excluida'] != True].reset_index(drop=True)
 
-    df.fillna('', inplace=True)
+#     df.fillna('', inplace=True)
 
-    for i in range(len(df)-1, 0, -1):
-        if df['id_ordem'][i] == df['id_ordem'][i-1]:
-            if df['maquina_parada'][i-1] == '':
-                df['maquina_parada'][i-1] = df['maquina_parada'][i]
+#     for i in range(len(df)-1, 0, -1):
+#         if df['id_ordem'][i] == df['id_ordem'][i-1]:
+#             if df['maquina_parada'][i-1] == '':
+#                 df['maquina_parada'][i-1] = df['maquina_parada'][i]
 
-    for i in range(1, len(df)):
-        if df['id_ordem'][i-1] == df['id_ordem'][i]:
-            df['maquina_parada'][i] = df['maquina_parada'][i-1]
+#     for i in range(1, len(df)):
+#         if df['id_ordem'][i-1] == df['id_ordem'][i]:
+#             df['maquina_parada'][i] = df['maquina_parada'][i-1]
 
-    df = df.sort_values(by='n_ordem')
+#     df = df.sort_values(by='n_ordem')
 
-    df.reset_index(drop=True, inplace=True)
-    df.replace(np.nan, '', inplace=True)
+#     df.reset_index(drop=True, inplace=True)
+#     df.replace(np.nan, '', inplace=True)
 
-    df['dataabertura'] = df['dataabertura'].fillna(method='ffill')
-    df['dataabertura'] = df['dataabertura'].replace('', method='ffill')
+#     df['dataabertura'] = df['dataabertura'].fillna(method='ffill')
+#     df['dataabertura'] = df['dataabertura'].replace('', method='ffill')
 
-    df = df.drop_duplicates(subset=['id_ordem'], keep='last')
-    df = df.sort_values(by='id_ordem')
-    df.reset_index(drop=True, inplace=True)
+#     df = df.drop_duplicates(subset=['id_ordem'], keep='last')
+#     df = df.sort_values(by='id_ordem')
+#     df.reset_index(drop=True, inplace=True)
 
-    for i in range(len(df)):
-        if df['total'][i] == '':
-            df['total'][i] = 0
+#     for i in range(len(df)):
+#         if df['total'][i] == '':
+#             df['total'][i] = 0
 
-    df['total'] = df['total'].apply(lambda x: round(x, 2))
+#     df['total'] = df['total'].apply(lambda x: round(x, 2))
 
-    df = df.sort_values('ultima_atualizacao', ascending=False)
+#     df = df.sort_values('ultima_atualizacao', ascending=False)
 
-    df['ultima_atualizacao'] = pd.to_datetime(df['ultima_atualizacao'])
-    df['ultima_atualizacao'] = df['ultima_atualizacao'] - timedelta(hours=3)
-    df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime(
-        "%Y-%m-%d %H:%M:%S")
+#     df['ultima_atualizacao'] = pd.to_datetime(df['ultima_atualizacao'])
+#     df['ultima_atualizacao'] = df['ultima_atualizacao'] - timedelta(hours=3)
+#     df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime(
+#         "%Y-%m-%d %H:%M:%S")
     
-    # .dt.strftime("%d/%m/%Y")
+#     # .dt.strftime("%d/%m/%Y")
 
-    df.reset_index(drop=True, inplace=True)
+#     df.reset_index(drop=True, inplace=True)
 
-    for i in range(len(df)):
-        try:
-            if df['dataabertura'][i].strftime('%H:%M') == '03:00':
-                df['dataabertura'][i] = df['ultima_atualizacao'][i]
-        except:
-            pass
+#     for i in range(len(df)):
+#         try:
+#             if df['dataabertura'][i].strftime('%H:%M') == '03:00':
+#                 df['dataabertura'][i] = df['ultima_atualizacao'][i]
+#         except:
+#             pass
         
-    for i in range(len(df)):
-        if df['maquina_parada'][i] == '':
-            df['maquina_parada'][i] = False
+#     for i in range(len(df)):
+#         if df['maquina_parada'][i] == '':
+#             df['maquina_parada'][i] = False
 
-    for i in range(len(df)):
-        if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
-            df['maquina_parada'][i] = False
+#     for i in range(len(df)):
+#         if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false':
+#             df['maquina_parada'][i] = False
 
-    df_custos = custo_MO()
+#     df_custos = custo_MO()
 
-    df = pd.merge(df, df_custos, how='left', on='id_ordem')
+#     df = pd.merge(df, df_custos, how='left', on='id_ordem')
 
-    df['proporcional'] = df['proporcional'].fillna(0)
-    df['dataabertura'] = df['dataabertura'].dt.strftime('%Y-%m-%d %H:%M:%S')
-    df['datainicio'] = pd.to_datetime(df['datainicio']).dt.strftime('%Y-%m-%d')
-    df['datafim'] = pd.to_datetime(df['datafim']).dt.strftime('%Y-%m-%d')
-    # df['horainicio'] = pd.to_datetime(df['horainicio'])#.strftime('HH:MM')
-    # df['horafim'] = pd.to_datetime(df['horafim']).dt.strftime('%Y-%m-%d')
-    # df['horainicio'] = df['horainicio'].apply(lambda x: x.strftime('%H:%M') if not pd.isnull(x) else '')
-    # df['horainicio'] = pd.to_datetime(df['horainicio'], format='%H:%M:%S').dt.time
-    df.drop(columns={'horafim','horainicio'}, inplace=True)
+#     df['proporcional'] = df['proporcional'].fillna(0)
+#     df['dataabertura'] = df['dataabertura'].dt.strftime('%Y-%m-%d %H:%M:%S')
+#     df['datainicio'] = pd.to_datetime(df['datainicio']).dt.strftime('%Y-%m-%d')
+#     df['datafim'] = pd.to_datetime(df['datafim']).dt.strftime('%Y-%m-%d')
+#     # df['horainicio'] = pd.to_datetime(df['horainicio'])#.strftime('HH:MM')
+#     # df['horafim'] = pd.to_datetime(df['horafim']).dt.strftime('%Y-%m-%d')
+#     # df['horainicio'] = df['horainicio'].apply(lambda x: x.strftime('%H:%M') if not pd.isnull(x) else '')
+#     # df['horainicio'] = pd.to_datetime(df['horainicio'], format='%H:%M:%S').dt.time
+#     df.drop(columns={'horafim','horainicio'}, inplace=True)
 
-    tabela_ordens = df.values.tolist()
+#     tabela_ordens = df.values.tolist()
     
-    return jsonify(tabela_ordens)
+#     return jsonify(tabela_ordens)
 
 
 

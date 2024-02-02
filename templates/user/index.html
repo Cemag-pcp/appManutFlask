@@ -955,6 +955,19 @@
                     $('#modalExcluirOrdem').modal('hide');
                     
                     location.reload();
+                    
+                    $('#dataTable').DataTable().destroy();
+
+                    var table = $('#dataTable').DataTable({
+                        order: [[7, 'desc']],
+                        responsive: true,
+                        columnDefs: [
+                            // { responsivePriority: 10001, targets: 0 },
+                            { responsivePriority: 10001, targets: 1 },
+                            // { responsivePriority: 1, targets: 3 },
+                            { responsivePriority: 1, targets: -2 },
+                        ]
+                    });
 
                     hideLoading();
                 },
