@@ -818,8 +818,8 @@
             order: [[7, 'desc']],
             responsive: true,
             columnDefs: [
-                { responsivePriority: 10001, targets: 10 },
-                { responsivePriority: 1, targets: 0 },
+                // { responsivePriority: 10001, targets: 10 },
+                { responsivePriority: 1, targets: 9 },
             ]
         });
 
@@ -864,7 +864,7 @@
     var maquinaFilter = document.getElementById('maquina-filter');
     var statusFilter = document.getElementById('status-filter');
     var naturezaFilter = document.getElementById('natureza-filter');
-    var aberturaFilter = document.getElementById('abertura-filter')
+    var aberturaFilter = document.getElementById('abertura-filter');
     // var maquinaParadaFilter = document.getElementById('maquina-parada-filter');
 
     // Função para preencher o filtro de execução com valores únicos

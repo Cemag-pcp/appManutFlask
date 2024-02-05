@@ -3433,62 +3433,101 @@ def grafico():  # Dashboard
                                todos_meses=todos_meses, maquinas_importantes=maquinas_importantes, disponibilidade_geral_maquina=disponibilidade_geral_maquina,
                                disponibilidade_geral_setor=disponibilidade_geral_setor)
 
+    print('get')
+
     mes = datetime.now().month
     mes = list(range(1, mes + 1))
 
     boleano_historico = True
     setor_selecionado = None
 
+    data_inicial = datetime.now().date() # hoje
+    data_fim = datetime.now().date() # Data Final do Histórico do MTBF,sempre hoje
+
     # Monta a query base
-    query = """
-            SELECT DISTINCT ON (id_ordem) *,
-            COALESCE(status, 'Em espera') AS status_atualizado
-            FROM tb_ordens
-            WHERE (ordem_excluida IS NULL OR ordem_excluida = FALSE)
-            ORDER BY id_ordem, n_ordem DESC;
+    query = f"""
+        WITH RankedOrders AS (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (PARTITION BY id_ordem ORDER BY n_ordem DESC) AS rn,
+                COALESCE(status, 'Em espera') as status_atualizado
+            FROM
+                tb_ordens)
+
+            SELECT
+                *
+            FROM
+            RankedOrders
+            WHERE
+            rn = 1
+            AND (ordem_excluida IS NULL OR ordem_excluida = FALSE)
+            AND ultima_atualizacao BETWEEN '{data_inicial}' AND '{data_fim}'::date + 1
         """
 
     lista_qt = cards_get(query)
 
     query_mtbf = (
-        """
-        SELECT maquina, n_ordem, id_ordem, datafim, setor
-        FROM tb_ordens
-        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
+        f"""
+            SELECT 
+                CASE 
+                    WHEN t2.apelido IS NOT NULL AND t2.apelido <> '' THEN t2.apelido
+                    ELSE t1.maquina
+                END as maquina,
+                t1.n_ordem,
+                t1.id_ordem,
+                t1.datafim,
+                t1.setor
+            FROM tb_ordens as t1
+            LEFT JOIN tb_maquinas as t2 
+                ON t1.maquina = t2.codigo
+            WHERE 1=1 AND datafim >= '{data_inicial}' AND datafim <= '{data_fim}'::date + 1
+            AND (t1.ordem_excluida IS NULL OR t1.ordem_excluida = FALSE) AND t1.natureza = 'OS';
     """)
 
     query_mttr = (
-        """
-        SELECT t1.id_ordem,t1.n_ordem,t1.setor,t1.maquina,
-            TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-            TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim,
-            parada3
-        FROM tb_ordens as t1
-        left join tb_paradas as t2 on t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem
-        WHERE 1=1 AND ordem_excluida IS NULL OR ordem_excluida = FALSE AND natureza = 'OS'
+        f"""
+        SELECT DISTINCT t3.id_ordem,status,datafim,maquina,t3.n_ordem,setor,inicio,fim,parada3
+            FROM (
+                SELECT
+                    t1.id_ordem,
+                    t1.status,
+                    t1.datafim,
+                    CASE
+                        WHEN t2.apelido IS NOT NULL AND t2.apelido <> '' THEN t2.apelido
+                        ELSE t1.maquina
+                    END as maquina,
+                    t1.n_ordem,
+                    t1.setor,
+                    TO_TIMESTAMP(t1.datainicio || ' ' || t1.horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+                    TO_TIMESTAMP(t1.datafim || ' ' || t1.horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+                FROM tb_ordens as t1
+                LEFT JOIN tb_maquinas as t2
+                    ON t1.maquina = t2.codigo
+                WHERE 1=1 AND datafim >= '{data_inicial}' AND datafim <= '{data_fim}'
+                AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS') as t3 INNER JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem and t3.n_ordem = t4.n_ordem;
     """)
 
     query_disponibilidade = (
-        """
+        f"""
         SELECT t1.*, t2.parada3
-        FROM (
-            SELECT
-                datafim, 
-                maquina, 
-                n_ordem,
-                setor,
-                status,
-                id_ordem,
-                TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
-                TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
-            FROM
-                tb_ordens
-            WHERE
-                1=1
-            AND (ordem_excluida IS NULL OR ordem_excluida = FALSE)) AS t1 JOIN tb_paradas t2 ON t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem
-    """)
+            FROM (
+                SELECT
+                    status,
+                    id_ordem,
+                    datafim,
+                    maquina,
+                    n_ordem,
+                    setor,
+                    TO_TIMESTAMP(datainicio || ' ' || horainicio, 'YYYY-MM-DD HH24:MI:SS') AS inicio,
+                    TO_TIMESTAMP(datafim || ' ' || horafim, 'YYYY-MM-DD HH24:MI:SS') AS fim
+                FROM
+                    tb_ordens
+                WHERE
+                    1=1 AND datafim >= '{data_inicial}' AND datafim <= '{data_fim}'
+                    AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) ) AS t1 JOIN tb_paradas t2 ON t1.id_ordem = t2.id_ordem and t1.n_ordem = t2.n_ordem"""
+        )
 
-    query_horas_trabalhada_tipo = """
+    query_horas_trabalhada_tipo = f"""
         SELECT
             tipo_manutencao,
             (CASE WHEN
@@ -3499,11 +3538,12 @@ def grafico():  # Dashboard
                 SUM(horafim - horainicio)
             END) AS diferenca
         FROM tb_ordens
-        WHERE ordem_excluida IS NULL
-        GROUP BY tipo_manutencao;
+        WHERE 1=1
+        AND datafim >= '{data_inicial}' AND datafim <= '{data_fim}'
+        AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY tipo_manutencao;
         """
 
-    query_horas_trabalhada_area = """
+    query_horas_trabalhada_area = f"""
         SELECT
             area_manutencao,
             (CASE WHEN
@@ -3514,11 +3554,11 @@ def grafico():  # Dashboard
                 SUM(horafim - horainicio)
             END) AS diferenca
         FROM tb_ordens
-        WHERE ordem_excluida IS NULL
-        GROUP BY area_manutencao;
+        WHERE 1=1 AND datafim >= '{data_inicial}' AND datafim <= '{data_fim}'
+        AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY area_manutencao;
         """
     
-    query_horas_trabalhada_setor = """
+    query_horas_trabalhada_setor = f"""
         SELECT
             setor,
             (CASE WHEN
@@ -3530,11 +3570,11 @@ def grafico():  # Dashboard
             END) AS diferenca
         FROM tb_ordens
         WHERE ordem_excluida IS NULL
-        GROUP BY setor;
+        AND datafim >= '{data_inicial}' AND datafim <= '{data_fim}'
+        AND (ordem_excluida IS NULL OR ordem_excluida = FALSE) AND natureza = 'OS' GROUP BY setor;
         """
     
-    data_inicial = datetime(2022,8,1).date() # Data Inicial do Histórico do MTBF
-    data_fim = datetime.now().date() # Data Final do Histórico do MTBF,sempre hoje
+    # data_inicial = datetime(2022,8,1).date() # Data Inicial do Histórico do MTBF
 
     resultado = funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado,
                             query_disponibilidade, query_horas_trabalhada_tipo, query_horas_trabalhada_area,
@@ -3601,7 +3641,6 @@ def grafico():  # Dashboard
                            setor_selecionado='', lista_disponibilidade_setor=lista_disponibilidade_setor, lista_disponibilidade_maquina=lista_disponibilidade_maquina,
                            lista_mttr_setor=lista_mttr_setor, lista_mttr_maquina=lista_mttr_maquina, area_manutencao='', disponibilidade_geral_maquina=disponibilidade_geral_maquina,
                            disponibilidade_geral_setor=disponibilidade_geral_setor)
-
 
 
 @routes_bp.route('/timeline', methods=['POST'])
