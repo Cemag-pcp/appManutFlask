@@ -2280,10 +2280,7 @@ def dados_ordem_servico():
 @login_required
 def dados_editar_ordem():
     data = request.get_json()
-    print(data)
     data = dados_para_editar(data['id_ordem'], data['n_ordem'])
-    
-    print(data)
 
     return jsonify(data)
 
@@ -2302,6 +2299,33 @@ def verificar_maquina_preventiva(maquina):
         return True
     else:
         return False
+    
+@routes_bp.route('/tombamento', methods=['POST'])
+@login_required
+def obter_tombamento():
+    data = request.get_json()
+    codigo_maquina = data['codigo']
+
+    if ' - ' in codigo_maquina:
+        codigo_maquina = codigo_maquina.split(' - ')
+        codigo_maquina = codigo_maquina[0]
+
+    print(codigo_maquina)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = f"""SELECT tombamento
+            FROM tb_maquinas
+            WHERE codigo = '{codigo_maquina}'"""
+
+    cur.execute(query)
+    tombamento = cur.fetchall()
+
+    print(tombamento)
+
+    return jsonify({'tombamento': tombamento})
 
 @routes_bp.route('/guardar-ordem-editada', methods=['POST'])
 @login_required
@@ -2310,13 +2334,14 @@ def editar_ordem_banco():
     dados = request.get_json()
     print(dados)
     
-    # setor = dados['setor']
+    setor = dados['setor_edicao']
     maquina = dados['maquina_edicao']
+    tombamento = dados['inputTombamento_edicao']
     risco = dados['inputRisco_edicao']
     status = dados['statusLista_edicao']
     # problema = dados['problema']
-    id_ordem = dados['numeroOs']
-    n_execucao = dados['n_ordem_edicao']
+    id_ordem = int(dados['numeroOs'])
+    n_execucao = int(dados['n_ordem_edicao'])
     descmanutencao = dados['descmanutencao_edicao']
     operador = dados['operador_edicao']
     inputEquipamentoEmFalha_edicao = dados['inputEquipamentoEmFalha_edicao']
@@ -2354,26 +2379,30 @@ def editar_ordem_banco():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    # if n_execucao == 0:
-    #     cur.execute("""update tb_ordens
-    #     set maquina=%s, risco=%s, descmanutencao=%s, tipo_manutencao=%s, area_manutencao=%s, 
-    #     equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
-    #     cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
-    #     where id_ordem = %s""", (maquina,risco,descmanutencao,tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
-    #                             setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,pvlye,
-    #                             pa_plus,tratamento,ph_agua,id_ordem))
-    # else:
-    #     cur.execute("""update tb_ordens
-    #     set maquina=%s, risco=%s, status=%s, datainicio=%s, horainicio=%s,
-    #         datafim=%s, horafim=%s, descmanutencao=%s,
-    #         operador=%s,equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
-    #         cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
-    #         where id_ordem = %s and n_ordem = %s""", (maquina,risco,status,datainicio,horainicio,
-    #                                                 datafim,horafim,descmanutencao,operador,inputEquipamentoEmFalha_edicao,
-    #                                                 setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,
-    #                                                 pvlye,pa_plus,tratamento,ph_agua,id_ordem,n_execucao))
+    if n_execucao == 0:
+        cur.execute("""update tb_ordens
+        set maquina=%s,setor=%s, risco=%s, tipo_manutencao=%s, area_manutencao=%s, 
+        equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
+        cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
+        where id_ordem = %s""", (maquina,setor,risco,tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
+                                setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,pvlye,
+                                pa_plus,tratamento,ph_agua,id_ordem))
+        cur.execute("""update tb_maquinas
+        set tombamento=%s
+        where codigo = %s""", (tombamento,maquina))
+    else:
+        cur.execute("""update tb_ordens
+        set status=%s, datainicio=%s, horainicio=%s,
+            datafim=%s, horafim=%s, descmanutencao = %s,
+            operador=%s,equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
+            cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
+            where id_ordem = %s and n_ordem = %s""", (status,datainicio,horainicio,
+                                                    datafim,horafim,descmanutencao,operador,inputEquipamentoEmFalha_edicao,
+                                                    setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,
+                                                    pvlye,pa_plus,tratamento,ph_agua,id_ordem,n_execucao))
 
-    # conn.commit()
+    conn.commit()
+    cur.close()
 
     return 'sucess'
 
@@ -3025,13 +3054,20 @@ def filtro_maquinas(setor):
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """
-        SELECT concat (codigo, ' - ', descricao) FROM tb_maquinas
+    if setor == 'Administrativo':
+        query = """
+        SELECT codigo FROM tb_maquinas
         WHERE setor = %s
         """
+    else:
+        query = """
+            SELECT concat (codigo, ' - ', descricao) FROM tb_maquinas
+            WHERE setor = %s
+            """
 
     cur.execute(query,(setor,))
     lista_maquinas = cur.fetchall()
+    print(lista_maquinas)
     lista_maquinas.append(["Outros"])
 
     return jsonify(lista_maquinas)

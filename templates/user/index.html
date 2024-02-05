@@ -561,14 +561,14 @@
                     <div class="col-sm-6 mb-2">
                         <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
                             <label>Máquina ou local</label>
-                            <input type="text" class="dropdown-input form-control" name="maquina_edicao" id="maquina_edicao" placeholder=" " required disabled> 
+                            <input type="text" class="dropdown-input form-control" name="maquina_edicao" id="maquina_edicao" autocomplete="off" placeholder=" " required disabled> 
                             <ul class="dropdown-list" id="listMaquinaLocalEdicao">
                             </ul>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <label for="tombamento">Tombamento</label>
-                        <input id="inputTombamento_edicao" type="text" name="inputTombamento_edicao" value="" class="form-control">
+                        <input id="inputTombamento_edicao" type="text" name="inputTombamento_edicao" class="form-control" disabled>
                     </div>
                 </div>
                 <div id="camposSolda_edicao" style="display: none;">
@@ -596,7 +596,17 @@
                         <div class="col-sm-6 mb-2">
                             <div id="setor_maquina_solda_edicao">
                                 <label>Setor da máq. de solda:</label>
-                                <input id="setorMaqSolda_edicao" type="text" name="input_setor_maquina_solda" value="" class="form-control">
+                                <select class="form-control" name="input_setor_maquina_solda" id="setorMaqSolda_edicao">
+                                    <option value="" selected disabled hidden></option>
+                                    <option value="Laterais">Laterais</option>
+                                    <option value="Eixos">Eixos</option>
+                                    <option value="Içamentos">Içamentos</option>
+                                    <option value='Plataforma "Esqueleto"'>Plataforma "Esqueleto"</option>
+                                    <option value="Chassi">Chassi</option>
+                                    <option value="Tanque">Tanque</option>
+                                    <option value="Caçamba">Caçamba</option>
+                                    <option value="Serralheria">Serralheria</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -651,7 +661,7 @@
                     <div class="col-sm-6 mb-2">
                         <label>Tipo de manutenção</label>
                         <select class="form-control" name="tipo_manutencao" id="selectTipoManutencao_edicao">
-                            <option value="" selected disabled hidden></option>  
+                            <option value="" selected disabled hidden></option> 
                             <option value="Corretiva">Corretiva</option>
                             <option value="Preventiva">Preventiva</option>
                             <option value="Preditiva">Preditiva</option>
@@ -665,7 +675,7 @@
                     <div class="col-sm-6">
                         <label>Área de manutenção</label>
                         <select class="form-control" name="area_manutencao" id="areaManutencao_edicao">
-                            <option value="" selected disabled hidden></option>  
+                            <option value="" selected disabled hidden></option> 
                             <option value="Predial">Predial</option>
                             <option value="Mecânica">Mecânica</option>
                             <option value="Elétrica">Elétrica</option>
@@ -1505,10 +1515,9 @@
 
 <!-- Abertura modal de timeline  -->
 <script>
+
     function modalTimeline(id_ordem) {
         
-        showLoading();
-
         $.ajax({
             url: '/timeline',
             type: 'POST',  // Alterado para POST
@@ -1572,25 +1581,24 @@
     
                     // Use addEventListener para lidar com o clique
                     (function(itemValue) {
-                        listItem.addEventListener('click', function() {
+                        $(listItem).on('click', function() {
+                            // Chamar a função apenas uma vez
                             itensParaEditar(id_ordem, itemValue);
                         });
                     })(item[0]);
                     
                     document.getElementById('listaHistorico').appendChild(listItem);
                 }
-
-                hideLoading();
             
             },
             error: function(error) {
-                hideLoading();
                 alert('Ocorreu um erro ao buscar os vídeos');
                 console.log(error);
             }
         });
     }
 
+    
     var maquina_edicao;
     var setor_edicao;
 
@@ -1604,8 +1612,6 @@
             data: JSON.stringify({ 'id_ordem': id_ordem, 'n_ordem': n_ordem }),  // Enviando um objeto JSON
             success: function(response,maquinas) {
 
-                $('#modalEdicaoExecucao').modal('show');
-
                 // console.log(response.setor_values);
                 // verificarEstadoBotao();
 
@@ -1618,6 +1624,14 @@
                     $('#setor_edicao').prop('disabled',false)
                     $('#inputSolicitante_edicao').prop('disabled',false)
                     $('#maquina_edicao').prop('disabled',false)
+                    $('#inputRisco_edicao').prop('disabled',false)
+                    $('#inputEquipamentoEmFalha_edicao').prop('disabled',false)
+                    $('#codigoEquipamento_edicao').prop('disabled',false)
+                    $('#setorMaqSolda_edicao').prop('disabled',false)
+                    $('#qual_ferramenta_edicao').prop('disabled',false)
+                    $('#selectTipoManutencao_edicao').prop('disabled',false)
+                    $('#areaManutencao_edicao').prop('disabled',false)
+                    $('#problema_edicao').prop('disabled',false)
                 } else {
                     $('#campo_execucao').show()
                     $('#setor_edicao').prop('disabled',true)
@@ -1625,10 +1639,12 @@
                     $('#maquina_edicao').prop('disabled',true)
                     $('#inputRisco_edicao').prop('disabled',true)
                     $('#inputEquipamentoEmFalha_edicao').prop('disabled',true)
-                    $('#inputTombamento_edicao').prop('disabled',true)
                     $('#codigoEquipamento_edicao').prop('disabled',true)
                     $('#setorMaqSolda_edicao').prop('disabled',true)
                     $('#qual_ferramenta_edicao').prop('disabled',true)
+                    $('#selectTipoManutencao_edicao').prop('disabled',true)
+                    $('#areaManutencao_edicao').prop('disabled',true)
+                    $('#problema_edicao').prop('disabled',true)
                 }
                 
                 if (response.setor_values === 'Solda') {
@@ -1650,12 +1666,44 @@
 
                 $('#setor_edicao').val(response.setor_values);
                 setor_edicao = response.setor_values;
+                var ajaxChamadaRealizada = false; 
+                // Adicione este trecho para realizar uma chamada AJAX quando o modal é exibido
+                $('#modalEdicaoExecucao').on('show.bs.modal', function () {
+                    // Verificar se a chamada AJAX já foi realizada
+                    if (!ajaxChamadaRealizada) {
+                        realizarChamadaAjax('/maquinas/' + setor_edicao, function (data) { 
+                            // Manipule os dados recebidos conforme necessário
+                            var inputDropdown = document.getElementById('setor_edicao');
+                            var listaDropdown = document.getElementById('listSetorEdicao');
+                            var listaMaquinasLocais = document.getElementById('listMaquinaLocalEdicao');
+                            var inputMaquinasLocais = document.getElementById('maquina_edicao');
+                            var listaHistorico = document.getElementById('listaHistorico');
+
+                            console.log(data);
+                            listaMaquinasLocais.innerHTML = '';
+                            inputMaquinasLocais.value = '';
+
+                            data.forEach(function (item) {
+                                var li = document.createElement('li');
+                                li.textContent = item;
+                                listaMaquinasLocais.appendChild(li);
+                            });
+
+                            // Marcar que a chamada AJAX foi realizada
+                            ajaxChamadaRealizada = true;
+                        });
+                    }
+                });
+
+
+                $('#modalEdicaoExecucao').modal('show');
+
                 $('#inputSolicitante_edicao').val(response.solicitante);
                 $('#dataAbertura_edicao').val(formatarDataBr(response.data_abertura));
                 $('#n_ordem_edicao').val(response.n_execucao);
                 $('#maquina_edicao').val(response.maquina);
                 maquina_edicao = response.maquina;
-                $('#inputTombamento_edicao').val(response.tombamento);
+
                 $('#inputEquipamentoEmFalha_edicao').val(response.equipamento_em_falha);
                 $('#codigoEquipamento_edicao').val(response.codigo_equipamento);
                 $('#setorMaqSolda_edicao').val(response.setor_maquina_solda);
@@ -1701,6 +1749,7 @@
                         $(this).prop('selected', true);
                     }
                 });
+                
 
                 console.log(selectOperadores.length);
 
@@ -1747,8 +1796,34 @@
                 alert('Ocorreu um erro ao buscar os vídeos');
                 console.log(error);
             }
+            
         });
     }   
+
+    $(document).on('click', '#listMaquinaLocalEdicao li', function() {
+        // Obter o valor selecionado do select
+        var selectedMaquina = $('#maquina_edicao').val();
+
+        console.log(selectedMaquina);
+
+        // Fazer a requisição AJAX para obter o tombamento
+        $.ajax({
+            url: '/tombamento',
+            type: 'POST',  // ou 'GET', dependendo da configuração do seu backend
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'codigo': selectedMaquina }),
+            success: function(response) {
+                // Atualizar o valor do inputTombamento_edicao com o valor obtido
+                console.log(response.tombamento);
+                $('#inputTombamento_edicao').val(response.tombamento);
+            },
+            error: function(error) {
+                console.log(error);
+                // Lidar com erros, se necessário
+            }
+        });
+    });
 
 </script>
 
@@ -1792,6 +1867,7 @@
             'n_ordem_edicao',
             'inputRisco_edicao',
             'maquina_edicao',
+            'inputTombamento_edicao',
             'inputEquipamentoEmFalha_edicao',
             'codigoEquipamento_edicao',
             'setorMaqSolda_edicao',
@@ -1866,15 +1942,9 @@
         inputDropdown.addEventListener('blur', function () {
             // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
             setTimeout(function () {
-                if (!correspondeAItem()) {
+                if (!correspondeAItemIndex()) {
                     // Se o valor não corresponder a um item na lista, redefina para o valor anterior
-                    if(inputDropdown.value !== maquina_edicao){
-                        inputDropdown.value = valorAnterior;
-                    }else if(inputDropdown.value !== setor_edicao) {
-                        inputDropdown.value = valorAnterior;
-                    } else {
-                        inputDropdown.value = maquina_edicao;
-                    }
+                    inputDropdown.value = valorAnterior;
                 } 
                 listaDropdown.style.display = 'none';
             }, 200);
@@ -1913,7 +1983,7 @@
             listaDropdown.style.display = correspondenciaItens ? 'block' : 'none';
         });
 
-        function correspondeAItem() {
+        function correspondeAItemIndex() {
             var input = inputDropdown.value.trim().toLowerCase();
             return Array.from(itens).some(function (item) {
                 return item.textContent.toLowerCase() === input;
@@ -1921,47 +1991,48 @@
         }
     }
 
-    configurarDropdownIndex('maquina_edicao', 'listMaquinaLocalEdicao');
     configurarDropdownIndex('setor_edicao', 'listSetorEdicao');
+    configurarDropdownIndex('maquina_edicao', 'listMaquinaLocalEdicao');
  
 </script>
 
 <!-- Script para mostrar maquinas de acordo com o setor selecionado -->
 <script>
+    function realizarChamadaAjax(url, successCallback) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: successCallback
+        });
+    }
+
     var inputDropdown = document.getElementById('setor_edicao');
     var listaDropdown = document.getElementById('listSetorEdicao');
     var listaMaquinasLocais = document.getElementById('listMaquinaLocalEdicao');
     var inputMaquinasLocais = document.getElementById('maquina_edicao');
     var listaHistorico = document.getElementById('listaHistorico');
     
-    listaDropdown.addEventListener('click', function(event) {
+    
+    listaDropdown.addEventListener('click', function (event) {
         if (event.target.tagName === 'LI') {
             inputDropdown.value = event.target.textContent;
 
-            $.ajax({
-                url: '/maquinas/' + event.target.textContent,
-                type: 'GET',
-                success: function(data) {
-                    // Atualiza o menu de máquinas com as opções retornadas do servidor
-                    console.log(data);
-                    // Adiciona os itens à lista
-                    console.log(maquina_edicao);
+            realizarChamadaAjax('/maquinas/' + event.target.textContent, function (lista_maquinas) {
+                // Atualiza o menu de máquinas com as opções retornadas do servidor
+                $('#camposSolda_edicao').show();
+                console.log(lista_maquinas);
+                listaMaquinasLocais.innerHTML = '';
+                inputMaquinasLocais.value = '';
 
-                    listaMaquinasLocais.innerHTML = '';
-                    
-                    inputMaquinasLocais = '';
-
-                    data.forEach(function(item) {
-                        var li = document.createElement('li');
-                        li.textContent = item;
-                        listaMaquinasLocais.appendChild(li);
-                    });
-                }
+                lista_maquinas.forEach(function (item) {
+                    var li = document.createElement('li');
+                    li.textContent = item;
+                    listaMaquinasLocais.appendChild(li);
+                });
             });
 
-        
             // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
-            setTimeout(function() {
+            setTimeout(function () {
                 listaDropdown.style.display = 'none';
             }, 100);
         }
