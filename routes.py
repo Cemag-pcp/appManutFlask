@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 import numpy as np
 import json
-from funcoes import gerador_de_semanas_informar_manutencao, login_required, gerador_de_semanas_informar_manutencao_diario,gerar_planejamento_maquinas_preventivas,calcular_proxima_data
+from funcoes import gerador_de_semanas_informar_manutencao, login_required, gerador_de_semanas_informar_manutencao_diario,gerar_planejamento_maquinas_preventivas,calcular_proxima_data,calcular_planejamento_anual
 import warnings
 from flask import session
 import base64
@@ -145,8 +145,8 @@ def buscar_dados_os(id_ordem):
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select *, coalesce(status,'Em espera') as status_new from tb_ordens where id_ordem = %s order by n_ordem desc limit 1"
-    sql_data_abertura =  """select dataabertura - INTERVAL '3 hours' as dataabertura,solicitante,
+    sql = "select *, coalesce(status,'Em espera') as status_new, coalesce(dataabertura,ultima_atualizacao) as dataabertura_atualizada from tb_ordens where id_ordem = %s order by n_ordem desc limit 1"
+    sql_data_abertura =  """select coalesce(dataabertura,ultima_atualizacao) as dataabertura,solicitante,
                             equipamento_em_falha,cod_equipamento,setor_maquina_solda,status
                             from tb_ordens where id_ordem = %s and n_ordem = 0
                         """
@@ -3619,7 +3619,7 @@ def timeline_os():
 
     s = ("""
         SELECT
-            o.dataabertura,
+            coalesce(o.dataabertura,o.ultima_atualizacao) as dataabertura,
             o.n_ordem,
             o.status,
             o.operador,
@@ -3728,7 +3728,6 @@ def tabela_maquinas_preventivas():
     return tabela_maquinas_preventivas
 
 @routes_bp.route('/tabela-grupos-preventivas')
-@login_required
 def grupos_preventivas():
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -3755,6 +3754,19 @@ def grupos_preventivas():
     grupos_juntos = pd.concat([df_grupos_notna,df_grupos_nan]).values.tolist()
 
     return jsonify(grupos_juntos)
+
+@routes_bp.route('/mostrar-preventivas', methods=['POST'])
+def mostrar_preventivas():
+
+    data = request.get_json()
+    print(data)
+    periodicidade_dias = data['periodicidade']*30
+    data_ultima_manutencao = pd.to_datetime(data['ultima_manutencao'], format="%d/%m/%Y").date()
+    planejamento_anual,semanas = calcular_planejamento_anual(data_ultima_manutencao,periodicidade_dias)
+
+    data_return = {'planejamento_anual': planejamento_anual, 'semanas': semanas}
+
+    return jsonify(data_return) 
 
 @routes_bp.route('/tabela-historico-preventivas')
 @login_required

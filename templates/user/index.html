@@ -682,22 +682,7 @@
     <!-- <div id="divMaquinasPreventivas" style="display: none;"><input type="text" value="" id="inputMaquinasPreventivas"></div> -->
 </div>
 
-<!-- Modal excluir ordem -->
-<!-- <div id="modalEnviar" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span> 
-        <form>
-            <div>
-                <label for="observacao">Motivo da exclusão da OS:</label>
-                <textarea id="observacao" rows="4" cols="45" required></textarea>
-            </div>
-            <button class="enviarModal" type="submit" onclick="excluirOrdem()">Enviar</button>
-        </form>
-    </div>
-</div> -->
-
 <!-- Modal excluir ordem 2.0 -->
-
 <div class="modal fade" data-backdrop="static" id="modalExcluirOrdem" tabindex="-1" role="dialog" aria-labelledby="modalExcluirOrdemLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
@@ -833,10 +818,8 @@
             order: [[7, 'desc']],
             responsive: true,
             columnDefs: [
-                // { responsivePriority: 10001, targets: 0 },
-                { responsivePriority: 10001, targets: 1 },
-                // { responsivePriority: 1, targets: 3 },
-                { responsivePriority: 1, targets: -2 },
+                { responsivePriority: 10001, targets: 10 },
+                { responsivePriority: 1, targets: 0 },
             ]
         });
 

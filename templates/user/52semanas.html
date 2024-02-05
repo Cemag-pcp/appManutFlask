@@ -26,6 +26,7 @@
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Última manutenção</th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Periodicidade (meses)</th>
                   <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Próxima manutenção</th>
+                  <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Planejamento 52 semanas</th>
                 </tr>
               </thead>
               <tbody class="tbodyTable13">
@@ -253,6 +254,29 @@
         <button class="form-control" id="nomear_grupo">Nomear Grupo</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal 52 semanas -->
+
+<div class="modal fade" data-backdrop="static" id="modal52semanas" tabindex="-1" role="dialog" aria-labelledby="modal52semanasLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h6 class="m-0 font-weight-bold text-primary">Planejamento para as próximas 52 semanas</h6>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div style="max-height: 500px; overflow-y: auto;" id="modalBodySemanas" class="modal-body">
+            <div class="list-group" id="listaSemanas">
+                    
+            </div>
+          </div>
+          <div class="modal-footer">
+              <!-- <button id="button52semanas" class="btn btn-success" type="submit" onclick="mostrarSemanas()">Enviar</button> -->
+          </div>
+      </div>
   </div>
 </div>
 
@@ -749,6 +773,9 @@
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/plug-ins/1.10.25/sorting/date-uk.js"></script>
 
+<!-- Formatar data para BR -->
+<script src="static/js/formatar-data.js"></script>
+
 <!-- <script src="static/vendor/datatables/jquery.dataTables.min.js"></script> -->
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
@@ -757,53 +784,74 @@
 <!-- Populando tabela de grupos -->
 <script>
   // Função para popular a tabela
-function popularTabelaMaquinasPreventivas(data) {
-    $('#dataTable13').DataTable().destroy();
+  function popularTabelaMaquinasPreventivas(data) {
+      $('#dataTable13').DataTable().destroy();
 
-    var tabelaBody = $('.tbodyTable13');
+      var tabelaBody = $('.tbodyTable13');
 
-    // Limpa o conteúdo existente na tabela
-    tabelaBody.empty();
+      // Limpa o conteúdo existente na tabela
+      tabelaBody.empty();
 
-    // Itera sobre os dados e adiciona as linhas à tabela
-    data.forEach(function (item) {
+      // Itera sobre os dados e adiciona as linhas à tabela
+      data.forEach(function (item) {
 
-        // var formattedDate = moment(item[3], "YYYY-MM-DD").format("DD/MM/YYYY");
+          // var formattedDate = moment(item[3], "YYYY-MM-DD").format("DD/MM/YYYY");
 
-        tabelaBody.append(
+          tabelaBody.append(
             '<tr>' +
             '<td>' + item[1] + '</td>' +
             '<td>' + item[2] + '</td>' +
-            '<td>' + item[3] + '</td>' + // Use the formatted date
+            '<td>' + item[3] + '</td>' +
             '<td>' + item[4] + '</td>' +
-            '<td>' + item[6] + '</td>' +
+            '<td>' +
+            item[6] +
+            '</td>' +
+            '<td>' +
+            '<a href="#" class="calendario52semanas" data-maquina="' + item[1] + '" data-grupo="' + item[2] + '" data-ultima="' + item[3] + '" data-periodicidade="' + item[4] + '">' +
+            ' <i class="fas fa-calendar"></i>' +
+            '</a>'+
+            '</td>' +
             '</tr>'
-        );
-    });
-    
-    // Inicializa o DataTable
-    $('#dataTable13').DataTable({
-      order: [[4, 'asc']],
-      columnDefs: [
-        { type: 'date-uk', targets: [2,4] }
-      ]
-    });
-}
+          );
 
-// Faz a requisição AJAX para obter os dados
-$.ajax({
-    url: '/tabela-grupos-preventivas',
-    type: 'GET',
-    dataType: 'json',
-    success: function (data) {
-        console.log(data);
-        // Chama a função para popular a tabela
-        popularTabelaMaquinasPreventivas(data);
-    },
-    error: function (error) {
-        console.log('Erro na requisição AJAX:', error);
-    }
-});
+      });
+
+      // Adicione um manipulador de eventos para os links com a classe 'calendario52semanas'
+      $('.calendario52semanas').on('click', function() {
+        // Recupere os dados da máquina e do grupo dos atributos de dados
+        var maquina = $(this).data('maquina');
+        var grupo = $(this).data('grupo');
+        var ultimaManutencao = $(this).data('ultima');
+        var periodicidade = $(this).data('periodicidade');
+
+        console.log(maquina,grupo,periodicidade,ultimaManutencao)
+
+        abrirModalSemana(maquina,grupo,ultimaManutencao,periodicidade);
+      });
+      
+      // Inicializa o DataTable
+      $('#dataTable13').DataTable({
+        order: [[4, 'asc']],
+        columnDefs: [
+          { type: 'date-uk', targets: [2,4] }
+        ]
+      });
+  }
+
+  // Faz a requisição AJAX para obter os dados
+  $.ajax({
+      url: '/tabela-grupos-preventivas',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+          console.log(data);
+          // Chama a função para popular a tabela
+          popularTabelaMaquinasPreventivas(data);
+      },
+      error: function (error) {
+          console.log('Erro na requisição AJAX:', error);
+      }
+  });
 
 </script>
 
@@ -858,5 +906,62 @@ $.ajax({
 <!-- Page level custom scripts -->
 <script src="static/js/demo/datatables-demo.js"></script>
 
+
+<!-- Modal 52 semanas -->
+<script>
+  
+  function abrirModalSemana(maquina,grupo,ultimaManutencao,periodicidade) {
+
+    $.ajax({
+      url: '/mostrar-preventivas',
+      type: 'POST',
+      dataType: 'json',
+      data: JSON.stringify({ codigo_maquina:maquina, nome_grupo:grupo, ultima_manutencao:ultimaManutencao, periodicidade:periodicidade }),  // Converte os dados para JSON
+      contentType: 'application/json',
+      success: function (data) {
+        
+        $('#listaSemanas').empty();
+
+        // Itera sobre o array 'planejamento_anual'
+        for (var i = 0; i < data.planejamento_anual.length; i++) {
+          
+          var listItem = document.createElement('a');
+          listItem.className = 'list-group-item list-group-item-action';
+          listItem.setAttribute('aria-current', 'true');
+
+          valor_data = data.planejamento_anual[i];
+          valor_semana = data.semanas[i];
+          // Cria um novo elemento <p> para cada linha
+          var content = `
+            <div class="d-flex w-100 justify-content-between">
+              <div class="row">
+                <div class="col-md-12">
+                  <p class="mb-1" style="font-size: small;"><strong>Semana: </strong>${valor_semana}</p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                    <p class="mb-1" style="font-size: small;"><strong>Data prevista: </strong>${formatarDataBrSemHora(valor_data)}</p>
+                </div> 
+              </div>
+            </div>
+            `;
+
+          listItem.innerHTML = content;
+          
+          document.getElementById('listaSemanas').appendChild(listItem);
+        }
+
+      },
+      error: function (error) {
+          console.log('Erro na requisição AJAX:', error);
+      }
+    });
+
+    $("#modal52semanas").modal("show");
+    
+  };
+
+</script>
 
 {% endblock %}
