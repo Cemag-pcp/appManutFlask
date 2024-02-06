@@ -51,7 +51,7 @@ def dados_para_editar(id_ordem,n_ordem):
 
     sql = "select o.*,func.nome,func.matricula,coalesce(status,'Em espera') as status_new from tb_ordens as o left join tb_funcionario as func on ',' || o.operador || ',' like '%%,' || func.matricula || ',%%' where id_ordem = %s and n_ordem = %s"
     sql_data_abertura =  """select dataabertura - INTERVAL '3 hours' as dataabertura,solicitante,
-                            equipamento_em_falha,cod_equipamento,setor_maquina_solda,status
+                            equipamento_em_falha,cod_equipamento,setor_maquina_solda,qual_ferramenta,status
                             from tb_ordens where id_ordem = %s and n_ordem = 0
                         """
     sql_tombamento = """select tombamento from tb_ordens
@@ -82,6 +82,7 @@ def dados_para_editar(id_ordem,n_ordem):
     equipamento_em_falha = dados_dataabertura[0]['equipamento_em_falha']
     codigo_equipamento = dados_dataabertura[0]['cod_equipamento']
     setor_maquina_solda = dados_dataabertura[0]['setor_maquina_solda']
+    qual_ferramenta = dados_dataabertura[0]['qual_ferramenta']
     risco = [row['risco'] for row in data][0]
     desc_usuario = [row['problemaaparente'] for row in data][0]
     status = [row['status_new'] for row in data][0]
@@ -105,10 +106,18 @@ def dados_para_editar(id_ordem,n_ordem):
     horafim = [row['horafim'] for row in data][0]
 
     # Formatando as datas e horas como strings
-    data_inicio_str = datainicio.isoformat()
-    hora_inicio_str = horainicio.strftime('%H:%M')
-    data_fim_str = datafim.isoformat()
-    hora_fim_str = horafim.strftime('%H:%M')
+    try:
+        data_inicio_str = datainicio.isoformat()
+        hora_inicio_str = horainicio.strftime('%H:%M')
+        data_fim_str = datafim.isoformat()
+        hora_fim_str = horafim.strftime('%H:%M')
+    except:
+        data_inicio_str = datetime.now().date().isoformat()
+        horainicio = "00:00"
+        hora_inicio_str = horainicio
+        data_fim_str = datetime.now().date().isoformat()
+        horafim = "00:00"
+        hora_fim_str = horafim
 
     dados = {
         'setor_values':setor_values,
@@ -120,6 +129,7 @@ def dados_para_editar(id_ordem,n_ordem):
         'equipamento_em_falha':equipamento_em_falha,
         'codigo_equipamento':codigo_equipamento,
         'setor_maquina_solda':setor_maquina_solda,
+        'qual_ferramenta':qual_ferramenta,
         'risco':risco,
         'desc_usuario':desc_usuario,
         'status':status,
@@ -2007,7 +2017,9 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     funcionarios = buscar_funcionarios()
 
-    return render_template('user/index.html', funcionarios=funcionarios, list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
+    nomes_solicitantes = solicitantes()
+
+    return render_template('user/index.html', funcionarios=funcionarios, nomes_solicitantes=nomes_solicitantes,list_users=list_users,setor_selecionado=setor_selecionado,identificador_selecionado=identificador_selecionado)
 
 def proxima_os():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -2259,9 +2271,8 @@ def dados_ordem_servico():
 @login_required
 def dados_editar_ordem():
     data = request.get_json()
-    print(data)
     data = dados_para_editar(data['id_ordem'], data['n_ordem'])
-    
+
     print(data)
 
     return jsonify(data)
@@ -2281,6 +2292,33 @@ def verificar_maquina_preventiva(maquina):
         return True
     else:
         return False
+    
+@routes_bp.route('/tombamento', methods=['POST'])
+@login_required
+def obter_tombamento():
+    data = request.get_json()
+    codigo_maquina = data['codigo']
+
+    if ' - ' in codigo_maquina:
+        codigo_maquina = codigo_maquina.split(' - ')
+        codigo_maquina = codigo_maquina[0]
+
+    print(codigo_maquina)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = f"""SELECT tombamento
+            FROM tb_maquinas
+            WHERE codigo = '{codigo_maquina}'"""
+
+    cur.execute(query)
+    tombamento = cur.fetchall()
+
+    print(tombamento)
+
+    return jsonify({'tombamento': tombamento})
 
 @routes_bp.route('/guardar-ordem-editada', methods=['POST'])
 @login_required
@@ -2289,13 +2327,15 @@ def editar_ordem_banco():
     dados = request.get_json()
     print(dados)
     
-    # setor = dados['setor']
+    setor = dados['setor_edicao']
+    solicitante = dados['inputSolicitante_edicao']
     maquina = dados['maquina_edicao']
+    tombamento = dados['inputTombamento_edicao']
     risco = dados['inputRisco_edicao']
     status = dados['statusLista_edicao']
     # problema = dados['problema']
-    id_ordem = dados['numeroOs']
-    n_execucao = dados['n_ordem_edicao']
+    id_ordem = int(dados['numeroOs'])
+    n_execucao = int(dados['n_ordem_edicao'])
     descmanutencao = dados['descmanutencao_edicao']
     operador = dados['operador_edicao']
     inputEquipamentoEmFalha_edicao = dados['inputEquipamentoEmFalha_edicao']
@@ -2333,19 +2373,27 @@ def editar_ordem_banco():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    cur.execute("""update tb_ordens
-    set maquina=%s, risco=%s, status=%s, datainicio=%s, horainicio=%s,
-        datafim=%s, horafim=%s, descmanutencao=%s,
-        operador=%s, tipo_manutencao=%s, area_manutencao=%s,
+    if n_execucao == 0:
+        cur.execute("""update tb_ordens
+        set maquina=%s,solicitante=%s,setor=%s, risco=%s, tipo_manutencao=%s, area_manutencao=%s, 
         equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
         cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
-        where id_ordem = %s and n_ordem = %s""", (maquina,risco,status,datainicio,horainicio,
-                                                  datafim,horafim,descmanutencao,operador,
-                                                  tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
-                                                  setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,
-                                                  pvlye,pa_plus,tratamento,ph_agua,id_ordem,n_execucao))
+        where id_ordem = %s""", (maquina,solicitante,setor,risco,tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
+                                setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,pvlye,
+                                pa_plus,tratamento,ph_agua,id_ordem))
+    else:
+        cur.execute("""update tb_ordens
+        set status=%s, datainicio=%s, horainicio=%s,
+            datafim=%s, horafim=%s, descmanutencao = %s,
+            operador=%s,equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
+            cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
+            where id_ordem = %s and n_ordem = %s""", (status,datainicio,horainicio,
+                                                    datafim,horafim,descmanutencao,operador,inputEquipamentoEmFalha_edicao,
+                                                    setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,
+                                                    pvlye,pa_plus,tratamento,ph_agua,id_ordem,n_execucao))
 
     conn.commit()
+    cur.close()
 
     return 'sucess'
 
@@ -2997,10 +3045,16 @@ def filtro_maquinas(setor):
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """
-        SELECT concat (codigo, ' - ', descricao) FROM tb_maquinas
+    if setor == 'Administrativo':
+        query = """
+        SELECT codigo FROM tb_maquinas
         WHERE setor = %s
         """
+    else:
+        query = """
+            SELECT concat (codigo, ' - ', descricao) FROM tb_maquinas
+            WHERE setor = %s
+            """
 
     cur.execute(query,(setor,))
     lista_maquinas = cur.fetchall()

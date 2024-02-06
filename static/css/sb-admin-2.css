@@ -3188,7 +3188,7 @@ input[type="button"].btn-block {
 .dropdown-item {
   display: block;
   width: 100%;
-  /* padding: 0.25rem 1.5rem; */
+  padding: 0.25rem 1.5rem;
   clear: both;
   font-weight: 400;
   color: #3a3b45;

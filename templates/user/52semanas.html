@@ -419,6 +419,7 @@
         return;
       }
 
+      $('#modalGrupoExistente .modal-title').text(codigo_maquina + ' - ' + grupoSelecionado);
       console.log(codigo_maquina);
       // Fechar o modalGrupoAtividade
       // closeModalGrupo();
@@ -429,7 +430,7 @@
         type: 'GET',
         success: function (data) {
             // Popule o modalGrupoExistente com os dados recebidos
-            $('.modal-title').text(codigo_maquina + ' - ' + grupoSelecionado);
+            
             console.log("Dados recebidos:", data);
             // Verifica se data é um array
             if (typeof data === 'object' && data !== null) {
@@ -439,7 +440,6 @@
                 console.error("Os dados recebidos não são um array:", data);
             }
 
-            
             // Exibir o modalGrupoExistente
             $('#modalGrupoExistente').modal('show');
         },
