@@ -364,7 +364,7 @@
                 <div class="row">
                     <div class="col-sm-6 mb-2">
                         <label>Tipo de manutenção</label>
-                        <select style = 'height: 50px;' class="form-control" name="tipo_manutencao" id="selectTipoManutencao">
+                        <select class="form-control" name="tipo_manutencao" id="selectTipoManutencao">
                             <option value="" selected disabled hidden></option>  
                             <option value="Corretiva">Corretiva</option>
                             <option value="Preventiva">Preventiva</option>
@@ -378,7 +378,7 @@
                     </div>
                     <div class="col-sm-6">
                         <label>Área de manutenção</label>
-                        <select style = 'height: 50px;' class="form-control" name="area_manutencao" id="areaManutencao">
+                        <select class="form-control" name="area_manutencao" id="areaManutencao">
                             <option value="" selected disabled hidden></option>  
                             <option value="Predial">Predial</option>
                             <option value="Mecânica">Mecânica</option>
@@ -528,7 +528,7 @@
                     </div>
                     <div class="col-sm-6">
                         <label for="setor">Solicitante:</label>
-                        <select class="form-control" id="inputSolicitante_edicao">
+                        <select class="form-control" id="inputSolicitante_edicao" required>
                             {% for solicitante in nomes_solicitantes %}
                                 <option>{{solicitante[0]}}</option>
                             {% endfor %}
@@ -661,7 +661,7 @@
                     <div class="col-sm-6 mb-2">
                         <label>Tipo de manutenção</label>
                         <select class="form-control" name="tipo_manutencao" id="selectTipoManutencao_edicao">
-                            <option value="" selected disabled hidden></option> 
+                            <option value="" selected></option> 
                             <option value="Corretiva">Corretiva</option>
                             <option value="Preventiva">Preventiva</option>
                             <option value="Preditiva">Preditiva</option>
@@ -675,7 +675,7 @@
                     <div class="col-sm-6">
                         <label>Área de manutenção</label>
                         <select class="form-control" name="area_manutencao" id="areaManutencao_edicao">
-                            <option value="" selected disabled hidden></option> 
+                            <option value="" selected></option> 
                             <option value="Predial">Predial</option>
                             <option value="Mecânica">Mecânica</option>
                             <option value="Elétrica">Elétrica</option>
@@ -1664,6 +1664,8 @@
                     $('#camposEte_edicao').hide();
                 }
 
+                // CHAMANDO O GET DE /MAQUINAS NO MOMENTO QUE ABRIR O MODAL PARA JÁ TRAZER OS VALORES DA LISTA E DO TOMBAMENTO
+
                 $('#setor_edicao').val(response.setor_values);
                 setor_edicao = response.setor_values;
                 var ajaxChamadaRealizada = false; 
@@ -1679,9 +1681,12 @@
                             var inputMaquinasLocais = document.getElementById('maquina_edicao');
                             var listaHistorico = document.getElementById('listaHistorico');
 
+                            $("#inputTombamento_edicao").val('')
+
+                            obterTombamento(inputMaquinasLocais.value)
+
                             console.log(data);
                             listaMaquinasLocais.innerHTML = '';
-                            inputMaquinasLocais.value = '';
 
                             data.forEach(function (item) {
                                 var li = document.createElement('li');
@@ -1800,12 +1805,9 @@
         });
     }   
 
-    $(document).on('click', '#listMaquinaLocalEdicao li', function() {
-        // Obter o valor selecionado do select
-        var selectedMaquina = $('#maquina_edicao').val();
 
-        console.log(selectedMaquina);
-
+    // TRAZENDO O TOMBAMENTO COM BASE NO NOME DA MÁQUINA
+    function obterTombamento(selectedMaquina) {
         // Fazer a requisição AJAX para obter o tombamento
         $.ajax({
             url: '/tombamento',
@@ -1823,6 +1825,40 @@
                 // Lidar com erros, se necessário
             }
         });
+    }
+
+    // AO CLICAR EM ALGUM ITEM DA LISTA, BUSCAR O TOMBAMENTO
+    $(document).ready(function() {
+        // Evento de clique associado à lista de máquinas
+        $(document).on('click', '#listMaquinaLocalEdicao li', function() {
+            // Obter o valor selecionado do select
+            var selectedMaquina = $('#maquina_edicao').val();
+
+            console.log(selectedMaquina);
+
+            // Chamar a função para obter o tombamento
+            obterTombamento(selectedMaquina);
+        });
+    });
+
+    // OCULTAR CAMPOS DE SOLDA CASO MUDE O SETOR
+    $(document).on('click', '#listSetorEdicao li', function() {
+        
+        // Obter o valor do setor
+        var selectedSetor = $('#setor_edicao').val();
+
+        console.log(selectedSetor);
+
+        if (selectedSetor !== 'Solda') {
+            $('#camposSolda_edicao').hide();
+        } else {
+            $('#camposSolda_edicao').show();
+            $('#inputEquipamentoEmFalha_edicao').val('');
+            $('#codigoEquipamento_edicao').val('');
+            $('#setorMaqSolda_edicao').val('');
+            $('#qual_ferramenta_edicao').val('');
+        }
+
     });
 
 </script>
@@ -1831,12 +1867,22 @@
 <script>
     $('#salvarEdicaoExecucao_edicao').on('click', function() {
 
-        showLoading();
-
         var tipoManutencao =  document.getElementById('selectTipoManutencao_edicao').value;
         var areaManutencao =  document.getElementById('areaManutencao_edicao').value;
         var observacao =  document.getElementById('descmanutencao_edicao').value;
-        var operadorSelecionado = $('#operador_edicao option:selected').length;
+        var setor_edicao = $('#setor_edicao').val();
+        var inputSolicitante_edicao = $('#inputSolicitante_edicao').val();
+        var inputRisco_edicao = $('#inputRisco_edicao').val();
+        var maquina_edicao = $('#maquina_edicao').val();
+
+        // EVITAR ENVIO DE REQUISIÇÃO CASO INPUT ESTEJA VAZIO
+
+        if (setor_edicao === '' | inputSolicitante_edicao === '' | inputRisco_edicao === '' | maquina_edicao === '' | tipoManutencao === '' | areaManutencao === '') {
+            exibirMensagem('aviso','Preencha todos os campos obrigatórios.');
+            return;
+        }
+
+        showLoading();
 
         // Lista de IDs dos elementos que são checkboxes
         // var idsCheckboxes = [
@@ -1998,6 +2044,7 @@
 
 <!-- Script para mostrar maquinas de acordo com o setor selecionado -->
 <script>
+    // CHAMANDO A ROTA /MAQUINAS PARA ATUALIZAR AS LISTAS
     function realizarChamadaAjax(url, successCallback) {
         $.ajax({
             url: url,
@@ -2019,7 +2066,6 @@
 
             realizarChamadaAjax('/maquinas/' + event.target.textContent, function (lista_maquinas) {
                 // Atualiza o menu de máquinas com as opções retornadas do servidor
-                $('#camposSolda_edicao').show();
                 console.log(lista_maquinas);
                 listaMaquinasLocais.innerHTML = '';
                 inputMaquinasLocais.value = '';

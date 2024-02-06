@@ -51,7 +51,7 @@ def dados_para_editar(id_ordem,n_ordem):
 
     sql = "select o.*,func.nome,func.matricula,coalesce(status,'Em espera') as status_new from tb_ordens as o left join tb_funcionario as func on ',' || o.operador || ',' like '%%,' || func.matricula || ',%%' where id_ordem = %s and n_ordem = %s"
     sql_data_abertura =  """select dataabertura - INTERVAL '3 hours' as dataabertura,solicitante,
-                            equipamento_em_falha,cod_equipamento,setor_maquina_solda,status
+                            equipamento_em_falha,cod_equipamento,setor_maquina_solda,qual_ferramenta,status
                             from tb_ordens where id_ordem = %s and n_ordem = 0
                         """
     sql_tombamento = """select tombamento from tb_ordens
@@ -82,6 +82,7 @@ def dados_para_editar(id_ordem,n_ordem):
     equipamento_em_falha = dados_dataabertura[0]['equipamento_em_falha']
     codigo_equipamento = dados_dataabertura[0]['cod_equipamento']
     setor_maquina_solda = dados_dataabertura[0]['setor_maquina_solda']
+    qual_ferramenta = dados_dataabertura[0]['qual_ferramenta']
     risco = [row['risco'] for row in data][0]
     desc_usuario = [row['problemaaparente'] for row in data][0]
     status = [row['status_new'] for row in data][0]
@@ -128,6 +129,7 @@ def dados_para_editar(id_ordem,n_ordem):
         'equipamento_em_falha':equipamento_em_falha,
         'codigo_equipamento':codigo_equipamento,
         'setor_maquina_solda':setor_maquina_solda,
+        'qual_ferramenta':qual_ferramenta,
         'risco':risco,
         'desc_usuario':desc_usuario,
         'status':status,
@@ -2282,6 +2284,8 @@ def dados_editar_ordem():
     data = request.get_json()
     data = dados_para_editar(data['id_ordem'], data['n_ordem'])
 
+    print(data)
+
     return jsonify(data)
 
 def verificar_maquina_preventiva(maquina):
@@ -2335,6 +2339,7 @@ def editar_ordem_banco():
     print(dados)
     
     setor = dados['setor_edicao']
+    solicitante = dados['inputSolicitante_edicao']
     maquina = dados['maquina_edicao']
     tombamento = dados['inputTombamento_edicao']
     risco = dados['inputRisco_edicao']
@@ -2381,15 +2386,12 @@ def editar_ordem_banco():
 
     if n_execucao == 0:
         cur.execute("""update tb_ordens
-        set maquina=%s,setor=%s, risco=%s, tipo_manutencao=%s, area_manutencao=%s, 
+        set maquina=%s,solicitante=%s,setor=%s, risco=%s, tipo_manutencao=%s, area_manutencao=%s, 
         equipamento_em_falha=%s,setor_maquina_solda=%s,qual_ferramenta=%s,
         cod_equipamento=%s,pvlye=%s, pa_plus=%s, tratamento=%s, ph_agua=%s
-        where id_ordem = %s""", (maquina,setor,risco,tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
+        where id_ordem = %s""", (maquina,solicitante,setor,risco,tipo_manutencao,area_manutencao,inputEquipamentoEmFalha_edicao,
                                 setorMaqSolda_edicao,qual_ferramenta_edicao,codigoEquipamento_edicao,pvlye,
                                 pa_plus,tratamento,ph_agua,id_ordem))
-        cur.execute("""update tb_maquinas
-        set tombamento=%s
-        where codigo = %s""", (tombamento,maquina))
     else:
         cur.execute("""update tb_ordens
         set status=%s, datainicio=%s, horainicio=%s,
@@ -3067,7 +3069,6 @@ def filtro_maquinas(setor):
 
     cur.execute(query,(setor,))
     lista_maquinas = cur.fetchall()
-    print(lista_maquinas)
     lista_maquinas.append(["Outros"])
 
     return jsonify(lista_maquinas)
