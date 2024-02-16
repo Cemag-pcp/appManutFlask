@@ -1162,157 +1162,167 @@ def funcao_geral(query_mtbf, query_mttr, boleano_historico, setor_selecionado, q
 
     df_timeline = pd.read_sql_query(query_disponibilidade, conn)
 
-    df_timeline['inicio'] = df_timeline['inicio'].astype(str)
-    df_timeline['fim'] = df_timeline['fim'].astype(str)
+    if len(df_timeline)>0:
 
-    df_timeline = df_timeline.dropna()
+        df_timeline['inicio'] = df_timeline['inicio'].astype(str)
+        df_timeline['fim'] = df_timeline['fim'].astype(str)
 
-    df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
-    df_timeline['mes'] = df_timeline['datafim'].dt.month
-    
-    df_timeline['now'] = datetime.now()
-    df_timeline['mes_hoje'] = datetime.now().month
+        df_timeline = df_timeline.dropna()
 
-    df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(lista_meses)
-
-    df_timeline.dtypes
-
-    # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
-
-    try:
-        df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
-        df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
-
-        # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
-        df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1, df=df_timeline)
-        # df_timeline['diferenca'] = 
-        # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
-        #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
-
-    except:
-        df_timeline['diferenca'] = 0
-
-    # df_timeline = df_timeline[['datafim','diferenca']]
-
-    df_timeline['maquina'] = df_timeline['maquina']
-    df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
-
-    if df_timeline['maquina'].drop_duplicates().tolist() == ['Outros']:
-        df_agrupado_tempo = df_timeline.groupby('maquina').agg({
-            'diferenca': 'sum',
-            'setor': 'first'  # Ou use a função de agregação desejada para 'setor'
-        }).reset_index()
-    else:
-        df_agrupado_tempo = df_timeline.groupby(
-            ['maquina'])['diferenca'].sum().reset_index()
+        df_timeline['datafim'] = pd.to_datetime(df_timeline['datafim'])
+        df_timeline['mes'] = df_timeline['datafim'].dt.month
         
-    df_agrupado_tempo['maquina'] = df_agrupado_tempo['maquina'].str.split(
-        ' - ').str[0]
+        df_timeline['now'] = datetime.now()
+        df_timeline['mes_hoje'] = datetime.now().month
 
-    df_agrupado_qtd = df_timeline[['maquina']]
+        df_timeline['ultimo_dia_mes'] = ultimo_dia_mes(lista_meses)
 
-    # Contar a quantidade de manutenções por máquina
-    contagem = df_agrupado_qtd['maquina'].value_counts()
-    df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['maquina'].map(
-        contagem)
-    df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
+        df_timeline.dtypes
 
-    df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='maquina')
+        # df_timeline = df_timeline[df_timeline['mes'] == mes_hoje]
 
-    s = ("""
-    SELECT * FROM tb_maquinas
-    """)
+        try:
+            df_timeline['inicio'] = pd.to_datetime(df_timeline['inicio'])
+            df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
 
-    df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
-    df_maquinas = df_maquinas[['codigo','setor']]
-    df_maquinas = df_maquinas.rename(columns={'codigo': 'maquina'})
+            # df_timeline['diferenca'] = pd.to_datetime(df_timeline['fim']) - pd.to_datetime(df_timeline['inicio'])
+            df_timeline['diferenca'] = df_timeline.apply(calcular_minutos_uteis, axis=1, df=df_timeline)
+            # df_timeline['diferenca'] = 
+            # df_timeline['diferenca'] = (df_timeline['fim'] - df_timeline['inicio']).apply(
+            #     lambda x: x.total_seconds() // 60 if pd.notnull(x) else None)
 
-    if df_combinado['maquina'].drop_duplicates().tolist() != ['Outros']:
-        df_combinado = df_combinado.merge(df_maquinas, on='maquina')
+        except:
+            df_timeline['diferenca'] = 0
 
-    df_combinado['diferenca'] = df_combinado['diferenca'] / 60
+        # df_timeline = df_timeline[['datafim','diferenca']]
 
-    qtd_dias_uteis = dias_uteis(lista_meses)
+        df_timeline['maquina'] = df_timeline['maquina']
+        df_timeline['maquina'] = df_timeline['maquina'].str.split(' - ').str[0]
 
-    df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
+        if df_timeline['maquina'].drop_duplicates().tolist() == ['Outros']:
+            df_agrupado_tempo = df_timeline.groupby('maquina').agg({
+                'diferenca': 'sum',
+                'setor': 'first'  # Ou use a função de agregação desejada para 'setor'
+            }).reset_index()
+        else:
+            df_agrupado_tempo = df_timeline.groupby(
+                ['maquina'])['diferenca'].sum().reset_index()
+            
+        df_agrupado_tempo['maquina'] = df_agrupado_tempo['maquina'].str.split(
+            ' - ').str[0]
 
-    df_combinado = df_combinado.drop_duplicates().reset_index(drop=True)
+        df_agrupado_qtd = df_timeline[['maquina']]
 
-    if len(df_combinado) > 0:
-        print('Entrou')
-        df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] -
-                                df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
-        df_combinado['MTTR'] = (
-            df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
-        df_combinado['disponibilidade'] = (
-            (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+        # Contar a quantidade de manutenções por máquina
+        contagem = df_agrupado_qtd['maquina'].value_counts()
+        df_agrupado_qtd['qtd_manutencao'] = df_agrupado_qtd['maquina'].map(
+            contagem)
+        df_agrupado_qtd = df_agrupado_qtd.drop_duplicates()
 
-        disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
-            2)
-    
-        df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].groupby('setor').mean()[['MTBF','MTTR','disponibilidade']].reset_index()
-        df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
-        df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
-        df_disponibilidade_setor['disponibilidade'] = df_disponibilidade_setor['disponibilidade'].round(2)
+        df_combinado = df_agrupado_qtd.merge(df_agrupado_tempo, on='maquina')
 
-        if boleano_historico == True:
-            """
-            Se for GET pega todo o histórico e adiciona no atual
-            """
-            print('Entrou no Boleano')
-            historico_csv = pd.read_csv("disponibilidade_historico.csv", sep=';')
+        s = ("""
+        SELECT * FROM tb_maquinas
+        """)
 
-            if setor_selecionado:
-                historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
+        df_maquinas = pd.read_sql_query(s, conn).drop_duplicates()
+        df_maquinas = df_maquinas[['codigo','setor']]
+        df_maquinas = df_maquinas.rename(columns={'codigo': 'maquina'})
 
-            historico_csv['setor'] = historico_csv['setor'].str.split(' - ').str[0]
-            historico_csv['disponibilidade_historico_media'] = historico_csv['disponibilidade_historico_media'].str.replace(',', '.').str.replace("%", "").astype(float)
+        if df_combinado['maquina'].drop_duplicates().tolist() != ['Outros']:
+            df_combinado = df_combinado.merge(df_maquinas, on='maquina')
 
-            df_disponibilidade_setor = df_combinado.merge(historico_csv, how='outer', on='setor').fillna(100)
-            df_disponibilidade_setor["disponibilidade_media"] = (df_disponibilidade_setor["disponibilidade"] + df_disponibilidade_setor["disponibilidade_historico_media"]) / 2
-            df_disponibilidade_setor = df_disponibilidade_setor.drop(columns={"disponibilidade"})
-            df_disponibilidade_setor = df_disponibilidade_setor.rename(columns={"disponibilidade_media": 'disponibilidade'})
+        df_combinado['diferenca'] = df_combinado['diferenca'] / 60
 
-            # Calcular a média da disponibilidade para cada setor
-            df_disponibilidade_setor = df_disponibilidade_setor.groupby('setor')[['MTBF','MTTR','disponibilidade']].mean().reset_index()
+        qtd_dias_uteis = dias_uteis(lista_meses)
 
+        df_combinado['carga_trabalhada'] = qtd_dias_uteis * 9
+
+        df_combinado = df_combinado.drop_duplicates().reset_index(drop=True)
+
+        if len(df_combinado) > 0:
+            print('Entrou')
+            df_combinado['MTBF'] = ((df_combinado['carga_trabalhada'] -
+                                    df_combinado['diferenca']) / df_combinado['qtd_manutencao']).round(2)
+            df_combinado['MTTR'] = (
+                df_combinado['diferenca'] / df_combinado['qtd_manutencao']).round(2)
+            df_combinado['disponibilidade'] = (
+                (df_combinado['MTBF'] / (df_combinado['MTBF'] + df_combinado['MTTR'])) * 100).round(2)
+
+            disponibilidade_geral_setor = df_combinado['disponibilidade'].mean().round(
+                2)
+        
+            df_disponibilidade_setor = df_combinado[['setor','MTBF','MTTR','disponibilidade']].groupby('setor').mean()[['MTBF','MTTR','disponibilidade']].reset_index()
             df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
             df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
             df_disponibilidade_setor['disponibilidade'] = df_disponibilidade_setor['disponibilidade'].round(2)
 
-            print('2',df_disponibilidade_setor)
+            if boleano_historico == True:
+                """
+                Se for GET pega todo o histórico e adiciona no atual
+                """
+                print('Entrou no Boleano')
+                historico_csv = pd.read_csv("disponibilidade_historico.csv", sep=';')
 
-            df_disponibilidade_setor.sort_values(by='disponibilidade', inplace=True)
+                if setor_selecionado:
+                    historico_csv = historico_csv[historico_csv['setor'] == setor_selecionado]
 
-            labels = df_disponibilidade_setor['setor'].tolist()  # eixo x
-            dados_disponibilidade = df_disponibilidade_setor['disponibilidade'].tolist()
+                historico_csv['setor'] = historico_csv['setor'].str.split(' - ').str[0]
+                historico_csv['disponibilidade_historico_media'] = historico_csv['disponibilidade_historico_media'].str.replace(',', '.').str.replace("%", "").astype(float)
 
-            disponibilidade_geral_setor = df_disponibilidade_setor['disponibilidade'].mean().round(2)
+                df_disponibilidade_setor = df_combinado.merge(historico_csv, how='outer', on='setor').fillna(100)
+                df_disponibilidade_setor["disponibilidade_media"] = (df_disponibilidade_setor["disponibilidade"] + df_disponibilidade_setor["disponibilidade_historico_media"]) / 2
+                df_disponibilidade_setor = df_disponibilidade_setor.drop(columns={"disponibilidade"})
+                df_disponibilidade_setor = df_disponibilidade_setor.rename(columns={"disponibilidade_media": 'disponibilidade'})
 
-            df_disponibilidade_setor = df_disponibilidade_setor[['setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
-        
+                # Calcular a média da disponibilidade para cada setor
+                df_disponibilidade_setor = df_disponibilidade_setor.groupby('setor')[['MTBF','MTTR','disponibilidade']].mean().reset_index()
+
+                df_disponibilidade_setor['MTBF'] = df_disponibilidade_setor['MTBF'].round(2)
+                df_disponibilidade_setor['MTTR'] = df_disponibilidade_setor['MTTR'].round(2)
+                df_disponibilidade_setor['disponibilidade'] = df_disponibilidade_setor['disponibilidade'].round(2)
+
+                df_disponibilidade_setor.sort_values(by='disponibilidade', inplace=True)
+
+                labels = df_disponibilidade_setor['setor'].tolist()  # eixo x
+                dados_disponibilidade = df_disponibilidade_setor['disponibilidade'].tolist()
+
+                disponibilidade_geral_setor = df_disponibilidade_setor['disponibilidade'].mean().round(2)
+
+                df_disponibilidade_setor = df_disponibilidade_setor[['setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
+            
+
+            else:
+                print('Não Entrou no Boleano')
+                labels = df_disponibilidade_setor['setor'].tolist()  # eixo x
+                # eixo y gráfico 1
+                dados_disponibilidade = df_disponibilidade_setor['disponibilidade'].tolist()
+
+                df_disponibilidade_setor = df_disponibilidade_setor[[
+                    'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
+
+            context_disponibilidade_setor = {
+                'labels_disponibilidade_setor': labels,
+                'dados_disponibilidade_setor': dados_disponibilidade,
+                'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
 
         else:
-            print('Não Entrou no Boleano')
-            labels = df_disponibilidade_setor['setor'].tolist()  # eixo x
-            # eixo y gráfico 1
-            dados_disponibilidade = df_disponibilidade_setor['disponibilidade'].tolist()
+            print('Não Entrou')
+            labels = []
+            dados_disponibilidade = []
+            df_disponibilidade_setor = []
+            df_disponibilidade_setor = df_combinado[['setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
+            disponibilidade_geral_setor = []
 
-            df_disponibilidade_setor = df_disponibilidade_setor[[
-                'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
-
-        context_disponibilidade_setor = {
-            'labels_disponibilidade_setor': labels,
-            'dados_disponibilidade_setor': dados_disponibilidade,
-            'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
+            context_disponibilidade_setor = {
+                'labels_disponibilidade_setor': labels,
+                'dados_disponibilidade_setor': dados_disponibilidade,
+                'valor_disponibilidade_geral_setor': disponibilidade_geral_setor}
 
     else:
-        print('Não Entrou')
         labels = []
         dados_disponibilidade = []
         df_disponibilidade_setor = []
-        df_disponibilidade_setor = df_combinado[[
-            'setor', 'MTBF', 'MTTR', 'disponibilidade']].values.tolist()
         disponibilidade_geral_setor = []
 
         context_disponibilidade_setor = {
