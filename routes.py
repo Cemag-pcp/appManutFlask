@@ -1826,8 +1826,8 @@ def disponibilidade_setor():
     maquinas_importante = data.get('maquinasFavoritas', [])
 
     # Defina a URL da API
-    url = 'http://127.0.0.1:5000/api/calculo_maquina_tempo_parada'
-    url2 = 'http://127.0.0.1:5000/api/calculo_maquina_parada'
+    url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
+    url2 = 'https://manutencaocemag.onrender.com/api/calculo_maquina_parada'
     
     # Suponha que você tenha dados para enviar no corpo da solicitação (payload)
     payload = {
