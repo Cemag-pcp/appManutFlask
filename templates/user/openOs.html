@@ -554,15 +554,19 @@
                 inputCodigoFerramenta.value = '';
                 inputMaquinaLocal.value = '';
 
+                document.getElementById('campoMaquinaLocal').style.display = 'none';
+                document.getElementById('campoSetorMaquinaSolda').style.display = 'none';
+                document.getElementById('inputcampoESetorMaquinaSolda').required = false;
+                document.getElementById('campoCodigoFerramenta').style.display = 'none';
+                document.getElementById('campoFerramenta').style.display = 'none';
+                document.getElementById('inputFerramenta').required = false;
+                document.getElementById('inputCodigoFerramenta').required = false;
+                document.getElementById('inputMaquinaLocal').required = true;
+
                 if (event.target.textContent === 'Máquina de Solda') {
                     document.getElementById('campoSetorMaquinaSolda').style.display = 'block';
                     document.getElementById('campoMaquinaLocal').style.display = 'block';
                     document.getElementById('inputcampoESetorMaquinaSolda').required = true;
-                } else {
-                    document.getElementById('campoMaquinaLocal').style.display = 'none';
-                    document.getElementById('campoSetorMaquinaSolda').style.display = 'none';
-                    document.getElementById('inputcampoESetorMaquinaSolda').required = false;
-                    
                 }
 
                 if (event.target.textContent === 'Ferramentas') {
@@ -571,22 +575,15 @@
                     document.getElementById('inputMaquinaLocal').required = false;
                     document.getElementById('inputFerramenta').required = true;
                     document.getElementById('inputCodigoFerramenta').required = true;
-                    
-                } else {
-                    document.getElementById('campoCodigoFerramenta').style.display = 'none';
-                    document.getElementById('campoFerramenta').style.display = 'none';
-                    document.getElementById('inputMaquinaLocal').required = true;
-                    document.getElementById('inputFerramenta').required = false;
-                    document.getElementById('inputCodigoFerramenta').required = false;
-
                 }
 
                 if (event.target.textContent === 'Monovia') {
                     document.getElementById('campoMaquinaLocal').style.display = 'block';
                     document.getElementById('inputMaquinaLocal').required = false;
-                } else {
-                    document.getElementById('inputMaquinaLocal').required = true;
-                    // document.getElementById('campoMaquinaLocal').style.display = 'none';
+                }
+
+                else {
+                    document.getElementById('inputMaquinaLocal').required = false;
                 }
 
                 console.log(event.target.textContent);

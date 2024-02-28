@@ -9,45 +9,51 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
 
+  <!-- Filtros -->
+
   <div class="card shadow mb-4">
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary">Filtros Gráficos</h6>
     </div>
     <div class="card-body">
-      <form action="{{ url_for('routes.grafico') }}" method="POST" onsubmit="return validateForm()">
-        <div class="row">
-          <div class="col-md-6">
-            <label for="filtro_setor">Setor:</label>
-            <select class="selectpicker form-control" name="filtro_setor" multiple title="Selecione o(s) setor(es)..."
-              data-selected-text-format="count > 3">
-              {% for setor in setores %}
-              {% if setor[0] in lista_setore_selecionado %}
-              <option value="{{ setor[0] }}" selected>{{ setor[0] }}</option>
-              {% else %}
-              <option value="{{ setor[0] }}">{{ setor[0] }}</option>
-              {% endif %}
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="data_filtro">Mês:</label>
-            <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
-          </div>
+      <div class="row">
+        <div class="col-md-6">
+          <label for="filtro_setor">Setor:</label>
+          <select id="selectSetor" class="selectpicker form-control" name="filtro_setor" multiple
+            title="Selecione o(s) setor(es)..." data-selected-text-format="count > 3">
+            <option value="Qualidade">Qualidade</option>
+            <option value="Solda">Solda</option>
+            <option value="Corte e estamparia">Corte e estamparia</option>
+            <option value="Almoxarifado">Almoxarifado</option>
+            <option value="Pintura">Pintura</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Usinagem">Usinagem</option>
+            <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+            <option value="Utilidades">Utilidades</option>
+            <option value="Forjaria">Forjaria</option>
+            <option value="Administrativo">Administrativo</option>
+            <option value="Carpintaria">Carpintaria</option>
+            <option value="Forjaria">Forjaria</option>
+          </select>
         </div>
-        <div style="display: flex;justify-content: flex-end;gap: 20px;align-items: flex-start;margin-top: 20px;">
-          <label for="maquinas-favoritas">Máquinas importantes</label>
-          <label class="switch">
-            {% if maquinas_importantes %}
-            <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas" style="width: 20px;height: 20px;"
-              checked>
-            {% else %}
-            <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas" style="width: 20px;height: 20px;">
-            {% endif %}
-            <span class="slider round"></span>
-          </label>
+        <div class="col-md-6">
+          <label for="data_filtro">Mês:</label>
+          <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
         </div>
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-      </form>
+      </div>
+      <div style="display: flex;justify-content: flex-end;gap: 20px;align-items: flex-start;margin-top: 20px;">
+        <label for="maquinas-favoritas">Máquinas importantes</label>
+        <label class="switch">
+          <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas" style="width: 20px;height: 20px;">
+          <span class="slider round"></span>
+        </label>
+        <label for="historico">Dados históricos</label>
+        <label class="switch">
+          <input type="checkbox" name="historico" id="historico" style="width: 20px;height: 20px;">
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <button id="buttonFilter" type="submit" class="btn btn-primary">Filtrar</button>
     </div>
   </div>
 
@@ -59,93 +65,99 @@
   <!-- Cards -->
 
   <div class="row">
-    <!-- Earnings (Monthly) Card Example -->
+    <!-- Execução -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Em Execução</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[2]}}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fa-solid fa-play fa-2x text-gray-300"></i>
-                    </div>
-                </div>
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                Em Execução</div>
+              <div id="statusExecucao" class="h5 mb-0 font-weight-bold text-gray-800"></div>
             </div>
+            <div class="col-auto">
+              <i class="fa-solid fa-play fa-2x text-gray-300"></i>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- Earnings (Monthly) Card Example -->
+    <!-- Em espera -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Em Espera</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[4]}}</div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fa-solid fa-hourglass-start fa-2x text-gray-300"></i>
-                    </div>
-                </div>
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                Em Espera</div>
+              <div id="statusEspera" class="h5 mb-0 font-weight-bold text-gray-800"></div>
             </div>
+            <div class="col-auto">
+              <i class="fa-solid fa-hourglass-start fa-2x text-gray-300"></i>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- Earnings (Monthly) Card Example -->
+    <!-- Finalizada -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Finalizada</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[1]}}</div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fa-solid fa-clipboard-check fa-2x text-gray-300"></i>
-                    </div>
-                </div>
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                Finalizada</div>
+              <div id="statusFinalizada" class="h5 mb-0 font-weight-bold text-gray-800"></div>
             </div>
+            <div class="col-auto">
+              <i class="fa-solid fa-clipboard-check fa-2x text-gray-300"></i>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
+    <!-- Aguardando material -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-secondary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
-                            Aguardando Material</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{lista_qt[0]}}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fa-solid fa-business-time fa-2x text-gray-300"></i>
-                    </div>
-                </div>
+      <div class="card border-left-secondary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                Aguardando Material</div>
+              <div id="statusAguardando" class="h5 mb-0 font-weight-bold text-gray-800"></div>
             </div>
+            <div class="col-auto">
+              <i class="fa-solid fa-business-time fa-2x text-gray-300"></i>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+
   </div>
+
+  <!-- Disponibilidade -->
   <div class="row">
-    
+
+    <!-- Disponibilidade -->
+  
     <div class="col-xl-3 col-md-6 mb-4">
       <div class="card border-left-info shadow h-100 py-2">
-          <div class="card-body">
-              <div class="row no-gutters align-items-center">
-                  <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                          Disponibilidade Geral</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{disponibilidade_geral_setor}}%</div>
-                  </div>
-                  <div class="col-auto">
-                      <i class="fa-solid fa-globe fa-2x text-gray-300"></i>
-                  </div>
-              </div>
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                Disponibilidade Geral</div>
+              <div id="cardDisponibilidade" class="h5 mb-0 font-weight-bold text-gray-800"></div>
+            </div>
+            <div class="col-auto">
+              <i class="fa-solid fa-globe fa-2x text-gray-300"></i>
+            </div>
           </div>
+        </div>
       </div>
     </div>
 
@@ -183,20 +195,11 @@
               <thead>
                 <tr>
                   <td>Máquina</td>
-                  <td>Qtd. OS</td>
-                  <td>H.Trabalhadas</td>
                   <td>MTBF</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for mtbf_maquina in lista_mtbf_maquina %}
-                <tr>
-                  <td>{{mtbf_maquina[0]}}</td>
-                  <td>{{mtbf_maquina[1]}}</td>
-                  <td>{{mtbf_maquina[2]}}</td>
-                  <td>{{mtbf_maquina[3]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody2">
+
               </tbody>
             </table>
           </div>
@@ -236,20 +239,11 @@
               <thead>
                 <tr>
                   <td>Máquina</td>
-                  <td>Qtd. OS</td>
-                  <td>H.Trabalhadas</td>
                   <td>MTBF</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for mtbf_maquina_top10 in top_10_maiores_MTBF_lista %}
-                <tr>
-                  <td>{{mtbf_maquina_top10[0]}}</td>
-                  <td>{{mtbf_maquina_top10[1]}}</td>
-                  <td>{{mtbf_maquina_top10[2]}}</td>
-                  <td>{{mtbf_maquina_top10[3]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody3">
+
               </tbody>
             </table>
           </div>
@@ -288,20 +282,11 @@
               <thead>
                 <tr>
                   <td>Setor</td>
-                  <td>Qnt. OS</td>
-                  <td>H.Trabalhadas</td>
                   <td>MTBF</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for mtbf_setor in lista_mtbf_setor %}
-                <tr>
-                  <td>{{mtbf_setor[0]}}</td>
-                  <td>{{mtbf_setor[1]}}</td>
-                  <td>{{mtbf_setor[2]}}</td>
-                  <td>{{mtbf_setor[3]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody4">
+
               </tbody>
             </table>
           </div>
@@ -339,20 +324,11 @@
               <thead>
                 <tr>
                   <td>Máquina</td>
-                  <td>Qnt. OS</td>
-                  <td>Dif. (H. trab sem parada - H. Parada)</td>
                   <td>MTTR</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for mttr_maquina in lista_mttr_maquina %}
-                <tr>
-                  <td>{{mttr_maquina[0]}}</td>
-                  <td>{{mttr_maquina[1]}}</td>
-                  <td>{{mttr_maquina[2]|round(2)}}</td>
-                  <td>{{mttr_maquina[3]|round(2)}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody5">
+
               </tbody>
             </table>
           </div>
@@ -390,20 +366,11 @@
               <thead>
                 <tr>
                   <td>Setor</td>
-                  <td>Qtd. OS</td>
-                  <td>H.Trabalhadas</td>
                   <td>MTTR</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for mttr_setor in lista_mttr_setor %}
-                <tr>
-                  <td>{{mttr_setor[0]}}</td>
-                  <td>{{mttr_setor[1]}}</td>
-                  <td>{{mttr_setor[2]|round(2)}}</td>
-                  <td>{{mttr_setor[3]|round(2)}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody6">
+
               </tbody>
             </table>
           </div>
@@ -441,20 +408,11 @@
               <thead>
                 <tr>
                   <td>Máquina</td>
-                  <td>MTBF</td>
-                  <td>MTTR</td>
                   <td>Disponibilidade</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for disponibilidade_maquina in lista_disponibilidade_maquina %}
-                <tr>
-                  <td>{{disponibilidade_maquina[0]}}</td>
-                  <td>{{disponibilidade_maquina[1]}}</td>
-                  <td>{{disponibilidade_maquina[2]}}</td>
-                  <td>{{disponibilidade_maquina[3]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody7">
+
               </tbody>
             </table>
           </div>
@@ -492,20 +450,11 @@
               <thead>
                 <tr>
                   <td>Setor</td>
-                  <td>MTBF</td>
-                  <td>MTTR</td>
                   <td>Disponibilidade</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for disponibilidade_setor in lista_disponibilidade_setor %}
-                <tr>
-                  <td>{{disponibilidade_setor[0]}}</td>
-                  <td>{{disponibilidade_setor[1]}}</td>
-                  <td>{{disponibilidade_setor[2]}}</td>
-                  <td>{{disponibilidade_setor[3]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody8">
+
               </tbody>
             </table>
           </div>
@@ -546,13 +495,8 @@
                   <td>Horas</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for hora_tipo in lista_horas_trabalhadas_tipo %}
-                <tr>
-                  <td>{{hora_tipo [0]}}</td>
-                  <td>{{hora_tipo [1]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody9">
+
               </tbody>
             </table>
           </div>
@@ -593,13 +537,8 @@
                   <td>Horas</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for hora_area in lista_horas_trabalhadas_area %}
-                <tr>
-                  <td>{{hora_area[0]}}</td>
-                  <td>{{hora_area[1]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody10">
+
               </tbody>
             </table>
           </div>
@@ -638,21 +577,16 @@
                   <td>OS</td>
                 </tr>
               </thead>
-              <tbody>
-                {% for hora_setor in lista_horas_trabalhadas_setor %}
-                <tr>
-                  <td>{{hora_setor[0]}}</td>
-                  <td>{{hora_setor[1]}}</td>
-                </tr>
-                {% endfor %}
+              <tbody id="tabelaBody11">
+
               </tbody>
             </table>
           </div>
         </div>
+      </div>
     </div>
   </div>
-</div>
-{% endblock %}
+  {% endblock %}
 
   {% block scripts %}
   <!-- Latest compiled and minified CSS -->
@@ -683,36 +617,14 @@
   <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
   <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-
-
-  <!-- <script>
-  function saveAndSubmit() {
-      // Salva o valor do campo no armazenamento local
-      var inputValue = document.getElementById("inputDate1").value;
-      localStorage.setItem("inputDateValue", inputValue);
-
-      // Submete o formulário
-      document.forms[0].submit();
-  }
-
-  // Restaura o valor do campo ao carregar a página
-  window.onload = function() {
-      var storedValue = localStorage.getItem("inputDateValue");
-      if (storedValue) {
-          document.getElementById("inputDate1").value = storedValue;
-      }
-  };
-</script> -->
+  <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
   <script>
     function validateForm() {
       var inputDate = document.getElementById('inputDate1').value;
-
-      console.log(inputDate)
 
       // Verifica se a data está no formato correto
       if (!isValidDateRange(inputDate) && inputDate !== '') {
@@ -727,8 +639,6 @@
       // Cria as datas invertendo os componentes
       var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
       var endDate = new Date(endDateComponents[2], endDateComponents[1] - 1, endDateComponents[0]);
-
-      console.log(dateRange)
 
       // Define as datas de restrição
       var minDate = new Date('2023-06-22');
@@ -816,87 +726,88 @@
 
   <script>
 
-    // Bar Chart Example
-    var eixo_y = {{ dados_mtbf_maquina | safe }};
-    var eixo_x = {{ labels_mtbf_maquina | safe }};
-    // Encontrar o valor máximo no array
-    let maxValor = Math.max(...eixo_y);
-    // Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
-    let arredondadoMaxValor = Math.ceil(maxValor / 100) * 100;
-    if (eixo_y == NaN) {
-      eixo_y = 500
-    }
-    var ctx = document.getElementById("grafico1");
-    var myBarChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: eixo_x,
-        datasets: [{
-          label: 'MTBF',
-          backgroundColor: "#4e73df",
-          hoverBackgroundColor: "#2e59d9",
-          borderColor: "#4e73df",
-          data: eixo_y,
-        }],
-      },
-      options: {
-        maintainAspectRatio: false,
-        layout: {
-          padding: {
-            left: 10,
-            right: 25,
-            top: 25,
-            bottom: 0
-          }
-        },
-        scales: {
-          xAxes: [{
-            time: {
-              unit: 'month'
-            },
-            gridLines: {
-              display: false,
-              drawBorder: false
-            },
-            ticks: {
-              maxTicksLimit: 6
-            },
-            maxBarThickness: 25,
-          }],
-          yAxes: [{
-            ticks: {
-              min: 0,
-              max: arredondadoMaxValor,
-              maxTicksLimit: 10,
-              padding: 10,
-            },
-            gridLines: {
-              color: "rgb(234, 236, 244)",
-              zeroLineColor: "rgb(234, 236, 244)",
-              drawBorder: false,
-              borderDash: [2],
-              zeroLineBorderDash: [2]
-            }
-          }],
-        },
-        legend: {
-          display: false
-        },
-        tooltips: {
-          titleMarginBottom: 10,
-          titleFontColor: '#6e707e',
-          titleFontSize: 14,
-          backgroundColor: "rgb(255,255,255)",
-          bodyFontColor: "#858796",
-          borderColor: '#dddfeb',
-          borderWidth: 1,
-          xPadding: 15,
-          yPadding: 15,
-          displayColors: false,
-          caretPadding: 10,
-        },
-      }
-    });
+    // // Bar Chart Example
+    // var eixo_y = {{ dados_mtbf_maquina | safe }};
+    // var eixo_x = {{ labels_mtbf_maquina | safe }};
+    // // Encontrar o valor máximo no array
+    // let maxValor = Math.max(...eixo_y);
+    // // Arredondar o valor máximo para cima para o múltiplo mais próximo de 50
+    // let arredondadoMaxValor = Math.ceil(maxValor / 100) * 100;
+    // if (eixo_y == NaN) {
+    //   eixo_y = 500
+    // }
+    // var ctx = document.getElementById("grafico1");
+    // var myBarChart = new Chart(ctx, {
+    //   type: 'bar',
+    //   data: {
+    //     labels: eixo_x,
+    //     datasets: [{
+    //       label: 'MTBF',
+    //       backgroundColor: "#4e73df",
+    //       hoverBackgroundColor: "#2e59d9",
+    //       borderColor: "#4e73df",
+    //       data: eixo_y,
+    //     }],
+    //   },
+    //   options: {
+    //     maintainAspectRatio: false,
+    //     layout: {
+    //       padding: {
+    //         left: 10,
+    //         right: 25,
+    //         top: 25,
+    //         bottom: 0
+    //       }
+    //     },
+    //     scales: {
+    //       xAxes: [{
+    //         time: {
+    //           unit: 'month'
+    //         },
+    //         gridLines: {
+    //           display: false,
+    //           drawBorder: false
+    //         },
+    //         ticks: {
+    //           maxTicksLimit: 6
+    //         },
+    //         maxBarThickness: 25,
+    //       }],
+    //       yAxes: [{
+    //         ticks: {
+    //           min: 0,
+    //           max: arredondadoMaxValor,
+    //           maxTicksLimit: 10,
+    //           padding: 10,
+    //         },
+    //         gridLines: {
+    //           color: "rgb(234, 236, 244)",
+    //           zeroLineColor: "rgb(234, 236, 244)",
+    //           drawBorder: false,
+    //           borderDash: [2],
+    //           zeroLineBorderDash: [2]
+    //         }
+    //       }],
+    //     },
+    //     legend: {
+    //       display: false
+    //     },
+    //     tooltips: {
+    //       titleMarginBottom: 10,
+    //       titleFontColor: '#6e707e',
+    //       titleFontSize: 14,
+    //       backgroundColor: "rgb(255,255,255)",
+    //       bodyFontColor: "#858796",
+    //       borderColor: '#dddfeb',
+    //       borderWidth: 1,
+    //       xPadding: 15,
+    //       yPadding: 15,
+    //       displayColors: false,
+    //       caretPadding: 10,
+    //     },
+    //   }
+    // });
+
 
 
     // Bar Chart Example
@@ -1537,6 +1448,1419 @@
       }
     });
 
+  </script>
+
+  <!-- MTBF POR MÁQUINA e TOP 10 MTBF POR MÁQUINA -->
+  <script>
+    // Variável global para armazenar a referência ao gráfico
+    let chartMtbfMaquina;
+    let chartTop10MtbfMaquina;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoMtbfMaquina(historicoChecked, maquinasFavoritas, selectedOptions, dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/calculo_mtbf_maquina', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas,
+          historico_checked: historicoChecked
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          data.resultados.sort((a, b) => a.resultado_mtbf - b.resultado_mtbf);
+
+          // Dados para o mtbf de máquinas
+          const ctx = document.getElementById('grafico1').getContext('2d');
+          const maquinas = data.resultados.map(item => item.maquina);
+          const resultados = data.resultados.map(item => item.resultado_mtbf);
+
+          // Destrua o gráfico anterior se existir
+          if (chartMtbfMaquina) {
+            chartMtbfMaquina.destroy();
+          }
+          // Destrua o gráfico anterior se existir
+          if (chartTop10MtbfMaquina) {
+            chartTop10MtbfMaquina.destroy();
+          }
+
+          // Dados para o top 10 mtbf de máquinas
+          const ctx_top_10 = document.getElementById('grafico1top10').getContext('2d');
+          var top10Resultados = data.resultados.slice(0, 10);
+          const maquinas_top10 = top10Resultados.map(item => item.maquina);
+          const resultados_top10 = top10Resultados.map(item => item.resultado_mtbf);
+
+          // Gráfico mtbf por máquina
+          chartMtbfMaquina = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: maquinas,
+              datasets: [{
+                label: 'MTBF por máquina',
+                data: resultados,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Gráfico top 10 mtbf por máquina
+          chartTop10MtbfMaquina = new Chart(ctx_top_10, {
+            type: 'bar',
+            data: {
+              labels: maquinas_top10,
+              datasets: [{
+                label: 'MTBF por máquina',
+                data: resultados_top10,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Preencha a tabela
+          preencherTabela_mtbf_maquina(data);
+          preencherTabela_top_10_mtbf_maquina(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabela_mtbf_maquina(data) {
+      $('#dataTable2').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody2');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.resultado_mtbf - b.resultado_mtbf);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.maquina + '</td>');
+        newRow.append('<td>' + row.resultado_mtbf + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable2').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+    function preencherTabela_top_10_mtbf_maquina(data) {
+      $('#dataTable3').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody3');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.resultado_mtbf - b.resultado_mtbf);
+      var top10Resultados = data.resultados.slice(0, 10);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(top10Resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.maquina + '</td>');
+        newRow.append('<td>' + row.resultado_mtbf + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable3').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- MTBF POR SETOR -->
+  <script>
+    // Variável global para armazenar a referência ao gráfico
+    let chartMtbfSetor;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoMtbfSetor(selectedOptions, dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/calculo_mtbf_setor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          data.resultados.sort((a, b) => a.resultado_mtbf - b.resultado_mtbf);
+
+          // Destrua o gráfico anterior se existir
+          if (chartMtbfSetor) {
+            chartMtbfSetor.destroy();
+          }
+
+          // Dados para o mtbf de máquinas
+          const ctx = document.getElementById('grafico2').getContext('2d');
+          const setores = data.resultados.map(item => item.setor);
+          const resultados = data.resultados.map(item => item.resultado_mtbf);
+
+          // Crie um novo gráfico
+          chartMtbfSetor = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: setores,
+              datasets: [{
+                label: 'MTTR por máquina',
+                data: resultados,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Preencha a tabela
+          preencherTabela_mtbf_setor(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabela_mtbf_setor(data) {
+      $('#dataTable4').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody4');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.resultado_mtbf - b.resultado_mtbf);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.setor + '</td>');
+        newRow.append('<td>' + row.resultado_mtbf + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable4').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+  </script>
+
+  <!-- MTTR POR MÁQUINA -->
+  <script>
+    let chartMttrMaquina;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/calculo_mttr_maquina', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          data.resultados.sort((a, b) => a.resultado_mttr - b.resultado_mttr);
+
+          // Destrua o gráfico anterior se existir
+          if (chartMttrMaquina) {
+            chartMttrMaquina.destroy();
+          }
+
+          // Dados para o mtbf de máquinas
+          const ctx = document.getElementById('grafico3').getContext('2d');
+          const maquinas = data.resultados.map(item => item.maquina);
+          const resultados = data.resultados.map(item => item.resultado_mttr);
+
+          // Gráfico mtbf por maquina
+          chartMttrMaquina = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: maquinas,
+              datasets: [{
+                label: 'MTTR por máquina',
+                data: resultados,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Preencha a tabela
+          preencherTabela_mttr_maquina(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabela_mttr_maquina(data) {
+      $('#dataTable5').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody5');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.resultado_mttr - b.resultado_mttr);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.maquina + '</td>');
+        newRow.append('<td>' + row.resultado_mttr + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable5').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- MTTR POR SETOR -->
+  <script>
+    let chartMttrSetor;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoMttrSetor(selectedOptions, dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/calculo_mttr_setor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+
+          data.resultados.sort((a, b) => a.resultado_mttr - b.resultado_mttr);
+
+          // Destrua o gráfico anterior se existir
+          if (chartMttrSetor) {
+            chartMttrSetor.destroy();
+          }
+
+          // Dados para o mtbf de máquinas
+          const ctx = document.getElementById('grafico4').getContext('2d');
+          const setores = data.resultados.map(item => item.setor);
+          const resultados = data.resultados.map(item => item.resultado_mttr);
+
+          // Gráfico mtbf por maquina
+          chartMttrSetor = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: setores,
+              datasets: [{
+                label: 'MTTR por setor',
+                data: resultados,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Preencha a tabela
+          preencherTabela_mttr_setor(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabela_mttr_setor(data) {
+      $('#dataTable6').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody6');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.resultado_mttr - b.resultado_mttr);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.setor + '</td>');
+        newRow.append('<td>' + row.resultado_mttr + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable6').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- DISPONIBILIDADE POR MÁQUINA -->
+  <script>
+    let chartDisponibilidadeMaquina;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions,dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/disponibilidade_maquina', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+
+          const mediaDisponibilidade = data.resultados.reduce((total, resultado) => total + resultado.disponibilidade, 0) / data.resultados.length;
+          
+          document.getElementById('cardDisponibilidade').textContent = mediaDisponibilidade.toFixed(2)*100 + '%';
+
+          data.resultados.sort((a, b) => a.disponibilidade - b.disponibilidade);
+
+          // Destrua o gráfico anterior se existir
+          if (chartDisponibilidadeMaquina) {
+            chartDisponibilidadeMaquina.destroy();
+          }
+
+          // Dados para o mtbf de máquinas
+          const ctx = document.getElementById('grafico5').getContext('2d');
+          const maquinas = data.resultados.map(item => item.codigo_tratado);
+          const resultados = data.resultados.map(item => item.disponibilidade);
+
+          // Gráfico mtbf por maquina
+          chartDisponibilidadeMaquina = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: maquinas,
+              datasets: [{
+                label: 'Disponibilidade por máquina',
+                data: resultados,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Preencha a tabela
+          preencherTabelaDisponibilidadeMaquina(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabelaDisponibilidadeMaquina(data) {
+      $('#dataTable7').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody7');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.disponibilidade - b.disponibilidade);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.codigo_tratado + '</td>');
+        newRow.append('<td>' + row.disponibilidade.toFixed(2)*100 + "%" + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable7').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- DISPONIBILIDADE POR SETOR -->
+  <script>
+    let chartDisponibilidadeSetor;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions,dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/disponibilidade_setor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          data.resultados.sort((a, b) => a.disponibilidade - b.disponibilidade);
+
+          // Destrua o gráfico anterior se existir
+          if (chartDisponibilidadeSetor) {
+            chartDisponibilidadeSetor.destroy();
+          }
+
+          // Dados para o mtbf de máquinas
+          const ctx = document.getElementById('grafico6').getContext('2d');
+          const setores = data.resultados.map(item => item.setor);
+          const resultados = data.resultados.map(item => item.disponibilidade);
+
+          // Gráfico mtbf por maquina
+          chartDisponibilidadeSetor = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: setores,
+              datasets: [{
+                label: 'Disponibilidade por setor',
+                data: resultados,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Preencha a tabela
+          preencherTabelaDisponibilidadeSetor(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabelaDisponibilidadeSetor(data) {
+      $('#dataTable8').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody8');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.disponibilidade - b.disponibilidade);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.setor + '</td>');
+        newRow.append('<td>' + row.disponibilidade.toFixed(2)*100 + "%" + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable8').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- HORAS TRABALHADOS POR TIPO DE MANUTENÇÃO -->
+  <script>
+
+    let chartHorasTipo;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoTipoManutencao(maquinasFavoritas,selectedOptions,dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/calculo_horas_trabalhadas_tipo_manutencao', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+
+          // Destrua o gráfico anterior se existir
+          if (chartHorasTipo) {
+            chartHorasTipo.destroy();
+          }
+
+          const ctx = document.getElementById('grafico7').getContext('2d');
+          const tipo_ = data.resultados.map(item => item.tipo);
+          const horas_ = data.resultados.map(item => item.horas);
+
+          chartHorasTipo = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: tipo_,
+              datasets: [{
+                label: 'Horas por tipo de manutenção',
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#ffd369', '#f87474'],
+                hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                data: horas_,
+              }],
+            },
+            options: {
+              maintainAspectRatio: false,
+              tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+              legend: {
+                display: true
+              },
+              cutoutPercentage: 50,
+            },
+          });
+
+          // Preencha a tabela
+          preencherTabelaTipoManutencao(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabelaTipoManutencao(data) {
+      $('#dataTable9').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody9');
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.tipo + '</td>');
+        newRow.append('<td>' + row.horas + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable9').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- HORAS TRABALHADOS POR ÁREA DE MANUTENÇÃO -->
+  <script>
+    let chartHorasArea;
+
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoAreaManutencao(maquinasFavoritas, selectedOptions,dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/calculo_horas_trabalhadas_area_manutencao', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+
+          // Destrua o gráfico anterior se existir
+          if (chartHorasArea) {
+            chartHorasArea.destroy();
+          }
+
+          const ctx = document.getElementById('grafico8').getContext('2d');
+          const area_ = data.resultados.map(item => item.area);
+          const horas_ = data.resultados.map(item => item.horas);
+
+          chartHorasArea = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: area_,
+              datasets: [{
+                label: 'Horas por area de manutenção',
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#ffd369', '#f87474'],
+                hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                data: horas_,
+              }],
+            },
+            options: {
+              maintainAspectRatio: false,
+              tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+              legend: {
+                display: true
+              },
+              cutoutPercentage: 50,
+            },
+          });
+
+          // Preencha a tabela
+          preencherTabelaAreaManutencao(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabelaAreaManutencao(data) {
+      $('#dataTable10').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody10');
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.area + '</td>');
+        newRow.append('<td>' + row.horas + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable10').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- HORAS TRABALHADAS POR SETOR -->
+  <script>
+
+    let chartHorasSetor;
+    // Função para carregar os dados e criar o gráfico e a tabela
+    function graficoHorasSetor(maquinasFavoritas, selectedOptions,dataFiltro) {
+      // Substitua pela lógica que faz a solicitação à sua API
+      fetch('/api/calculo_horas_setor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          data.resultados.sort((a, b) => a.horas - b.horas);
+
+          // Destrua o gráfico anterior se existir
+          if (chartHorasSetor) {
+            chartHorasSetor.destroy();
+          }
+
+          // Dados para o mtbf de máquinas
+          const ctx = document.getElementById('grafico9').getContext('2d');
+          const setores = data.resultados.map(item => item.setor);
+          const horas_ = data.resultados.map(item => item.horas);
+
+          // Gráfico mtbf por maquina
+          chartHorasSetor = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: setores,
+              datasets: [{
+                label: 'Horas trabalhadas por setor',
+                data: horas_,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
+          // Preencha a tabela
+          preencherTabelaHorasSetor(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+    // Função para preencher a tabela com os dados
+    function preencherTabelaHorasSetor(data) {
+      $('#dataTable11').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody11');
+
+      // Ordena os dados pelo resultado
+      data.resultados.sort((a, b) => a.horas - b.horas);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.resultados, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.setor + '</td>');
+        newRow.append('<td>' + row.horas + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable11').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
+  </script>
+
+  <!-- CARDS -->
+  <script>
+
+    // Função para fazer a solicitação à API e preencher o valor no card
+    function valoresCards(maquinasFavoritas,selectedOptions,dataFiltro) {
+      fetch('/api/calculo_cards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          // dia_inicial: dataInicio,
+          // dia_final: dataFim,
+          data_filtro: dataFiltro,
+          setores_selecionados: selectedOptions,
+          maquinasFavoritas: maquinasFavoritas
+          // Adicione outros parâmetros conforme necessário
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+
+          // Encontre o item com o status 'Em execução'
+          const itemFinalizada = data.resultados.find(item => item.status === 'Finalizada');
+          // Obtenha a quantidade, se o item existir
+          const quantidadeFinalizada = itemFinalizada ? itemFinalizada.quantidade : 0;
+
+          document.getElementById('statusFinalizada').textContent = quantidadeFinalizada;
+
+          // Encontre o item com o status 'Aguardando material'
+          const itemAguardando = data.resultados.find(item => item.status === 'Aguardando material');
+          // Obtenha a quantidade, se o item existir
+          const quantidadeAguardando = itemAguardando ? itemAguardando.quantidade : 0;
+
+          document.getElementById('statusAguardando').textContent = quantidadeAguardando;
+
+          // Encontre o item com o status 'Em execução'
+          const itemEspera = data.resultados.find(item => item.status === 'Em espera');
+          // Obtenha a quantidade, se o item existir
+          const quantidadeEspera = itemEspera ? itemEspera.quantidade : 0;
+
+          document.getElementById('statusEspera').textContent = quantidadeEspera;
+
+          // Encontre o item com o status 'Em execução'
+          const itemExecucao = data.resultados.find(item => item.status === 'Em execução');
+          // Obtenha a quantidade, se o item existir
+          const quantidadeExecucao = itemExecucao ? itemExecucao.quantidade : 0;
+
+          document.getElementById('statusExecucao').textContent = quantidadeExecucao;
+
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    }
+
+  </script>
+
+  <!-- CHAMANDO OS GRÁFICOS -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('buttonFilter').addEventListener('click', function () {
+        // Obtenha os valores selecionados nos campos do formulário
+        const historicoChecked = document.getElementById('historico').checked;
+        
+        const selectedSetores = Array.from(document.getElementsByName('filtro_setor'))
+          .filter(option => option.selected)
+          .map(option => option.value);
+
+        const dataFiltro = document.getElementById('inputDate1').value;
+        const maquinasFavoritas = document.getElementById('maquinas-favoritas').checked;
+        const selectSetor = document.getElementById('selectSetor');
+        const selectedOptions = Array.from(selectSetor.selectedOptions).map(option => option.value);
+        
+        console.log(dataFiltro);
+
+        // Converte a string da data para o formato desejado
+        // const [dataInicioStr, dataFimStr] = dataFiltro.split(' - ');
+        // const dataInicio = formatDate(dataInicioStr);
+        // const dataFim = formatDate(dataFimStr);
+
+        valoresCards(maquinasFavoritas,selectedOptions,dataFiltro);
+        graficoHorasSetor(maquinasFavoritas, selectedOptions,dataFiltro);
+        graficoAreaManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
+        graficoTipoManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
+        graficoMttrSetor(selectedOptions, dataFiltro);
+        graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro);
+        graficoMtbfSetor(selectedOptions, dataFiltro);
+        graficoMtbfMaquina(historicoChecked,maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions,dataFiltro);
+        graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions,dataFiltro);
+        
+      });
+    });
+  </script>
+
+  <script>
+    // Função para formatar a data
+    function formatDate(dateStr) {
+      const [day, month, year] = dateStr.split('/');
+      return `${year}-${month}-${day}`;
+    }
   </script>
 
   {% endblock %}
