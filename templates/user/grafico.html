@@ -47,11 +47,6 @@
           <input type="checkbox" name="maquinas-favoritas" id="maquinas-favoritas" style="width: 20px;height: 20px;">
           <span class="slider round"></span>
         </label>
-        <label for="historico">Dados históricos</label>
-        <label class="switch">
-          <input type="checkbox" name="historico" id="historico" style="width: 20px;height: 20px;">
-          <span class="slider round"></span>
-        </label>
       </div>
       <button id="buttonFilter" type="submit" class="btn btn-primary">Filtrar</button>
     </div>
@@ -724,7 +719,7 @@
     });
   </script>
 
-  <script>
+  <!-- <script>
 
     // // Bar Chart Example
     // var eixo_y = {{ dados_mtbf_maquina | safe }};
@@ -1448,7 +1443,7 @@
       }
     });
 
-  </script>
+  </script> -->
 
   <!-- MTBF POR MÁQUINA e TOP 10 MTBF POR MÁQUINA -->
   <script>
@@ -1457,7 +1452,7 @@
     let chartTop10MtbfMaquina;
 
     // Função para carregar os dados e criar o gráfico e a tabela
-    function graficoMtbfMaquina(historicoChecked, maquinasFavoritas, selectedOptions, dataFiltro) {
+    function graficoMtbfMaquina(maquinasFavoritas, selectedOptions, dataFiltro) {
       // Substitua pela lógica que faz a solicitação à sua API
       fetch('/api/calculo_mtbf_maquina', {
         method: 'POST',
@@ -1468,7 +1463,7 @@
           data_filtro: dataFiltro,
           setores_selecionados: selectedOptions,
           maquinasFavoritas: maquinasFavoritas,
-          historico_checked: historicoChecked
+          // historico_checked: historicoChecked
           // Adicione outros parâmetros conforme necessário
         })
       })
@@ -2822,7 +2817,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('buttonFilter').addEventListener('click', function () {
         // Obtenha os valores selecionados nos campos do formulário
-        const historicoChecked = document.getElementById('historico').checked;
+        // const historicoChecked = document.getElementById('historico').checked;
         
         const selectedSetores = Array.from(document.getElementsByName('filtro_setor'))
           .filter(option => option.selected)
@@ -2841,15 +2836,15 @@
         // const dataFim = formatDate(dataFimStr);
 
         valoresCards(maquinasFavoritas,selectedOptions,dataFiltro);
-        graficoHorasSetor(maquinasFavoritas, selectedOptions,dataFiltro);
-        graficoAreaManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
-        graficoTipoManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
-        graficoMttrSetor(selectedOptions, dataFiltro);
-        graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro);
+        // graficoHorasSetor(maquinasFavoritas, selectedOptions,dataFiltro);
+        // graficoAreaManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
+        // graficoTipoManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
+        // graficoMttrSetor(selectedOptions, dataFiltro);
+        // graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro);
         graficoMtbfSetor(selectedOptions, dataFiltro);
-        graficoMtbfMaquina(historicoChecked,maquinasFavoritas, selectedOptions, dataFiltro);
-        graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions,dataFiltro);
-        graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions,dataFiltro);
+        graficoMtbfMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
+        // graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions,dataFiltro);
+        // graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions,dataFiltro);
         
       });
     });
