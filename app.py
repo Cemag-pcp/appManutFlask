@@ -6,7 +6,6 @@ import psycopg2.extras
 import os
 
 def create_app():
-
     app = Flask(__name__)
     app.config['UPLOAD_FOLDER'] = r'C:\Users\pcp2\projetoManutencao\appManutFlask-3\UPLOAD_FOLDER'
     app.register_blueprint(routes_bp)
