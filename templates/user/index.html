@@ -148,7 +148,11 @@
                             <td data-title="Tipo Manutenção" class="colunaExec" style="padding-bottom: 0px; overflow: hidden; text-overflow: d; white-space: nowrap; color: transparent;">Não Informado</td>
                             {% endif %}
                             <td data-title="Setor" class="colunaSetor" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[2] }}</td>
+                            {% if row[3] == '' and row[24] != 'Outros' %}
+                            <td data-title="Maquina" class="colunaMaquina" style="padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ row[26] ~ ' - ' ~ row[27] }}</td>
+                            {% else %}
                             <td data-title="Maquina" class="colunaMaquina" style="padding-bottom: 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{row[3]}}</td>
+                            {% endif %}
                             <td data-title="Risco" style="padding-bottom: 0px;">{{row[4]}}</td>
                             {% if row[5] == 'Finalizada' %}
                             <td data-title="Status" class="colunaStatus" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -1356,6 +1360,7 @@
                     // Caso contrário, ocultar a div
                     $('#camposEte').hide();
                 }
+                console.log(response.qual_ferramenta)
 
                 $('#setor').val(response.setor_values);
                 $('#inputSolicitante').val(response.solicitante);

@@ -148,6 +148,8 @@ def dados_para_editar(id_ordem,n_ordem):
         'hora_fim': hora_fim_str
     }
 
+    print(qual_ferramenta)
+
     return dados
 
 def buscar_dados_os(id_ordem):
@@ -158,7 +160,7 @@ def buscar_dados_os(id_ordem):
 
     sql = "select *, coalesce(status,'Em espera') as status_new, coalesce(dataabertura,ultima_atualizacao) as dataabertura_atualizada from tb_ordens where id_ordem = %s order by n_ordem desc limit 1"
     sql_data_abertura =  """select coalesce(dataabertura,ultima_atualizacao) as dataabertura,solicitante,
-                            equipamento_em_falha,cod_equipamento,setor_maquina_solda,status
+                            equipamento_em_falha,cod_equipamento,qual_ferramenta,setor_maquina_solda,status
                             from tb_ordens where id_ordem = %s and n_ordem = 0
                         """
     sql_tombamento = """select tombamento from tb_ordens
@@ -189,6 +191,7 @@ def buscar_dados_os(id_ordem):
     equipamento_em_falha = dados_dataabertura[0]['equipamento_em_falha']
     codigo_equipamento = dados_dataabertura[0]['cod_equipamento']
     setor_maquina_solda = dados_dataabertura[0]['setor_maquina_solda']
+    qual_ferramenta = dados_dataabertura[0]['qual_ferramenta']
     risco = [row['risco'] for row in data][0]
     desc_usuario = [row['problemaaparente'] for row in data][0]
     status = [row['status_new'] for row in data][0]
@@ -225,6 +228,7 @@ def buscar_dados_os(id_ordem):
         'tombamento':tombamento,
         'equipamento_em_falha':equipamento_em_falha,
         'codigo_equipamento':codigo_equipamento,
+        'qual_ferramenta':qual_ferramenta,
         'setor_maquina_solda':setor_maquina_solda,
         'risco':risco,
         'desc_usuario':desc_usuario,
@@ -3439,6 +3443,10 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     df['dataabertura'] = df['dataabertura'].fillna(method='ffill')
     df['dataabertura'] = df['dataabertura'].replace('', method='ffill')
+
+    df['qual_ferramenta'] = df.groupby('id_ordem')['qual_ferramenta'].transform(lambda x: x.iloc[0])
+
+    print(df.loc[df['id_ordem'] == 1390, ['id_ordem', 'qual_ferramenta']])
 
     df = df.drop_duplicates(subset=['id_ordem'], keep='last')
     df = df.sort_values(by='id_ordem')
