@@ -138,7 +138,7 @@
   <div class="row">
 
     <!-- Disponibilidade -->
-  
+
     <div class="col-xl-3 col-md-6 mb-4">
       <div class="card border-left-info shadow h-100 py-2">
         <div class="card-body">
@@ -1471,6 +1471,9 @@
         .then(data => {
           data.resultados.sort((a, b) => a.resultado_mtbf - b.resultado_mtbf);
 
+          data.resultados = data.resultados.filter(item => item.maquina !== null && item.maquina.trim() !== "Telhado" && item.maquina.trim() !== "ETE"
+            && item.maquina.trim() !== "Ultrassom" && item.maquina.trim() !== "Termográfica");
+
           // Dados para o mtbf de máquinas
           const ctx = document.getElementById('grafico1').getContext('2d');
           const maquinas = data.resultados.map(item => item.maquina);
@@ -1865,7 +1868,8 @@
         .then(response => response.json())
         .then(data => {
           data.resultados.sort((a, b) => a.resultado_mttr - b.resultado_mttr);
-
+          data.resultados = data.resultados.filter(item => item.maquina !== null && item.maquina.trim() !== "Telhado" && item.maquina.trim() !== "ETE"
+            && item.maquina.trim() !== "Ultrassom" && item.maquina.trim() !== "Termográfica");
           // Destrua o gráfico anterior se existir
           if (chartMttrMaquina) {
             chartMttrMaquina.destroy();
@@ -2132,7 +2136,7 @@
     let chartDisponibilidadeMaquina;
 
     // Função para carregar os dados e criar o gráfico e a tabela
-    function graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions,dataFiltro) {
+    function graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions, dataFiltro) {
       // Substitua pela lógica que faz a solicitação à sua API
       fetch('/api/disponibilidade_maquina', {
         method: 'POST',
@@ -2152,10 +2156,12 @@
         .then(data => {
 
           const mediaDisponibilidade = data.resultados.reduce((total, resultado) => total + resultado.disponibilidade, 0) / data.resultados.length;
-          
-          document.getElementById('cardDisponibilidade').textContent = mediaDisponibilidade.toFixed(2)*100 + '%';
+
+          document.getElementById('cardDisponibilidade').textContent = mediaDisponibilidade.toFixed(2) * 100 + '%';
 
           data.resultados.sort((a, b) => a.disponibilidade - b.disponibilidade);
+          data.resultados = data.resultados.filter(item => item.codigo_tratado !== null && item.codigo_tratado.trim() !== "Telhado" && item.codigo_tratado.trim() !== "ETE"
+            && item.codigo_tratado.trim() !== "Ultrassom" && item.codigo_tratado.trim() !== "Termográfica");
 
           // Destrua o gráfico anterior se existir
           if (chartDisponibilidadeMaquina) {
@@ -2260,7 +2266,7 @@
       $.each(data.resultados, function (index, row) {
         var newRow = $('<tr>');
         newRow.append('<td>' + row.codigo_tratado + '</td>');
-        newRow.append('<td>' + row.disponibilidade.toFixed(2)*100 + "%" + '</td>');
+        newRow.append('<td>' + row.disponibilidade.toFixed(2) * 100 + "%" + '</td>');
         tabelaBody.append(newRow);
       });
 
@@ -2280,7 +2286,7 @@
     let chartDisponibilidadeSetor;
 
     // Função para carregar os dados e criar o gráfico e a tabela
-    function graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions,dataFiltro) {
+    function graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro) {
       // Substitua pela lógica que faz a solicitação à sua API
       fetch('/api/disponibilidade_setor', {
         method: 'POST',
@@ -2403,7 +2409,7 @@
       $.each(data.resultados, function (index, row) {
         var newRow = $('<tr>');
         newRow.append('<td>' + row.setor + '</td>');
-        newRow.append('<td>' + row.disponibilidade.toFixed(2)*100 + "%" + '</td>');
+        newRow.append('<td>' + row.disponibilidade.toFixed(2) * 100 + "%" + '</td>');
         tabelaBody.append(newRow);
       });
 
@@ -2424,7 +2430,7 @@
     let chartHorasTipo;
 
     // Função para carregar os dados e criar o gráfico e a tabela
-    function graficoTipoManutencao(maquinasFavoritas,selectedOptions,dataFiltro) {
+    function graficoTipoManutencao(maquinasFavoritas, selectedOptions, dataFiltro) {
       // Substitua pela lógica que faz a solicitação à sua API
       fetch('/api/calculo_horas_trabalhadas_tipo_manutencao', {
         method: 'POST',
@@ -2521,7 +2527,7 @@
     let chartHorasArea;
 
     // Função para carregar os dados e criar o gráfico e a tabela
-    function graficoAreaManutencao(maquinasFavoritas, selectedOptions,dataFiltro) {
+    function graficoAreaManutencao(maquinasFavoritas, selectedOptions, dataFiltro) {
       // Substitua pela lógica que faz a solicitação à sua API
       fetch('/api/calculo_horas_trabalhadas_area_manutencao', {
         method: 'POST',
@@ -2618,7 +2624,7 @@
 
     let chartHorasSetor;
     // Função para carregar os dados e criar o gráfico e a tabela
-    function graficoHorasSetor(maquinasFavoritas, selectedOptions,dataFiltro) {
+    function graficoHorasSetor(maquinasFavoritas, selectedOptions, dataFiltro) {
       // Substitua pela lógica que faz a solicitação à sua API
       fetch('/api/calculo_horas_setor', {
         method: 'POST',
@@ -2760,7 +2766,7 @@
   <script>
 
     // Função para fazer a solicitação à API e preencher o valor no card
-    function valoresCards(maquinasFavoritas,selectedOptions,dataFiltro) {
+    function valoresCards(maquinasFavoritas, selectedOptions, dataFiltro) {
       fetch('/api/calculo_cards', {
         method: 'POST',
         headers: {
@@ -2818,7 +2824,7 @@
       document.getElementById('buttonFilter').addEventListener('click', function () {
         // Obtenha os valores selecionados nos campos do formulário
         // const historicoChecked = document.getElementById('historico').checked;
-        
+
         const selectedSetores = Array.from(document.getElementsByName('filtro_setor'))
           .filter(option => option.selected)
           .map(option => option.value);
@@ -2827,7 +2833,7 @@
         const maquinasFavoritas = document.getElementById('maquinas-favoritas').checked;
         const selectSetor = document.getElementById('selectSetor');
         const selectedOptions = Array.from(selectSetor.selectedOptions).map(option => option.value);
-        
+
         console.log(dataFiltro);
 
         // Converte a string da data para o formato desejado
@@ -2835,17 +2841,17 @@
         // const dataInicio = formatDate(dataInicioStr);
         // const dataFim = formatDate(dataFimStr);
 
-        valoresCards(maquinasFavoritas,selectedOptions,dataFiltro);
-        // graficoHorasSetor(maquinasFavoritas, selectedOptions,dataFiltro);
-        // graficoAreaManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
-        // graficoTipoManutencao(maquinasFavoritas, selectedOptions,dataFiltro);
-        // graficoMttrSetor(selectedOptions, dataFiltro);
-        // graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro);
+        valoresCards(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoHorasSetor(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoAreaManutencao(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoTipoManutencao(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoMttrSetor(selectedOptions, dataFiltro);
+        graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro);
         graficoMtbfSetor(selectedOptions, dataFiltro);
         graficoMtbfMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
-        // graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions,dataFiltro);
-        // graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions,dataFiltro);
-        
+        graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro);
+
       });
     });
   </script>
