@@ -1,0 +1,199 @@
+{% extends "user/layout.html" %}
+
+{% block links %}
+
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/mensagem.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+    <div id="seu-container-de-alertas"></div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Filtros do Histórico</h6>
+        </div>
+        <div class="card-body p-5">
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label for="data_filtro">Data:</label>
+                <input type="text" class="form-control" id="dataOsMaquina" name="datetimes" autocomplete="off">
+              </div>
+              <div class="col-md-6 mb-4">
+                <label for="maquinas_geral">Equipamento:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="maquinas_geral" autocomplete="off" aria-describedby="basic-addon2" required>
+                </div>
+              <ul class="dropdown-list" id="list_maquinas_geral">
+              </ul>
+              </div>
+            </div>
+            <button type="submit" id="filtrar_maquina" class="btn btn-primary">Filtrar</button>
+        </div>
+      </div>
+      
+    <div id="criandoTabela" class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 id="titulo_tabela_criada" class="m-0 font-weight-bold text-primary">Tabela com máquinas cadastradas</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTableGeral" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Defeito</th>
+                            <th>Desc. da Manutenção</th>
+                            <th>Solicitante</th>
+                            <th>Tipo da Manutenção</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>                    
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mensagem"></div>
+<div><input style="display: none;" id="booleanCadastroMaquina"></div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script de mensagem -->
+<script src="static/js/mensagem.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- Page level plugins -->
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="static/js/demo/datatables-demo.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
+<script>
+    function criarLinha(row) {
+          return `
+          <tr>
+            <td style="max-width: 70px;">${row.data}</td>
+            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="${row.setor}" style="max-width: 70px; cursor: default;">${row.setor}</td>
+            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="${row.maquina}" style="max-width: 70px; cursor: default;">${row.maquina}</td>
+            <td>${row.problemaaparente}</td>
+            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="${row.descmanutencao}" style="max-width: 100px; cursor: default;">${row.descmanutencao}</td>
+            <td>${row.solicitante}</td>
+            <td>${row.tipo_manutencao}</td>
+          </tr>`;
+      }
+
+      function atualizarTabela(response) {
+          // Limpar o conteúdo atual da tabela
+          $('#dataTableGeral tbody').empty();
+
+          $('#titulo_tabela_criada').text(response[2] + ' - ' + response[1]);
+
+          // Preencher a tabela com os dados do response
+          for (var i = 0; i < response.length; i++) {
+            var row = response[i];
+            var newRow = criarLinha(row);
+            $('#dataTableGeral tbody').append(newRow);
+          }
+      }
+
+      function visaoGeralOs(data,maquina) {
+          $("#loading-overlay").show();
+          
+          $.ajax({
+            url: '/visao_geral',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            dados: JSON.stringify({ 'maquina': maquina }),
+            success: function (response) {
+                console.log('Response:', response);
+                atualizarTabela(response);
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
+                $("#loading-overlay").hide();
+            },
+            error: function () {
+              console.log('Item não encontrado');
+              $("#loading-overlay").hide();
+              // Tratar o erro de forma adequada (exibir mensagem para o usuário)
+            }
+          });
+      }
+
+      $('#dataOsMaquina').on('focus',function(){
+        $('#dataOsMaquina').val('')
+      })
+
+      $('#filtrar_maquina').on('click', function () {
+          maquina = $('#maquinas_geral').val();
+          data = $('#dataOsMaquina').val();
+          visaoGeralOs(data,maquina);
+      });
+</script>
+
+
+<script>
+
+    $(function () {
+      const dataAtual = new Date();
+      const opcoesFormatacao = { day: 'numeric', month: '2-digit', year: 'numeric' };
+      const dataFormatada = dataAtual.toLocaleDateString('pt-BR', opcoesFormatacao);
+
+      var dataInicial = dataFormatada.split(" - ")[0];
+      var dataFinal = dataFormatada.split(" - ")[1];
+
+      $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        timePicker24Hour: true,
+        autoUpdateInput: false,
+        startDate: moment(dataInicial, 'DD/MM/YYYY'),
+        endDate: moment(dataFinal, 'DD/MM/YYYY'),
+        locale: {
+          format: 'DD/MM/YYYY',
+          cancelLabel: 'Clear'
+        }
+      });
+
+      $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+      });
+
+      $('input[name="datetimes"]').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+      });
+
+      $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+        var startDate = picker.startDate;
+        var endDate = picker.endDate;
+
+        if (endDate.isBefore(startDate)) {
+          alert("A data final não pode ser menor que a data inicial");
+          picker.setEndDate(startDate);
+        }
+      });
+    });
+
+  </script>
+
+{% endblock %}
