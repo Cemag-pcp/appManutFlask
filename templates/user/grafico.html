@@ -2159,7 +2159,7 @@
       })
         .then(response => response.json())
         .then(data => {
-
+            
           const mediaDisponibilidade = data.resultados.reduce((total, resultado) => total + resultado.disponibilidade, 0) / data.resultados.length;
 
           document.getElementById('cardDisponibilidade').textContent = mediaDisponibilidade.toFixed(2) * 100 + '%';
@@ -2841,11 +2841,6 @@
 
         console.log(dataFiltro);
 
-        // Converte a string da data para o formato desejado
-        // const [dataInicioStr, dataFimStr] = dataFiltro.split(' - ');
-        // const dataInicio = formatDate(dataInicioStr);
-        // const dataFim = formatDate(dataFimStr);
-
         valoresCards(maquinasFavoritas, selectedOptions, dataFiltro);
         graficoHorasSetor(maquinasFavoritas, selectedOptions, dataFiltro);
         graficoAreaManutencao(maquinasFavoritas, selectedOptions, dataFiltro);
@@ -2855,7 +2850,7 @@
         graficoMtbfSetor(selectedOptions, dataFiltro);
         graficoMtbfMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
         graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
-        graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro);
+        // graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro);
 
       });
     });
