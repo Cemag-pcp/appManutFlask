@@ -61,7 +61,7 @@
                 <tbody>
                   {% for maquina in tabela_maquinas_preventivas_ %}
                     <tr>
-                      <td data-title="Código">{{ maquina[0] }}</td>
+                      <td data-title="Código" onclick="pegandoMaquina('{{ maquina[0] }}')">{{ maquina[0] }}</td>
                       <td data-title="Classificação">{{ maquina[1] }}</td>
                       <td style="width: 50px;">
                         <div class="dropdown">
@@ -421,8 +421,12 @@
 
       $('#modalGrupoExistente .modal-title').text(codigo_maquina + ' - ' + grupoSelecionado);
       console.log(codigo_maquina);
-      // Fechar o modalGrupoAtividade
-      // closeModalGrupo();
+
+    }
+
+    function getAtividades(codigo_maquina) {
+      
+      var grupoSelecionado = $('#selectGrupos').val();
 
       // Chamar a rota no backend para carregar dados associados
       $.ajax({
@@ -564,6 +568,7 @@
           success: function (data) {
             exibirMensagem('sucesso', 'Tarefas salvas com sucesso.');
             entrarGrupo(codigo_maquina);
+            getAtividades(codigo_maquina);
             hideLoading();
           },
           error: function (error) {
@@ -614,42 +619,16 @@
           }
       });
     }
-
-    var codigoMaquina; // Declaração da variável no escopo mais amplo
+   // Declaração da variável no escopo mais amplo
+    var codigoMaquina;
 
     // Ao abrir o modal será carregadas as funções
     $('.abrir-modal').on('click', function() {
-      var codigoMaquina = $(this).data('id');
+      codigoMaquina = $(this).data('id');
       // abrirModalGrupoAtividade(codigoMaquina);
       coletarGrupos(codigoMaquina);
 
       // Ao clicar em Entrar no grupo será carregadas as funções
-      $('#grupoExistente').on('click', function() {
-        entrarGrupo(codigoMaquina);
-        
-      });
-
-      $('#enviarArquivo').on('click', function() {
-        console.log(codigoMaquina);
-        uploadFile(codigoMaquina);
-        $('#enviarArquivo').prop('disabled', true);
-      });
-
-      $('#criarGrupo').on('click', function() {
-        $('#modalRenomearGrupo').modal('show');
-      });
-
-      $('#nomear_grupo').on('click', function() {
-        criarGrupo(codigoMaquina);
-        $('#modalRenomearGrupo').modal('hide');
-
-      });
-
-      $('#salvar_tarefa').on('click', function() {
-        var grupo = $('#selectGrupos').val();
-        salvarTarefas(grupo, codigoMaquina);
-
-      });
 
       $('#tableTarefas tbody').on('click', '.excluirTarefa', function() {
 
@@ -722,6 +701,33 @@
         });
 
     });
+
+    $('#grupoExistente').on('click', function() {
+        entrarGrupo(codigoMaquina);
+        getAtividades(codigoMaquina);
+    });
+
+    $('#enviarArquivo').on('click', function() {
+        console.log(codigoMaquina);
+        uploadFile(codigoMaquina);
+        $('#enviarArquivo').prop('disabled', true);
+      });
+
+      $('#criarGrupo').on('click', function() {
+        $('#modalRenomearGrupo').modal('show');
+      });
+
+      $('#nomear_grupo').on('click', function() {
+        criarGrupo(codigoMaquina);
+        $('#modalRenomearGrupo').modal('hide');
+
+      });
+
+      $('#salvar_tarefa').on('click', function() {
+        var grupo = $('#selectGrupos').val();
+        salvarTarefas(grupo, codigoMaquina);
+
+      });
 
   });
 

@@ -3446,8 +3446,6 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     df['qual_ferramenta'] = df.groupby('id_ordem')['qual_ferramenta'].transform(lambda x: x.iloc[0])
 
-    print(df.loc[df['id_ordem'] == 1390, ['id_ordem', 'qual_ferramenta']])
-
     df = df.drop_duplicates(subset=['id_ordem'], keep='last')
     df = df.sort_values(by='id_ordem')
     df.reset_index(drop=True, inplace=True)
@@ -3749,8 +3747,6 @@ def dados_editar_ordem():
     data = request.get_json()
     data = dados_para_editar(data['id_ordem'], data['n_ordem'])
 
-    print(data)
-
     return jsonify(data)
 
 def verificar_maquina_preventiva(maquina):
@@ -3801,7 +3797,6 @@ def obter_tombamento():
 def editar_ordem_banco():
     
     dados = request.get_json()
-    print(dados)
     
     setor = dados['setor_edicao']
     solicitante = dados['inputSolicitante_edicao']
@@ -5544,8 +5539,6 @@ def atividadesGrupo():
 
     # Use os parâmetros para carregar os dados associados
     dados_associados, parametros = tarefasGrupo(codigo_maquina, grupo_selecionado)  
-    
-    print(data)
 
     try:
         nova_data = data[0][0].strftime("%Y-%m-%d")
@@ -5570,13 +5563,10 @@ def atividadesGrupo():
         print(f"Erro ao calcular próxima manutenção: {e}")
         proxima_data = None
 
-    print(parametros)
-
     if len(parametros)>0:
         parametros[0].append(formatar_data(proxima_data))
     else:
         parametros = None
-
 
     # Retorne os dados como JSON
     return jsonify(dados_associados,parametros)
@@ -6352,6 +6342,64 @@ def lista_maquinas():
 
     return render_template('user/lista_maquinas.html', data=data)
 
+@routes_bp.route('/visao_geral', methods=['GET','POST'])
+@login_required
+def visao_geral():
+
+    if request.method == 'POST':
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                                password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        dados = request.get_json()
+
+        maquina = dados['maquina']
+
+        data = dados['data']
+
+        query = f"""SELECT 
+                    COALESCE(dataabertura, datainicio) AS data,
+                    setor,
+                    maquina,
+                    problemaaparente,
+                    descmanutencao,
+                    solicitante,
+                    tipo_manutencao
+                FROM tb_ordens
+                WHERE 1=1
+                """
+
+        if maquina:
+            query += f" AND maquina = '{maquina}'"
+        if data:
+            mes_inicial, mes_final = data.split(' - ')
+            mes_inicial = datetime.strptime(mes_inicial, '%d/%m/%Y').date()
+            mes_final = datetime.strptime(mes_final, '%d/%m/%Y').date() + timedelta(days=1)
+
+            mes_inicial_formatado = mes_inicial.strftime('%Y-%m-%d')
+            mes_final_formatado = mes_final.strftime('%Y-%m-%d')
+            query += f" AND data >= '{mes_inicial_formatado}' AND data <= '{mes_final_formatado}'"
+        
+        cur.execute(query)
+        datas = cur.fetchall()
+
+        object_visal_geral = []
+
+        for dat in datas:
+            historico_dict = {
+                'data': dat[0].strftime('%d/%m/%Y'),
+                'setor': dat[1],
+                'maquina': dat[2],
+                'problemaaparente': dat[3],
+                'descmanutencao': dat[4],
+                'solicitante': dat[5], 
+                'tipo_manutencao':dat[6],
+            }
+            object_visal_geral.append(historico_dict)
+
+        return jsonify(object_visal_geral)
+    return render_template('user/visao_geral.html')
 
 @routes_bp.route('/excluir-ordem', methods=['POST'])
 @login_required

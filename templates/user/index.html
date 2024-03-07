@@ -135,7 +135,7 @@
                             <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Máq. Parada?</th>
                             <!-- <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Custo MO</th> -->
                             <th style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Menu</th>
-                            <th style=" display: none; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Descricao</th>
+                            <th style=" display: none;">Descricao</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -235,7 +235,7 @@
                                     {% endif %}
                                 </div>
                             </td>
-                            <td data-title="Descricao" style="display: none; padding-bottom: 0px;">{{row[6]}}</td>
+                            <td data-title="Descricao" class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[6]}}" style="display: none; padding-bottom: 0px; max-width: 150px; cursor: default;">{{row[6]}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -823,6 +823,10 @@
 
 <script>
 
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+
     function downloadFilteredCSV(filteredData) {
         // Adicione uma linha de cabeçalho com os nomes das colunas
         let headerRow = ['OS', 'Execução','Setor', 'Máquina', 'Risco', 'Status', 'Natureza', 'Abertura', 'Máq. Parada?', 'Custo MO', 'Descricao'];
@@ -1376,7 +1380,11 @@
                 $('#problema').val(response.desc_usuario);
                 $('#inputMaquinasPreventivas').val(response.preventiva);
 
-                console.log(response);
+                if (response.solicitante === "Automático"){
+                    $('#selectTipoManutencao').prop('disabled',true)
+                } else {
+                    $('#selectTipoManutencao').prop('disabled',false)
+                }
 
                 // Populando select de tipo de manutencao e area de manutencao
                 var statusTipoManutencao = response.tipo_manutencao;
@@ -1466,6 +1474,7 @@
       });
 </script>  
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
 <!-- Script para verificar se o botão de salvar vai desabilitar ou não -->

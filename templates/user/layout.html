@@ -25,8 +25,7 @@
         rel="stylesheet">
 
     <link rel="icon" href="/static/img/SELO 50 ANOS ISOLADO_Prancheta 1.png" type="image/x-icon">
-
-    <link rel="stylesheet" href="font-awesome-4.7.0\css\font-awesome.min.css">
+    
 
     <!-- Custom styles for this template -->
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
@@ -132,6 +131,11 @@
                 <a class="nav-link" href="/lista_maquinas">
                     <i class="fas fa-fw fa-table"></i>
                   <span>Lista de Máquinas</span></a>
+            </li>
+            <li class="nav-item" onclick="location.href='/index'">
+                <a class="nav-link" href="/visao_geral">
+                    <i class="fas fa-fw fa-hammer"></i>
+                  <span>Visão Geral - Máquinas</span></a>
             </li>
 
             <!-- Divider -->
