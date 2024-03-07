@@ -1596,7 +1596,7 @@ def calculo_disponibilidade_setor_parada():
     except Exception as e:
         return jsonify({'error': str(e)})
 
-def tempo_maquina_parada(data_filtro):
+def tempo_maquina_parada_api(data_filtro):
 
     try:
         # Obtenha dados da solicitação POST
@@ -1807,27 +1807,30 @@ def disponibilidade_maquina():
 
     # data = response.json()
     # data2 = response2.json()
-    data = tempo_maquina_parada(data_filtro)
+    data = tempo_maquina_parada_api(data_filtro)
     data2 = calculo_disponibilidade_maquina_parada(data_filtro)
 
     tabela_mtbf = pd.DataFrame(data['resultados'])
 
     tabela_disponibilidade = pd.DataFrame(data2['resultados'])
-    tabela_disponibilidade['data_inicio'] = pd.to_datetime(tabela_disponibilidade['data_inicio'])
+    # tabela_disponibilidade['data_inicio'] = pd.to_datetime(tabela_disponibilidade['data_inicio'])
+    tabela_disponibilidade['data_inicio'] = tabela_disponibilidade['data_inicio'].astype(str)
+    tabela_disponibilidade['data_inicio'] = pd.to_datetime(tabela_disponibilidade['data_inicio'].apply(lambda x: x.split(' ')[0]))
+
     tabela_disponibilidade.loc[tabela_disponibilidade['data_inicio'] < pd.to_datetime(dia_inicial), 'data_inicio'] = pd.to_datetime(dia_inicial)
     tabela_disponibilidade['data_hoje'] = pd.to_datetime(dia_final)
 
-    tabela_disponibilidade['tempo_parada'] = abs(tabela_disponibilidade['data_hoje'] - tabela_disponibilidade['data_inicio']).dt.days * 9
+    tabela_disponibilidade['tempo_total_parada'] = abs(tabela_disponibilidade['data_hoje'] - tabela_disponibilidade['data_inicio']).dt.days * 9
     tabela_disponibilidade['tempo_planejado'] = (pd.to_datetime(dia_final) - pd.to_datetime(dia_inicial)).days * 9
     tabela_disponibilidade['parada_antes'] = tabela_disponibilidade['data_inicio'].between(pd.to_datetime(dia_inicial), pd.to_datetime(dia_final))
-    tabela_disponibilidade['disponibilidade'] = (tabela_disponibilidade['tempo_planejado'] - tabela_disponibilidade['tempo_parada']) / tabela_disponibilidade['tempo_planejado']
+    tabela_disponibilidade['disponibilidade'] = (tabela_disponibilidade['tempo_planejado'] - tabela_disponibilidade['tempo_total_parada']) / tabela_disponibilidade['tempo_planejado']
 
-    tabela_disponibilidade = tabela_disponibilidade[['maquina','tempo_parada','tempo_planejado']]
+    tabela_disponibilidade = tabela_disponibilidade[['maquina','tempo_total_parada','tempo_planejado']]
 
     tabela_maquinas_ = tabela_maquinas()
 
     tabela_disponibilidade = tabela_maquinas_.merge(tabela_disponibilidade, left_on='codigo', right_on='maquina')  
-    tabela_disponibilidade = tabela_disponibilidade[['codigo_tratado','tempo_parada','tempo_planejado']]
+    tabela_disponibilidade = tabela_disponibilidade[['codigo_tratado','tempo_total_parada','tempo_planejado']]
     tabela_disponibilidade = tabela_disponibilidade.rename(columns={'codigo_tratado':'maquina'})
     
     tabela_concatenada = pd.concat([tabela_disponibilidade, tabela_mtbf], ignore_index=True)
@@ -1847,9 +1850,9 @@ def disponibilidade_maquina():
     tabela_completa = tabela_maquinas_.merge(tabela_concatenada, how='left', left_on='codigo_tratado', right_on='maquina')
 
     tabela_completa['tempo_planejado'] = tabela_completa['tempo_planejado'].fillna(100)
-    tabela_completa['tempo_parada'] = tabela_completa['tempo_parada'].fillna(0)
+    tabela_completa['tempo_total_parada'] = tabela_completa['tempo_total_parada'].fillna(0)
 
-    tabela_completa['disponibilidade'] = round((tabela_completa['tempo_planejado'] - tabela_completa['tempo_parada']) / tabela_completa['tempo_planejado'], 2)
+    tabela_completa['disponibilidade'] = round((tabela_completa['tempo_planejado'] - tabela_completa['tempo_total_parada']) / tabela_completa['tempo_planejado'], 2)
     
     if not data_filtro:
 
@@ -1924,20 +1927,23 @@ def disponibilidade_setor():
 
     # data = response.json()
     # data2 = response2.json()
-    data = tempo_maquina_parada(data_filtro)
+    data = tempo_maquina_parada_api(data_filtro)
     data2 = calculo_disponibilidade_maquina_parada(data_filtro)
 
     tabela_mtbf = pd.DataFrame(data['resultados'])
 
     tabela_disponibilidade = pd.DataFrame(data2['resultados'])
-    tabela_disponibilidade['data_inicio'] = pd.to_datetime(tabela_disponibilidade['data_inicio'])
+    tabela_disponibilidade['data_inicio'] = tabela_disponibilidade['data_inicio'].astype(str)
+    tabela_disponibilidade['data_inicio'] = pd.to_datetime(tabela_disponibilidade['data_inicio'].apply(lambda x: x.split(' ')[0]))
+
     tabela_disponibilidade.loc[tabela_disponibilidade['data_inicio'] < pd.to_datetime(dia_inicial), 'data_inicio'] = pd.to_datetime(dia_inicial)
     tabela_disponibilidade['data_hoje'] = pd.to_datetime(dia_final)
-    tabela_disponibilidade['tempo_parada'] = abs(tabela_disponibilidade['data_hoje'] - tabela_disponibilidade['data_inicio']).dt.days * 9
+
+    tabela_disponibilidade['tempo_total_parada'] = abs(tabela_disponibilidade['data_hoje'] - tabela_disponibilidade['data_inicio']).dt.days * 9
     tabela_disponibilidade['tempo_planejado'] = (pd.to_datetime(dia_final) - pd.to_datetime(dia_inicial)).days * 9
     tabela_disponibilidade['parada_antes'] = tabela_disponibilidade['data_inicio'].between(pd.to_datetime(dia_inicial), pd.to_datetime(dia_final))
-    tabela_disponibilidade['disponibilidade'] = (tabela_disponibilidade['tempo_planejado'] - tabela_disponibilidade['tempo_parada']) / tabela_disponibilidade['tempo_planejado']
-    tabela_disponibilidade = tabela_disponibilidade[['maquina','tempo_parada','tempo_planejado']]
+    tabela_disponibilidade['disponibilidade'] = (tabela_disponibilidade['tempo_planejado'] - tabela_disponibilidade['tempo_total_parada']) / tabela_disponibilidade['tempo_planejado']
+    tabela_disponibilidade = tabela_disponibilidade[['maquina','tempo_total_parada','tempo_planejado']]
     
     tabela_concatenada = pd.concat([tabela_disponibilidade, tabela_mtbf], ignore_index=True)
     tabela_maquinas_ = tabela_maquinas()
@@ -1954,7 +1960,7 @@ def disponibilidade_setor():
     
     tabela_final_disponibilidade = tabela_maquinas_.merge(tabela_concatenada, how='left', left_on='codigo', right_on='maquina')
 
-    tabela_final_disponibilidade['tempo_parada'] = tabela_final_disponibilidade['tempo_parada'].fillna(0) # apenas para deixar a disponibilidade 100%
+    tabela_final_disponibilidade['tempo_total_parada'] = tabela_final_disponibilidade['tempo_total_parada'].fillna(0) # apenas para deixar a disponibilidade 100%
     tabela_final_disponibilidade['tempo_planejado'] = tabela_final_disponibilidade['tempo_planejado'].fillna(100) # apenas para deixar a disponibilidade 100%
      
     tabela_final_disponibilidade['disponibilidade'] = round((tabela_final_disponibilidade['tempo_planejado'] - tabela_final_disponibilidade['tempo_parada']) / tabela_final_disponibilidade['tempo_planejado'],2)
