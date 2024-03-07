@@ -1420,16 +1420,15 @@ def calculo_cards():
     except Exception as e:
         return jsonify({'error': str(e)})
 
-@routes_bp.route('/api/calculo_maquina_parada', methods=['POST','GET'])
-def calculo_disponibilidade_maquina_parada():
+def calculo_disponibilidade_maquina_parada(data_filtro):
 
     try:
         # Obtenha dados da solicitação POST
-        data = request.get_json()
+        # data = request.get_json()
 
         # dia_inicial = data['dia_inicial']
         # dia_final = data['dia_final']
-        data_filtro = data.get('data_filtro')
+        # data_filtro = data.get('data_filtro')
 
         query = """
         WITH ordens_ultima_atualizacao AS (
@@ -1513,16 +1512,16 @@ def calculo_disponibilidade_maquina_parada():
                 #     resultado.append({'maquina': item[1], 'disponibilidade':round(disponibilidade*100, 2)})
             
         except Exception as e:
-            return jsonify({'error': str(e)})
+            return ({'error': str(e)})
 
         finally:
             if conn:
                 conn.close()
 
-        return jsonify({'resultados': resultado})
+        return ({'resultados': resultado})
 
     except Exception as e:
-        return jsonify({'error': str(e)})
+        return ({'error': str(e)})
 
 @routes_bp.route('/api/calculo_setor_parada', methods=['POST','GET'])
 def calculo_disponibilidade_setor_parada():
@@ -1597,15 +1596,14 @@ def calculo_disponibilidade_setor_parada():
     except Exception as e:
         return jsonify({'error': str(e)})
 
-@routes_bp.route('/api/calculo_maquina_tempo_parada', methods=['POST', 'GET'])
-def tempo_maquina_parada():
+def tempo_maquina_parada(data_filtro):
 
     try:
         # Obtenha dados da solicitação POST
-        data = request.get_json()
+        # data = request.get_json()
 
         # dia_inicial = data.get('dia_inicial')
-        data_filtro = data.get('data_filtro')
+        # data_filtro = data.get('data_filtro')
         # dia_final = data.get('dia_final')
         # setores_selecionados = data.get('setores_selecionados', [])
         # maquinas_importante = data.get('maquinasFavoritas', [])
@@ -1678,16 +1676,16 @@ def tempo_maquina_parada():
                     resultado_mtbf_maquina.append({'maquina': item[0], 'tempo_parada': float(item[2]),'tempo_planejado':float(horas_trabalhadas_otimo)})
 
         except Exception as e:
-            return jsonify({'error': str(e)})
+            return ({'error': str(e)})
 
         finally:
             if conn:
                 conn.close()
 
-        return jsonify({'resultados': resultado_mtbf_maquina})
+        return ({'resultados': resultado_mtbf_maquina})
 
     except Exception as e:
-        return jsonify({'error': str(e)})
+        return ({'error': str(e)})
 
 @routes_bp.route('/api/calculo_setor_tempo_parada', methods=['POST', 'GET'])
 def tempo_setor_parada():
@@ -1780,17 +1778,17 @@ def disponibilidade_maquina():
     maquinas_importante = data_get.get('maquinasFavoritas', [])
     
     # Defina a URL da API
-    url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
-    url2 = 'https://manutencaocemag.onrender.com/api/calculo_maquina_parada'
+    # url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
+    # url2 = 'https://manutencaocemag.onrender.com/api/calculo_maquina_parada'
     
     # Suponha que você tenha dados para enviar no corpo da solicitação (payload)
-    payload = {
+    # payload = {
         # 'dia_inicial': dia_inicial,
         # 'dia_final': dia_final,
-        'data_filtro':data_filtro,
+        # 'data_filtro':data_filtro,
         # 'setores_selecionados':setores_selecionados,
         # 'maquinas_importante':maquinas_importante
-    }
+    # }
 
     if data_filtro:
         # Divida a string com base no caractere "-"
@@ -1804,12 +1802,14 @@ def disponibilidade_maquina():
         dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
     # Faça a solicitação POST
-    response = requests.post(url, json=payload)
-    response2 = requests.post(url2, json=payload)
+    # response = requests.post(url, json=payload)
+    # response2 = requests.post(url2, json=payload)
 
-    data = response.json()
-    data2 = response2.json()
-   
+    # data = response.json()
+    # data2 = response2.json()
+    data = tempo_maquina_parada(data_filtro)
+    data2 = calculo_disponibilidade_maquina_parada(data_filtro)
+
     tabela_mtbf = pd.DataFrame(data['resultados'])
 
     tabela_disponibilidade = pd.DataFrame(data2['resultados'])
@@ -1895,17 +1895,17 @@ def disponibilidade_setor():
     maquinas_importante = data_get.get('maquinasFavoritas', [])
 
     # Defina a URL da API
-    url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
-    url2 = 'https://manutencaocemag.onrender.com/api/calculo_maquina_parada'
+    # url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
+    # url2 = 'https://manutencaocemag.onrender.com/api/calculo_maquina_parada'
     
     # Suponha que você tenha dados para enviar no corpo da solicitação (payload)
-    payload = {
+    # payload = {
         # 'dia_inicial': dia_inicial,
         # 'dia_final': dia_final,
-        'data_filtro':data_filtro,
+        # 'data_filtro':data_filtro,
         # 'setores_selecionados':setores_selecionados,
         # 'maquinas_importante':maquinas_importante
-    }
+    # }
 
     if data_filtro:
         # Divida a string com base no caractere "-"
@@ -1919,11 +1919,13 @@ def disponibilidade_setor():
         dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
     # Faça a solicitação POST
-    response = requests.post(url, json=payload)
-    response2 = requests.post(url2, json=payload)
+    # response = requests.post(url, json=payload)
+    # response2 = requests.post(url2, json=payload)
 
-    data = response.json()
-    data2 = response2.json()
+    # data = response.json()
+    # data2 = response2.json()
+    data = tempo_maquina_parada(data_filtro)
+    data2 = calculo_disponibilidade_maquina_parada(data_filtro)
 
     tabela_mtbf = pd.DataFrame(data['resultados'])
 
