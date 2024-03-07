@@ -1075,7 +1075,7 @@ def calculo_horas_trabalhadas_tipo():
             """
 
         if setores_selecionados:
-            setores_selecionados = json.loads(data["setores_selecionados"])
+            # setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -1175,7 +1175,7 @@ def calculo_horas_trabalhadas_area():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
-            setores_selecionados = json.loads(data["setores_selecionados"])
+            # setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -1263,7 +1263,7 @@ def calculo_horas_setor():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
-            setores_selecionados = json.loads(data["setores_selecionados"])
+            # setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
