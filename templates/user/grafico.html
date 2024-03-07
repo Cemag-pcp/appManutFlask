@@ -1868,8 +1868,10 @@
         .then(response => response.json())
         .then(data => {
           data.resultados.sort((a, b) => a.resultado_mttr - b.resultado_mttr);
+          
           data.resultados = data.resultados.filter(item => item.maquina !== null && item.maquina.trim() !== "Telhado" && item.maquina.trim() !== "ETE"
             && item.maquina.trim() !== "Ultrassom" && item.maquina.trim() !== "Termográfica");
+
           // Destrua o gráfico anterior se existir
           if (chartMttrMaquina) {
             chartMttrMaquina.destroy();

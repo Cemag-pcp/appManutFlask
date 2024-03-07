@@ -618,6 +618,8 @@ def calculo_mtbf_maquina():
         # Obtenha dados da solicitação POST
         data = request.get_json()
 
+        print(data)
+
         # dia_inicial = data.get('dia_inicial')
         data_filtro = data.get('data_filtro')
         setores_selecionados = data.get('setores_selecionados', [])
@@ -657,12 +659,17 @@ def calculo_mtbf_maquina():
 
             dia_inicial = datetime.strptime(datas[0], "%d/%m/%Y").strftime("%Y-%m-%d")
             dia_final = datetime.strptime(datas[1], "%d/%m/%Y").strftime("%Y-%m-%d")
+
+            print(dia_inicial)
+            print(dia_final)
         
         else:
             dia_inicial = '2023-01-06'
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
+
+            setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -716,6 +723,8 @@ def calculo_mtbf_maquina():
 
                 resultado_mtbf_maquina = join_df.to_dict(orient='records')
 
+            resultado_mtbf_maquina = sorted(resultado_mtbf_maquina, key=lambda x: x['resultado_mtbf'])
+
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -739,6 +748,8 @@ def calculo_mtbf_setor():
         # dia_final = data.get('dia_final')
         data_filtro = data.get('data_filtro')
         setores_selecionados = data.get('setores_selecionados', [])
+
+        print(data)
 
         query_mtbf = """
                 SELECT
@@ -778,6 +789,8 @@ def calculo_mtbf_setor():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
+
+            setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -824,6 +837,8 @@ def calculo_mtbf_setor():
 
                 resultado_mtbf_setor = join_df.to_dict(orient='records')
 
+            resultado_mtbf_setor = sorted(resultado_mtbf_setor, key=lambda x: x['resultado_mtbf'])
+
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -841,7 +856,9 @@ def calculo_mttr_maquina():
     try:
         # Obtenha dados da solicitação POST
         data = request.get_json()
-
+        
+        print(data)
+        
         # dia_inicial = data.get('dia_inicial')
         # dia_final = data.get('dia_final')
         data_filtro = data.get('data_filtro')
@@ -884,6 +901,7 @@ def calculo_mttr_maquina():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
+            setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -914,6 +932,10 @@ def calculo_mttr_maquina():
                 else:
                     resultado_mttr_maquina.append({'maquina': maquina, 'resultado_mttr': None, 'qt_execucao': None})
 
+            resultado_mttr_maquina = agrupando_dados(resultado_mttr_maquina)
+            resultado_mttr_maquina = sorted(resultado_mttr_maquina, key=lambda x: x['resultado_mttr'])
+
+
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -936,7 +958,9 @@ def calculo_mttr_setor():
         # dia_final = data.get('dia_final')
         data_filtro = data.get('data_filtro')
         setores_selecionados = data.get('setores_selecionados', [])
-                
+
+        print(data)
+
         query_mttr = f"""
             SELECT
                 setor,
@@ -972,6 +996,7 @@ def calculo_mttr_setor():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
+            setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -998,6 +1023,9 @@ def calculo_mttr_setor():
                     resultado_mttr_setor.append({'setor': setor, 'resultado_mttr': resultado, 'qt_execucao': qt_execucao})
                 else:
                     resultado_mttr_setor.append({'setor': setor, 'resultado_mttr': None, 'qt_execucao': None})
+
+            resultado_mttr_setor = sorted(resultado_mttr_setor, key=lambda x: x['resultado_mttr'])
+
 
         except Exception as e:
             return jsonify({'error': str(e)})
@@ -1049,6 +1077,7 @@ def calculo_horas_trabalhadas_tipo():
             """
 
         if setores_selecionados:
+            setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -1084,7 +1113,7 @@ def calculo_horas_trabalhadas_tipo():
 
             # Processar resultados conforme necessário
             for tipo, ocorrencias, horas in resultados_query:
-                resultado.append({'tipo': tipo, 'ocorrencias': ocorrencias, 'horas': round(horas,2)})
+                resultado.append({'tipo': tipo, 'ocorrencias': ocorrencias, 'horas': round(float(horas),2)})
 
         except Exception as e:
             return jsonify({'error': str(e)})
@@ -1148,6 +1177,7 @@ def calculo_horas_trabalhadas_area():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
+            setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -1172,7 +1202,7 @@ def calculo_horas_trabalhadas_area():
 
             # Processar resultados conforme necessário
             for area, ocorrencias, horas in resultados_query:
-                resultado.append({'area': area, 'ocorrencias': ocorrencias, 'horas': round(horas,2)})
+                resultado.append({'area': area, 'ocorrencias': ocorrencias, 'horas': round(float(horas),2)})
   
 
         except Exception as e:
@@ -1235,6 +1265,7 @@ def calculo_horas_setor():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
+            setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -1259,7 +1290,7 @@ def calculo_horas_setor():
 
             # Processar resultados conforme necessário
             for setor, ocorrencias, horas in resultados_query:
-                resultado.append({'setor': setor, 'ocorrencias': ocorrencias, 'horas': round(horas,2)})
+                resultado.append({'setor': setor, 'ocorrencias': ocorrencias, 'horas': round(float(horas),2)})
   
 
         except Exception as e:
@@ -1447,7 +1478,7 @@ def calculo_disponibilidade_maquina_parada():
                 #     disponibilidade = 0
                     
                 #     resultado.append({'maquina': item[1], 'disponibilidade':round(disponibilidade*100, 2)})
-
+            
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -1707,14 +1738,14 @@ def tempo_setor_parada():
 @routes_bp.route('/api/disponibilidade_maquina', methods=['POST', 'GET'])
 def disponibilidade_maquina():
     
-    data = request.get_json()
+    data_get = request.get_json()
     
     # dia_inicial = data.get('dia_inicial')
     # dia_final = data.get('dia_final')
-    data_filtro = data.get('data_filtro')
-    setores_selecionados = data.get('setores_selecionados', [])
-    maquinas_importante = data.get('maquinasFavoritas', [])
-
+    data_filtro = data_get.get('data_filtro')
+    setores_selecionados = data_get.get('setores_selecionados', [])
+    maquinas_importante = data_get.get('maquinasFavoritas', [])
+    
     # Defina a URL da API
     url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
     url2 = 'https://manutencaocemag.onrender.com/api/calculo_maquina_parada'
@@ -1724,8 +1755,8 @@ def disponibilidade_maquina():
         # 'dia_inicial': dia_inicial,
         # 'dia_final': dia_final,
         'data_filtro':data_filtro,
-        'setores_selecionados':setores_selecionados,
-        'maquinas_importante':maquinas_importante
+        # 'setores_selecionados':setores_selecionados,
+        # 'maquinas_importante':maquinas_importante
     }
 
     if data_filtro:
@@ -1746,6 +1777,10 @@ def disponibilidade_maquina():
     data = response.json()
     data2 = response2.json()
 
+    print(data)
+    print(data2)
+    print()
+    
     tabela_mtbf = pd.DataFrame(data['resultados'])
 
     tabela_disponibilidade = pd.DataFrame(data2['resultados'])
@@ -1773,7 +1808,8 @@ def disponibilidade_maquina():
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['codigo'].isin(list(maquinas_importantes()))] # filtro maquinas importantes
 
     if setores_selecionados:
-        
+        setores_selecionados = json.loads(data_get["setores_selecionados"])
+
         setores_selecionados = [setor.strip() for setor in setores_selecionados]
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['setor'].isin(setores_selecionados)] # filtro setor
 
@@ -1792,6 +1828,8 @@ def disponibilidade_maquina():
         df_historico_disponibilidade['maquina'] = df_historico_disponibilidade['maquina'].apply(lambda x: x.split(" - ")[0])
 
         if setores_selecionados:
+            setores_selecionados = json.loads(data["setores_selecionados"])
+
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             df_historico_disponibilidade = df_historico_disponibilidade[df_historico_disponibilidade['setor'].isin(setores_selecionados)]
                 
@@ -1811,19 +1849,21 @@ def disponibilidade_maquina():
     resultado_agrupado = resultado_agrupado[['codigo_tratado','disponibilidade']]
     
     lista_resultado = resultado_agrupado.to_dict(orient='records')
+    
+    lista_resultado = sorted(lista_resultado, key=lambda x: x['disponibilidade'])
 
     return jsonify({'resultados': lista_resultado})
 
 @routes_bp.route('/api/disponibilidade_setor', methods=['POST', 'GET'])
 def disponibilidade_setor():
     
-    data = request.get_json()
+    data_get = request.get_json()
     
     # dia_inicial = data.get('dia_inicial')
     # dia_final = data.get('dia_final')
-    data_filtro = data.get('data_filtro')
-    setores_selecionados = data.get('setores_selecionados', [])
-    maquinas_importante = data.get('maquinasFavoritas', [])
+    data_filtro = data_get.get('data_filtro')
+    setores_selecionados = data_get.get('setores_selecionados', [])
+    maquinas_importante = data_get.get('maquinasFavoritas', [])
 
     # Defina a URL da API
     url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
@@ -1834,8 +1874,8 @@ def disponibilidade_setor():
         # 'dia_inicial': dia_inicial,
         # 'dia_final': dia_final,
         'data_filtro':data_filtro,
-        'setores_selecionados':setores_selecionados,
-        'maquinas_importante':maquinas_importante
+        # 'setores_selecionados':setores_selecionados,
+        # 'maquinas_importante':maquinas_importante
     }
 
     if data_filtro:
@@ -1876,6 +1916,7 @@ def disponibilidade_setor():
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['codigo'].isin(list(maquinas_importantes()))] # filtro maquinas importantes
 
     if setores_selecionados:
+        setores_selecionados = json.loads(data_get["setores_selecionados"])
         
         setores_selecionados = [setor.strip() for setor in setores_selecionados]
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['setor'].isin(setores_selecionados)] # filtro setor
@@ -1892,6 +1933,8 @@ def disponibilidade_setor():
         df_historico_disponibilidade = pd.read_csv("disponibilidade_historico.csv", sep=";")
 
         if setores_selecionados:
+            setores_selecionados = json.loads(data["setores_selecionados"])
+
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             df_historico_disponibilidade = df_historico_disponibilidade[df_historico_disponibilidade['setor'].isin(setores_selecionados)]
                 
@@ -1911,6 +1954,8 @@ def disponibilidade_setor():
     resultado_agrupado = resultado_agrupado[['setor','disponibilidade']]
 
     lista_resultado = resultado_agrupado.to_dict(orient='records')
+
+    lista_resultado = sorted(lista_resultado, key=lambda x: x['disponibilidade'])
 
     return jsonify({'resultados': lista_resultado})
 
@@ -1932,6 +1977,22 @@ def tabela_maquinas():
         lista_tabela_maquinas.append({'setor':maquina[0],'codigo':maquina[1],'codigo_tratado':maquina[2]})
     
     return pd.DataFrame(lista_tabela_maquinas,)
+
+def agrupando_dados(data):
+
+    # Convertendo a lista de dicionários para um DataFrame
+    df = pd.DataFrame(data)
+
+    # Agrupando por 'maquina' e calculando a média
+    resultados_agrupados = df.groupby('maquina').agg({'qt_execucao': 'mean', 'resultado_mttr': 'mean'}).reset_index()
+
+    # Renomeando as colunas
+    resultados_agrupados = resultados_agrupados.rename(columns={'qt_execucao': 'qt_execucao', 'resultado_mttr': 'resultado_mttr'})
+
+    # Convertendo de volta para uma lista de dicionários
+    resultado_final = resultados_agrupados.to_dict('records')
+
+    return resultado_final
 
 # @routes_bp.route('/api/calculo_disponibilidade_maquinas', methods=['POST', 'GET'])
 # def calculo_disponibilidade():
