@@ -593,6 +593,41 @@ def cards_post(query):
 
 #     return card_em_espera
 
+def tabela_maquinas():
+
+    sql_tb_maquinas = """
+    select setor,codigo, COALESCE(NULLIF(apelido, ''), codigo) AS codigo_tratado from tb_maquinas
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute(sql_tb_maquinas,)
+    tabela_maquinas = cur.fetchall()
+
+    lista_tabela_maquinas = []
+
+    for maquina in tabela_maquinas:
+        lista_tabela_maquinas.append({'setor':maquina[0],'codigo':maquina[1],'codigo_tratado':maquina[2]})
+    
+    return pd.DataFrame(lista_tabela_maquinas,)
+
+def agrupando_dados(data):
+
+    # Convertendo a lista de dicionários para um DataFrame
+    df = pd.DataFrame(data)
+
+    # Agrupando por 'maquina' e calculando a média
+    resultados_agrupados = df.groupby('maquina').agg({'qt_execucao': 'mean', 'resultado_mttr': 'mean'}).reset_index()
+
+    # Renomeando as colunas
+    resultados_agrupados = resultados_agrupados.rename(columns={'qt_execucao': 'qt_execucao', 'resultado_mttr': 'resultado_mttr'})
+
+    # Convertendo de volta para uma lista de dicionários
+    resultado_final = resultados_agrupados.to_dict('records')
+
+    return resultado_final
+
 def maquinas_importantes():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
@@ -1774,11 +1809,7 @@ def disponibilidade_maquina():
 
     data = response.json()
     data2 = response2.json()
-
-    print(data)
-    print(data2)
-    print()
-    
+   
     tabela_mtbf = pd.DataFrame(data['resultados'])
 
     tabela_disponibilidade = pd.DataFrame(data2['resultados'])
@@ -1806,7 +1837,7 @@ def disponibilidade_maquina():
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['codigo'].isin(list(maquinas_importantes()))] # filtro maquinas importantes
 
     if setores_selecionados:
-        setores_selecionados = json.loads(data_get["setores_selecionados"])
+        # setores_selecionados = json.loads(data_get["setores_selecionados"])
 
         setores_selecionados = [setor.strip() for setor in setores_selecionados]
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['setor'].isin(setores_selecionados)] # filtro setor
@@ -1848,7 +1879,7 @@ def disponibilidade_maquina():
     
     lista_resultado = resultado_agrupado.to_dict(orient='records')
     
-    lista_resultado = sorted(lista_resultado, key=lambda x: x['disponibilidade'])
+    # lista_resultado = sorted(lista_resultado, key=lambda x: x['disponibilidade'])
 
     return jsonify({'resultados': lista_resultado})
 
@@ -1914,7 +1945,7 @@ def disponibilidade_setor():
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['codigo'].isin(list(maquinas_importantes()))] # filtro maquinas importantes
 
     if setores_selecionados:
-        setores_selecionados = json.loads(data_get["setores_selecionados"])
+        # setores_selecionados = json.loads(data_get["setores_selecionados"])
         
         setores_selecionados = [setor.strip() for setor in setores_selecionados]
         tabela_maquinas_ = tabela_maquinas_[tabela_maquinas_['setor'].isin(setores_selecionados)] # filtro setor
@@ -1953,44 +1984,10 @@ def disponibilidade_setor():
 
     lista_resultado = resultado_agrupado.to_dict(orient='records')
 
-    lista_resultado = sorted(lista_resultado, key=lambda x: x['disponibilidade'])
+    # lista_resultado = sorted(lista_resultado, key=lambda x: x['disponibilidade'])
 
     return jsonify({'resultados': lista_resultado})
 
-def tabela_maquinas():
-
-    sql_tb_maquinas = """
-    select setor,codigo, COALESCE(NULLIF(apelido, ''), codigo) AS codigo_tratado from tb_maquinas
-    """
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    cur.execute(sql_tb_maquinas,)
-    tabela_maquinas = cur.fetchall()
-
-    lista_tabela_maquinas = []
-
-    for maquina in tabela_maquinas:
-        lista_tabela_maquinas.append({'setor':maquina[0],'codigo':maquina[1],'codigo_tratado':maquina[2]})
-    
-    return pd.DataFrame(lista_tabela_maquinas,)
-
-def agrupando_dados(data):
-
-    # Convertendo a lista de dicionários para um DataFrame
-    df = pd.DataFrame(data)
-
-    # Agrupando por 'maquina' e calculando a média
-    resultados_agrupados = df.groupby('maquina').agg({'qt_execucao': 'mean', 'resultado_mttr': 'mean'}).reset_index()
-
-    # Renomeando as colunas
-    resultados_agrupados = resultados_agrupados.rename(columns={'qt_execucao': 'qt_execucao', 'resultado_mttr': 'resultado_mttr'})
-
-    # Convertendo de volta para uma lista de dicionários
-    resultado_final = resultados_agrupados.to_dict('records')
-
-    return resultado_final
 
 # @routes_bp.route('/api/calculo_disponibilidade_maquinas', methods=['POST', 'GET'])
 # def calculo_disponibilidade():
