@@ -790,7 +790,7 @@ def calculo_mtbf_setor():
 
         if setores_selecionados:
 
-            setores_selecionados = json.loads(data["setores_selecionados"])
+            # setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -836,9 +836,7 @@ def calculo_mtbf_setor():
                 }).reset_index()
 
                 resultado_mtbf_setor = join_df.to_dict(orient='records')
-
-            resultado_mtbf_setor = sorted(resultado_mtbf_setor, key=lambda x: x['resultado_mtbf'])
-
+            
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -901,7 +899,7 @@ def calculo_mttr_maquina():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
-            setores_selecionados = json.loads(data["setores_selecionados"])
+            # setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -933,7 +931,7 @@ def calculo_mttr_maquina():
                     resultado_mttr_maquina.append({'maquina': maquina, 'resultado_mttr': None, 'qt_execucao': None})
 
             resultado_mttr_maquina = agrupando_dados(resultado_mttr_maquina)
-            resultado_mttr_maquina = sorted(resultado_mttr_maquina, key=lambda x: x['resultado_mttr'])
+            # resultado_mttr_maquina = sorted(resultado_mttr_maquina, key=lambda x: x['resultado_mttr'])
 
 
         except Exception as e:
@@ -996,7 +994,7 @@ def calculo_mttr_setor():
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
         if setores_selecionados:
-            setores_selecionados = json.loads(data["setores_selecionados"])
+            # setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -1024,7 +1022,7 @@ def calculo_mttr_setor():
                 else:
                     resultado_mttr_setor.append({'setor': setor, 'resultado_mttr': None, 'qt_execucao': None})
 
-            resultado_mttr_setor = sorted(resultado_mttr_setor, key=lambda x: x['resultado_mttr'])
+            # resultado_mttr_setor = sorted(resultado_mttr_setor, key=lambda x: x['resultado_mttr'])
 
 
         except Exception as e:
