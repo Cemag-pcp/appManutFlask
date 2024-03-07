@@ -2839,18 +2839,16 @@
         const selectSetor = document.getElementById('selectSetor');
         const selectedOptions = Array.from(selectSetor.selectedOptions).map(option => option.value);
 
-        console.log(dataFiltro);
-
-        // valoresCards(maquinasFavoritas, selectedOptions, dataFiltro);
-        // graficoHorasSetor(maquinasFavoritas, selectedOptions, dataFiltro);
-        // graficoAreaManutencao(maquinasFavoritas, selectedOptions, dataFiltro);
-        // graficoTipoManutencao(maquinasFavoritas, selectedOptions, dataFiltro);
-        // graficoMttrSetor(selectedOptions, dataFiltro);
-        // graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro);
-        // graficoMtbfSetor(selectedOptions, dataFiltro);
-        // graficoMtbfMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
-        graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
-        graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro);
+        valoresCards(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoHorasSetor(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoAreaManutencao(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoTipoManutencao(maquinasFavoritas, selectedOptions, dataFiltro);
+        graficoMttrSetor(selectedOptions, dataFiltro);
+        graficoMttrMaquina(selectedOptions, maquinasFavoritas, dataFiltro);
+        graficoMtbfSetor(selectedOptions, dataFiltro);
+        graficoMtbfMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
+        // graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
+        // graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro);
 
       });
     });
