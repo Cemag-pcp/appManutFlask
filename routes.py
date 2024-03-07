@@ -669,7 +669,7 @@ def calculo_mtbf_maquina():
 
         if setores_selecionados:
 
-            setores_selecionados = json.loads(data["setores_selecionados"])
+            # setores_selecionados = json.loads(data["setores_selecionados"])
 
             setores_selecionados = [setor.strip() for setor in setores_selecionados]
             setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
@@ -723,7 +723,7 @@ def calculo_mtbf_maquina():
 
                 resultado_mtbf_maquina = join_df.to_dict(orient='records')
 
-            resultado_mtbf_maquina = sorted(resultado_mtbf_maquina, key=lambda x: x['resultado_mtbf'])
+            # resultado_mtbf_maquina = sorted(resultado_mtbf_maquina, key=lambda x: x['resultado_mtbf'])
 
         except Exception as e:
             return jsonify({'error': str(e)})
