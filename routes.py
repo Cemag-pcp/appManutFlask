@@ -653,8 +653,6 @@ def calculo_mtbf_maquina():
         # Obtenha dados da solicitação POST
         data = request.get_json()
 
-        print(data)
-
         # dia_inicial = data.get('dia_inicial')
         data_filtro = data.get('data_filtro')
         setores_selecionados = data.get('setores_selecionados', [])
@@ -1596,6 +1594,7 @@ def calculo_disponibilidade_setor_parada():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@routes_bp.route('/api/calculo_setor_parada', methods=['POST','GET'])
 def tempo_maquina_parada_api(data_filtro):
 
     try:
@@ -1898,7 +1897,7 @@ def disponibilidade_setor():
     maquinas_importante = data_get.get('maquinasFavoritas', [])
 
     # Defina a URL da API
-    # url = 'https://manutencaocemag.onrender.com/api/calculo_maquina_tempo_parada'
+    # url = 'https://localhost:5000/api/calculo_maquina_tempo_parada'
     # url2 = 'https://manutencaocemag.onrender.com/api/calculo_maquina_parada'
     
     # Suponha que você tenha dados para enviar no corpo da solicitação (payload)
