@@ -3,6 +3,7 @@
 {% block links %}
 
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/mensagem.css') }}">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dropdown.css') }}">
 
 {% endblock %}
 
@@ -17,17 +18,36 @@
         </div>
         <div class="card-body p-5">
             <div class="row">
-              <div class="col-md-6 mb-4">
+              <div class="col-md-4 mb-4">
                 <label for="data_filtro">Data:</label>
                 <input type="text" class="form-control" id="dataOsMaquina" name="datetimes" autocomplete="off">
               </div>
-              <div class="col-md-6 mb-4">
+              <div class="col-md-4">
+                <label>Setor:</label>
+                <select id="filtro_setor_geral" class="form-control" name="filtro_setor_geral">
+                  <option value="" selected hidden disabled></option>
+                  <option value="Qualidade">Qualidade</option>
+                  <option value="Solda">Solda</option>
+                  <option value="Corte e estamparia">Corte e estamparia</option>
+                  <option value="Almoxarifado">Almoxarifado</option>
+                  <option value="Pintura">Pintura</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Usinagem">Usinagem</option>
+                  <option value="Equipamentos de Movimentação">Equipamentos de Movimentação</option>
+                  <option value="Utilidades">Utilidades</option>
+                  <option value="Forjaria">Forjaria</option>
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Carpintaria">Carpintaria</option>
+                  <option value="Forjaria">Forjaria</option>
+                </select>
+              </div>
+              <div class="col-md-4 mb-4">
                 <label for="maquinas_geral">Equipamento:</label>
                 <div class="input-group">
                   <input type="text" class="form-control" id="maquinas_geral" autocomplete="off" aria-describedby="basic-addon2" required>
                 </div>
-              <ul class="dropdown-list" id="list_maquinas_geral">
-              </ul>
+                <ul class="dropdown-list" id="list_maquinas_geral">
+                </ul>
               </div>
             </div>
             <button type="submit" id="filtrar_maquina" class="btn btn-primary">Filtrar</button>
@@ -75,6 +95,19 @@
 <!-- Script de mensagem -->
 <script src="static/js/mensagem.js"></script>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+<!-- (Optional) Latest compiled and minified JavaScript translation files -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="static/js/demo/datatables-demo.js"></script>
+<!-- Bootstrap core JavaScript-->
+<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
 <!-- Core plugin JavaScript-->
 <script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
 
@@ -82,11 +115,10 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-<!-- Page level custom scripts -->
-<script src="static/js/demo/datatables-demo.js"></script>
+<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 
 <script>
     function criarLinha(row) {
@@ -195,5 +227,127 @@
     });
 
   </script>
+
+<script>
+  // Populando lista de itens 
+var itensHistorico = document.getElementById('maquinas_geral');
+var listItens = document.getElementById('list_maquinas_geral');
+var setorSelect = document.getElementById('filtro_setor_geral');
+var setorSelecionado = setorSelect.value;
+
+function carregarItensMaquinas() {
+    // Verifica se os itens estão em cache
+    var itensCache = localStorage.getItem('itensCache');
+
+    if (itensCache) {
+        // Se estiver em cache, utiliza os dados do cache
+        atualizarListaHistorico(JSON.parse(itensCache));
+    } else {
+        // Caso contrário, faz a solicitação AJAX
+        $.ajax({
+            url: '/maquinas',
+            type: 'GET',
+            success: function (data) {
+                // Atualiza o menu de máquinas com as opções retornadas do servidor
+                console.log(data);
+                // Adiciona os itens à lista
+
+                // Atualiza o cache com os novos dados
+                localStorage.setItem('itensCache', JSON.stringify(data));
+
+                atualizarListaHistorico(data);
+            }
+        });
+    }
+}
+
+function atualizarListaHistorico(itens) {
+    listItens.innerHTML = '';
+
+    itens.forEach(function (item) {
+        var li = document.createElement('li');
+        li.textContent = item;
+        listItens.appendChild(li);
+    });
+}
+
+// Adiciona eventos tanto para o clique quanto para o foco
+itensHistorico.addEventListener('click', carregarItensMaquinas);
+itensHistorico.addEventListener('focus', carregarItensMaquinas);
+setorSelect.addEventListener('change', carregarItensMaquinas);
+// Fim Populando lista de itens 
+
+// Criar listas dentro do input
+function configurarDropdownMaquinas(inputId, listId) {
+    var inputDropdown = document.getElementById(inputId);
+    var listaDropdown = document.getElementById(listId);
+    var itens = listaDropdown.getElementsByTagName('li');
+    var valorAnterior = "";
+
+    inputDropdown.addEventListener('focus', function () {
+        if (inputDropdown.readOnly) {
+            listaDropdown.style.display = 'none';
+        } else {
+            listaDropdown.style.display = 'block';
+            listaDropdown.innerHTML = '';
+        }
+    });
+
+    inputDropdown.addEventListener('blur', function () {
+        // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
+        setTimeout(function () {
+            if (!correspondeAItemMaquinas()) {
+                // Se o valor não corresponder a um item na lista, redefina para o valor anterior
+                inputDropdown.value = valorAnterior;
+            }
+            listaDropdown.style.display = 'none';
+        }, 200);
+    });
+
+    listaDropdown.addEventListener('click', function (event) {
+        if (event.target.tagName === 'LI') {
+            valorAnterior = event.target.textContent;
+            inputDropdown.value = valorAnterior;
+
+            // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+            setTimeout(function () {
+                listaDropdown.style.display = 'none';
+            }, 100);
+        }
+    });
+
+    inputDropdown.addEventListener('input', function () {
+        var input = this.value.trim().toLowerCase();
+        var itens = listaDropdown.getElementsByTagName('li');
+
+        for (var i = 0; i < itens.length; i++) {
+            var textoItem = itens[i].textContent.toLowerCase();
+            var itemVisivel = textoItem.indexOf(input) > -1;
+            itens[i].style.display = itemVisivel ? 'block' : 'none';
+        }
+
+        // Exiba a lista apenas se houver correspondência com os itens
+        var correspondenciaItens = Array.from(itens).some(function (item) {
+            var textoItem = item.textContent.toLowerCase();
+            var itemVisivel = textoItem.includes(input);
+            item.style.display = itemVisivel ? 'block' : 'none';
+            return itemVisivel;
+        });
+
+        listaDropdown.style.display = correspondenciaItens ? 'block' : 'none';
+    });
+
+    function correspondeAItemMaquinas() {
+        var input = inputDropdown.value.trim().toLowerCase();
+        return Array.from(itens).some(function (item) {
+            return item.textContent.toLowerCase() === input;
+        });
+    }
+}
+
+configurarDropdownMaquinas('maquinas_geral', 'list_maquinas_geral');
+// Fim criar lista dentro de input
+
+</script>
 
 {% endblock %}
