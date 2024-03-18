@@ -3150,13 +3150,29 @@ def formulario_os(id_ordem):
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """SELECT * FROM tb_ordens WHERE id_ordem = {}""".format(id_ordem)
+    query = """SELECT *
+                    FROM tb_ordens o1
+                    WHERE (n_ordem = (
+                            SELECT MAX(n_ordem)
+                            FROM tb_ordens o2
+                            WHERE o1.id_ordem = o2.id_ordem
+                        ) OR n_ordem = (
+                            SELECT MIN(n_ordem)
+                            FROM tb_ordens o3
+                            WHERE o1.id_ordem = o3.id_ordem
+                        ))
+                        AND id_ordem = {}
+                    ORDER BY id_ordem DESC;
+                    """.format(id_ordem)
+
     cur.execute(query)
     df = pd.read_sql_query(query, conn)
 
-    ultima_atualizacao = df['ultima_atualizacao'][0] - timedelta(hours=3)
+    cur.execute("INSERT INTO tb_confirmacao (id_ordem, n_ordem, confirmacao) VALUES (%s, %s, %s)", (int(df['id_ordem'][len(df) - 1]),int(df['n_ordem'][len(df) - 1]),True))
 
-    wb = load_workbook('modelo_os_new.xlsx')
+    ultima_atualizacao = df['ultima_atualizacao'][len(df) - 1] - timedelta(hours=3)
+
+    wb = load_workbook('modelo_os_new_v2.xlsx')
     ws = wb.active
 
     nova_hora_formatada = ultima_atualizacao.strftime('%H:%M')
@@ -3165,13 +3181,13 @@ def formulario_os(id_ordem):
     ws['G8'] = data_atual
     ws['G9'] = nova_hora_formatada
 
+    ws['B8'] = df['id_ordem'][len(df) - 1]
+    ws['B9'] = df['setor'][len(df) - 1]
     ws['B10'] = df['solicitante'][0]
-    ws['B8'] = df['id_ordem'][0]
-    ws['B9'] = df['setor'][0]
-    ws['B11'] = df['maquina'][0]
-    ws['B12'] = df['problemaaparente'][0]
+    ws['B11'] = df['maquina'][len(df) - 1]
+    ws['B12'] = df['problemaaparente'][len(df) - 1]
 
-    if df['maquina_parada'][0] == True:
+    if df['maquina_parada'][len(df) - 1] == True:
         ws['G11'] = 'Sim'
     else:
         ws['G11'] = 'Não'
@@ -3180,20 +3196,12 @@ def formulario_os(id_ordem):
 
     ws['G10'] = df['status'][0]
 
-    wb.save('modelo_os_new.xlsx')
+    wb.save('modelo_os_new_v2.xlsx')
 
-    # workbook = Workbook("modelo_os_new.xlsx")
-    # workbook.save("Ordem de Serviço.pdf")
-
-    # convertapi.api_secret = 'vkVdyOJxS8xz4uWq'
-    # convertapi.convert('pdf', {
-    #     'File': 'modelo_os_new.xlsx'
-    # }, from_format = 'xlsx').save_files('modelo_os_new.pdf')
-
-    # arquivo_final = 'modelo_os_new.pdf'
+    conn.commit()
 
     # Retorna o arquivo para download
-    return send_file("modelo_os_new.xlsx", as_attachment=True)
+    return send_file("modelo_os_new_v2.xlsx", as_attachment=True)
 
 
 def mes_atual():
@@ -3456,27 +3464,31 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    s = (""" select DISTINCT t7.*, t8.id_ordem as contem_imagem
-            from (
-                select t5.*, t6.id_ordem as contem_video
-                from(
-                    select t3.*, t4.parada1,t4.parada2,t4.parada3
-                    from(
-                        SELECT DISTINCT t1.total, t2.* 
-                        FROM (
-                            SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
-                            FROM tb_carrinho
-                            JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
-                            GROUP BY tb_carrinho.id_ordem
-                            ) t1
-                        RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
-                    ) as t3
-                    LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
-                    ORDER BY t3.id_ordem
-                ) as t5
-                LEFT JOIN tb_videos_ordem_servico t6 on t5.id_ordem = t6.id_ordem
-                ) as t7
-            LEFT JOIN tb_imagens t8 on t7.id_ordem = t8.id_ordem;
+    s = (""" SELECT DISTINCT t10.*, tc.confirmacao,tc.data_atual FROM (
+                SELECT * FROM (
+                select DISTINCT t7.*, t8.id_ordem as contem_imagem
+                    FROM (
+                        select t5.*, t6.id_ordem as contem_video
+                        FROM(
+                            select t3.*, t4.parada1,t4.parada2,t4.parada3
+                            FROM(
+                                SELECT DISTINCT t1.total, t2.* 
+                                FROM (
+                                    SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+                                    FROM tb_carrinho
+                                    JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+                                    GROUP BY tb_carrinho.id_ordem
+                                    ) t1
+                                RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
+                            ) as t3
+                            LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
+                            ORDER BY t3.id_ordem
+                        ) as t5
+                        LEFT JOIN tb_videos_ordem_servico t6 on t5.id_ordem = t6.id_ordem
+                        ) as t7
+                    LEFT JOIN tb_imagens t8 on t7.id_ordem = t8.id_ordem)  as t9
+                    LEFT JOIN tb_planejamento_anual AS tpa ON t9.maquina LIKE '%' || tpa.codigo || '%') AS t10
+                    LEFT JOIN tb_confirmacao as tc ON t10.id_ordem = tc.id_ordem AND t10.n_ordem = tc.n_ordem
          """)
 
     df = pd.read_sql_query(s, conn)
