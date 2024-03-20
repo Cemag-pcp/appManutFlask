@@ -241,7 +241,7 @@
                                     {% endif %}
                                 </div>
                             </td>
-                            <td data-title="Descricao" style="display: none; padding-bottom: 0px;">{{row[6]}}</td>
+                            <td data-title="Descricao" style="min-width: 300px; display: none; padding-bottom: 0px;">{{row[6]}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -791,7 +791,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" style="overflow-x: auto;">
+            <div class="modal-body" style="overflow-x: auto; max-width: 500px;">
                 <!-- Aqui é onde o vídeo será exibido -->
             </div>
         </div>
@@ -1118,11 +1118,15 @@
                 var imagens = response.imagens_data;
                 var videos = response.videos_data;
                 var modalBody = '';
-
+                console.log(imagens.length)
                 // Iterar sobre todas as imagens e adicionar ao modal
                 for (var i = 0; i < imagens.length; i++) {
                     var base64Image = imagens[i];
-                    modalBody += '<img class="img-thumbnail" src="data:image/png;base64,' + base64Image + '" alt="Imagem" /><br><br>';
+                    if(imagens.length > 1){
+                        modalBody += '<img class="img-thumbnail multi" src="data:image/png;base64,' + base64Image + '" alt="Imagem" /><br><br>';
+                    } else {
+                        modalBody += '<img class="img-thumbnail unico" src="data:image/png;base64,' + base64Image + '" alt="Imagem" /><br><br>';
+                    }
                 }
 
                 // Preencher o conteúdo do modal com as imagens e vídeos
@@ -1189,7 +1193,7 @@
                 // Iterar sobre todos os vídeos e adicionar ao modal
                 for (var i = 0; i < videos.length; i++) {
                     var videoURL = videos[i];
-                    modalBody += '<video controls>';
+                    modalBody += '<video controls style="max-width:400px">';
                     modalBody += '<source src="' + videoURL + '" type="video/mp4">';
                     modalBody += 'Seu navegador não suporta o elemento de vídeo.';
                     modalBody += '</video><br><br>';
