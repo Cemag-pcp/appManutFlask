@@ -24,6 +24,7 @@ import zipfile
 from io import BytesIO
 import re
 import requests
+import copy
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -3150,22 +3151,15 @@ def formulario_os(id_ordem):
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = """SELECT *
-                    FROM tb_ordens o1
-                    WHERE (n_ordem = (
-                            SELECT MAX(n_ordem)
-                            FROM tb_ordens o2
-                            WHERE o1.id_ordem = o2.id_ordem
-                        ) OR n_ordem = (
-                            SELECT MIN(n_ordem)
-                            FROM tb_ordens o3
-                            WHERE o1.id_ordem = o3.id_ordem
-                        ))
-                        AND id_ordem = {}
-                    ORDER BY id_ordem DESC;
+    query = """SELECT n_ordem,descmanutencao,operador,datainicio,horainicio,datafim,horafim,
+    id_ordem,setor,solicitante,maquina,problemaaparente,maquina_parada,status,ultima_atualizacao
+                    FROM tb_ordens 
+                WHERE id_ordem = {}
+                ORDER BY n_ordem asc
                     """.format(id_ordem)
 
     cur.execute(query)
+    lista_solicitacoes = cur.fetchall()
     df = pd.read_sql_query(query, conn)
 
     cur.execute("INSERT INTO tb_confirmacao (id_ordem, n_ordem, confirmacao) VALUES (%s, %s, %s)", (int(df['id_ordem'][len(df) - 1]),int(df['n_ordem'][len(df) - 1]),True))
@@ -3187,6 +3181,35 @@ def formulario_os(id_ordem):
     ws['B11'] = df['maquina'][len(df) - 1]
     ws['B12'] = df['problemaaparente'][len(df) - 1]
 
+    # Aumentar a quantidade de Linhas
+    for i in range(len(df)):
+        # Define a linha de destino
+        linha_destino = 24 + i
+        ws.insert_rows(25 + i)
+
+        # Copia o valor e o estilo da linha 27 para a linha de destino
+        for coluna in range(1, 9):  # A coluna 1 é a A, a coluna 2 é a B, etc.
+            ws.cell(row=linha_destino, column=coluna).font = copy.copy(ws.cell(row=24, column=coluna).font)
+            ws.cell(row=linha_destino, column=coluna).fill = copy.copy(ws.cell(row=24, column=coluna).fill)
+            ws.cell(row=linha_destino, column=coluna).border = copy.copy(ws.cell(row=24, column=coluna).border)
+            ws.cell(row=linha_destino, column=coluna).alignment = copy.copy(ws.cell(row=24, column=coluna).alignment)
+                    # Access and copy the line height from row 27
+            line_height = ws.row_dimensions[24].height  # Access height from source row
+            ws.row_dimensions[linha_destino].height = line_height  # Set the same height for the target row
+
+    for i in range(1,len(df)):
+        linha_destino = 23 + i
+
+        ws.cell(row=linha_destino, column=1).value = lista_solicitacoes[i][0]
+        ws.cell(row=linha_destino, column=2).value = lista_solicitacoes[i][1] 
+        ws.cell(row=linha_destino, column=4).value = lista_solicitacoes[i][2] 
+        data_inicio = lista_solicitacoes[i][3].strftime("%d/%m/%Y")
+        ws.cell(row=linha_destino, column=5).value = data_inicio  # Motivo
+        ws.cell(row=linha_destino, column=6).value = lista_solicitacoes[i][4]
+        data_fim = lista_solicitacoes[i][5].strftime("%d/%m/%Y")  # Motivo
+        ws.cell(row=linha_destino, column=7).value = data_fim  # Motivo
+        ws.cell(row=linha_destino, column=8).value = lista_solicitacoes[i][6]  # Motivo
+
     if df['maquina_parada'][len(df) - 1] == True:
         ws['G11'] = 'Sim'
     else:
@@ -3196,12 +3219,14 @@ def formulario_os(id_ordem):
 
     ws['G10'] = df['status'][0]
 
-    wb.save('modelo_os_new_v2.xlsx')
+    wb.save('Relatorio_OS.xlsx')
+
+    wb.close()
 
     conn.commit()
 
     # Retorna o arquivo para download
-    return send_file("modelo_os_new_v2.xlsx", as_attachment=True)
+    return send_file("Relatorio_OS.xlsx", as_attachment=True)
 
 
 def mes_atual():
