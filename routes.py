@@ -3550,7 +3550,7 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
         if df['total'][i] == '':
             df['total'][i] = 0
 
-    df['total'] = df['total'].apply(lambda x: round(x, 2))
+    # df['total'] = df['total'].apply(lambda x: round(x, 2))
 
     df = df.sort_values('ultima_atualizacao', ascending=False)
 
