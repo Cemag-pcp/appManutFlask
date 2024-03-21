@@ -3347,6 +3347,8 @@ def custo_MO():
 
     df_timeline = df_final.merge(df_funcionario, left_on='operador', right_on='matricula')
 
+    df_timeline['fim'] = pd.to_datetime(df_timeline['fim'])
+
     df_timeline['mesExecucao'] = df_timeline['fim'].dt.month
     df_timeline['anoExecucao'] = df_timeline['fim'].dt.year
     df_timeline['dias_uteis'] = df_timeline.apply(
@@ -5339,7 +5341,7 @@ def timeline_os():
 
     df_final = df_timeline
 
-    print(df_timeline)
+    print(df_timeline['fim'])
 
     if len(df_timeline) > 1:
         df_timeline['mesExecucao'] = df_timeline['fim'].dt.month
