@@ -1524,7 +1524,23 @@
 
         if (tipoManutencao === '' | areaManutencao === '' | observacao === '' | operadorSelecionado === 0) {
             exibirMensagem('aviso','Preencha todos os campos obrigatórios.');
+            hideLoading();
             return;
+        }
+
+        var pvlye = document.getElementById('pvlye').value;
+        var pa_plus = document.getElementById('pa-plus').value;
+        var tratamento = document.getElementById('tratamento').value;
+        var ph_agua = document.getElementById('ph-agua').value;
+        var maquina = document.getElementById('maquina').value;
+        var inputSolicitante = document.getElementById('inputSolicitante').value;
+
+        if (maquina === 'ETE' && inputSolicitante === 'Automático') {
+            if (pvlye === '' || pa_plus === '' || tratamento  === '' || ph_agua === '') {
+                exibirMensagem('aviso','Preencha todos os campos obrigatórios.');
+                hideLoading();
+                return;
+            }
         }
 
         // Lista de IDs dos elementos que são checkboxes
