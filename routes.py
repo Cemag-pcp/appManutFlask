@@ -729,11 +729,13 @@ def calculo_mtbf_maquina():
             # Processar resultados conforme necessário
             for maquina, qt_execucao, valor_decimal in mtbf_maquina:
                 if valor_decimal is not None:
-                    resultado = round((horas_trabalhadas_otimo - float(valor_decimal)) / qt_execucao, 2)
+                    resultado = abs(round((horas_trabalhadas_otimo - float(valor_decimal)) / qt_execucao, 2))
                     resultado_mtbf_maquina.append({'maquina': maquina, 'resultado_mtbf': resultado, 'qt_execucao': qt_execucao})
-                else:
-                    resultado_mtbf_maquina.append({'maquina': maquina, 'resultado_mtbf': None, 'qt_execucao': None})
 
+                else:
+                    resultado_mtbf_maquina['resultado_mtbf'] = abs(resultado_mtbf_maquina['resultado_mtbf'])            
+                    resultado_mtbf_maquina.append({'maquina': maquina, 'resultado_mtbf': None, 'qt_execucao': None})
+                    
             if not data_filtro:
 
                 df_historico_mtbf = pd.read_csv("mtbf_historico.csv", sep=";")
@@ -755,9 +757,9 @@ def calculo_mtbf_maquina():
                     'resultado_mtbf': 'mean',
                 }).reset_index()
 
-                resultado_mtbf_maquina = join_df.to_dict(orient='records')
+                join_df['resultado_mtbf'] = abs(join_df['resultado_mtbf'])
 
-            # resultado_mtbf_maquina = sorted(resultado_mtbf_maquina, key=lambda x: x['resultado_mtbf'])
+                resultado_mtbf_maquina = join_df.to_dict(orient='records')
 
         except Exception as e:
             return jsonify({'error': str(e)})
