@@ -1408,7 +1408,7 @@
 
   </script>
 
-  <!-- DISPONIBILIDADE POR MÁQUINA -->
+  <!-- DISPONIBILIDADE POR MÁQUINA e setor -->
   <script>
     let chartDisponibilidadeMaquina;
     let chartDisponibilidadeSetor;
@@ -1449,6 +1449,11 @@
           const ctx_setor = document.getElementById('grafico6').getContext('2d');
           const setores = data.disp_setor.map(item_setor => item_setor.setor);
           const resultados_setor = data.disp_setor.map(item_setor => item_setor.disponibilidade_horas);
+
+          const disponibilidade_horas = data.disp_setor.map(item => item.disponibilidade_horas);
+          const media = disponibilidade_horas.reduce((total, valor) => total + valor, 0) / disponibilidade_horas.length;
+
+          document.getElementById('cardDisponibilidade').textContent = media.toFixed(2) * 100 + '%';
 
           // gráfico disponibilidade por maquina
           chartDisponibilidadeMaquina = new Chart(ctx, {
