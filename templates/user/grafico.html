@@ -1411,11 +1411,12 @@
   <!-- DISPONIBILIDADE POR MÁQUINA -->
   <script>
     let chartDisponibilidadeMaquina;
+    let chartDisponibilidadeSetor;
 
     // Função para carregar os dados e criar o gráfico e a tabela
     function graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions, dataFiltro) {
       // Substitua pela lógica que faz a solicitação à sua API
-      fetch('/api/disponibilidade_maquina', {
+      fetch('/api/disponibilidades', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1432,25 +1433,24 @@
         .then(response => response.json())
         .then(data => {
             
-          const mediaDisponibilidade = data.resultados.reduce((total, resultado) => total + resultado.disponibilidade, 0) / data.resultados.length;
-
-          document.getElementById('cardDisponibilidade').textContent = mediaDisponibilidade.toFixed(2) * 100 + '%';
-
-          data.resultados.sort((a, b) => a.disponibilidade - b.disponibilidade);
-          data.resultados = data.resultados.filter(item => item.codigo_tratado !== null && item.codigo_tratado.trim() !== "Telhado" && item.codigo_tratado.trim() !== "ETE"
-            && item.codigo_tratado.trim() !== "Ultrassom" && item.codigo_tratado.trim() !== "Termográfica");
-
           // Destrua o gráfico anterior se existir
           if (chartDisponibilidadeMaquina) {
             chartDisponibilidadeMaquina.destroy();
           }
+          if (chartDisponibilidadeSetor) {
+            chartDisponibilidadeSetor.destroy();
+          }
 
           // Dados para o mtbf de máquinas
           const ctx = document.getElementById('grafico5').getContext('2d');
-          const maquinas = data.resultados.map(item => item.codigo_tratado);
-          const resultados = data.resultados.map(item => item.disponibilidade);
+          const maquinas = data.disp_maquinas.map(item => item.codigo);
+          const resultados = data.disp_maquinas.map(item => item.disponibilidade_horas);
 
-          // Gráfico mtbf por maquina
+          const ctx_setor = document.getElementById('grafico6').getContext('2d');
+          const setores = data.disp_setor.map(item_setor => item_setor.setor);
+          const resultados_setor = data.disp_setor.map(item_setor => item_setor.disponibilidade_horas);
+
+          // gráfico disponibilidade por maquina
           chartDisponibilidadeMaquina = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -1521,8 +1521,80 @@
             }
           });
 
+          // gráfico disponibilidade por setor
+          chartDisponibilidadeSetor = new Chart(ctx_setor, {
+            type: 'bar',
+            data: {
+              labels: setores,
+              datasets: [{
+                label: 'Disponibilidade por setor',
+                data: resultados_setor,
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                borderWidth: 1
+              }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  left: 10,
+                  right: 25,
+                  top: 25,
+                  bottom: 0
+                }
+              },
+              scales: {
+                x: {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    maxTicksLimit: 6
+                  },
+                  maxBarThickness: 25,
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    min: 0,
+                    // max: arredondadoMaxValor2,
+                    maxTicksLimit: 10,
+                    padding: 10,
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2]
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+              },
+            }
+          });
+
           // Preencha a tabela
           preencherTabelaDisponibilidadeMaquina(data);
+          preencherTabelaDisponibilidadeSetor(data);
         })
         .catch(error => console.error('Erro ao carregar dados:', error));
     }
@@ -1534,16 +1606,16 @@
       var tabelaBody = $('#tabelaBody7');
 
       // Ordena os dados pelo resultado
-      data.resultados.sort((a, b) => a.disponibilidade - b.disponibilidade);
+      data.disp_maquinas.sort((a, b) => a.disponibilidade_horas - b.disponibilidade_horas);
 
       // Limpa o conteúdo atual da tabela
       tabelaBody.empty();
 
       // Itera sobre os dados e cria as linhas da tabela
-      $.each(data.resultados, function (index, row) {
+      $.each(data.disp_maquinas, function (index, row) {
         var newRow = $('<tr>');
-        newRow.append('<td>' + row.codigo_tratado + '</td>');
-        newRow.append('<td>' + row.disponibilidade.toFixed(2) * 100 + "%" + '</td>');
+        newRow.append('<td>' + row.codigo + '</td>');
+        newRow.append('<td>' + row.disponibilidade_horas.toFixed(2) * 100 + "%" + '</td>');
         tabelaBody.append(newRow);
       });
 
@@ -1556,10 +1628,38 @@
       });
     }
 
+    function preencherTabelaDisponibilidadeSetor(data) {
+      $('#dataTable8').DataTable().destroy();
+
+      var tabelaBody = $('#tabelaBody8');
+
+      // Ordena os dados pelo resultado
+      data.disp_setor.sort((a, b) => a.disponibilidade_horas - b.disponibilidade_horas);
+
+      // Limpa o conteúdo atual da tabela
+      tabelaBody.empty();
+
+      // Itera sobre os dados e cria as linhas da tabela
+      $.each(data.disp_setor, function (index, row) {
+        var newRow = $('<tr>');
+        newRow.append('<td>' + row.setor + '</td>');
+        newRow.append('<td>' + row.disponibilidade_horas.toFixed(2) * 100 + "%" + '</td>');
+        tabelaBody.append(newRow);
+      });
+
+      // Inicialize o DataTable após preencher a tabela
+      $('#dataTable8').DataTable({
+        order: [[1, 'asc']],
+        "info": false,
+        "aLengthMenu": [4, 10],
+        "iDisplayLength": 4
+      });
+    }
+
   </script>
 
   <!-- DISPONIBILIDADE POR SETOR -->
-  <script>
+  <!-- <script>
     let chartDisponibilidadeSetor;
 
     // Função para carregar os dados e criar o gráfico e a tabela
@@ -1699,7 +1799,7 @@
       });
     }
 
-  </script>
+  </script> -->
 
   <!-- HORAS TRABALHADOS POR TIPO DE MANUTENÇÃO -->
   <script>
@@ -2120,7 +2220,7 @@
         graficoMtbfSetor(selectedOptions, dataFiltro);
         graficoMtbfMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
         graficoDisponibilidadeMaquina(maquinasFavoritas, selectedOptions, dataFiltro);
-        graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro);
+        // graficoDisponibilidadeSetor(maquinasFavoritas, selectedOptions, dataFiltro);
 
       });
     });

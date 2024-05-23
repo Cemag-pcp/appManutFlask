@@ -25,6 +25,7 @@ from io import BytesIO
 import re
 import requests
 import copy
+import calendar
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -577,42 +578,6 @@ def cards_post(query):
 
     return lista_qt
 
-# def card_post_em_espera(query_em_espera):
-
-#     """
-#     Função para gerar dados de quantidade de os em aberto, em execução, aguardadno material e fechada.
-#     """
-
-#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-#                             password=DB_PASS, host=DB_HOST)
-
-#     cards = pd.read_sql_query(query_em_espera, conn)
-#     # cards = cards[cards['id_ordem'] == 837]
-
-#     # cards['status'] = cards['status'].fillna('Em espera')
-
-#     # cards[cards['id_ordem'] == 1185]
-
-#     # cards = cards.sort_values(by='n_ordem', ascending=True)
-
-#     # cards = cards.drop_duplicates(subset='id_ordem', keep='last')
-
-#     em_execucao = cards[cards['status_atualizado'] == 'Em espera'][['id_ordem', 'status_atualizado','n_ordem']]
-
-#     cards = cards.groupby(['status_atualizado'])['status_atualizado'].count()
-
-#     # Crie um dicionário para armazenar os resultados
-#     status_dict = {}
-#     for status, qt_os in cards.items():
-#         status_dict[status] = qt_os
-
-#     # Certifique-se de que todas as chaves estão presentes no dicionário, mesmo que com valor 0
-#     card_em_espera = [
-#         status_dict.get('Em espera', 0),
-#     ]
-
-#     return card_em_espera
-
 def tabela_maquinas():
 
     sql_tb_maquinas = """
@@ -1099,8 +1064,6 @@ def calculo_horas_trabalhadas_tipo():
         # Obtenha dados da solicitação POST
         data = request.get_json()
 
-        # dia_inicial = data['dia_inicial']
-        # dia_final = data['dia_final']
         data_filtro = data.get('data_filtro')
         setores_selecionados = data.get('setores_selecionados', [])
         maquinas_importante = data.get('maquinasFavoritas', [])
@@ -1542,6 +1505,224 @@ def calculo_disponibilidade_maquina_parada(data_filtro):
 
     except Exception as e:
         return ({'error': str(e)})
+
+def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None):
+
+    # parada1 = maquina parada desde a abertura da os
+    # parada2 = exec feita com maquina parada
+    # parada3 = ao finalizar a exec a maquina funcionou
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if maquina_importantes:
+        maquinas_filter = maquinas_importantes()
+    
+    # Criando o DataFrame
+    # df = pd.read_csv('ordens.csv')
+    query = """select 
+                to2.id_ordem,
+                to2.n_ordem,
+                split_part(to2.maquina,' - ',1) as maquina,
+                to2.setor,
+                to2.dataabertura - INTERVAL '6 hours' AS dataabertura,
+                to2.datainicio,
+                to2.horainicio,
+                to2.datafim,
+                to2.horafim,
+                to2.status,
+                tp.parada1,
+                tp.parada2,
+                tp.parada3
+            from public.tb_ordens to2
+            left join public.tb_paradas tp on to2.id_ordem = tp.id_ordem and to2.n_ordem = tp.n_ordem
+            where parada1 notnull and maquina != '' and maquina != 'ETE' and maquina != 'Telhado ' and maquina != 'Outros'
+            """
+
+    df = pd.read_sql_query(query, conn)
+
+    df = df.sort_values(by=['id_ordem', 'n_ordem'])
+    df['status_geral'] = ''
+
+    query_maquinas = """
+        select codigo,setor from public.tb_maquinas tm 
+    """
+
+    df_maquinas = pd.read_sql_query(query_maquinas, conn)
+
+    # Função para obter o status geral
+    def obter_status_geral(grupo):
+        # O status geral é o status do último registro de cada grupo
+        status_geral = grupo.iloc[-1]['status']
+        grupo['status_geral'] = status_geral
+        return grupo
+
+    # Aplicando a função ao DataFrame agrupado por 'ordem'
+    df = df.groupby('id_ordem').apply(obter_status_geral).reset_index(drop=True)
+    
+    # Convertendo colunas de data e hora para objetos datetime
+    # df['dataabertura'] = df['dataabertura'].apply(lambda x: x[:len(x)-10])
+    df['dataabertura'] = pd.to_datetime(df['dataabertura'], format='%Y-%m-%d %H:%M:%S').dt.tz_localize(None)
+
+    df['datainicio'] = df['datainicio'].astype(str)
+    df['horainicio'] = df['horainicio'].astype(str)
+    df['datainicio'] = pd.to_datetime(df['datainicio'] + ' ' + df['horainicio'], format='%Y-%m-%d %H:%M:%S')
+
+    df['datafim'] = df['datafim'].astype(str)
+    df['horafim'] = df['horafim'].astype(str)
+    df['datafim'] = pd.to_datetime(df['datafim'] + ' ' + df['horafim'], format='%Y-%m-%d %H:%M:%S')
+
+    df['parada1'] = df['parada1'].map({'true': True, 'false': False})
+    df['parada2'] = df['parada2'].map({'true': True, 'false': False})
+    df['parada3'] = df['parada3'].map({'true': True, 'false': False})
+
+    df['parada1'] = df['parada1'].astype(bool)
+    df['parada2'] = df['parada2'].astype(bool)
+    df['parada3'] = df['parada3'].astype(bool)
+
+    # Inicializa a coluna datafim_real com pd.NaT
+    # df['datafim_real'] = pd.NaT
+
+    def ultimo_dia_do_mes(ano, mes):
+        ultimo_dia = calendar.monthrange(ano, mes)[1]
+        return datetime(ano, mes, ultimo_dia)
+
+    novos_registros=[]
+
+    for i in range(len(df) - 1):
+        if df['id_ordem'][i] == df['id_ordem'][i + 1] and df['parada1'][i] and df['status'][i] != 'Finalizada':
+            if df['dataabertura'][i].month < df['datainicio'][i].month and df['n_ordem'][i] == 1:
+                
+                qnt_novos_registro = df['datainicio'][i].month - df['dataabertura'][i].month
+
+                for m in range(df['dataabertura'][i].month+1, df['dataabertura'][i].month+1 + qnt_novos_registro):
+                    
+                    ultimo_dia_mes = ultimo_dia_do_mes(df['datainicio'][i].year, m)
+
+                    if ultimo_dia_mes > datetime.now():
+                        ultimo_dia_mes = datetime.now()
+                   
+                    novo_registro = {
+                        'id_ordem': df['id_ordem'][i],  # Manter o mesmo id de ordem
+                        'n_ordem': df['n_ordem'][i],  # Manter o mesmo número de ordem
+                        'maquina': df['maquina'][i],  # Manter a mesma máquina
+                        'setor': df['setor'][i],  # Manter o mesmo setor
+                        'dataabertura': df['dataabertura'][i] ,
+                        'datainicio': datetime(df['datainicio'][i].year, m, 1),  # Primeiro dia do mês
+                        'datafim': ultimo_dia_mes,  # Último dia do mês
+                        'status': df['status'][i],
+                        'parada1':df['parada1'][i],
+                        'parada2':df['parada2'][i],
+                        'parada3':df['parada3'][i],
+                        'status_geral':df['status_geral'][i],
+                    }
+
+                    novos_registros.append(novo_registro)
+
+                ultimo_dia_mes = ultimo_dia_do_mes(df['dataabertura'][i].year, df['dataabertura'][i].month)
+                
+                df.at[i, 'datafim'] = ultimo_dia_mes
+                df.at[i, 'datainicio'] = df['dataabertura'][i]
+
+            elif df['datainicio'][i].month == df['datainicio'][i - 1].month:
+                df['datainicio'][i] = df['datafim'][i - 1]
+
+            elif df['dataabertura'][i].month < df['datainicio'][i].month:
+                df.at[i, 'datainicio'] = datetime(df['datainicio'][i].year,df['datainicio'][i].month,1) # 
+
+        elif i != 0:
+
+            if df['id_ordem'][i] == df['id_ordem'][i - 1] and df['parada1'][i] and df['status'][i] == 'Finalizada':
+                df.at[i, 'datainicio'] = df['datafim'][i - 1]
+
+            elif df['id_ordem'][i] == df['id_ordem'][i - 1]:
+                df.at[i, 'datainicio'] = df['datafim'][i - 1]
+                df.at[i, 'datafim'] = datetime.now()   
+            
+            elif df['parada1'][i] and df['status'][i] != 'Finalizada':
+                df.at[i, 'datafim'] = datetime.now()  
+
+    # Crie um DataFrame a partir da lista de novos registros
+    df_novos_registros = pd.DataFrame(novos_registros)
+
+    # Concatene o DataFrame original com o DataFrame dos novos registros
+    df = pd.concat([df, df_novos_registros], ignore_index=True)
+
+    # Função para calcular o tempo de parada dentro do horário de 7h às 17h
+    def calcular_tempo_parada(row, now):
+        if row['parada1'] and row['parada2']:
+            inicio = row['dataabertura']
+        elif row['parada1'] and not row['parada2']:
+            inicio = row['dataabertura']
+        elif not row['parada1'] and row['parada2']:
+            inicio = row['datainicio']
+        # elif not row['parada1'] and row['parada2']:
+        #     inicio = row['datainicio']
+        else:
+            return timedelta(0)
+
+        # Determina o fim do intervalo de tempo com base no status geral
+        # if row['status_geral'] == 'Finalizada':
+        fim = row['datafim']
+        # else:
+        #     fim = now
+
+        # Define os intervalos de trabalho
+        start_working_hour = 7
+        end_working_hour = 17
+
+        tempo_parada = timedelta(0)
+        current = inicio
+
+        while current < fim:
+            start_of_day = datetime.combine(current.date(), datetime.min.time()) + timedelta(hours=start_working_hour)
+            end_of_day = datetime.combine(current.date(), datetime.min.time()) + timedelta(hours=end_working_hour)
+
+            if current < start_of_day:
+                current = start_of_day
+            
+            if current < end_of_day:
+                end_current_period = min(fim, end_of_day)
+                tempo_parada += end_current_period - current
+
+            current = datetime.combine(current.date() + timedelta(days=1), datetime.min.time()) + timedelta(hours=start_working_hour)
+
+        return tempo_parada
+
+    # Aplicar a função ao DataFrame
+    now = datetime.now()
+    df['tempo_parada'] = df.apply(lambda row: calcular_tempo_parada(row, now), axis=1)
+    # filtro entra aqui
+    df_filtro = df[(df['datainicio']>datainicio) & (df['datainicio']<datafim)]
+
+    dias_uteis = dias_uteis_entre_datas(datainicio,datafim)
+
+    # Agrupando o tempo de parada total por ordem
+    tempo_parada_total_por_ordem = df_filtro.groupby('maquina')['tempo_parada'].sum().reset_index()
+
+    df_maquinas['horas_funcionamento_bom'] = 9*dias_uteis
+    
+    df_final = df_maquinas.merge(tempo_parada_total_por_ordem, how='left', right_on='maquina',left_on='codigo')
+    df_final['tempo_parada'] = df_final['tempo_parada'].fillna(timedelta(0))
+
+    df_final['tempo_parada_horas'] = df_final['tempo_parada'].dt.total_seconds() / 3600
+    df_final['disponibilidade_horas'] = 1 - (df_final['tempo_parada_horas'] / df_final['horas_funcionamento_bom'])
+    df_final['tempo_parada'] = df_final['tempo_parada'].dt.total_seconds() / 3600 
+
+    if maquina_importantes:
+        df_final = df_final[df_final['maquina'].isin(maquinas_filter)]
+    
+    if setor:
+        df_final = df_final[df_final['setor'].isin(setor)]
+
+    disp_maquinas = df_final.sort_values(by='disponibilidade_horas')[['codigo','setor','tempo_parada','disponibilidade_horas']]
+    disp_setor = disp_maquinas.groupby('setor')['disponibilidade_horas'].mean().reset_index()
+    
+    disp_maquinas_dict = disp_maquinas.to_dict(orient='records')
+    disp_setor_dict = disp_setor.to_dict(orient='records')
+
+    return disp_maquinas_dict,disp_setor_dict
 
 @routes_bp.route('/api/calculo_setor_parada', methods=['POST','GET'])
 def calculo_disponibilidade_setor_parada():
@@ -2016,6 +2197,59 @@ def disponibilidade_setor():
     # lista_resultado = sorted(lista_resultado, key=lambda x: x['disponibilidade'])
 
     return jsonify({'resultados': lista_resultado})
+
+@routes_bp.route('/api/disponibilidades', methods=['POST', 'GET'])
+def disponibilidades():
+    
+    data_get = request.get_json()
+    
+    data_filtro = data_get.get('data_filtro')
+    setores_selecionados = data_get.get('setores_selecionados', [])
+    maquinas_importante = data_get.get('maquinasFavoritas', [])
+
+    if data_filtro == '':
+        data_filtro = None
+    if len(setores_selecionados) == 0:
+        setores_selecionados = None
+
+    if data_filtro:
+    
+        # Divida a string com base no caractere "-"
+        datas = data_filtro.split(" - ")
+
+        dia_inicial = datetime.strptime(datas[0], "%d/%m/%Y").strftime("%Y-%m-%d")
+        dia_final = datetime.strptime(datas[1], "%d/%m/%Y").strftime("%Y-%m-%d")
+
+        disp_maquinas, disp_setor = disponibilidade_final(dia_inicial,dia_final,setores_selecionados,maquinas_importante)
+        
+        return jsonify({'disp_setor': disp_setor, 'disp_maquinas':disp_maquinas})
+    
+    else:
+
+        disp_maquinas, disp_setor = disponibilidade_historica(setores_selecionados,maquinas_importante)
+
+        return jsonify({'disp_setor': disp_setor, 'disp_maquinas':disp_maquinas})
+
+def disponibilidade_historica(setor=None,maquinas_importante=None):
+
+    df_historico_disponibilidade = pd.read_csv("disponibilidade_historico.csv", sep=";")
+    df_historico_disponibilidade['maquina'] = df_historico_disponibilidade['maquina'].apply(lambda x: x.split(" - ")[0])
+
+    if setor:
+        df_historico_disponibilidade = df_historico_disponibilidade[df_historico_disponibilidade['setor'].isin(setor)]
+            
+    if maquinas_importante:
+        df_historico_disponibilidade = df_historico_disponibilidade[df_historico_disponibilidade['maquina'].isin(maquinas_importantes())]
+
+    df_historico_disponibilidade['disponibilidade_historico_media'] = df_historico_disponibilidade['disponibilidade_historico_media'].apply(lambda x: float(x.replace(",",".").replace("%",""))/100)
+    df_historico_disponibilidade.rename(columns={"disponibilidade_historico_media": "disponibilidade_horas", "maquina": "codigo"}, inplace=True)
+    df_historico_disponibilidade_maquina = df_historico_disponibilidade[['codigo','disponibilidade_horas']].groupby('codigo').mean().reset_index()
+    df_historico_disponibilidade_setor = df_historico_disponibilidade[['setor','disponibilidade_horas']].groupby('setor').mean().reset_index()
+
+    disp_maquinas_dict = df_historico_disponibilidade_maquina.to_dict(orient='records')
+    disp_setor_dict = df_historico_disponibilidade_setor.to_dict(orient='records')
+
+    return disp_maquinas_dict,disp_setor_dict
 
 def formulario_os(id_ordem):
 
