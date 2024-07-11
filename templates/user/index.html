@@ -1218,10 +1218,12 @@
                 this.data()[7].toLowerCase().includes(aberturaFilterValue)
                 // this.data()[8].toLowerCase().includes(maquinaParadaFilterValue);
 
-            this.node().style.display = shouldDisplay ? '' : 'none';
+            // this.node().style.display = shouldDisplay ? '' : 'none';
         });
 
         let visibleRows = table.rows({ search: 'applied' }).data().toArray();
+
+        console.log(visibleRows)
 
         // Retorna os dados filtrados
         return visibleRows;

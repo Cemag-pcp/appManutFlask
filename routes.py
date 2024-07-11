@@ -5182,11 +5182,16 @@ def funcionarios():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if request.method == 'POST':
-        nome = request.form['nome']
-        matricula = request.form['matricula']
-        ativo = request.form['ativo']
-        salario = request.form['salario']
-        funcao = request.form['funcao']
+
+        data = request.get_json()
+
+        print(data)
+
+        nome = data['nome']
+        matricula = data['matricula']
+        ativo = data['ativo']
+        salario = data['salario']
+        funcao = data['funcao']
 
         print(nome, matricula, ativo, salario, funcao)
 
@@ -5195,25 +5200,19 @@ def funcionarios():
         funcionario_cadastrado = pd.read_sql_query(s, conn)
 
         if len(funcionario_cadastrado[funcionario_cadastrado['nome'] == nome]) > 0 or len(funcionario_cadastrado[funcionario_cadastrado['matricula'] == matricula]) > 0:
-            flash("Funcionário ja cadastrado", category='danger')
             print("Funcionário ja cadastrado")
+            return jsonify("Funcionário ja cadastrado")
         else:
-
-            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
             cur.execute("INSERT INTO tb_funcionario (nome, matricula, ativo, salario, funcao) VALUES (%s, %s, %s, %s,%s)",
                         (nome, matricula, ativo, salario, funcao))
-            print("Funcionário cadastrado com sucesso")
 
             conn.commit()
             conn.close()
 
-            flash("Funcionário cadastrado com sucesso", category='sucess')
-            return render_template('user/funcionarios.html')
+            print("Funcionário cadastrado com sucesso")
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        return jsonify("Funcionário cadastrado com sucesso")
 
     query = """SELECT * FROM tb_funcionario"""
 
@@ -5251,6 +5250,7 @@ def editar_funcionarios():
         cur.execute(query, (nome_novo, matricula, ativo,
                     salario, funcao, nome_antigo))
         conn.commit()
+        conn.close()
 
         return render_template("user/funcionarios.html")
 

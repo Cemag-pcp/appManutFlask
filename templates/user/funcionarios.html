@@ -1,83 +1,67 @@
 {% extends "user/layout.html" %}
-{% block body %}
 
-  {% with messages = get_flashed_messages()  %}
-  {% if messages %}
-  {% for message in messages %}
-  {% if message == 'Funcionário cadastrado com sucesso' %}
-  <div class="alert-success alert-dismissible fade show" id="alert_cadast_52" role="alert">
-    {{ message }}
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  {% else %}
-  <div class="alert alert-danger">
-    {{ message }}
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  {% endif %}
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-</div>
+{% block links %}
 
-<div class="col-md-4 offset-md-4">
-  <div id ="formulario_preventiva" class="card card-body">
-    
-    <div id = 'abertura_titulo' style="display: flex;justify-content: space-between;align-items: center; margin-bottom: 25px;">
-        <a href="#" onclick="window.history.back();" class="botao-voltar">
-          <i class="fas fa-arrow-left"></i>
-        </a>
-      <h5 style="font-size: 20px;">Cadastro de Funcionários</h5>
-      <button class="menu-button"><i class="fa-solid fa-bars"></i></button>
-    </div> 
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/mensagem.css') }}">
 
-    <form action="{{ url_for('routes.funcionarios') }}" method="POST" enctype="multipart/form-data">
-      <a onclick="showEditarFuncionarios()"><i class="fas fa-pencil" style="color: black; cursor: pointer;" title="Editar Funcionário"></i></a>
-      <div class="form-row">
-        <div class="form-group">
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-sm">
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <div class="row" style="display: flex; justify-content: space-between; align-items:flex-end;">
+        <h5 style="font-size: 20px;">Cadastro de Funcionários</h5>
+        <button class="btn btn-primary" onclick="showEditarFuncionarios()">Editar Funcionário</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-sm-6 mb-2">
           <label for="nome">Nome</label>
-          <input type="text" class="form-control" style="height: 38px;" name="nome" required>
+          <input type="text" id="nome_cadastrado" class="form-control" style="height: 38px;" name="nome" required>
         </div>
 
-        <div class="form-group">
+        <div class="col-sm-6 mb-2">
           <label for="matricula">Matrícula</label>
-          <input type="text" class="form-control" style="height: 38px;" name="matricula" required>
+          <input type="text" id="matricula_cadastrada" class="form-control" style="height: 38px;" name="matricula" required>
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">  
+      <div class="row">
+        <div class="col-sm-6 mb-2">  
           <label for="ativo">Em atividade?</label>              
-          <select class="form-control form-control" id="ativo" name="ativo" required>
+          <select class="form-control" id="ativo" name="ativo" required>
             <option value="" selected disabled hidden></option>  
             <option value="true">Sim</option>
             <option value="false">Não</option>
           </select>
         </div>
       
-        <div class="form-group">
+        <div class="col-sm-6 mb-2">
           <label for="salario">Salário</label>
-          <input type="number" class="form-control" style="height: 38px;" name="salario">
+          <input type="number" id="salario_cadastrado" class="form-control" style="height: 38px;" name="salario">
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="funcao">Função</label>
-        <input type="text" class="form-control" style="height: 38px;" name="funcao">
+      <div class="row">
+        <div class="col-sm-6 mb-2">
+          <label for="funcao">Função</label>
+          <input type="text" id="funcao_cadastrada" class="form-control" style="height: 38px;" name="funcao">
+        </div>
       </div>
-
-      <button id = 'salvar' class="btn btn-primary btn-block">
-        Inserir 
-      </button>
-    </form>
+  </div>
+  <div class="card-footer d-flex justify-content-end">
+    <button id='cadastrar_funcionario' class="btn btn-primary btn-block" style="width: 100px;">
+      Cadastrar 
+    </button>
   </div>
 </div>
 
-<div class="modal fade" id="funcionarioModal" tabindex="-1" role="dialog" aria-labelledby="funcionarioModalLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="funcionarioModal" tabindex="-1" role="dialog" aria-labelledby="modalEdicaoExecucaoLabel"
+aria-hidden="true">
   <div class="modal-dialog" role="document">
       <div class="modal-content">
           <div class="modal-header">
@@ -87,63 +71,83 @@
               </button>
           </div>
           <div class="modal-body">
-              <div class="form-group2">  
-                <label for="funci">Funcionários</label>              
-                <select class="form-control form-control" id="funcionario" name="funcionario" onchange="selectFuncionario()" required>
-                  <option value="" selected disabled hidden></option>  
-                  {% for funcionario in funci %}
-                  <option value="{{funcionario[1]}}">{{funcionario[1]}}</option>
-                  {% endfor %}
-                </select>
-                <div class="form-modal" style="display: none;">
-                  <div class="form-group" >
+              <div class="row">  
+                <div class="col-sm-12 mb-2">
+                  <label for="funci">Funcionários</label>              
+                  <select class="form-control" id="funcionario" name="funcionario" onchange="selectFuncionario()" required>
+                    <option value="" selected disabled hidden></option>  
+                    {% for funcionario in funci %}
+                    <option value="{{funcionario[1]}}">{{funcionario[1]}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="row">  
+                  <div class="col-sm-6 mb-2">
                     <label for="editar_nome">Nome</label>
                     <input type="text" class="form-control" style="height: 38px;" name="editar_nome" id="editar_nome" required>
                   </div>
           
-                  <div class="form-group">
+                  <div class="col-sm-6 mb-2">
                     <label for="editar_matricula">Matrícula</label>
-                    <input type="text" class="form-control" style="height: 38px;" name="editar_matricula" id="editar_matricula" required>
+                    <input type="number" class="form-control" style="height: 38px;" name="editar_matricula" id="editar_matricula" required>
                   </div>
+              </div>
+              <div class="row"> 
+                <div class="col-sm-6 mb-2">  
+                  <label for="editar_ativo">Em atividade?</label>              
+                  <select class="form-control form-control" id="editar_ativo" name="editar_ativo" id="editar_ativo" required>
+                    <option value="" selected disabled hidden></option>  
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                  </select>
                 </div>
-          
-                <div class="form-modal" style="display: none;">
-                  <div class="form-group">  
-                    <label for="editar_ativo">Em atividade?</label>              
-                    <select class="form-control form-control" id="editar_ativo" name="editar_ativo" id="editar_ativo" required>
-                      <option value="" selected disabled hidden></option>  
-                      <option value="true">Sim</option>
-                      <option value="false">Não</option>
-                    </select>
-                  </div>
-                
-                  <div class="form-group">
-                    <label for="editar_salario">Salário</label>
-                    <input type="number" class="form-control" style="height: 38px;" name="editar_salario" id="editar_salario" required>
-                  </div>
-                
-                <div class="form-group">
+              
+                <div class="col-sm-6 mb-2">
+                  <label for="editar_salario">Salário</label>
+                  <input type="number" class="form-control" style="height: 38px;" name="editar_salario" id="editar_salario" required>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 mb-2">
                   <label for="editar_funcao">Função</label>
                   <input type="text" class="form-control" style="height: 38px;" name="editar_funcao" id="editar_funcao" required>
                 </div>
-
-                <div>
-                  <button id="filtrar" onclick="getFuncionario()">Editar dados do Funcionário</button>
-                </div>
-
               </div>
-            </div>
           </div>
+          <div class="modal-footer">
+              <button class="btn btn-primary" id="filtrar" onclick="postFuncionario()">Editar dados do Funcionário</button>
+          </div>
+        </div>
+        </div>
       </div>
+  </div>
+
+
+<div id="mensagem"></div>
+<div><input style="display: none;" id="booleanCadastroMaquina"></div>
+
+<div class="loading" id="loading" style="display: none;">
+  <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Loading...</span>
   </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script de mensagem -->
+<script src="static/js/mensagem.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
 
 
 <script>
 
   function showEditarFuncionarios() {
-          showLoading()
+          $("#loading").show()
           $.ajax({
             success: function() {
                         
@@ -152,11 +156,11 @@
 
                 // Ocultar a tela de carregamento após um pequeno atraso (500 milissegundos)
                 setTimeout(function() {
-                    hideLoading(); // Esconde o indicador de carregamento
+                  $("#loading").hide()
                 }, 10);
             },
             error: function(error) {
-                hideLoading();
+                $("#loading").hide()
                 alert('Essa Ordem de Serviço não contém imagem ou vídeo');
                 console.log(error);
             }
@@ -166,8 +170,8 @@
 
 <script>
 
-function getFuncionario() {
-    showLoading();
+function postFuncionario() {
+    $("#loading").show();
     var funcionarioSelecionado = $('#funcionario').val();
     var nome = $('#editar_nome').val();
     var matricula = $('#editar_matricula').val();
@@ -176,6 +180,13 @@ function getFuncionario() {
     var funcao = $('#editar_funcao').val();
     
     var nome_antigo = funcionarioSelecionado;
+
+    if(funcionarioSelecionado === null || nome === "" || matricula === "" || ativo === null || salario === "" || funcao === "") {
+        alert("Preencha todos os campos")
+        $("#loading").hide();
+        return 
+    }
+
     $.ajax({
         url: '/editar_funcionarios',
         method: 'POST',
@@ -200,17 +211,55 @@ function getFuncionario() {
           window.location.reload();
           // faça o processamento necessário para atualizar o DataFrame na página
 
-          hideLoading(); // Oculta o overlay após atualizar os dados
+          $("#loading").hide();
         },
         error: function(error) {
           console.log(error);
-          $("#loading-overlay").hide(); // Oculta o overlay após atualizar os dados
+          $("#loading").hide();
         }
       });
 }
 
+$("#cadastrar_funcionario").on('click',function(){
+
+  $("#loading").show();
+  let nome_cadastrado = $("#nome_cadastrado").val()
+  let matricula_cadastrada = $("#matricula_cadastrada").val()
+  let ativo = $("#ativo").val()
+  let funcao_cadastrada = $("#funcao_cadastrada").val()
+  let salario_cadastrado = $("#salario_cadastrado").val()
+
+  if(ativo === null || nome_cadastrado === "" || matricula_cadastrada === "" || funcao_cadastrada === "" || salario_cadastrado === "") {
+      alert("Preencha todos os campos")
+      $("#loading").hide();
+      return 
+  }
+
+  $.ajax({
+      url: "/funcionarios", // Endpoint no servidor para obter dados do funcionário
+      method: "POST",
+      contentType: "application/json", // Define o tipo de conteúdo como JSON
+      data: JSON.stringify({
+        nome: nome_cadastrado,
+        matricula: matricula_cadastrada,
+        ativo: ativo,
+        funcao: funcao_cadastrada,
+        salario: salario_cadastrado
+      }), 
+    success: function(response) {
+      $("#loading").hide();
+      console.log(response);
+      location.reload()
+    },
+    error: function(error) {
+      console.error("Erro ao obter dados do funcionário:", error);
+      $("#loading").hide();
+    }
+  });
+})
+
 function selectFuncionario() {
-    showLoading();
+    $("#loading").show();
     var nome = $('#editar_nome').val();
     var matricula = $('#editar_matricula').val();
     var ativo = $('#editar_ativo').val();
@@ -243,7 +292,7 @@ function selectFuncionario() {
       document.getElementById("editar_ativo").value = data[2];
       document.getElementById("editar_salario").value = data[3];
       document.getElementById("editar_funcao").value = data[4];
-      hideLoading();
+      $("#loading").hide();
     },
     error: function(error) {
       console.error("Erro ao obter dados do funcionário:", error);
