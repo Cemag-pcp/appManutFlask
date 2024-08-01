@@ -361,6 +361,26 @@ def ultimo_dia_mes(mes):
 
     return ultimo_dia_do_mes_com_hora
 
+def ajustar_horas_trabalho(row):
+    inicio = row['hinicial'].replace(tzinfo=None)  # Remove timezone information
+    fim = row['hfinal'].replace(tzinfo=None)  # Remove timezone information
+
+    # Calcular a diferença entre 'inicio' e 'datafim'
+    diferenca = fim - inicio
+
+    # Obter a quantidade de dias e segundos totais
+    dias = diferenca.days
+    segundos = diferenca.total_seconds()
+
+    # Calcular horas baseadas nos dias
+    days_hours = dias * 10
+
+    # Converter os segundos restantes em horas
+    additional_hours = segundos / 3600
+    # Ajustar o additional_hours para ser no máximo 10 horas
+    additional_hours = min(additional_hours, 10)
+
+    return days_hours + additional_hours
 
 def dias_uteis(meses):
 
@@ -757,104 +777,87 @@ def calculo_mtbf_maquina():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+
 @routes_bp.route('/api/calculo_mtbf_setor', methods=['POST','GET'])
 def calculo_mtbf_setor():
 
     try:
         # Obtenha dados da solicitação POST
         data = request.get_json()
-
-        # dia_inicial = data.get('dia_inicial')
-        # dia_final = data.get('dia_final')
         data_filtro = data.get('data_filtro')
         setores_selecionados = data.get('setores_selecionados', [])
 
-        query_mtbf = """
-                SELECT
-                    setor,
-                    COUNT(*) AS quantidade_setor,
-                    SUM(duracao_total_em_horas) AS duracao_total_em_horas
-                FROM (
-                    SELECT DISTINCT
-                        t1.setor,
-                        CASE 
-                            WHEN t1.maquina_parada = 'true' OR t2.parada3 = 'true' THEN 
-                                EXTRACT(EPOCH FROM 
-                                    TO_TIMESTAMP(COALESCE(t1.datafim, t1.dataabertura::date) || ' ' || COALESCE(t1.horafim::text, TO_CHAR(t1.dataabertura::timestamp, 'HH24:MI')), 'YYYY-MM-DD HH24:MI') -
-                                    TO_TIMESTAMP(COALESCE(t1.datainicio, t1.dataabertura::date) || ' ' || COALESCE(t1.horainicio::text, TO_CHAR(t1.dataabertura::timestamp, 'HH24:MI')), 'YYYY-MM-DD HH24:MI')) / 3600 
-                            ELSE 0
-                        END AS duracao_total_em_horas
-                    FROM
-                        tb_ordens AS t1
-                    LEFT JOIN
-                        tb_paradas AS t2 ON t1.id_ordem = t2.id_ordem AND t1.n_ordem = t2.n_ordem
-                    WHERE
-                    (t1.maquina_parada = 'true' OR t2.parada3 = 'true') AND
-                    (t1.datainicio BETWEEN %s AND %s) AND
-                    (ordem_excluida isnull) AND NOT maquina = 'ETE'
-                ) AS subquery
-                where 1=1
-            """
-
         if data_filtro:
-            # Divida a string com base no caractere "-"
             datas = data_filtro.split(" - ")
-
             dia_inicial = datetime.strptime(datas[0], "%d/%m/%Y").strftime("%Y-%m-%d")
             dia_final = datetime.strptime(datas[1], "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             dia_inicial = '2023-01-06'
             dia_final = datetime.now().date().strftime('%Y-%m-%d')
 
+        nova_query_mtbf = """
+            SELECT DISTINCT
+                t1.setor,
+                TO_TIMESTAMP(COALESCE(t1.datafim, t1.dataabertura::date) || ' ' || COALESCE(t1.horafim::text, TO_CHAR(t1.dataabertura::timestamp, 'HH24:MI')), 'YYYY-MM-DD HH24:MI') AS hfinal,
+                TO_TIMESTAMP(COALESCE(t1.datainicio, t1.dataabertura::date) || ' ' || COALESCE(t1.horainicio::text, TO_CHAR(t1.dataabertura::timestamp, 'HH24:MI')), 'YYYY-MM-DD HH24:MI') AS hinicial
+            FROM
+                tb_ordens AS t1
+            LEFT JOIN
+                tb_paradas AS t2 ON t1.id_ordem = t2.id_ordem AND t1.n_ordem = t2.n_ordem
+            WHERE
+                (t1.maquina_parada = 'true' OR t2.parada3 = 'true') AND
+                (t1.datainicio BETWEEN %s AND %s) AND
+                (ordem_excluida IS NULL) AND NOT maquina = 'ETE'
+        """
+
         if setores_selecionados:
-
-            # setores_selecionados = json.loads(data["setores_selecionados"])
-
-            setores_selecionados = [setor.strip() for setor in setores_selecionados]
-            setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")" if setores_selecionados else "()"
-
-            query_mtbf += f' and setor in {setores_selecionados_lista}'
-
-        query_mtbf += ' GROUP BY setor;'
-
-        conn = None
-        resultado_mtbf_setor = []
-
+            setores_selecionados_lista = "(" + ", ".join(f"'{setor}'" for setor in setores_selecionados) + ")"
+            nova_query_mtbf += f' AND setor IN {setores_selecionados_lista}'
         try:
             conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(nova_query_mtbf, (dia_inicial, dia_final))
+            df = pd.DataFrame(cur.fetchall())
+
+            print(df)
+
+            # Ajustar as horas de trabalho
+            df = df.rename(columns={0: 'setor', 1: 'hfinal',2: 'hinicial'})
+
+            df['duracao_total_em_horas'] = df.apply(ajustar_horas_trabalho, axis=1)
+
+            # Calcular total de horas trabalhadas e quantidade de ordens por setor
+            resultado_mtbf_setor = df.groupby('setor').agg(
+                quantidade_setor=('duracao_total_em_horas', 'size'),
+                duracao_total_em_horas=('duracao_total_em_horas', 'sum')
+            ).reset_index()
 
             horas_trabalhadas_otimo = dias_uteis_entre_datas(dia_inicial, dia_final) * 10
-            cur.execute(query_mtbf, (dia_inicial, dia_final))
-            mtbf_setor = cur.fetchall()
-
-            # Processar resultados conforme necessário
-            for setor, qt_execucao, valor_decimal in mtbf_setor:
-                if valor_decimal is not None:
-                    resultado = round((horas_trabalhadas_otimo - float(valor_decimal)) / qt_execucao, 2)
-                    resultado_mtbf_setor.append({'setor': setor, 'resultado_mtbf': resultado, 'qt_execucao': qt_execucao})
-                else:
-                    resultado_mtbf_setor.append({'setor': setor, 'resultado_mtbf': None, 'qt_execucao': None})
+            resultado_mtbf_setor['resultado_mtbf'] = resultado_mtbf_setor.apply(
+                lambda row: round((horas_trabalhadas_otimo - row['duracao_total_em_horas']) / row['quantidade_setor'], 2) 
+                if row['quantidade_setor'] > 0 else None, axis=1
+            )
 
             if not data_filtro:
-
                 df_historico_mtbf = pd.read_csv("mtbf_historico.csv", sep=";")
                 df_historico_mtbf['resultado_mtbf'] = pd.to_timedelta(df_historico_mtbf['historico_mtbf']).dt.total_seconds() / 3600
-                
+
                 if setores_selecionados:
                     setores_selecionados = [setor.strip() for setor in setores_selecionados]
                     df_historico_mtbf = df_historico_mtbf[df_historico_mtbf['setor'].isin(setores_selecionados)]
-                
-                df_historico_mtbf = df_historico_mtbf[['setor','resultado_mtbf']]
-                
-                resultado_mtbf_setor = pd.DataFrame(resultado_mtbf_setor)
-                join_df = pd.concat([resultado_mtbf_setor,df_historico_mtbf], ignore_index=True)
+
+                df_historico_mtbf = df_historico_mtbf[['setor', 'resultado_mtbf']]
+
+                resultado_mtbf_setor_df = pd.DataFrame(resultado_mtbf_setor)
+                join_df = pd.concat([resultado_mtbf_setor_df, df_historico_mtbf], ignore_index=True)
                 join_df = join_df.groupby('setor').agg({
                     'resultado_mtbf': 'mean',
                 }).reset_index()
 
                 resultado_mtbf_setor = join_df.to_dict(orient='records')
-            
+            else:
+                resultado_mtbf_setor = resultado_mtbf_setor.to_dict(orient='records')
+
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -863,9 +866,8 @@ def calculo_mtbf_setor():
                 conn.close()
 
         return jsonify({'resultados': resultado_mtbf_setor})
-
     except Exception as e:
-        return jsonify({'error': str(e)})
+            return jsonify({'error': str(e)})
 
 @routes_bp.route('/api/calculo_mttr_maquina', methods=['POST', 'GET'])
 def calculo_mttr_maquina():
