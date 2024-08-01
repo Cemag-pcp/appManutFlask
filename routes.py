@@ -769,15 +769,13 @@ def calculo_mtbf_setor():
         data_filtro = data.get('data_filtro')
         setores_selecionados = data.get('setores_selecionados', [])
 
-        print(data)
-
         query_mtbf = """
                 SELECT
                     setor,
                     COUNT(*) AS quantidade_setor,
                     SUM(duracao_total_em_horas) AS duracao_total_em_horas
                 FROM (
-                    SELECT
+                    SELECT DISTINCT
                         t1.setor,
                         CASE 
                             WHEN t1.maquina_parada = 'true' OR t2.parada3 = 'true' THEN 
@@ -793,7 +791,7 @@ def calculo_mtbf_setor():
                     WHERE
                     (t1.maquina_parada = 'true' OR t2.parada3 = 'true') AND
                     (t1.datainicio BETWEEN %s AND %s) AND
-                    (ordem_excluida isnull)
+                    (ordem_excluida isnull) AND NOT maquina = 'ETE'
                 ) AS subquery
                 where 1=1
             """
@@ -826,7 +824,7 @@ def calculo_mtbf_setor():
             conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-            horas_trabalhadas_otimo = dias_uteis_entre_datas(dia_inicial, dia_final) * 9
+            horas_trabalhadas_otimo = dias_uteis_entre_datas(dia_inicial, dia_final) * 10
             cur.execute(query_mtbf, (dia_inicial, dia_final))
             mtbf_setor = cur.fetchall()
 
@@ -1537,7 +1535,7 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
                 tp.parada3
             from public.tb_ordens to2
             left join public.tb_paradas tp on to2.id_ordem = tp.id_ordem and to2.n_ordem = tp.n_ordem
-            where parada1 notnull and maquina != '' and maquina != 'ETE' and maquina != 'Telhado ' and maquina != 'Outros'
+            where data1 >= '2024-05-14' AND parada1 notnull and maquina != '' and maquina != 'ETE' and maquina != 'Telhado ' and maquina != 'Outros'
             """
 
     df = pd.read_sql_query(query, conn)
@@ -1621,28 +1619,28 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
                     novos_registros.append(novo_registro)
 
                 ultimo_dia_mes = ultimo_dia_do_mes(df['dataabertura'][i].year, df['dataabertura'][i].month)
-                
                 df.at[i, 'datafim'] = ultimo_dia_mes
                 df.at[i, 'datainicio'] = df['dataabertura'][i]
-
             elif df['datainicio'][i].month == df['datainicio'][i - 1].month:
                 df['datainicio'][i] = df['datafim'][i - 1]
 
             elif df['dataabertura'][i].month < df['datainicio'][i].month:
                 df.at[i, 'datainicio'] = datetime(df['datainicio'][i].year,df['datainicio'][i].month,1) # 
 
-        elif i != 0:
+        elif i != 0 or len(df) == 1:
 
             if df['id_ordem'][i] == df['id_ordem'][i - 1] and df['parada1'][i] and df['status'][i] == 'Finalizada':
+                df.at[i, 'datainicio'] = df['datafim'][i - 1]
+            elif df['id_ordem'][i] == df['id_ordem'][i - 1] and df['parada3'][i]:
                 df.at[i, 'datainicio'] = df['datafim'][i - 1]
 
             elif df['id_ordem'][i] == df['id_ordem'][i - 1]:
                 df.at[i, 'datainicio'] = df['datafim'][i - 1]
                 df.at[i, 'datafim'] = datetime.now()   
-            
-            elif df['parada1'][i] and df['status'][i] != 'Finalizada':
+            elif not df['parada3'][i] and df['status'][i] != 'Finalizada':
                 df.at[i, 'datafim'] = datetime.now()  
 
+    
     # Crie um DataFrame a partir da lista de novos registros
     df_novos_registros = pd.DataFrame(novos_registros)
 
@@ -1651,9 +1649,13 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
 
     # Função para calcular o tempo de parada dentro do horário de 7h às 17h
     def calcular_tempo_parada(row, now):
-        if row['parada1'] and row['parada2']:
-            inicio = row['dataabertura']
-        elif row['parada1'] and not row['parada2']:
+        if row['parada1'] and row['parada2'] and row.name != 0:
+            if row['id_ordem'] == df.loc[row.name - 1, 'id_ordem']:
+                inicio = df.loc[row.name - 1, 'datafim']
+            else:
+                inicio = row['dataabertura']
+                # return timedelta(0)
+        elif row['parada1'] and row['parada2']:
             inicio = row['dataabertura']
         elif not row['parada1'] and row['parada2']:
             inicio = row['datainicio']
@@ -1687,13 +1689,25 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
                 tempo_parada += end_current_period - current
 
             current = datetime.combine(current.date() + timedelta(days=1), datetime.min.time()) + timedelta(hours=start_working_hour)
+        
 
         return tempo_parada
+    
+    def calculate_tempo_parada_horas(td):
+        # Obtenha os dias multiplicados por 10
+        days_hours = td.days * 10
+        # Converta os segundos em horas
+        additional_hours = td.seconds / 3600
+        # Ajuste o additional_hours para ser no máximo 10
+        additional_hours = min(additional_hours, 10)
+
+        return days_hours + additional_hours 
 
     # Aplicar a função ao DataFrame
     now = datetime.now()
     df['tempo_parada'] = df.apply(lambda row: calcular_tempo_parada(row, now), axis=1)
     # filtro entra aqui
+
     df_filtro = df[(df['datainicio']>datainicio) & (df['datainicio']<datafim)]
 
     dias_uteis = dias_uteis_entre_datas(datainicio,datafim)
@@ -1701,20 +1715,23 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
     # Agrupando o tempo de parada total por ordem
     tempo_parada_total_por_ordem = df_filtro.groupby('maquina')['tempo_parada'].sum().reset_index()
 
-    df_maquinas['horas_funcionamento_bom'] = 9*dias_uteis
+    df_maquinas['horas_funcionamento_bom'] = 10*dias_uteis
     
     df_final = df_maquinas.merge(tempo_parada_total_por_ordem, how='left', right_on='maquina',left_on='codigo')
     df_final['tempo_parada'] = df_final['tempo_parada'].fillna(timedelta(0))
 
-    df_final['tempo_parada_horas'] = df_final['tempo_parada'].dt.total_seconds() / 3600
+    # df_final['tempo_parada_horas'] = df_final['tempo_parada'].dt.total_seconds() / 3600
+    df_final['tempo_parada_horas'] = df_final['tempo_parada'].apply(calculate_tempo_parada_horas)
     df_final['disponibilidade_horas'] = 1 - (df_final['tempo_parada_horas'] / df_final['horas_funcionamento_bom'])
-    df_final['tempo_parada'] = df_final['tempo_parada'].dt.total_seconds() / 3600 
+    df_final['tempo_parada'] = df_final['tempo_parada'].apply(calculate_tempo_parada_horas)
 
     if maquina_importantes:
         df_final = df_final[df_final['maquina'].isin(maquinas_filter)]
     
     if setor:
         df_final = df_final[df_final['setor'].isin(setor)]
+    
+    df_final = df_final.drop_duplicates(subset=['maquina', 'setor'], keep='first')
 
     disp_maquinas = df_final.sort_values(by='disponibilidade_horas')[['codigo','setor','tempo_parada','disponibilidade_horas']]
     disp_setor = disp_maquinas.groupby('setor')['disponibilidade_horas'].mean().reset_index()
@@ -3897,8 +3914,11 @@ def timeline_os():
         totalCusto = df_final['proporcional'].sum().round(2).tolist()
 
         df_final = df_final.iloc[:, 1:]
+        
+        print(df_final)
 
         df_final = df_final.values.tolist()
+
 
         return jsonify (id_ordem, df_final, totalMinutos, totalCusto)
     else:
