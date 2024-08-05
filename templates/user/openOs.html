@@ -39,10 +39,15 @@
             <!-- <div class="card mx-auto text-center o-hidden border-0 shadow-lg my-5"> -->
             <div class="card mx-auto o-hidden border-0 shadow-lg my-5">
                 <form id="formularioEnviarOs" method="POST" action="{{url_for('routes.abrir_os')}}" enctype="multipart/form-data">
-                    <div class="card-header text-center">
-                        <h1 class="h4 text-gray-900">Abertura de OS</h1>
-                        <a href="#" data-toggle="modal" data-target="#informativo">
-                            <i class="fas fa-question-circle"></i>
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="d-flex" style="gap: 10px;">
+                            <h1 class="h4 text-gray-900">Abertura de OS</h1>
+                            <a href="#" data-toggle="modal" data-target="#informativo">
+                                <i class="fas fa-question-circle"></i>
+                            </a>
+                        </div>
+                        <a href="/global" class="font-weight-bold text-secondary" style="text-decoration: none;">
+                            Visualizar OS's
                         </a>
                     </div>
                     <div class="card-body p-0">

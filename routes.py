@@ -2652,16 +2652,13 @@ def Index():  # Página inicial (Página com a lista de ordens de serviço)
 
     df = df[df['ordem_excluida'] != True].reset_index(drop=True)
 
+    # Em seguida, preenchemos valores de cima para baixo (forward fill)
+    df['maquina_parada'] = df.groupby('id_ordem')['maquina_parada'].ffill()
+
+    # Depois, preenchemos valores de baixo para cima (backward fill)
+    df['maquina_parada'] = df.groupby('id_ordem')['maquina_parada'].bfill()
+
     df.fillna('', inplace=True)
-
-    for i in range(len(df)-1, 0, -1):
-        if df['id_ordem'][i] == df['id_ordem'][i-1]:
-            if df['maquina_parada'][i-1] == '':
-                df['maquina_parada'][i-1] = df['maquina_parada'][i]
-
-    for i in range(1, len(df)):
-        if df['id_ordem'][i-1] == df['id_ordem'][i]:
-            df['maquina_parada'][i] = df['maquina_parada'][i-1]
 
     df = df.sort_values(by='n_ordem')
 
@@ -3730,6 +3727,91 @@ def open_os():  # Página de abrir OS
 
     return render_template("user/openOs.html", solicitantes=nomes_solicitantes)
 
+@routes_bp.route('/global', methods=['GET'])
+def plan_global():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    s = (""" SELECT DISTINCT t10.*, tc.confirmacao,tc.data_atual FROM (
+                SELECT * FROM (
+                select DISTINCT t7.*, t8.id_ordem as contem_imagem
+                    FROM (
+                        select t5.*, t6.id_ordem as contem_video
+                        FROM(
+                            select t3.*, t4.parada1,t4.parada2,t4.parada3
+                            FROM(
+                                SELECT DISTINCT t1.total, t2.* 
+                                FROM (
+                                    SELECT tb_carrinho.id_ordem, SUM(tb_material.valor * tb_carrinho.quantidade) AS total
+                                    FROM tb_carrinho
+                                    JOIN tb_material ON tb_carrinho.codigo = tb_material.codigo
+                                    GROUP BY tb_carrinho.id_ordem
+                                    ) t1
+                                RIGHT JOIN tb_ordens t2 ON t1.id_ordem = t2.id_ordem
+                            ) as t3
+                            LEFT JOIN tb_paradas t4 ON t3.id_ordem = t4.id_ordem
+                            ORDER BY t3.id_ordem
+                        ) as t5
+                        LEFT JOIN tb_videos_ordem_servico t6 on t5.id_ordem = t6.id_ordem
+                        ) as t7
+                    LEFT JOIN tb_imagens t8 on t7.id_ordem = t8.id_ordem)  as t9
+                    LEFT JOIN tb_planejamento_anual AS tpa ON t9.maquina LIKE '%' || tpa.codigo || '%') AS t10
+                    LEFT JOIN tb_confirmacao as tc ON t10.id_ordem = tc.id_ordem AND t10.n_ordem = tc.n_ordem
+                    WHERE ordem_excluida IS NOT true
+         """)
+
+    df = pd.read_sql_query(s, conn)
+    df = df.sort_values(by='id_ordem').reset_index(drop=True)
+
+    # Em seguida, preenchemos valores de cima para baixo (forward fill)
+    df['maquina_parada'] = df.groupby('id_ordem')['maquina_parada'].ffill()
+
+    # Depois, preenchemos valores de baixo para cima (backward fill)
+    df['maquina_parada'] = df.groupby('id_ordem')['maquina_parada'].bfill()
+
+    df.fillna('', inplace=True)
+
+    df = df.sort_values(by='n_ordem')
+
+    df.reset_index(drop=True, inplace=True)
+    df.replace(np.nan, '', inplace=True)
+
+    df['dataabertura'] = df['dataabertura'].fillna(method='ffill')
+    df['dataabertura'] = df['dataabertura'].replace('', method='ffill')
+
+    df = df.drop_duplicates(subset=['id_ordem'], keep='last')
+    df = df.sort_values(by='id_ordem')
+    df.reset_index(drop=True, inplace=True)
+
+    for i in range(len(df)):
+        if df['total'][i] == '':
+            df['total'][i] = 0
+
+    df = df.sort_values('ultima_atualizacao', ascending=False)
+
+    df['ultima_atualizacao'] = pd.to_datetime(df['ultima_atualizacao'])
+    df['ultima_atualizacao'] = df['ultima_atualizacao'] - timedelta(hours=3)
+    df['ultima_atualizacao'] = df['ultima_atualizacao'].dt.strftime(
+        "%Y-%m-%d %H:%M:%S")
+    
+    # .dt.strftime("%d/%m/%Y")
+
+    df.reset_index(drop=True, inplace=True)
+
+    for i in range(len(df)):
+        if df['status'][i] == 'Finalizada' or df['parada1'][i] == 'false' or df['maquina_parada'][i] == '':
+            df['maquina_parada'][i] = False
+        try:
+            if df['dataabertura'][i].strftime('%H:%M') == '03:00':
+                df['dataabertura'][i] = df['ultima_atualizacao'][i]
+        except:
+            pass
+
+    list_users = df.values.tolist()
+
+    return render_template('user/global.html',list_users=list_users)
 
 @login_required
 @routes_bp.route('/maquinas/<setor>')

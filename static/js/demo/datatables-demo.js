@@ -113,5 +113,4 @@ $(document).ready(function() {
     "aLengthMenu": [10,20,30,50],
     "iDisplayLength": 10
   });
-  
 });
