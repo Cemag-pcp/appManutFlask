@@ -3832,7 +3832,7 @@ def filtro_maquinas(setor):
         """
     else:
         query = """
-            SELECT concat (codigo, ' - ', descricao) FROM tb_maquinas
+            SELECT DISTINCT concat (codigo, ' - ', descricao) FROM tb_maquinas
             WHERE setor = %s
             """
 
