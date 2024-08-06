@@ -819,8 +819,6 @@ def calculo_mtbf_setor():
             cur.execute(nova_query_mtbf, (dia_inicial, dia_final))
             df = pd.DataFrame(cur.fetchall())
 
-            print(df)
-
             # Ajustar as horas de trabalho
             df = df.rename(columns={0: 'setor', 1: 'hfinal',2: 'hinicial'})
 
@@ -1655,7 +1653,13 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
             if row['id_ordem'] == df.loc[row.name - 1, 'id_ordem']:
                 inicio = df.loc[row.name - 1, 'datafim']
             else:
-                inicio = row['dataabertura']
+                if row['maquina'] == 'SO-MS-LINCOLN':
+                    print(row['dataabertura'].month)
+                    print(row['datainicio'].month)
+                if row['dataabertura'].month != row['datainicio'].month or (row['datainicio'].month - row['dataabertura'].month) > 1:
+                    inicio = row['datainicio']
+                else:
+                    inicio = row['dataabertura']
                 # return timedelta(0)
         elif row['parada1'] and row['parada2']:
             inicio = row['dataabertura']
@@ -1721,6 +1725,10 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
     
     df_final = df_maquinas.merge(tempo_parada_total_por_ordem, how='left', right_on='maquina',left_on='codigo')
     df_final['tempo_parada'] = df_final['tempo_parada'].fillna(timedelta(0))
+
+    resultado = df_final.loc[df_final['codigo'] == 'SO-MS-LINCOLN']
+
+    print(resultado)
 
     # df_final['tempo_parada_horas'] = df_final['tempo_parada'].dt.total_seconds() / 3600
     df_final['tempo_parada_horas'] = df_final['tempo_parada'].apply(calculate_tempo_parada_horas)

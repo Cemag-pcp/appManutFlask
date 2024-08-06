@@ -1542,6 +1542,15 @@
         var divExecMaqParada = document.getElementById('linhaExecucaoFeitaMaquinaParada');
         var divAposExecMaqParada = document.getElementById('linhaAposExecucao');
 
+        var divlinhaLimpezaLocal = document.getElementById('linhaLimpezaLocal')
+        var limpeza_local = document.getElementById('limpeza-local')
+
+        var divlinhaProtecoes = document.getElementById('linhaProtecoes')
+        var protecao_local = document.getElementById('protecao-local')
+
+        var divlinhaFuncionalidadeEquipamento = document.getElementById('linhaFuncionalidadeEquipamento')
+        var funcionalidade_equipamento = document.getElementById('funcionalidade-equipamento')
+
         var radioAposExeMaqParadaSim = document.getElementById('apos-exec-maq-parada-1');
         var radioAposExeMaqParadaNao = document.getElementById('apos-exec-maq-parada-2');
         var radioMaqRealParadaNao = document.getElementById('maq-real-parada-2');
@@ -1567,7 +1576,10 @@
         if (status === 'Finalizada' && (maquinaValue !== 'ETE' && maquinaValue !== 'Outros')) {
 
             radioAposExeMaqParadaSim.checked = true;
-            radioAposExeMaqParadaNao.disabled = true;   
+            radioAposExeMaqParadaNao.disabled = true;
+            divlinhaLimpezaLocal.style.display = 'block'   
+            divlinhaProtecoes.style.display = 'block'   
+            divlinhaFuncionalidadeEquipamento.style.display = 'block'   
 
         } else if (maquinaValue === 'ETE' || maquinaValue === 'Outros') {
 
@@ -1586,6 +1598,14 @@
             radioExecMaqParadaSim.checked = false;
             radioExecMaqParadaSim.disabled = false;  
 
+            divlinhaLimpezaLocal.style.display = 'none'   
+            divlinhaProtecoes.style.display = 'none'   
+            divlinhaFuncionalidadeEquipamento.style.display = 'none'  
+
+            limpeza_local.checked = false
+            protecao_local.checked = false
+            funcionalidade_equipamento.checked = false
+
         } else {
 
             radioAposExeMaqParadaSim.checked = false;
@@ -1602,6 +1622,14 @@
             radioExecMaqParadaNao.disabled = false;
             radioExecMaqParadaSim.checked = false;
             radioExecMaqParadaSim.disabled = false;
+
+            divlinhaLimpezaLocal.style.display = 'none'   
+            divlinhaProtecoes.style.display = 'none'   
+            divlinhaFuncionalidadeEquipamento.style.display = 'none' 
+
+            limpeza_local.checked = false
+            protecao_local.checked = false
+            funcionalidade_equipamento.checked = false
 
         };
 
