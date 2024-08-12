@@ -1238,20 +1238,6 @@
     var statusFilter = document.getElementById('status-filter');
     var naturezaFilter = document.getElementById('natureza-filter');
     var aberturaFilter = document.getElementById('abertura-filter');
-    // var maquinaParadaFilter = document.getElementById('maquina-parada-filter');
-
-    // Função para preencher o filtro de execução com valores únicos
-    function populateExecucaoFilter() {
-        var options = Array.from(new Set(Array.from(document.querySelectorAll('#execucao-filter option')).map(option => option.value)));
-        var sortedValues = sortUniqueValues(options);
-
-        var nonEmptyValues = sortedValues.filter(value => value !== "");
-
-        execucaoFilter.innerHTML = '<option value="">Todos</option>';
-        nonEmptyValues.forEach(value => {
-            execucaoFilter.innerHTML += `<option value="${value}">${value}</option>`;
-        });
-    }
 
     // Adiciona event listeners para detectar mudanças nos filtros
     osFilter.addEventListener('input', applyFilters);
@@ -1266,26 +1252,6 @@
 
     // Chama a função applyFilters inicialmente para exibir a tabela completa
     applyFilters();
-    populateExecucaoFilter(); // Preenche o filtro de execução com valores únicos
-
-    function sortUniqueValues(values) {
-        return values.sort(function(a, b) {
-            return a.localeCompare(b, 'pt', { sensitivity: 'base' });
-        });
-    }
-
-        // Função para preencher o filtro de execução com valores únicos
-    function populateExecucaoFilter() {
-        let options = Array.from(new Set(Array.from(document.querySelectorAll('#execucao-filter option')).map(option => option.value)));
-        let sortedValues = sortUniqueValues(options);
-
-        let nonEmptyValues = sortedValues.filter(value => value !== "");
-
-        execucaoFilter.innerHTML = '<option value="">Todos</option>';
-        nonEmptyValues.forEach(value => {
-            execucaoFilter.innerHTML += `<option value="${value}">${value}</option>`;
-        });
-    }
 
 </script>
 

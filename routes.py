@@ -1377,6 +1377,8 @@ def calculo_cards():
         conn = None
         resultado = []
 
+        print(query_cards)
+
         try:
             conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
             cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1630,7 +1632,10 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
         elif i != 0 or len(df) == 1:
 
             if df['id_ordem'][i] == df['id_ordem'][i - 1] and df['parada1'][i] and df['status'][i] == 'Finalizada':
-                df.at[i, 'datainicio'] = df['datafim'][i - 1]
+                if df['id_ordem'][i - 1] != True and df['id_ordem'][i - 1] != False:
+                    df.at[i, 'datainicio'] = df['datafim'][i - 1]
+                else:
+                    df.at[i, 'datainicio'] = df['datafim'][i - 1]
             elif df['id_ordem'][i] == df['id_ordem'][i - 1] and df['parada3'][i]:
                 df.at[i, 'datainicio'] = df['datafim'][i - 1]
 
@@ -1652,10 +1657,9 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
         if row['parada1'] and row['parada2'] and row.name != 0:
             if row['id_ordem'] == df.loc[row.name - 1, 'id_ordem']:
                 inicio = df.loc[row.name - 1, 'datafim']
+                if row['dataabertura'] == 'SO-MS-LINCOLN':
+                    print("Entrou 1")
             else:
-                if row['maquina'] == 'SO-MS-LINCOLN':
-                    print(row['dataabertura'].month)
-                    print(row['datainicio'].month)
                 if row['dataabertura'].month != row['datainicio'].month or (row['datainicio'].month - row['dataabertura'].month) > 1:
                     inicio = row['datainicio']
                 else:
@@ -1663,6 +1667,9 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
                 # return timedelta(0)
         elif row['parada1'] and row['parada2']:
             inicio = row['dataabertura']
+            if row['maquina'] == 'SO-MS-LINCOLN':
+                inicio = row['datainicio']
+                print("inicio = row['datainicio']")
         elif not row['parada1'] and row['parada2']:
             inicio = row['datainicio']
         # elif not row['parada1'] and row['parada2']:
