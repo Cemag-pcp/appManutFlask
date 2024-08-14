@@ -3831,7 +3831,7 @@ def filtro_maquinas(setor):
 
     # setor = setor.upper()
     if setor == 'Serralheria':
-        setor = 'Solda'
+        setor = ('Solda','Serralheria')
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -3845,7 +3845,7 @@ def filtro_maquinas(setor):
     else:
         query = """
             SELECT DISTINCT concat (codigo, ' - ', descricao) FROM tb_maquinas
-            WHERE setor = %s
+            WHERE setor in %s
             """
 
     cur.execute(query,(setor,))
