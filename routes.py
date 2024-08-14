@@ -1657,8 +1657,6 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
         if row['parada1'] and row['parada2'] and row.name != 0:
             if row['id_ordem'] == df.loc[row.name - 1, 'id_ordem']:
                 inicio = df.loc[row.name - 1, 'datafim']
-                if row['dataabertura'] == 'SO-MS-LINCOLN':
-                    print("Entrou 1")
             else:
                 if row['dataabertura'].month != row['datainicio'].month or (row['datainicio'].month - row['dataabertura'].month) > 1:
                     inicio = row['datainicio']
@@ -1669,7 +1667,6 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
             inicio = row['dataabertura']
             if row['maquina'] == 'SO-MS-LINCOLN':
                 inicio = row['datainicio']
-                print("inicio = row['datainicio']")
         elif not row['parada1'] and row['parada2']:
             inicio = row['datainicio']
         # elif not row['parada1'] and row['parada2']:
