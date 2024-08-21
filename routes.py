@@ -717,7 +717,7 @@ def calculo_mtbf_maquina():
         if maquinas_importante:
             query_mtbf += f' and codigo in {maquinas_importantes()}'
 
-        query_mtbf += ' GROUP BY codigo,apelido,maquina;'
+        query_mtbf += ' GROUP BY codigo,apelido;'
 
         conn = None
         resultado_mtbf_maquina = []
@@ -1731,8 +1731,6 @@ def disponibilidade_final(datainicio,datafim,setor=None,maquina_importantes=None
     df_final['tempo_parada'] = df_final['tempo_parada'].fillna(timedelta(0))
 
     resultado = df_final.loc[df_final['codigo'] == 'SO-MS-LINCOLN']
-
-    print(resultado)
 
     # df_final['tempo_parada_horas'] = df_final['tempo_parada'].dt.total_seconds() / 3600
     df_final['tempo_parada_horas'] = df_final['tempo_parada'].apply(calculate_tempo_parada_horas)
