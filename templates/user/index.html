@@ -1108,6 +1108,8 @@
 <script src="https://kit.fontawesome.com/d1807a784c.js"
     crossorigin="anonymous"></script>
 
+<script src="static/js/formatar-data.js"></script>
+
 <!-- Bootstrap core JavaScript-->
 <!-- Conflitando (causando o click duplo para abrir dropdown) -->
 <!-- <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script> -->
@@ -1677,8 +1679,6 @@
 
 </script>
 
-<script src="static/js/formatar-data.js"></script>
-
 <!-- Abertura do modal de execução -->
 <script>
     function modalExecucao(id_ordem) {
@@ -1726,7 +1726,7 @@
 
                 $('#setor').val(response.setor_values);
                 $('#inputSolicitante').val(response.solicitante);
-                $('#dataAbertura').val(formatarDataBr(response.data_abertura));
+                $('#dataAbertura').val(formatarDataBr(response.data_abertura,3));
                 $('#n_ordem').val(response.n_execucao);
                 $('#maquina').val(response.maquina);
                 $('#inputTombamento').val(response.tombamento);
@@ -2105,7 +2105,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="mb-1" style="font-size: small;"><strong>Abertura: </strong>${formatarDataBr(item[4])}</p>
+                        <p class="mb-1" style="font-size: small;"><strong>Abertura: </strong>${formatarDataBr(item[4],3)}</p>
                     `;
                     } else {
                         var content = `
@@ -2263,7 +2263,7 @@
                 $('#modalEdicaoExecucao').modal('show');
 
                 $('#inputSolicitante_edicao').val(response.solicitante);
-                $('#dataAbertura_edicao').val(formatarDataBr(response.data_abertura));
+                $('#dataAbertura_edicao').val(formatarDataBr(response.data_abertura,3));
                 $('#n_ordem_edicao').val(response.n_execucao);
                 $('#maquina_edicao').val(response.maquina);
                 maquina_edicao = response.maquina;
