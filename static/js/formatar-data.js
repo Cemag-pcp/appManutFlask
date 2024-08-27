@@ -1,7 +1,7 @@
 function formatarDataBr(dataString, horasAdicionais = 0) {
     // Cria um objeto Date a partir da string
     var data = new Date(dataString);
-    
+    console.log(data)
     data.setHours(data.getHours() + horasAdicionais);
     // Obtém os componentes da data
     var dia = data.getDate();
